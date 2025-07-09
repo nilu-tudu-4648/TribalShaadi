@@ -1,0 +1,97 @@
+import { StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import AppHeader from '../components/AppHeader';
+import { COLORS } from '../constants/AppColors';
+import AppSafeView from '../components/AppSafeView';
+import { LightBulbIcon, RightArrowIcon } from '../components/svg/SvgIcons';
+import AppText from '../components/AppText';
+import { fontSize16, Size12, Size25, Size4, Size8 } from '../constants/Sizes';
+import AppButton from '../components/AppButton';
+import LogoutDialog from '../components/dialogs/LogoutDialog';
+import { logoutUser } from '../constants/functions';
+
+const SettingsScreen = () => {
+  const dispatch = useDispatch();
+  const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false);
+  const handleLogout = () => {
+    setIsLogoutDialogVisible(false);
+    logoutUser(dispatch);
+  };
+  return (
+    <AppSafeView style={styles.container}>
+      <AppHeader title="Settings" />
+      <View style={styles.topContainer}>
+        <View style={styles.iconContainer}>
+          <View style={styles.iconContainer}>
+            <LightBulbIcon />
+            <AppText text="Account details" />
+            <AppText text="User ID, Emai" textStyle={styles.subText} />
+          </View>
+          <RightArrowIcon />
+        </View>
+      </View>
+      <View style={styles.buttonContainer}>
+        <AppButton
+          title="Logout"
+          onPress={() => setIsLogoutDialogVisible(true)}
+          buttonStyle={styles.button}
+          textStyle={styles.buttonText}
+        />
+        <AppButton
+          title="Delete"
+          onPress={() => {}}
+          buttonStyle={styles.secondaryButton}
+          textStyle={styles.buttonText}
+        />
+      </View>
+      <LogoutDialog
+        isVisible={isLogoutDialogVisible}
+        onDismiss={() => setIsLogoutDialogVisible(false)}
+        onLogout={handleLogout}
+      />
+    </AppSafeView>
+  );
+};
+
+export default SettingsScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  topContainer: {
+    flex: 1,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    gap: Size12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Size4,
+    paddingVertical: Size8,
+  },
+  subText: {
+    fontSize: fontSize16,
+    color: COLORS.grey,
+  },
+  buttonContainer: {
+    flex: 1,
+    paddingHorizontal: Size8,
+    paddingVertical: Size12,
+    justifyContent: 'flex-end',
+  },
+  button: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.violet,
+    borderRadius: Size25,
+  },
+  secondaryButton: {
+    backgroundColor: COLORS.white,
+  },
+  buttonText: {
+    color: COLORS.violet,
+  },
+});
