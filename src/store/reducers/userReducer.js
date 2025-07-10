@@ -14,70 +14,70 @@ const initialState = {
   acceptRejectProposal: [],
 };
 
-const authReducer = createSlice({
-  name: 'authReducer',
+const userReducer = createSlice({
+  name: 'userReducer',
   initialState,
   reducers: {
-    authReducerDataRequested: (authReducer, action) => {
-      authReducer.loader = true;
+    userReducerDataRequested: (userReducer, action) => {
+      userReducer.loader = true;
     },
-    authReducerDataReceived: (authReducer, action) => {
-      authReducer.loader = false;
-      authReducer.user = action.payload.data;
+    userReducerDataReceived: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.user = action.payload.data;
     },
-    authReducerDataRequestFailed: (authReducer, action) => {
-      authReducer.loader = false;
+    userReducerDataRequestFailed: (userReducer, action) => {
+      userReducer.loader = false;
       console.log(action.payload, 'reducer Failed');
     },
-    setUserRegistrationCompleted: (authReducer, action) => {
-      authReducer.userRegistrationCompleted = action.payload;
+    setUserRegistrationCompleted: (userReducer, action) => {
+      userReducer.userRegistrationCompleted = action.payload;
     },
-    setMatchedUser: (authReducer, action) => {
-      authReducer.matchedUsers = action.payload.recordList;
-      authReducer.loader = false;
+    setMatchedUser: (userReducer, action) => {
+      userReducer.matchedUsers = action.payload.recordList;
+      userReducer.loader = false;
     },
-    sentProposalDataReceived: (authReducer, action) => {
-      authReducer.sentProposal = action.payload.recordList;
-      authReducer.loader = false;
+    sentProposalDataReceived: (userReducer, action) => {
+      userReducer.sentProposal = action.payload.recordList;
+      userReducer.loader = false;
     },
-    setProposalsSendByMeDataReceived: (authReducer, action) => {
-      authReducer.proposalsSendByMe = action.payload.recordList;
-      authReducer.loader = false;
+    setProposalsSendByMeDataReceived: (userReducer, action) => {
+      userReducer.proposalsSendByMe = action.payload.recordList;
+      userReducer.loader = false;
     },
-    setProposalsGotByMeDataReceived: (authReducer, action) => {
-      authReducer.proposalsGotByMe = action.payload.recordList;
-      authReducer.loader = false;
+    setProposalsGotByMeDataReceived: (userReducer, action) => {
+      userReducer.proposalsGotByMe = action.payload.recordList;
+      userReducer.loader = false;
     },
-    setCancelProposalRequestDataReceived: (authReducer, action) => {
-      authReducer.loader = false;
-      authReducer.cancelProposalRequest = action.payload.recordList;
+    setCancelProposalRequestDataReceived: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.cancelProposalRequest = action.payload.recordList;
     },
-    setAcceptRejectProposalDataReceived: (authReducer, action) => {
-      authReducer.loader = false;
-      authReducer.acceptRejectProposal = action.payload.recordList;
+    setAcceptRejectProposalDataReceived: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.acceptRejectProposal = action.payload.recordList;
     },
   },
 });
 
-export const { setUser, setUserRegistrationCompleted } = authReducer.actions;
+export const { setUser, setUserRegistrationCompleted } = userReducer.actions;
 
 const {
-  authReducerDataRequestFailed,
-  authReducerDataRequested,
+  userReducerDataRequestFailed,
+  userReducerDataRequested,
   setMatchedUser,
   sentProposalDataReceived,
   setProposalsSendByMeDataReceived,
   setProposalsGotByMeDataReceived,
   setCancelProposalRequestDataReceived,
   setAcceptRejectProposalDataReceived,
-  } = authReducer.actions;
+  } = userReducer.actions;
 export const setMatchedUserApi = url =>
   apiCallBegan({
     method: 'get',
     url,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setMatchedUser.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
 
 export const sentProposalApi = (url, data) =>
@@ -85,9 +85,9 @@ export const sentProposalApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: sentProposalDataReceived.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
 
 export const getProposalsSendByMeApi = (url, data={}) =>
@@ -95,18 +95,18 @@ export const getProposalsSendByMeApi = (url, data={}) =>
     method: 'post',
     url,
     data,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setProposalsSendByMeDataReceived.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
 export const getProposalsGotByMeApi = (url, data={}) =>
   apiCallBegan({
     method: 'post',
     url,
     data,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setProposalsGotByMeDataReceived.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
 
 export const cancelProposalRequestApi = (url, data) =>
@@ -114,9 +114,9 @@ export const cancelProposalRequestApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setCancelProposalRequestDataReceived.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
 
   export const acceptRejectProposalApi = (url, data) =>
@@ -124,8 +124,8 @@ export const cancelProposalRequestApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: authReducerDataRequested.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setAcceptRejectProposalDataReceived.type,
-    onError: authReducerDataRequestFailed.type,
+    onError: userReducerDataRequestFailed.type,
   });
-    export default authReducer.reducer;
+    export default userReducer.reducer;

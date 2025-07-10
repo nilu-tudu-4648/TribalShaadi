@@ -7,6 +7,8 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import WelcomeScreen from './src/screen/WelcomeScreen';
 import LoginScreen from './src/screen/LoginScreen';
 import OTPScreen from './src/screen/OTPScreen';
@@ -32,7 +34,7 @@ import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
 } from './src/navigation/StackNavigation';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
   [ROUTES.LOGIN]: undefined;
@@ -154,16 +156,18 @@ const MainApp = () => {
 export default function App() {
   return (
     <Provider store={store}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={COLORS.white}
-        translucent={false}
-      />
-        <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer ref={navigationRef} onReady={() => setIsReady()}>
-          <MainApp />
-      </NavigationContainer>
-        </GestureHandlerRootView>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider style={{ flex: 1 }}>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={COLORS.white}
+            translucent={false}
+          />
+          <NavigationContainer ref={navigationRef} onReady={() => setIsReady()}>
+            <MainApp />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </Provider>
   );
 }

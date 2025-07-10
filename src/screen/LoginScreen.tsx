@@ -17,7 +17,6 @@ import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import { sendOTP } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
-    import { debounce } from 'lodash';
 import AppToast from '../components/AppToast';
 type RootStackParamList = {
   Login: undefined;
@@ -40,10 +39,9 @@ const LoginScreen: React.FC = () => {
       }
       return () => { mounted = false; };
     }, [otpSent, navigation, phoneNumber]);
-    const handlePhoneNumberChange = debounce((text: string) => {
-      const numericOnly = text.replace(/[^0-9]/g, '');
-      setPhoneNumber(numericOnly);
-    }, 300);
+    const handlePhoneNumberChange = ((text: string) => {
+      setPhoneNumber(text);
+    });
     
 
 

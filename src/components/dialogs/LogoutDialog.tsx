@@ -1,10 +1,11 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Modal, TouchableOpacity, Dimensions } from 'react-native';
 import React from 'react';
-import { Dialog, PanningProvider } from 'react-native-ui-lib';
 import AppText from '../AppText';
 import AppButton from '../AppButton';
 import { COLORS } from '../../constants/AppColors';
 import { fontSize20, SIZES } from '../../constants/Sizes';
+
+const { width } = Dimensions.get('window');
 
 const LogoutDialog = ({
   isVisible,
@@ -16,46 +17,99 @@ const LogoutDialog = ({
   onLogout: () => void;
 }) => {
   return (
-    <Dialog
+    <Modal
       visible={isVisible}
-      onDismiss={onDismiss}
-      panDirection={PanningProvider.Directions.DOWN}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onDismiss}
     >
-      <View
-        style={{
-          backgroundColor: COLORS.white,
-          padding: SIZES.padding2,
-          borderRadius: SIZES.radius,
-        }}
+      <TouchableOpacity 
+        style={styles.overlay} 
+        activeOpacity={1} 
+        onPress={onDismiss}
       >
-        <AppText text="Logout" textStyle={styles.title} />
-        <AppText text="Do you really want to logout?" />
-        <View style={styles.buttonContainer}>
-          <AppButton title="No" onPress={onDismiss} textStyle={styles.noButton} />
-          <AppButton title="Yes" onPress={onLogout} textStyle={styles.yesButton} />
-        </View>
-      </View>
-    </Dialog>
+        <TouchableOpacity activeOpacity={1} style={styles.dialogContainer}>
+          <View style={styles.dialog}>
+            <AppText text="Logout" textStyle={styles.title} />
+            <AppText text="Do you really want to logout?" textStyle={styles.message} />
+            <View style={styles.buttonContainer}>
+              <AppButton 
+                title="No" 
+                onPress={onDismiss} 
+                textStyle={styles.noButton}
+                buttonStyle={styles.cancelButton}
+              />
+              <AppButton 
+                title="Yes" 
+                onPress={onLogout} 
+                textStyle={styles.yesButton}
+                buttonStyle={styles.confirmButton}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
   );
 };
 
 export default LogoutDialog;
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dialogContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dialog: {
+    backgroundColor: COLORS.white,
+    padding: SIZES.padding2,
+    borderRadius: SIZES.radius,
+    width: width * 0.8,
+    maxWidth: 320,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   title: {
     fontSize: fontSize20,
     fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  message: {
+    marginBottom: 20,
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignSelf: 'flex-end',
-    width: '20%',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.red,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: COLORS.red,
   },
   noButton: {
     color: COLORS.red,
   },
   yesButton: {
-    color: COLORS.red,
+    color: COLORS.white,
   },
 });
