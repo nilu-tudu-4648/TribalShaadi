@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { COLORS } from '../constants/AppColors';
 import {
   SIZES,
@@ -12,7 +12,7 @@ import AppSafeView from '../components/AppSafeView';
 import ProfileCard from '../components/Cards/ProfileCard';
 import {
   baseUrl,
-  cancelProposalRequestUrl,
+  passUserUrl,
   getMatchedUsersUrl,
   getProposalsSendByMeUrl,
   getUserDetailsUrl,
@@ -28,7 +28,6 @@ import {
   sentProposalApi,
   setMatchedUserApi,
 } from '../store/reducers/userReducer';
-import Carousel from 'react-native-reanimated-carousel';
 import AppButton from '../components/AppButton';
 
 const { width } = Dimensions.get('window');
@@ -38,7 +37,6 @@ const HomeScreen = () => {
     (state: any) => state.entities.userReducer,
   );
   const dispatch = useDispatch();
-  const carouselRef = useRef<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   console.log(currentMatchedUser, 'currentMatchedUser');
   useEffect(() => {
@@ -67,7 +65,7 @@ const HomeScreen = () => {
 
   const handleCancelProposal = (id: string) => {
     dispatch(
-      cancelProposalRequestApi(`${baseUrl}/${cancelProposalRequestUrl}`, {
+      cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
         proposalUserId: id,
       }),
     );
@@ -94,55 +92,42 @@ const HomeScreen = () => {
           {currentMatchedUser && currentIndex < matchedUsers.length ? (
             <>
               <View style={styles.carouselContainer}>
-                <Carousel
-                  ref={carouselRef}
-                  loop={false}
-                  width={width}
-                  height={SIZES.height - 140} // Reserve space for buttons
-                  data={[currentMatchedUser]}
-                  scrollAnimationDuration={1000}
-                  onSnapToItem={index => setCurrentIndex(index)}
-                  renderItem={({
-                    item,
-                    index,
-                  }: {
-                    item: any;
-                    index: number;
-                  }) => (
-                    <View style={styles.profileCardContainer}>
-                      <ProfileCard
-                        key={index}
-                        item={item}
-                        name={item.firstName + ' ' + item.lastName}
-                        age={item.age}
-                        height={item.height}
-                        religion={item.religionName}
-                        caste={item.caste}
-                        districtName={item.districtName}
-                        stateName={item.stateName}
-                        bio={item.aboutMe}
-                        image={item.imageUrl}
-                        isLoading={loader}
-                        maritalStatus={item.maritalStatus}
-                        dob={item.dob}
-                        motherTongue={item.motherTongue}
-                        annualIncome={item.annualIncome}
-                        partnerExpectation={item.partnerExpectation}
-                        employedIn={item.employedIn}
-                        occupation={item.occupation}
-                        organizationName={item.organizationName}
-                        settlingTime={item.settlingTime}
-                        highestQualification={item.highestQualification}
-                        college={item.college}
-                        eatingHabits={item.eatingHabits}
-                        drinkingHabits={item.drinkingHabits}
-                        smokingHabits={item.smokingHabits}
-                        kids={item.kids}
-                        interests={item.interests}
-                      />
-                    </View>
-                  )}
-                />
+                <View style={styles.profileCardContainer}>
+                  <ProfileCard
+                    name={
+                      currentMatchedUser.firstName +
+                      ' ' +
+                      currentMatchedUser.lastName
+                    }
+                    age={currentMatchedUser.age}
+                    height={currentMatchedUser.height}
+                    religion={currentMatchedUser.religion}
+                    caste={currentMatchedUser.community}
+                    districtName={currentMatchedUser.districtName}
+                    stateName={currentMatchedUser.stateName}
+                    bio={currentMatchedUser.aboutMe}
+                    image={currentMatchedUser.imageUrl}
+                    isLoading={loader}
+                    maritalStatus={currentMatchedUser.maritalStatus}
+                    dob={currentMatchedUser.birthDate}
+                    motherTongue={currentMatchedUser.motherTongue}
+                    annualIncome={currentMatchedUser.annualIncome}
+                    partnerExpectation={currentMatchedUser.about_lifepartener}
+                    employedIn={currentMatchedUser.employedIn}
+                    occupation={currentMatchedUser.occupation}
+                    organizationName={currentMatchedUser.companyName}
+                    settlingTime={currentMatchedUser.planingto_settle}
+                    highestQualification={
+                      currentMatchedUser.highestQualification
+                    }
+                    college={currentMatchedUser.college_name}
+                    eatingHabits={currentMatchedUser.diet}
+                    drinkingHabits={currentMatchedUser.drinking}
+                    smokingHabits={currentMatchedUser.smoking}
+                    kids={currentMatchedUser.kids}
+                    interests={currentMatchedUser.intrests}
+                  />
+                </View>
               </View>
               <View style={styles.floatingButtonContainer}>
                 <AppButton

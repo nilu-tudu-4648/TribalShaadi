@@ -9,6 +9,17 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { RootStackParamList as StackNavigationParamList } from '../navigation/StackNavigation';
+import { 
+  EditIcon, 
+  CrownIcon, 
+  SelfieVerifiedIcon, 
+  GovtIdIcon, 
+  GiftIcon, 
+  SlidersIcon, 
+  InfoIcon, 
+  HeadphonesIcon, 
+  SettingsIcon 
+} from '../components/svg/SvgIcons';
 
 const profileImage = require('../assets/images/Male.png'); // Placeholder image
 
@@ -17,19 +28,33 @@ type AccountScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<StackNavigationParamList>
 >;
 
-const badgeData = [
-  { key: 'crown', label: 'Crown\nbadge', color: '#FFD600', icon: '👑' },
-  { key: 'selfie', label: 'Selfie\nverified', color: '#1976D2', icon: '🤳' },
-  { key: 'govt', label: 'Govt. ID\nverified', color: '#1976D2', icon: '📄' },
+type BadgeData = {
+  key: string;
+  label: string;
+  color: string;
+  icon: React.ComponentType<any>;
+};
+
+type ActionButton = {
+  key: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  route?: string;
+};
+
+const badgeData: BadgeData[] = [
+  { key: 'crown', label: 'Crown\nbadge', color: '#FFD600', icon: CrownIcon },
+  { key: 'selfie', label: 'Selfie\nverified', color: COLORS.primaryBlue, icon: SelfieVerifiedIcon },
+  { key: 'govt', label: 'Govt. ID\nverified', color: COLORS.grey, icon: GovtIdIcon },
 ];
 
-const actionButtons = [
-  { key: 'plan', label: 'My Plan', icon: '👑', route: ROUTES.UPGRADE },
-  { key: 'invite', label: 'Invite', icon: '🎁' },
-  { key: 'preference', label: 'Preference', icon: '🎚️' },
-  { key: 'about', label: 'About Us', icon: 'ℹ️' },
-  { key: 'help', label: 'Help', icon: '🎧' },
-  { key: 'settings', label: 'Settings', icon: '⚙️', route: ROUTES.SETTINGS },
+const actionButtons: ActionButton[] = [
+  { key: 'plan', label: 'My Plan', icon: CrownIcon, route: ROUTES.UPGRADE },
+  { key: 'invite', label: 'Invite', icon: GiftIcon },
+  { key: 'preference', label: 'Preference', icon: SlidersIcon },
+  { key: 'about', label: 'About Us', icon: InfoIcon },
+  { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
+  { key: 'settings', label: 'Settings', icon: SettingsIcon, route: ROUTES.SETTINGS },
 ];
 
 const AccountScreen = () => {
@@ -39,33 +64,39 @@ const AccountScreen = () => {
       {/* Profile Image with Edit Icon */}
       <View style={styles.profileContainer}>
         <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity style={styles.editIcon}>
-          <AppText text={'✏️'} textStyle={{ fontSize: Sizes.fontSize18 }} />
+        <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: ROUTES.EDIT_PROFILE } as never)}} style={styles.editIcon}>
+          <EditIcon width={Sizes.fontSize18} height={Sizes.fontSize18} />
         </TouchableOpacity>
       </View>
       {/* Name */}
       <AppText text={'Jane Doe'} textStyle={styles.name} />
       {/* Badges */}
       <View style={styles.badgesRow}>
-        {badgeData.map(badge => (
-          <View key={badge.key} style={styles.badgeItem}>
-            <View style={[styles.badgeIcon, { backgroundColor: badge.color }]}> 
-              <AppText text={badge.icon} textStyle={{ fontSize: Sizes.fontSize18 }} />
+        {badgeData.map(badge => {
+          const IconComponent = badge.icon;
+          return (
+            <View key={badge.key} style={styles.badgeItem}>
+              <View style={[styles.badgeIcon, { backgroundColor: badge.color }]}> 
+                <IconComponent width={Sizes.fontSize18} height={Sizes.fontSize18} color={COLORS.white} />
+              </View>
+              <AppText text={badge.label} textStyle={styles.badgeLabel} />
             </View>
-            <AppText text={badge.label} textStyle={styles.badgeLabel} />
-          </View>
-        ))}
+          );
+        })}
       </View>
       {/* Action Buttons */}
       <View style={styles.actionsGrid}>
-        {actionButtons.map((btn) => (
-          <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: btn.route } as never)}} key={btn.key} style={styles.actionItem}>
-            <View style={styles.actionIconCircle}>
-              <AppText text={btn.icon} textStyle={{ fontSize: Sizes.fontSize24 }} />
-            </View>
-            <AppText text={btn.label} textStyle={styles.actionLabel} />
-          </TouchableOpacity>
-        ))}
+        {actionButtons.map((btn) => {
+          const IconComponent = btn.icon;
+          return (
+            <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: btn.route } as never)}} key={btn.key} style={styles.actionItem}>
+              <View style={styles.actionIconCircle}>
+                <IconComponent width={Sizes.fontSize24} height={Sizes.fontSize24} color={COLORS.textInactive} />
+              </View>
+              <AppText text={btn.label} textStyle={styles.actionLabel} />
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   )
@@ -153,11 +184,12 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: COLORS.lightGreyBackground,
+    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.borderGrey,
+    elevation: 2,
   },
   actionLabel: {
     fontSize: Sizes.fontSize16,

@@ -32,6 +32,12 @@ export const ROUTES = {
   ACCOUNT: 'Account',
   STACK: 'Stack',
   UPGRADE: 'Upgrade',
+  EDIT_PROFILE: 'EditProfile',
+  EDIT_PERSONAL: 'EditPersonal',
+  EDIT_LIFE: 'EditLife',
+  EDIT_EDUCATION: 'EditEducation',
+  EDIT_PERSONALITY: 'EditPersonality',
+  HELP: 'Help',
 };
 
 // Mother Tongue

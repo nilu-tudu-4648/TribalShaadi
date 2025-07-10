@@ -33,10 +33,13 @@ export const imageUrl = 'https://api.tribalshaadi.co.in/';
 // Home Screen API
 export const getMatchedUsersUrl = 'app/users/getAllUsers';
 export const sendProposalUrl = 'app/proposals/sendProposal';
+export const passUserUrl = 'app/proposals/passUser';
 export const getProposalsSendByMeUrl = 'app/proposals/getProposalsSendByMe';
 export const getProposalsGotByMeUrl = 'app/proposals/getProposalsGotByMe';
+export const getPassedUsersUrl = 'app/proposals/getPassedUsers';
 export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
+
 // https://api.tribalshaadi.co.in/content/user/24/9.jpeg
 export const checkUserLoggedIn = async dispatch => {
   try {

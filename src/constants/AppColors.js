@@ -37,5 +37,6 @@ export const COLORS = {
   transparent:"transparent",
   lightViolet:"#DCBFFF33",
   welcomeBottom:"#D3B7F8",
-  declineButton:"#AEAEB2"
+  declineButton:"#AEAEB2",
+  borderViolet:"#B97FFF33"
 };

@@ -1,4 +1,10 @@
-import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+} from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
 import { fontSize14, Size50, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
@@ -14,58 +20,29 @@ import {
   getProposalsGotByMeApi,
   getProposalsSendByMeApi,
   acceptRejectProposalApi,
+  getPassedUsersApi,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
   baseUrl,
+  getPassedUsersUrl,
   getProposalsGotByMeUrl,
 } from '../constants/functions';
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import GradientLoader from '../components/GradientLoader';
 
-// Sample profile data
-const profileData = [
-  {
-    id: 1,
-    name: 'Puja Lakra',
-    location: 'Ranchi',
-    image: require('../assets/images/match.jpg'),
-    age: 20,
-  },
-  {
-    id: 2,
-    name: 'Puja Lakra',
-    location: 'Ranchi',
-    image: require('../assets/images/match3.jpg'),
-    age: 20,
-  },
-  {
-    id: 3,
-    name: 'Puja Lakra',
-    location: 'Ranchi',
-    image: require('../assets/images/match2.png'),
-    age: 20,
-  },
-  {
-    id: 4,
-    name: 'Puja Lakra',
-    location: 'Ranchi',
-    image: require('../assets/images/match3.jpg'),
-    age: 20,
-  },
-];
-
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
   const bottomSheetRef = useRef<BottomSheet>(null);
   const dispatch = useDispatch();
-  const { proposalsSendByMe, proposalsGotByMe, loader, cancelProposalRequest } =
+  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
     useSelector((state: any) => state.entities.userReducer);
   useEffect(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+    dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
-  console.log(cancelProposalRequest, 'cancelProposalRequest');
+  console.log(passedUsers, 'passedUsers');
   const handleCardPress = () => {
     bottomSheetRef.current?.expand(); // Open the bottom sheet
   };
@@ -117,32 +94,32 @@ const InterestScreen = () => {
         </View>
       ) : (
         <>
-          {selectedTab === 0 && (
-            <FlatList
-              data={proposalsGotByMe}
-              renderItem={({ item }) => (
-                <ReceivedCard
-                  item={item}
-                  onDecline={() => handleRejectProposal(item.id)}
-                  onConnect={() => handleAcceptProposal(item.id)}
-                />
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.gridContainer}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyStateContainer}>
-                  <AppText
-                    text="No proposals received"
-                    textStyle={styles.emptyText}
+          {selectedTab === 0 &&
+            (proposalsGotByMe.length > 0 ? (
+              <FlatList
+                data={proposalsGotByMe}
+                renderItem={({ item }) => (
+                  <ReceivedCard
+                    item={item}
+                    onDecline={() => handleRejectProposal(item.id)}
+                    onConnect={() => handleAcceptProposal(item.id)}
                   />
-                </View>
-              }
-            />
-          )}
+                )}
+                keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={styles.gridContainer}
+                showsVerticalScrollIndicator={false}
+              />
+            ) : (
+              <View style={styles.emptyStateContainer}>
+                <Image
+                  source={require('../assets/images/lonely.png')}
+                  style={styles.heartImage}
+                />
+              </View>
+            ))}
           {selectedTab === 1 && (
             <FlatList
-              data={profileData}
+              data={passedUsers}
               renderItem={({ item }) => (
                 <RecentCard item={item} onPress={handleCardPress} />
               )}
@@ -259,7 +236,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SIZES.base1,
   },
   emptyText: {
     fontSize: SIZES.h2,
@@ -270,5 +246,7 @@ const styles = StyleSheet.create({
   heartImage: {
     width: SIZES.width * 0.55,
     height: SIZES.width * 0.55,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
 });

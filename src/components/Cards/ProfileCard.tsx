@@ -10,6 +10,7 @@ import {
   fontSize16,
   Size10,
   Size8,
+  Size25,
 } from '../../constants/Sizes';
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import {
@@ -18,21 +19,21 @@ import {
   HomeIcon2,
   ReligionIcon,
   TribeIcon,
-  SmokingIcon,
-  UtensilsIcon,
-  WineGlassIcon,
+  EatingIcon,
   KidsIcon,
   HeightIcon,
   LanguageIcon,
   RupeesIcon,
   PublicSectorIcon,
   WorkIcon,
+  DrinkingIcon,
+  CigrateIcon,
+  HomeWorkOutlineIcon,
 } from '../svg/SvgIcons';
 import AppChip from '../AppChip';
 import FONT_FAMILY from '../../constants/Fonts';
 
 export interface ProfileCardProps {
-  item: any;
   name: string;
   age: number;
   height: string;
@@ -44,7 +45,7 @@ export interface ProfileCardProps {
   image: any;
   isLoading: boolean;
   maritalStatus: string;
-  dob: string;
+  dob: any;
   motherTongue: string;
   annualIncome: string;
   partnerExpectation: string;
@@ -58,7 +59,7 @@ export interface ProfileCardProps {
   drinkingHabits: string;
   smokingHabits: string;
   kids: string;
-  interests: string[];
+  interests: string;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -71,7 +72,23 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   stateName,
   bio,
   image,
-}) => {
+  organizationName,
+  dob,
+  motherTongue,
+  annualIncome,
+  partnerExpectation,
+  maritalStatus,
+  employedIn,
+  occupation,
+  highestQualification,
+  college,
+  eatingHabits,
+  drinkingHabits,
+  smokingHabits,
+  kids,
+  interests,
+  settlingTime,
+  }) => {
       return (
       <View style={styles.card}>
         <ScrollView
@@ -118,7 +135,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={styles.column}>
             <ReligionIcon />
             <AppText
-              text={'Christian Pentecostal Church'}
+              text={religion}
               textStyle={styles.value}
             />
             <AppText text={'Religion'} textStyle={styles.label} />
@@ -126,7 +143,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={styles.verticalLine} />
           <View style={styles.column}>
             <TribeIcon />
-            <AppText text={'Tribe'} textStyle={styles.value} />
+            <AppText text={caste} textStyle={styles.value} />
             <AppText text={'Tribe'} textStyle={styles.label} />
           </View>
         </View>
@@ -147,28 +164,28 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <HeartIcon color={COLORS.black} />
             <View style={styles.detailText}>
               <AppText text="Marital Status" textStyle={styles.label} />
-              <AppText text={'maritalStatus'} textStyle={styles.value} />
+              <AppText text={maritalStatus} textStyle={styles.value} />
             </View>
           </View>
           <View style={styles.detailRow}>
             <CalendarIcon color={COLORS.black} />
             <View style={styles.detailText}>
               <AppText text="Date of Birth" textStyle={styles.label} />
-              <AppText text={'dob'} textStyle={styles.value} />
+              <AppText text={dob} textStyle={styles.value} />
             </View>
           </View>
           <View style={styles.detailRow}>
             <LanguageIcon color={COLORS.black} />
             <View style={styles.detailText}>
               <AppText text="Mother Tongue" textStyle={styles.label} />
-              <AppText text={'motherTongue'} textStyle={styles.value} />
+              <AppText text={motherTongue} textStyle={styles.value} />
             </View>
           </View>
           <View style={styles.detailRow}>
             <RupeesIcon color={COLORS.black} />
             <View style={styles.detailText}>
               <AppText text="Annual Income" textStyle={styles.label} />
-              <AppText text={'annualIncome'} textStyle={styles.value} />
+              <AppText text={annualIncome} textStyle={styles.value} />
             </View>
           </View>
         </View>
@@ -178,7 +195,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             text="matters most in a Life Partner!"
             textStyle={styles.bannerSubtitle}
           />
-          <AppText text={'partnerExpectation'} textStyle={styles.bannerTitle} />
+          <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
         </View>
 
         <View style={{ height: 200, backgroundColor: COLORS.divider }}>
@@ -192,24 +209,25 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={styles.detailRow2}>
             <View style={styles.detailText}>
               <AppText text="Employed in" textStyle={styles.label} />
-              <AppText text={'employedIn'} textStyle={styles.value} />
+              <AppText text={employedIn} textStyle={styles.value} />
             </View>
             <PublicSectorIcon />
           </View>
-          <View style={styles.horizontalLine} />
+          <View style={styles.thinLine} />
           <View style={styles.detailRow2}>
             <View style={styles.detailText}>
               <AppText text="Occupation" textStyle={styles.label} />
-              <AppText text={'occupation'} textStyle={styles.value} />
+              <AppText text={occupation} textStyle={styles.value} />
             </View>
             <WorkIcon />
           </View>
+          <View style={styles.thinLine} />
           <View style={styles.detailRow2}>
             <View style={styles.detailText}>
               <AppText text="Organisation Name" textStyle={styles.label} />
-              <AppText text={'organizationName'} textStyle={styles.value} />
+              <AppText text={organizationName} textStyle={styles.value} />
             </View>
-            <HomeIcon2 color={COLORS.primary} />
+            <HomeWorkOutlineIcon />
           </View>
         </View>
 
@@ -218,7 +236,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             text="planning to settle down"
             textStyle={styles.bannerSubtitle}
           />
-          <AppText text={'Within 10 years'} textStyle={styles.bannerTitle} />
+          <AppText text={settlingTime} textStyle={styles.bannerTitle} />
         </View>
 
         <View style={{ height: 200, backgroundColor: COLORS.divider }}>
@@ -233,56 +251,53 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={styles.detailRow}>
             <View style={styles.detailText}>
               <AppText text="Highest Qualification" textStyle={styles.label} />
-              <AppText text={'highestQualification'} textStyle={styles.value} />
+              <AppText text={highestQualification} textStyle={styles.value} />
             </View>
           </View>
           <View style={styles.detailRow}>
             <View style={styles.detailText}>
               <AppText text="College/University" textStyle={styles.label} />
-              <AppText text={'college'} textStyle={styles.value} />
+              <AppText text={college} textStyle={styles.value} />
             </View>
           </View>
         </View>
         <View style={styles.horizontalLine} />
         <View style={styles.row}>
           <View style={styles.column}>
-            <UtensilsIcon />
-            <AppText text={'Vegetarian'} textStyle={styles.value} />
+            <EatingIcon />
+            <AppText text={eatingHabits} textStyle={styles.value} />
             <AppText text={'Eating Habits'} textStyle={styles.label} />
           </View>
           <View style={styles.verticalLine} />
           <View style={styles.column}>
-            <WineGlassIcon />
-            <AppText text={'Drinks'} textStyle={styles.value} />
+            <DrinkingIcon />
+            <AppText text={drinkingHabits} textStyle={styles.value} />
             <AppText text={'Drinking Habits'} textStyle={styles.label} />
           </View>
         </View>
-        <View style={styles.horizontalLine} />
+        <View style={{
+          height: 1,
+          backgroundColor: COLORS.borderViolet,
+          width: '100%',
+        }} />
         <View style={styles.row}>
           <View style={styles.column}>
-            <SmokingIcon />
-            <AppText text={'No'} textStyle={styles.value} />
+            <CigrateIcon />
+            <AppText text={smokingHabits} textStyle={styles.value} />
             <AppText text={'Smoking Habits'} textStyle={styles.label} />
           </View>
           <View style={styles.verticalLine} />
           <View style={styles.column}>
             <KidsIcon />
-            <AppText text={'Wants Kids'} textStyle={styles.value} />
+            <AppText text={kids} textStyle={styles.value} />
             <AppText text={'Kids'} textStyle={styles.label} />
           </View>
         </View>
         <View style={styles.horizontalLine} />
         <View style={styles.section}>
-          <AppText text="Interests & Hobbies" textStyle={styles.sectionTitle} />
+         <AppText text="Interests & Hobbies" textStyle={styles.sectionTitle} />
           <View style={styles.interestsContainer}>
-            {[
-              'Reading',
-              'Travelling',
-              'Cooking',
-              'Dancing',
-              'Singing',
-              'Reading',
-            ].map((interest, index) => (
+            {interests?.split(',')?.map((interest: string, index: number) => (
               <AppChip
                 key={index}
                 title={interest}
@@ -308,12 +323,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: COLORS.white,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-    paddingBottom: SIZES.padding,
+    paddingBottom: Size25*2,
     gap: SIZES.padding,
   },
   imageContainer: {
@@ -508,5 +518,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: SIZES.padding,
+  },
+  thinLine: {
+    height: 1,
+    backgroundColor: COLORS.borderViolet,
+    width: '100%',
   },
 });

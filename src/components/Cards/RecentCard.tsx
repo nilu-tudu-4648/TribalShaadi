@@ -1,15 +1,39 @@
 import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
-import { fontSize14, fontSize16, Size16, Size4, screenHeight } from '../../constants/Sizes';
+import {
+  fontSize14,
+  fontSize16,
+  Size16,
+  Size4,
+  screenHeight,
+} from '../../constants/Sizes';
 import AppText from '../AppText';
+import LinearGradient from 'react-native-linear-gradient';
+// import { imageUrl } from '../../constants/functions';
 
-const RecentCard = ({ item, onPress }: { item: any, onPress: () => void }) => {
+const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.profileCard}>
-      <Image source={item.image} style={styles.profileImage} />
+      {/* <Image source={{uri: imageUrl + item.imageUrl}} style={styles.profileImage} /> */}
+      <Image
+        source={require('../../assets/images/match3.jpg')}
+        style={styles.profileImage}
+      />
+      <LinearGradient
+        colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.imageOverlay}
+      />
       <View style={styles.profileInfo}>
-        <AppText text={item.name} textStyle={styles.profileName} />
-        <AppText text={item.location} textStyle={styles.profileLocation} />
+        <AppText
+          text={item.firstName + ' ' + item.lastName}
+          textStyle={styles.profileName}
+        />
+        <AppText
+          text={item.districtName + ', ' + item.stateName}
+          textStyle={styles.profileLocation}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -32,6 +56,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  imageOverlay: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   profileImage: {
     width: '100%',
     height: screenHeight('25%'),
@@ -43,7 +74,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Size16,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     gap: Size4,
   },
   profileName: {

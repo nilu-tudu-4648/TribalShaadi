@@ -4,7 +4,6 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Image,
 } from 'react-native';
 import React, { useState } from 'react';
@@ -31,6 +30,7 @@ import {
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
+import AppSafeView from '../components/AppSafeView';
 
 const UpgradeScreen = () => {
   const navigation = useNavigation();
@@ -78,7 +78,7 @@ const UpgradeScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppSafeView style={styles.container}>
       <ImageBackground
         source={require('../assets/images/update.jpg')}
         style={styles.backgroundImage}>
@@ -130,7 +130,7 @@ const UpgradeScreen = () => {
                       <View style={styles.radioButtonInner} />
                     )}
                   </View>
-                  <View>
+                  <View style={styles.pricingTextContainer}>
                     <AppText
                       text={option.duration}
                       textStyle={styles.pricingDuration}
@@ -176,7 +176,7 @@ const UpgradeScreen = () => {
           textStyle={styles.disclaimerText}
         />
       </View>
-    </SafeAreaView>
+    </AppSafeView>
   );
 };
 
@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+    paddingHorizontal:0
   },
   backgroundImage: {
     height: SIZES.height * 0.5,
@@ -212,13 +213,14 @@ const styles = StyleSheet.create({
     height: 40,
   },
   featuresContainer: {
-    marginTop: Size40,
+    paddingTop: Size40,
     paddingHorizontal: Size40,
+    gap: Size16,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Size16,
+    // gap: Size12,
   },
   featureIconContainer: {
     width: 32,
@@ -226,24 +228,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Size12,
   },
   featureTitle: {
     fontSize: fontSize16,
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
-    color: COLORS.white,
+    color: COLORS.black,
   },
   bottomContainer: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-    marginTop: -Size40,
     paddingTop: Size20,
     paddingHorizontal: Size16,
+    borderTopLeftRadius: Size40*5,
+    borderTopRightRadius: Size40*5,
   },
   pricingContainer: {
-    marginVertical: Size12,
+    paddingVertical: Size12,
+    gap: Size12,
+    
   },
   pricingOption: {
     flexDirection: 'row',
@@ -252,7 +254,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: Size12,
     padding: Size16,
-    marginBottom: Size12,
     borderWidth: 1,
     borderColor: COLORS.borderLight,
   },
@@ -263,6 +264,10 @@ const styles = StyleSheet.create({
   pricingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Size12,
+  },
+  pricingTextContainer: {
+    gap: Size4,
   },
   radioButton: {
     width: 24,
@@ -270,7 +275,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: COLORS.grey,
-    marginRight: Size12,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -290,10 +294,10 @@ const styles = StyleSheet.create({
   pricingSubtext: {
     fontSize: fontSize14,
     color: COLORS.textSecondary,
-    marginTop: Size4,
   },
   pricingRight: {
     alignItems: 'flex-end',
+    gap: Size4,
   },
   pricingPrice: {
     fontSize: fontSize18,
@@ -305,7 +309,6 @@ const styles = StyleSheet.create({
     borderRadius: Size4,
     paddingHorizontal: Size8,
     paddingVertical: Size4,
-    marginTop: Size4,
   },
   badgeText: {
     fontSize: fontSize12,
@@ -314,10 +317,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     height: 50,
-    marginVertical: Size12,
+    paddingVertical: Size12,
   },
   continueButton: {
-    // flex: 0,
+    flex: 1,
   },
   continueButtonText: {
     fontSize: fontSize18,
@@ -327,7 +330,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.textSecondary,
     fontSize: fontSize12,
-    marginVertical: Size12,
+    paddingVertical: Size12,
     paddingHorizontal: Size20,
   },
 });
