@@ -7,7 +7,7 @@ import { INTEREST_TABS } from '../constants/data';
 import RecentCard from '../components/Cards/RecentCard';
 import SentCard from '../components/Cards/SentCard';
 import ReceivedCard from '../components/Cards/ReceivedCard';
-import ProfileBottomSheet from '../components/ProfileBottomSheet';
+import ProfileBottomSheet from '../components/BottomSheets/ProfileBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useDispatch, useSelector } from 'react-redux';
 import {

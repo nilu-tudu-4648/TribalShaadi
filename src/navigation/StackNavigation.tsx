@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import SettingsScreen from '../screen/SettingsScreen';
 import { ROUTES } from '../constants/data';
+import UpgradeScreen from '../screen/UpgradeScreen';
 
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
@@ -14,6 +15,7 @@ const StackNavigation = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name={ROUTES.SETTINGS} component={SettingsScreen} />
+      <Stack.Screen name={ROUTES.UPGRADE} component={UpgradeScreen} />
     </Stack.Navigator>
   );
 };

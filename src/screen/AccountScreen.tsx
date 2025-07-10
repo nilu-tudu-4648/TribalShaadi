@@ -24,7 +24,7 @@ const badgeData = [
 ];
 
 const actionButtons = [
-  { key: 'plan', label: 'My Plan', icon: '👑' },
+  { key: 'plan', label: 'My Plan', icon: '👑', route: ROUTES.UPGRADE },
   { key: 'invite', label: 'Invite', icon: '🎁' },
   { key: 'preference', label: 'Preference', icon: '🎚️' },
   { key: 'about', label: 'About Us', icon: 'ℹ️' },
@@ -59,7 +59,7 @@ const AccountScreen = () => {
       {/* Action Buttons */}
       <View style={styles.actionsGrid}>
         {actionButtons.map((btn) => (
-          <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: ROUTES.SETTINGS } as never)}} key={btn.key} style={styles.actionItem}>
+          <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: btn.route } as never)}} key={btn.key} style={styles.actionItem}>
             <View style={styles.actionIconCircle}>
               <AppText text={btn.icon} textStyle={{ fontSize: Sizes.fontSize24 }} />
             </View>

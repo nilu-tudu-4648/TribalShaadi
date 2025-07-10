@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dialog: {
+    gap: 20,
     backgroundColor: COLORS.white,
     padding: SIZES.padding2,
     borderRadius: SIZES.radius,
@@ -84,32 +85,28 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize20,
     fontWeight: 'bold',
-    marginBottom: 10,
     textAlign: 'center',
   },
   message: {
-    marginBottom: 20,
     textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
+    justifyContent: 'flex-end',
+    // gap: 10,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLORS.red,
+    backgroundColor: COLORS.white,
   },
   confirmButton: {
     flex: 1,
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.white,
   },
   noButton: {
     color: COLORS.red,
   },
   yesButton: {
-    color: COLORS.white,
+    color: COLORS.red,
   },
 });

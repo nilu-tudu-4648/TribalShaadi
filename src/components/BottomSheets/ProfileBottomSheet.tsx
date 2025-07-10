@@ -4,12 +4,12 @@ import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
-import AppText from './AppText';
-import { COLORS } from '../constants/AppColors';
-import { SIZES } from '../constants/Sizes';
-import AppChip from './AppChip';
-import AppButton from './AppButton';
-import { UtensilsIcon, WineGlassIcon } from './svg/SvgIcons';
+import AppText from '../AppText';
+import { COLORS } from '../../constants/AppColors';
+import { SIZES } from '../../constants/Sizes';
+import AppChip from '../AppChip';
+import AppButton from '../AppButton';
+import { UtensilsIcon, WineGlassIcon, SmokingIcon } from '../svg/SvgIcons';
 
 interface ProfileBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -71,6 +71,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             />
           </View>
           <View style={styles.attributeCard}>
+            <SmokingIcon />
             {/* <SmokingIcon /> */}
             <AppText
               text="Planning to quit"

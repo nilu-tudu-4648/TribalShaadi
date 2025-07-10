@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
   View,
@@ -11,45 +11,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/AppColors';
 import {
   Size16,
-  Size25,
   Size4,
   Size40,
   Size8,
-  fontSize16,
   fontSize18,
   fontSize24,
   lignHeight24,
-  lignHeight56,
   screenHeight,
   screenWidth,
-  lignHeight28,
-  lignHeight32,
-  Size48,
-  lignHeight47,
-  Size10,
-  Size20,
   fontSize36,
+  Size12,
+  lignHeight20,
 } from '../constants/Sizes';
-import { PhoneSvg } from '../components/svg/SvgIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
 import { ROUTES } from '../constants/data';
+import SwipeButton from '../components/SwipeButton';
 
 type RootStackParamList = {
   Login: undefined;
   OTP: { phoneNumber: string };
 };
 
+type SwipeButtonHandle = {
+  reset: () => void;
+};
 
 const WelcomeScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const swipeButtonRef = React.useRef<SwipeButtonHandle>(null);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (swipeButtonRef.current) {
+        swipeButtonRef.current.reset();
+      }
+    }, []),
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
-          <AppText text="Made with ❤️ in Jharkhand" textStyle={styles.headerText} />
+          <AppText
+            text="Made with ❤️ in Jharkhand"
+            textStyle={styles.headerText}
+          />
         </View>
 
         {/* Profile Circle Section */}
@@ -69,23 +77,25 @@ const WelcomeScreen = () => {
             <AppText text="Tribalshaadi.ai" textStyle={styles.brandText} />
           </View>
           <View>
-            <AppText text="AI - Powered" textStyle={styles.aiText} />
+            <AppText text="AI - powered" textStyle={styles.aiText} />
             <AppText text="Tribal Matchmaking" textStyle={styles.titleText} />
           </View>
-
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => navigation.navigate(ROUTES.LOGIN as never)}
-          >
-            <PhoneSvg />
-            <AppText text="Register with phone" textStyle={styles.buttonText} />
-            <View style={{ width: Size20 * 2 }} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate(ROUTES.LOGIN as never)}
-          >
-            <AppText text="Already have an account? Log in" textStyle={styles.loginText} />
-          </TouchableOpacity>
+          <View style={{ gap: Size12 }}>
+            <View style={{ alignItems: 'center' }}>
+              <SwipeButton
+                ref={swipeButtonRef}
+                onToggle={() => navigation.navigate(ROUTES.LOGIN as never)}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate(ROUTES.LOGIN as never)}
+            >
+              <AppText
+                text="Already have an account? Log in"
+                textStyle={styles.loginText}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -133,37 +143,11 @@ const styles = StyleSheet.create({
     height: screenWidth('20%'),
     borderRadius: screenWidth('10%'),
   },
-  avatar: {
-    position: 'absolute',
-  },
-  avatar1: {
-    top: Size48,
-    left: lignHeight32,
-  },
-  avatar2: {
-    top: Size16,
-    right: Size40,
-  },
-  avatar3: {
-    bottom: Size40,
-    right: lignHeight56,
-  },
-  avatar4: {
-    bottom: lignHeight24,
-    left: Size40,
-  },
-  avatarImage: {
-    width: lignHeight56,
-    height: lignHeight56,
-    borderRadius: lignHeight28,
-  },
   ctaSection: {
-    backgroundColor: COLORS.violet,
-    borderTopLeftRadius: lignHeight47,
-    borderTopRightRadius: lignHeight47,
+    backgroundColor: COLORS.welcomeBottom,
     padding: lignHeight24,
-    paddingVertical: lignHeight47,
-    gap: Size20,
+    paddingVertical: lignHeight20,
+    gap: Size40,
   },
   brandContainer: {
     flexDirection: 'row',
@@ -184,27 +168,15 @@ const styles = StyleSheet.create({
   aiText: {
     color: COLORS.white,
     fontSize: fontSize24,
+    backgroundColor: COLORS.black,
+    width: screenWidth('40%'),
+    textAlign: 'center',
+    borderRadius: Size8,
   },
   titleText: {
     color: COLORS.black,
     fontSize: fontSize36,
     fontWeight: '400',
-  },
-  ctaButton: {
-    backgroundColor: COLORS.black,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Size8,
-    borderRadius: Size25,
-    gap: lignHeight24,
-    paddingLeft: Size10,
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontWeight: '400',
-    alignSelf: 'center',
-    fontSize: fontSize16,
   },
   loginText: {
     textAlign: 'center',

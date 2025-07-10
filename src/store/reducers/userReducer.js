@@ -7,6 +7,7 @@ const initialState = {
   userRegistrationCompleted: false,
   user: null,
   matchedUsers: [],
+  currentMatchedUser: null,
   sentProposal: [],
   proposalsSendByMe: [],
   proposalsGotByMe: [],
@@ -56,6 +57,10 @@ const userReducer = createSlice({
       userReducer.loader = false;
       userReducer.acceptRejectProposal = action.payload.recordList;
     },
+    setCurrentMatchedDataReceived: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.currentMatchedUser = action.payload.recordList[0];
+    },
   },
 });
 
@@ -70,6 +75,7 @@ const {
   setProposalsGotByMeDataReceived,
   setCancelProposalRequestDataReceived,
   setAcceptRejectProposalDataReceived,
+  setCurrentMatchedDataReceived,
   } = userReducer.actions;
 export const setMatchedUserApi = url =>
   apiCallBegan({
@@ -128,4 +134,13 @@ export const cancelProposalRequestApi = (url, data) =>
     onSuccess: setAcceptRejectProposalDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
+
+  export const getCurrentMatchedApi = (url) =>
+    apiCallBegan({
+      method: 'get',
+      url,
+      onStart: userReducerDataRequested.type,
+      onSuccess: setCurrentMatchedDataReceived.type,
+      onError: userReducerDataRequestFailed.type,
+    });
     export default userReducer.reducer;

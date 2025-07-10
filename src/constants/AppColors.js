@@ -32,4 +32,10 @@ export const COLORS = {
   borderGrey: '#D1D1D1',
   borderBottom: '#616161',
   borderBottom2: '#D1D1D6',
+  bannerColor:"#CEA5FF",
+  borderLight2:"#F2F2F7",
+  transparent:"transparent",
+  lightViolet:"#DCBFFF33",
+  welcomeBottom:"#D3B7F8",
+  declineButton:"#AEAEB2"
 };

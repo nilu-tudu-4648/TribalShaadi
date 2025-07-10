@@ -31,6 +31,7 @@ export const ROUTES = {
   MAIN_TABS: 'MainTabs',
   ACCOUNT: 'Account',
   STACK: 'Stack',
+  UPGRADE: 'Upgrade',
 };
 
 // Mother Tongue
