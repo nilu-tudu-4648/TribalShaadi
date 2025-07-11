@@ -1,25 +1,15 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { fontSize24, Size12 } from '../constants/Sizes';
-import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ArrowIosBackSvg } from './svg/SvgIcons';
 import AppText from './AppText';
-import { ROUTES } from '../constants/data';
-import { RootStackParamList } from '../../App';
-import { RootStackParamList as StackNavigationParamList } from '../navigation/StackNavigation';
-type AppHeaderNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<RootStackParamList, typeof ROUTES.MAIN_TABS>,
-  NativeStackNavigationProp<StackNavigationParamList>
->;
 
-const AppHeader = ({ title }: { title: string }) => {
-  const navigation = useNavigation<AppHeaderNavigationProp>();
+
+const AppHeader = ({ title, onBackPress }: { title: string, onBackPress?: () => void }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={() => navigation.navigate(ROUTES.MAIN_TABS)}
+        onPress={onBackPress}
         style={styles.backButton}     
       >
         <ArrowIosBackSvg />

@@ -1,7 +1,6 @@
 import {
   StyleSheet,
   View,
-  TouchableOpacity,
   ImageBackground,
 } from 'react-native';
 import React from 'react';
@@ -13,10 +12,11 @@ import {
   fontSize24,
   fontSize14,
   fontSize16,
+  Size10,
 } from '../../constants/Sizes';
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import { HomeIcon2 } from '../svg/SvgIcons';
-import AppLinearButton from '../AppLinearButton';
+import AppButton from '../AppButton';
 
 const ReceivedCard = ({
   item,
@@ -61,20 +61,22 @@ const ReceivedCard = ({
           </View>
         </ImageBackground>
       </View>
-      <View style={styles.bioSection}>
-        <AppText text="Bio" textStyle={styles.bioLabel} />
-        <AppText text={item.aboutMe} textStyle={styles.bio} />
-      </View>
-      {/* Button Row */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.declineButton} onPress={onDecline}>
-          <AppText text="Decline" textStyle={styles.declineText} />
-        </TouchableOpacity>
-        <AppLinearButton
+        <AppButton
+          title="Decline"
+          onPress={onDecline}
+          isButtonDisabled={false}
+          isLoading={false}
+          buttonStyle={styles.declineButton}
+          textStyle={styles.declineButtonText}
+        />
+        <AppButton
           title="Accept"
           onPress={onConnect}
           isButtonDisabled={false}
           isLoading={false}
+          buttonStyle={styles.connectButton}
+          textStyle={styles.connectButtonText}
         />
       </View>
     </View>
@@ -166,31 +168,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SIZES.padding,
     gap: SIZES.padding,
-  },
-  declineButton: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-    elevation: 3,
-    paddingBottom: SIZES.padding,
-  },
-  connectButtonWrapper: {
-    flex: 1,
-    borderRadius: SIZES.radius,
-    shadowColor: '#5167FC',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    bottom:20
   },
   connectButton: {
-    flex: 1,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.violet,
+    width: '47%',
+    elevation: 2,
+    borderRadius:Size10
+  },
+  connectButtonText: {
+    color: COLORS.white,
+  },
+  declineButton: {
+    backgroundColor: COLORS.white,
+    width: '47%',
+    elevation: 2,
+    borderRadius:Size10
+  },
+  declineButtonText: {
+    color: COLORS.declineButton,
+    fontSize: fontSize16,
+    fontWeight: '600',
   },
   declineText: {
     color: COLORS.textInactive,

@@ -38,5 +38,8 @@ export const COLORS = {
   lightViolet:"#DCBFFF33",
   welcomeBottom:"#D3B7F8",
   declineButton:"#AEAEB2",
-  borderViolet:"#B97FFF33"
+  borderViolet:"#B97FFF33",
+  bgLight:"#0C0C0D0D",
+  greytext:"#8E8E93",
+  navBarInactive:"#474747"
 };

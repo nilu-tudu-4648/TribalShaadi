@@ -9,16 +9,12 @@ import {
 } from '../../constants/Sizes';
 import AppText from '../AppText';
 import LinearGradient from 'react-native-linear-gradient';
-// import { imageUrl } from '../../constants/functions';
+import { imageUrl } from '../../constants/functions';
 
 const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.profileCard}>
-      {/* <Image source={{uri: imageUrl + item.imageUrl}} style={styles.profileImage} /> */}
-      <Image
-        source={require('../../assets/images/match3.jpg')}
-        style={styles.profileImage}
-      />
+      <Image source={{uri: imageUrl + item.image}} style={styles.profileImage} />
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
         start={{ x: 0, y: 0 }}

@@ -15,7 +15,6 @@ import {
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import {
   CalendarIcon,
-  HeartIcon,
   HomeIcon2,
   ReligionIcon,
   TribeIcon,
@@ -29,6 +28,7 @@ import {
   DrinkingIcon,
   CigrateIcon,
   HomeWorkOutlineIcon,
+  HeartIcon2,
 } from '../svg/SvgIcons';
 import AppChip from '../AppChip';
 import FONT_FAMILY from '../../constants/Fonts';
@@ -161,7 +161,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             </View>
           </View>
           <View style={styles.detailRow}>
-            <HeartIcon color={COLORS.black} />
+            <HeartIcon2 color={COLORS.black} />
             <View style={styles.detailText}>
               <AppText text="Marital Status" textStyle={styles.label} />
               <AppText text={maritalStatus} textStyle={styles.value} />

@@ -32,6 +32,7 @@ import {
 import { getUserDetailsApi } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
+import { DRINKING_OPTIONS, SMOKING_OPTIONS } from '../constants/data';
 
 const PhysicalAttributesScreen = () => {
   const [selectedHeight, setSelectedHeight] = useState('');
@@ -49,16 +50,7 @@ const PhysicalAttributesScreen = () => {
   );
   // Diet options will come from the API
 
-  const drinkingOptions = [
-    'No',
-    'Regular',
-    'Planning to quit',
-    'Socially',
-    'Occasionally',
-    'Teetotaler',
-  ];
 
-  const smokingOptions = ['No', 'Yes'];
   useEffect(() => {
     dispatch(getHeight(getHeightUrl));
     dispatch(getDiet(getDietUrl));
@@ -164,7 +156,7 @@ const PhysicalAttributesScreen = () => {
         {/* Drinking Section */}
         {renderOptionButtons(
           'Drinking',
-          drinkingOptions,
+          DRINKING_OPTIONS,
           selectedDrinking,
           setSelectedDrinking,
         )}
@@ -172,7 +164,7 @@ const PhysicalAttributesScreen = () => {
         {/* Smoking Section */}
         {renderOptionButtons(
           'Smoking',
-          smokingOptions,
+          SMOKING_OPTIONS,
           selectedSmoking,
           setSelectedSmoking,
         )}

@@ -28,7 +28,7 @@ const AppTextInput = ({
   autoFocus,
   onFocus,
   onBlur,
-  editable,
+  editable = true,
   selectTextOnFocus,
 }: {
   placeholder: string;
@@ -57,7 +57,14 @@ const AppTextInput = ({
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         autoComplete={autoComplete}
-        style={[styles.textInput, textInputStyle]}
+        style={[
+          styles.textInput,
+          {
+            color: editable ? COLORS.textPrimary : COLORS.disabledText,
+            borderColor: editable ? COLORS.borderBottom : COLORS.borderLight,
+          },
+          textInputStyle,
+        ]}
         placeholderTextColor={placeholderTextColor}
         maxLength={maxLength}
         multiline={multiline}
@@ -67,7 +74,7 @@ const AppTextInput = ({
         onBlur={onBlur}
         editable={editable}
         selectTextOnFocus={selectTextOnFocus}
-        />
+      />
     </View>
   );
 };

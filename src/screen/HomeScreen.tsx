@@ -221,6 +221,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     width: '45%',
     elevation: 2,
+    borderRadius:Size10
   },
   declineButtonText: {
     color: COLORS.declineButton,
@@ -231,6 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.violet,
     width: '45%',
     elevation: 2,
+    borderRadius:Size10
   },
   connectButtonText: {
     color: COLORS.white,

@@ -8,7 +8,7 @@ import {
 import React from 'react';
 import AppText from './AppText';
 import GradientLoader from './GradientLoader';
-import { Size12, Size16, Size8 } from '../constants/Sizes';
+import { Size12, Size16, Size4 } from '../constants/Sizes';
 import { fontSize16 } from '../constants/Sizes';
 
 const AppButton = ({
@@ -45,7 +45,7 @@ export default AppButton;
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: Size8,
+    borderRadius: Size4,
     paddingVertical: Size12,
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,16 +1,15 @@
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   Image,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize12,
-  fontSize14,
   fontSize18,
   fontSize24,
   Size2,
@@ -19,35 +18,27 @@ import {
   Size20,
   Size25,
   lignHeight20,
-  lignHeight24,
   lignHeight32,
   lignHeight38,
   lignHeight43,
   lignHeight53,
   compPadding,
+  fontSize20,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppText from '../components/AppText';
 import {
-  AccountIcon,
+  UserProfileIcon,
   SlidersIcon,
-  SettingsIcon,
   RightArrowIcon,
   EditIcon,
+  EducationIcon,
+  PersonalityIcon,
 } from '../components/svg/SvgIcons';
 import { useNavigation } from '@react-navigation/native';
 import AppHeader from '../components/AppHeader';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
-
-// Custom Education Icon
-const EducationIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
-  <View
-    style={{ width, height, alignItems: 'center', justifyContent: 'center' }}
-  >
-    <Text style={{ fontSize: 20, color }}>🎓</Text>
-  </View>
-);
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -57,7 +48,7 @@ const EditProfileScreen = () => {
       title: 'Personal Details',
       description:
         'Update your basic information that helps others understand who you are',
-      icon: AccountIcon,
+      icon: UserProfileIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
           screen: ROUTES.EDIT_PERSONAL,
@@ -91,7 +82,7 @@ const EditProfileScreen = () => {
       title: 'Personality & Preferences',
       description:
         'Share more about yourself, your values, and what you seek in a life partner',
-      icon: SettingsIcon,
+      icon: PersonalityIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
           screen: ROUTES.EDIT_PERSONALITY,
@@ -102,7 +93,10 @@ const EditProfileScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <AppHeader title="Edit Profile" />
 
@@ -153,16 +147,16 @@ const EditProfileScreen = () => {
         {/* Menu Items */}
         <View style={styles.menuContainer}>
           {menuItems.map(item => (
-            <TouchableOpacity
+            <Pressable
+              onPress={item.onPress}
               key={item.id}
               style={styles.menuItem}
-              onPress={item.onPress}
             >
               <View style={styles.menuItemContent}>
                 <View style={styles.iconContainer}>
                   <item.icon
-                    width={lignHeight24}
-                    height={lignHeight24}
+                    width={lignHeight32}
+                    height={lignHeight32}
                     color={COLORS.black}
                   />
                 </View>
@@ -177,7 +171,7 @@ const EditProfileScreen = () => {
                   <RightArrowIcon />
                 </View>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
@@ -192,13 +186,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  scrollContent: {
+    gap: lignHeight43,
+    paddingBottom: Size20,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: compPadding,
     paddingVertical: Size12,
-    marginBottom: Size20,
   },
   backButton: {
     alignItems: 'center',
@@ -219,7 +216,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: compPadding,
-    marginBottom: lignHeight43,
   },
   profileImageWrapper: {
     position: 'relative',
@@ -270,34 +266,33 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     paddingHorizontal: compPadding,
+    gap: Size25,
   },
   menuItem: {
-    marginBottom: Size25,
+    justifyContent: 'flex-start',
   },
   menuItemContent: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: Size20,
   },
   iconContainer: {
     width: lignHeight32,
     height: lignHeight32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Size20,
   },
   menuItemText: {
     flex: 1,
-    marginRight: Size16,
+    gap: Size2,
   },
   menuItemTitle: {
-    fontSize: fontSize18,
+    fontSize: fontSize20,
     fontWeight: '700',
     color: COLORS.black,
-    marginBottom: Size2,
     fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
   },
   menuItemDescription: {
-    fontSize: fontSize14,
+    fontSize: fontSize12,
     color: COLORS.textSecondary,
     lineHeight: fontSize18,
     fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_REGULAR,

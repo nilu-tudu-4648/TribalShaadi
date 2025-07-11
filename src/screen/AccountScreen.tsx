@@ -1,27 +1,31 @@
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
 import { ROUTES } from '../constants/data';
-import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import {
+  CompositeNavigationProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { RootStackParamList as StackNavigationParamList } from '../navigation/StackNavigation';
-import { 
-  EditIcon, 
-  CrownIcon, 
-  SelfieVerifiedIcon, 
-  GovtIdIcon, 
-  GiftIcon, 
-  SlidersIcon, 
-  InfoIcon, 
-  HeadphonesIcon, 
-  SettingsIcon 
+import {
+  EditIcon,
+  CrownIcon,
+  SelfieVerifiedIcon,
+  GovtIdIcon,
+  GiftIcon,
+  SlidersIcon,
+  InfoIcon,
+  HeadphonesIcon,
+  SettingsIcon,
+  RocketIcon,
 } from '../components/svg/SvgIcons';
-
-const profileImage = require('../assets/images/Male.png'); // Placeholder image
+import { useSelector } from 'react-redux';
+import { imageUrl } from '../constants/functions';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -44,40 +48,75 @@ type ActionButton = {
 
 const badgeData: BadgeData[] = [
   { key: 'crown', label: 'Crown\nbadge', color: '#FFD600', icon: CrownIcon },
-  { key: 'selfie', label: 'Selfie\nverified', color: COLORS.primaryBlue, icon: SelfieVerifiedIcon },
-  { key: 'govt', label: 'Govt. ID\nverified', color: COLORS.grey, icon: GovtIdIcon },
+  {
+    key: 'selfie',
+    label: 'Selfie\nverified',
+    color: COLORS.primaryBlue,
+    icon: SelfieVerifiedIcon,
+  },
+  {
+    key: 'govt',
+    label: 'Govt. ID\nverified',
+    color: COLORS.grey,
+    icon: GovtIdIcon,
+  },
 ];
 
 const actionButtons: ActionButton[] = [
-  { key: 'plan', label: 'My Plan', icon: CrownIcon, route: ROUTES.UPGRADE },
+  { key: 'plan', label: 'My Plan', icon: RocketIcon, route: ROUTES.UPGRADE },
   { key: 'invite', label: 'Invite', icon: GiftIcon },
   { key: 'preference', label: 'Preference', icon: SlidersIcon },
   { key: 'about', label: 'About Us', icon: InfoIcon },
   { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
-  { key: 'settings', label: 'Settings', icon: SettingsIcon, route: ROUTES.SETTINGS },
+  {
+    key: 'settings',
+    label: 'Settings',
+    icon: SettingsIcon,
+    route: ROUTES.SETTINGS,
+  },
 ];
 
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const fullName = `${user?.firstName} ${user?.lastName}`.trim();
   return (
     <View style={styles.container}>
       {/* Profile Image with Edit Icon */}
       <View style={styles.profileContainer}>
-        <Image source={profileImage} style={styles.profileImage} />
-        <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: ROUTES.EDIT_PROFILE } as never)}} style={styles.editIcon}>
+        <Image
+          source={{ uri: imageUrl + user?.imageUrl }}
+          style={styles.profileImage}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate(ROUTES.STACK, {
+              screen: ROUTES.EDIT_PROFILE,
+            } as never);
+          }}
+          style={styles.editIcon}
+        >
           <EditIcon width={Sizes.fontSize18} height={Sizes.fontSize18} />
         </TouchableOpacity>
       </View>
       {/* Name */}
-      <AppText text={'Jane Doe'} textStyle={styles.name} />
+      <AppText
+        text={fullName}
+        textStyle={styles.name}
+      />
       {/* Badges */}
       <View style={styles.badgesRow}>
         {badgeData.map(badge => {
           const IconComponent = badge.icon;
           return (
             <View key={badge.key} style={styles.badgeItem}>
-              <View style={[styles.badgeIcon, { backgroundColor: badge.color }]}> 
-                <IconComponent width={Sizes.fontSize18} height={Sizes.fontSize18} color={COLORS.white} />
+              <View
+                style={[styles.badgeIcon, { backgroundColor: badge.color }]}
+              >
+                <IconComponent
+                  width={Sizes.fontSize18}
+                  height={Sizes.fontSize18}
+                />
               </View>
               <AppText text={badge.label} textStyle={styles.badgeLabel} />
             </View>
@@ -86,12 +125,23 @@ const AccountScreen = () => {
       </View>
       {/* Action Buttons */}
       <View style={styles.actionsGrid}>
-        {actionButtons.map((btn) => {
+        {actionButtons.map(btn => {
           const IconComponent = btn.icon;
           return (
-            <TouchableOpacity onPress={()=>{navigation.navigate(ROUTES.STACK, { screen: btn.route } as never)}} key={btn.key} style={styles.actionItem}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate(ROUTES.STACK, {
+                  screen: btn.route,
+                } as never);
+              }}
+              key={btn.key}
+              style={styles.actionItem}
+            >
               <View style={styles.actionIconCircle}>
-                <IconComponent width={Sizes.fontSize24} height={Sizes.fontSize24} color={COLORS.textInactive} />
+                <IconComponent
+                  width={Sizes.fontSize24}
+                  height={Sizes.fontSize24}
+                />
               </View>
               <AppText text={btn.label} textStyle={styles.actionLabel} />
             </TouchableOpacity>
@@ -99,10 +149,10 @@ const AccountScreen = () => {
         })}
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default AccountScreen
+export default AccountScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -117,6 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Sizes.Size8,
+    paddingTop: Sizes.Size20 * 5,
   },
   profileImage: {
     width: 100,
@@ -128,7 +179,7 @@ const styles = StyleSheet.create({
     right: -5,
     bottom: 0,
     backgroundColor: COLORS.white,
-    borderRadius: 20,
+    borderRadius: Sizes.Size20,
     padding: Sizes.Size8,
     elevation: 2,
     shadowColor: COLORS.black,
@@ -137,7 +188,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
   },
   name: {
-    fontSize: Sizes.fontSize28,
+    fontSize: Sizes.fontSize24,
     fontWeight: '600',
     paddingTop: Sizes.Size10,
     paddingBottom: Sizes.Size8,
@@ -155,11 +206,13 @@ const styles = StyleSheet.create({
     gap: Sizes.Size4,
   },
   badgeIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: Sizes.Size40,
+    height: Sizes.Size40,
+    borderRadius: Sizes.Size20,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: COLORS.borderGrey,
+    overflow: 'hidden',
   },
   badgeLabel: {
     fontSize: Sizes.fontSize12,
@@ -181,19 +234,24 @@ const styles = StyleSheet.create({
     paddingVertical: Sizes.Size10,
   },
   actionIconCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: Sizes.Size50,
+    height: Sizes.Size50,
+    borderRadius: Sizes.Size25,
+    padding: Sizes.Size18,
     backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.borderGrey,
     elevation: 2,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    borderWidth: 0.1,
+    borderColor: COLORS.borderGrey,
   },
   actionLabel: {
     fontSize: Sizes.fontSize16,
-    color: COLORS.textInactive,
+    color: COLORS.greytext,
     textAlign: 'center',
   },
-})
+});

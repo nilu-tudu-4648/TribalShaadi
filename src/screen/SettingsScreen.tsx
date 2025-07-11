@@ -10,6 +10,7 @@ import { fontSize16, Size12, Size25, Size4, Size8 } from '../constants/Sizes';
 import AppButton from '../components/AppButton';
 import LogoutDialog from '../components/dialogs/LogoutDialog';
 import { logoutUser } from '../constants/functions';
+import { useNavigation } from '@react-navigation/native';
 
 const SettingsScreen = () => {
   const dispatch = useDispatch();
@@ -18,9 +19,10 @@ const SettingsScreen = () => {
     setIsLogoutDialogVisible(false);
     logoutUser(dispatch);
   };
+  const navigation = useNavigation();
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Settings" />
+      <AppHeader title="Settings" onBackPress={() => navigation.goBack()} />
       <View style={styles.topContainer}>
         <View style={styles.iconContainer}>
           <View style={styles.iconContainer}>

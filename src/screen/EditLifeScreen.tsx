@@ -3,100 +3,50 @@ import { StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
-import AppHeader from '../components/AppHeader';
 import AppDropdown from '../components/AppDropdown';
 import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
-import AppScrollView from '../components/AppScrollView';
 import { COLORS } from '../constants/AppColors';
-import { Size16, Size20, Size25, compPadding } from '../constants/Sizes';
+import { Size20, Size8 } from '../constants/Sizes';
 import {
   completeUserProfileV2Updated,
+  getStates,
+  getCities,
+  getHeight,
+  getDiet,
 } from '../store/reducers/authReducer';
 import {
   updateUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
+  getStatesUrl,
+  getCitiesUrl,
+  getHeightUrl,
+  convertCmToReadableHeight,
+  getDietUrl,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
-
-// Mock data for dropdowns - these should ideally come from your data constants
-const STATES = [
-  { id: '1', name: 'Jharkhand' },
-  { id: '2', name: 'Bihar' },
-  { id: '3', name: 'West Bengal' },
-  { id: '4', name: 'Odisha' },
-  { id: '5', name: 'Uttar Pradesh' },
-];
-
-const CITIES = [
-  { id: '1', name: 'Jamshedpur', stateId: '1' },
-  { id: '2', name: 'Ranchi', stateId: '1' },
-  { id: '3', name: 'Dhanbad', stateId: '1' },
-  { id: '4', name: 'Bokaro', stateId: '1' },
-];
-
-const HEIGHTS = [
-  { id: '1', name: '5\'0"' },
-  { id: '2', name: '5\'1"' },
-  { id: '3', name: '5\'2"' },
-  { id: '4', name: '5\'3"' },
-  { id: '5', name: '5\'4"' },
-  { id: '6', name: '5\'5"' },
-  { id: '7', name: '5\'6"' },
-  { id: '8', name: '5\'7"' },
-  { id: '9', name: '5\'8"' },
-  { id: '10', name: '5\'9"' },
-  { id: '11', name: '5\'10"' },
-  { id: '12', name: '5\'11"' },
-  { id: '13', name: '6\'0"' },
-  { id: '14', name: '6\'1"' },
-  { id: '15', name: '6\'2"' },
-];
-
-const DIET_PREFERENCES = [
-  { id: '1', name: 'Vegetarian' },
-  { id: '2', name: 'Non-Vegetarian' },
-  { id: '3', name: 'Vegan' },
-  { id: '4', name: 'Jain' },
-];
-
-const YES_NO_OPTIONS = [
-  { id: '1', name: 'Yes' },
-  { id: '2', name: 'No' },
-];
-
-const SMOKING_OPTIONS = [
-  { id: '1', name: 'Never' },
-  { id: '2', name: 'Socially' },
-  { id: '3', name: 'Regularly' },
-  { id: '4', name: 'Planning to quit' },
-  { id: '5', name: 'Quit' },
-];
-
-const TIMELINE_OPTIONS = [
-  { id: '1', name: 'Within 6 months' },
-  { id: '2', name: 'Within 1 year' },
-  { id: '3', name: 'Within 2 years' },
-  { id: '4', name: 'More than 2 years' },
-  { id: '5', name: 'Not decided' },
-];
+import { SlidersIcon } from '../components/svg/SvgIcons';
+import ProfileHeader from '../components/Header/ProfileHeader';
+import {
+  DRINKING_OPTIONS,
+  SETTLING_DOWN_OPTIONS,
+  SMOKING_OPTIONS,
+} from '../constants/data';
 
 const EditLifeScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  
-  const { user, loader } = useSelector(
+
+  const { user, states, cities, loader, height, diet } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-
-  // Form state
+  console.log('user', user);
+  // Form state - now using objects for state and city
   const [formData, setFormData] = useState({
-    stateId: '',
-    stateName: '',
-    cityId: '',
-    cityName: '',
+    selectedState: null as any,
+    selectedCity: null as any,
     heightId: '',
     heightName: '',
     dietId: '',
@@ -107,6 +57,8 @@ const EditLifeScreen = () => {
     smokingName: '',
     timelineId: '',
     timelineName: '',
+    stateId: '',
+    districtId: '',
   });
 
   // Picker modal states
@@ -118,46 +70,89 @@ const EditLifeScreen = () => {
   const [showSmokingPicker, setShowSmokingPicker] = useState(false);
   const [showTimelinePicker, setShowTimelinePicker] = useState(false);
 
-  // Filtered cities for city picker
-  const [cityOptions, setCityOptions] = useState<any[]>([]);
+  // Loading state for cities
+  const [citiesLoading, setCitiesLoading] = useState(false);
+
+  // Fetch states when component mounts
+  useEffect(() => {
+    dispatch(getStates(getStatesUrl));
+    dispatch(getHeight(getHeightUrl));
+    dispatch(getDiet(getDietUrl));
+  }, [dispatch]);
+
+  // Load cities when state is selected
+  useEffect(() => {
+    if (formData.selectedState?.id) {
+      setCitiesLoading(true);
+      dispatch(
+        getCities(`${getCitiesUrl}?stateId=${formData.selectedState.id}`),
+      );
+    }
+  }, [formData.selectedState?.id, dispatch]);
+
+  // Stop loading when cities are received
+  useEffect(() => {
+    if (cities && cities.length >= 0) {
+      setCitiesLoading(false);
+    }
+  }, [cities]);
 
   // Initialize form data from user profile
   useEffect(() => {
-    if (user) {
-      setFormData({
-        stateId: user.stateId || '1',
-        stateName: user.stateName || 'Jharkhand',
-        cityId: user.cityId || '1',
-        cityName: user.cityName || 'Jamshedpur',
-        heightId: user.heightId || '8',
-        heightName: user.heightName || '5\'7"',
-        dietId: user.dietId || '1',
-        dietName: user.dietName || 'Vegetarian',
-        drinkingId: user.drinkingId || '2',
-        drinkingName: user.drinkingName || 'No',
-        smokingId: user.smokingId || '4',
-        smokingName: user.smokingName || 'Planning to quit',
-        timelineId: user.timelineId || '1',
-        timelineName: user.timelineName || 'Within 6 months',
-      });
-    }
-  }, [user]);
+    if (user && states && states.length > 0) {
+      console.log('Initializing form data. User stateId:', user.stateId);
+      console.log('Available states:', states);
 
-  // Handle state selection
+      // Find state object from the fetched data
+      const userState = states.find(
+        (state: any) => String(state.id) === String(user.stateId),
+      );
+      console.log('Found user state:', userState);
+
+      setFormData(prev => ({
+        ...prev,
+        selectedState: user.stateName || null,
+        districtName: user.districtName || null,
+        heightId: user.heightId || '8',
+        heightName: user.height || '5\'7"',
+        dietId: user.dietId || '1',
+        dietName: user.diet || 'Vegetarian',
+        drinkingName: user.drinking || 'No',
+        smokingName: user.smoking || '',
+        timelineName: user.planingto_settle || '',
+      }));
+    }
+  }, [user, states]);
+
+  // Initialize city when cities are loaded
+  useEffect(() => {
+    if (user && cities && cities.length > 0 && formData.selectedState) {
+      console.log('Initializing city. User cityId:', user.cityId);
+      console.log('Available cities:', cities);
+
+      const userCity = cities.find(
+        (city: any) => String(city.id) === String(user.cityId),
+      );
+      console.log('Found user city:', userCity);
+
+      if (userCity) {
+        setFormData(prev => ({
+          ...prev,
+          selectedCity: userCity,
+        }));
+      }
+    }
+  }, [user, cities, formData.selectedState]);
+
+  // Handle state selection and reset city when state changes
   const handleStateSelection = useCallback((selectedState: any) => {
+    console.log('Selected state:', selectedState);
     setFormData(prev => ({
       ...prev,
+      selectedState: selectedState,
       stateId: selectedState.id,
-      stateName: selectedState.name,
-      cityId: '', // Reset city when state changes
-      cityName: '',
+      selectedCity: null, // Reset city when state changes
     }));
-    
-    // Filter cities based on selected state
-    const filteredCities = CITIES.filter(
-      (city: any) => city.stateId === selectedState.id
-    );
-    setCityOptions(filteredCities);
     setShowStatePicker(false);
   }, []);
 
@@ -165,24 +160,15 @@ const EditLifeScreen = () => {
   const handleCitySelection = useCallback((selectedCity: any) => {
     setFormData(prev => ({
       ...prev,
-      cityId: selectedCity.id,
-      cityName: selectedCity.name,
+      districtId: selectedCity.id,
+      selectedCity: selectedCity,
     }));
     setShowCityPicker(false);
   }, []);
 
-  // Handle height selection
-  const handleHeightSelection = useCallback((selectedHeight: any) => {
-    setFormData(prev => ({
-      ...prev,
-      heightId: selectedHeight.id,
-      heightName: selectedHeight.name,
-    }));
-    setShowHeightPicker(false);
-  }, []);
-
   // Handle diet selection
   const handleDietSelection = useCallback((selectedDiet: any) => {
+    console.log('selectedDiet', selectedDiet);
     setFormData(prev => ({
       ...prev,
       dietId: selectedDiet.id,
@@ -221,46 +207,35 @@ const EditLifeScreen = () => {
     setShowTimelinePicker(false);
   }, []);
 
+  // Get filtered cities based on selected state
+  const filteredCities = React.useMemo(() => {
+    if (!formData.selectedState?.id || !cities) return [];
+    return cities.filter(
+      (city: any) => city.stateId === formData.selectedState.id,
+    );
+  }, [formData.selectedState?.id, cities]);
+
   // Handle form submission
   const handleSave = useCallback(async () => {
-    // Validate required fields
-    if (!formData.stateId) {
-      AppToast('Please select your state');
-      return;
-    }
-    
-    if (!formData.cityId) {
-      AppToast('Please select your city');
-      return;
-    }
-    
-    if (!formData.heightId) {
-      AppToast('Please select your height');
-      return;
-    }
-    
-    if (!formData.dietId) {
-      AppToast('Please select your diet preference');
-      return;
-    }
-
     try {
       const requestBody = {
         id: user.id,
-        stateId: formData.stateId,
-        cityId: formData.cityId,
+        permanentAddress: {
+          stateId: formData.stateId,
+          districtId: formData.districtId,
+        },    
         heightId: formData.heightId,
         dietId: formData.dietId,
-        drinkingId: formData.drinkingId,
-        smokingId: formData.smokingId,
-        timelineId: formData.timelineId,
+        drinking: formData.drinkingName,
+        smoking: formData.smokingName,
+        planingto_settle: formData.timelineName,
       };
-
+      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      
+
       AppToast('Profile updated successfully');
       navigation.goBack();
     } catch (error) {
@@ -271,110 +246,113 @@ const EditLifeScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Lifestyle & Hometown" />
-      
-      <AppScrollView 
+      <ProfileHeader
+        onBackPress={() => navigation.goBack()}
+        title="Lifestyle & Hometown"
+        icon={<SlidersIcon />}
+      />
+
+      <View
         style={styles.scrollView}
-        otherProps={{ contentContainerStyle: styles.scrollContent }}
+        // otherProps={{ contentContainerStyle: styles.scrollContent }}
       >
         {/* State Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.stateName}
-            placeholder="Select State"
-            onPress={() => setShowStatePicker(true)}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={formData.selectedState?.name || user.stateName}
+          placeholder="Select State"
+          onPress={() => {
+            console.log('State dropdown pressed, available states:', states);
+            console.log('States is array:', Array.isArray(states));
+            if (states && states.length > 0) {
+              setShowStatePicker(true);
+            } else {
+              console.warn('No states available for selection');
+            }
+          }}
+        />
 
         {/* City Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.cityName}
-            placeholder="Select City"
-            onPress={() => setShowCityPicker(true)}
-            disabled={!formData.stateId}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={formData.selectedCity?.name || user.districtName}
+          placeholder={citiesLoading ? 'Loading cities...' : 'Select City'}
+          onPress={() => !citiesLoading && setShowCityPicker(true)}
+          disabled={citiesLoading || !formData.selectedState}
+        />
 
         {/* Height Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.heightName}
-            placeholder="Select Height"
-            onPress={() => setShowHeightPicker(true)}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={convertCmToReadableHeight(formData.heightName)}
+          placeholder="Select Height"
+          onPress={() => setShowHeightPicker(true)}
+        />
 
         {/* Diet Preference Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.dietName}
-            placeholder="Select Diet Preference"
-            onPress={() => setShowDietPicker(true)}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={formData.dietName}
+          placeholder="Select Diet Preference"
+          onPress={() => setShowDietPicker(true)}
+        />
 
         {/* Drinking Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.drinkingName}
-            placeholder="Do you drink?"
-            onPress={() => setShowDrinkingPicker(true)}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={formData.drinkingName}
+          placeholder="Do you drink?"
+          onPress={() => setShowDrinkingPicker(true)}
+        />
 
         {/* Smoking Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.smokingName}
-            placeholder="Smoking Habits"
-            onPress={() => setShowSmokingPicker(true)}
-          />
-        </View>
+        <AppDropdown
+          label=""
+          selectedValue={formData.smokingName}
+          placeholder="Smoking Habits"
+          onPress={() => setShowSmokingPicker(true)}
+        />
 
         {/* Timeline Dropdown */}
-        <View style={styles.fieldContainer}>
-          <AppDropdown
-            label=""
-            selectedValue={formData.timelineName}
-            placeholder="Marriage Timeline"
-            onPress={() => setShowTimelinePicker(true)}
-          />
-        </View>
-      </AppScrollView>
-
-      {/* Save Button */}
-      <View style={styles.buttonContainer}>
-        <AppButton
-          title="Save"
-          onPress={handleSave}
-          isLoading={loader}
-          buttonStyle={styles.saveButton}
-          textStyle={styles.saveButtonText}
+        <AppDropdown
+          label=""
+          selectedValue={formData.timelineName}
+          placeholder="Marriage Timeline"
+          onPress={() => setShowTimelinePicker(true)}
         />
       </View>
+
+      {/* Spacer */}
+      <View style={styles.spacer} />
+
+      {/* Save Button */}
+      <AppButton
+        title="Save"
+        onPress={handleSave}
+        isLoading={loader}
+        isButtonDisabled={loader}
+        buttonStyle={[styles.saveButton]}
+        textStyle={[styles.saveButtonText]}
+      />
 
       {/* Picker Modals */}
       <AppPickerModal
         visible={showStatePicker}
-        items={STATES}
-        selectedValue={formData.stateName}
+        items={states || []}
+        selectedValue={formData.selectedState?.name || ''}
         onSelect={handleStateSelection}
-        onClose={() => setShowStatePicker(false)}
+        onClose={() => {
+          console.log('State picker closed');
+          setShowStatePicker(false);
+        }}
         title="Select State"
         isObjects={true}
       />
 
       <AppPickerModal
         visible={showCityPicker}
-        items={cityOptions}
-        selectedValue={formData.cityName}
+        items={filteredCities}
+        selectedValue={formData.selectedCity?.name || ''}
         onSelect={handleCitySelection}
         onClose={() => setShowCityPicker(false)}
         title="Select City"
@@ -383,17 +361,30 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showHeightPicker}
-        items={HEIGHTS}
-        selectedValue={formData.heightName}
-        onSelect={handleHeightSelection}
-        onClose={() => setShowHeightPicker(false)}
         title="Select Height"
+        items={
+          height
+            ? height.map((h: any) => ({
+                ...h,
+                displayName: convertCmToReadableHeight(h.name),
+              }))
+            : []
+        }
+        selectedValue={formData.heightName}
+        onSelect={item => {
+          setFormData(prev => ({
+            ...prev,
+            heightId: item.id,
+            heightName: item.name,
+          }));
+        }}
+        onClose={() => setShowHeightPicker(false)}
         isObjects={true}
+        displayProperty="displayName"
       />
-
       <AppPickerModal
         visible={showDietPicker}
-        items={DIET_PREFERENCES}
+        items={diet || []}
         selectedValue={formData.dietName}
         onSelect={handleDietSelection}
         onClose={() => setShowDietPicker(false)}
@@ -403,7 +394,10 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showDrinkingPicker}
-        items={YES_NO_OPTIONS}
+        items={DRINKING_OPTIONS.map((item, index) => ({
+          id: index,
+          name: item,
+        }))}
         selectedValue={formData.drinkingName}
         onSelect={handleDrinkingSelection}
         onClose={() => setShowDrinkingPicker(false)}
@@ -413,7 +407,10 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showSmokingPicker}
-        items={SMOKING_OPTIONS}
+        items={SMOKING_OPTIONS.map((item, index) => ({
+          id: index,
+          name: item,
+        }))}
         selectedValue={formData.smokingName}
         onSelect={handleSmokingSelection}
         onClose={() => setShowSmokingPicker(false)}
@@ -423,7 +420,10 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showTimelinePicker}
-        items={TIMELINE_OPTIONS}
+        items={SETTLING_DOWN_OPTIONS.map((item, index) => ({
+          id: index,
+          name: item,
+        }))}
         selectedValue={formData.timelineName}
         onSelect={handleTimelineSelection}
         onClose={() => setShowTimelinePicker(false)}
@@ -441,26 +441,24 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    padding: Size8,
+    gap: Size20,
+  },
+  content: {
+    flex: 1,
   },
   scrollContent: {
-    padding: compPadding,
-    paddingBottom: Size25,
+    padding: Size8,
+    gap: Size20,
   },
-  fieldContainer: {
-    marginBottom: Size20,
-  },
-  buttonContainer: {
-    padding: compPadding,
-    paddingTop: Size16,
+  spacer: {
+    flex: 1,
   },
   saveButton: {
     backgroundColor: COLORS.violet,
-    borderRadius: Size16,
-    paddingVertical: Size16,
   },
   saveButtonText: {
     color: COLORS.white,
-    fontWeight: '600',
   },
 });
 

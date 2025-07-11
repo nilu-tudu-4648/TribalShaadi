@@ -58,3 +58,23 @@ export const MOTHER_TONGUE = [
   { id: 14, label: 'Sadri', name: 'Sadri' },
   { id: 15, label: 'Bhili', name: 'Bhili' },
 ];
+
+export const DRINKING_OPTIONS = [
+  'No',
+  'Regular',
+  'Planning to quit',
+  'Socially',
+  'Occasionally',
+  'Teetotaler',
+];
+
+export const SMOKING_OPTIONS = ['No', 'Yes'];
+
+export const SETTLING_DOWN_OPTIONS = 
+  [
+    'Within 6 months',
+    'Within a year',
+  'Within 2 year',
+  'Within 3 year',
+  'Undecided',
+];

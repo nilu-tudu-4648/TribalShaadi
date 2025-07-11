@@ -10,7 +10,18 @@ import {
   G,
 } from 'react-native-svg';
 import { COLORS } from '../../constants/AppColors';
-import { fontSize36, lignHeight20, lignHeight21, lignHeight26, lignHeight30, lignHeight32, lignHeight38, lignHeight43 } from '../../constants/Sizes';
+import {
+  fontSize36,
+  lignHeight20,
+  lignHeight21,
+  lignHeight26,
+  lignHeight30,
+  lignHeight32,
+  lignHeight38,
+  lignHeight43,
+  Size12,
+  Size17,
+} from '../../constants/Sizes';
 
 export const ArrowIosBackSvg = ({
   width = fontSize36,
@@ -22,6 +33,31 @@ export const ArrowIosBackSvg = ({
       <Path
         d="M15.704 17.704a1 1 0 0 1-1.408 0l-5-5a1 1 0 0 1 0-1.408l5-5a1 1 0 1 1 1.408 1.408L11.816 12l3.888 3.888a1 1 0 0 1 0 1.416z"
         fill={color}
+      />
+    </Svg>
+  );
+};
+export const BackIcon = ({ 
+  size = Size12, 
+  color = COLORS.black, 
+  fill = color,
+  direction = 'left', // 'left' or 'right'
+  ...props 
+}) => {
+  const rotation = direction === 'right' ? '180deg' : '0deg';
+  
+  return (
+    <Svg 
+      width={size} 
+      height={size * (17/9)} // Maintain aspect ratio (9:17)
+      viewBox="0 0 9 17" 
+      fill="none"
+      style={{ transform: [{ rotate: rotation }] }}
+      {...props}
+    >
+      <Path
+        d="M6.8104 16.6678C6.63611 16.6684 6.4639 16.6299 6.30642 16.5552C6.14894 16.4805 6.01021 16.3715 5.9004 16.2361L0.265403 9.23614C0.0938073 9.02738 0 8.76553 0 8.4953C0 8.22507 0.0938073 7.96322 0.265403 7.75447L6.09874 0.754469C6.29676 0.516216 6.58133 0.366388 6.88982 0.337945C7.19832 0.309502 7.50548 0.404774 7.74373 0.602802C7.98199 0.80083 8.13182 1.08539 8.16026 1.39389C8.1887 1.70239 8.09343 2.00955 7.8954 2.2478L2.6804 8.50114L7.7204 14.7545C7.86306 14.9257 7.95369 15.1342 7.98155 15.3554C8.00941 15.5765 7.97334 15.801 7.87761 16.0023C7.78187 16.2036 7.63049 16.3732 7.44136 16.4912C7.25223 16.6091 7.03327 16.6704 6.8104 16.6678Z"
+        fill={fill}
       />
     </Svg>
   );
@@ -85,19 +121,22 @@ export const CloseIcon = ({ width = 24, height = 24, color = 'white' }) => {
 };
 
 export const CalendarIcon = ({
-  width = 24,
-  height = 24,
-  color = COLORS.textBlack,
-}) => {
-  return (
-    <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
-        fill={color}
-      />
-    </Svg>
-  );
-};
+  size = lignHeight20,
+  color = 'black',
+  strokeWidth = 1.25,
+  ...props
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 18 18" fill="none" {...props}>
+    <Path
+      d="M11.5 2.33317V0.666504M11.5 2.33317V3.99984M11.5 2.33317H7.75M1.5 7.33317V14.8332C1.5 15.2752 1.67559 15.6991 1.98816 16.0117C2.30072 16.3242 2.72464 16.4998 3.16667 16.4998H14.8333C15.2754 16.4998 15.6993 16.3242 16.0118 16.0117C16.3244 15.6991 16.5 15.2752 16.5 14.8332V7.33317M1.5 7.33317H16.5M1.5 7.33317V3.99984C1.5 3.55781 1.67559 3.13389 1.98816 2.82133C2.30072 2.50877 2.72464 2.33317 3.16667 2.33317H4.83333M16.5 7.33317V3.99984C16.5 3.55781 16.3244 3.13389 16.0118 2.82133C15.6993 2.50877 15.2754 2.33317 14.8333 2.33317H14.4167M4.83333 0.666504V3.99984"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export const DropdownIcon = ({
   width = 17,
   height = 10,
@@ -113,58 +152,128 @@ export const DropdownIcon = ({
   );
 };
 
-export const HomeIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+export const HomeIcon = ({
+  size = Size12,
+  color = COLORS.black,
+  fill = color,
+  ...props
+}) => (
+  <Svg
+    width={size}
+    height={size * (17 / 21)} // Maintain original aspect ratio (21:17)
+    viewBox="0 0 21 17"
+    fill="none"
+    {...props}
+  >
     <Path
-      d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-5h-6v5H4a1 1 0 0 1-1-1V10.5z"
-      stroke={color}
-      strokeWidth="1.5"
-      strokeLinejoin="round"
+      d="M10.75 2.69L15.75 7.19V15H13.75V9H7.75V15H5.75V7.19L10.75 2.69ZM10.75 0L0.75 9H3.75V17H9.75V11H11.75V17H17.75V9H20.75L10.75 0Z"
+      fill={fill}
     />
   </Svg>
 );
 
 export const HeartIcon = ({
-  width = 24,
-  height = 24,
-  color = COLORS.black,
+  size = Size12,
+  color = COLORS.white,
+  fill = color,
+  ...props
 }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+  <Svg
+    width={size}
+    height={size * (19 / 21)} // Maintain original aspect ratio (21:19)
+    viewBox="0 0 21 19"
+    fill="none"
+    {...props}
+  >
     <Path
-      d="M12 21s-6.5-5.5-8.5-8.5A5.5 5.5 0 0 1 12 5.5a5.5 5.5 0 0 1 8.5 7C18.5 15.5 12 21 12 21z"
-      stroke={color}
-      strokeWidth="1.5"
-      strokeLinejoin="round"
+      d="M10.25 18.35L8.8 17.03C3.65 12.36 0.25 9.28 0.25 5.5C0.25 2.42 2.67 0 5.75 0C7.49 0 9.16 0.81 10.25 2.09C11.34 0.81 13.01 0 14.75 0C17.83 0 20.25 2.42 20.25 5.5C20.25 9.28 16.85 12.36 11.7 17.04L10.25 18.35Z"
+      fill={fill}
+    />
+  </Svg>
+);
+export const HeartIcon2 = ({
+  size = 18,
+  color = 'black',
+  fill = color,
+  ...props
+}) => (
+  <Svg
+    width={size}
+    height={size * (16 / 18)} // Maintain aspect ratio (18:16)
+    viewBox="0 0 18 16"
+    fill="none"
+    {...props}
+  >
+    <Path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12.9247 0.5625C14.0533 0.565341 15.1349 1.01492 15.9333 1.81321C16.7308 2.6115 17.1811 3.69321 17.184 4.82175C17.184 9.95957 13.0525 12.6641 9.38706 15.0639L9.19246 15.1911C9.07954 15.2685 8.93181 15.2699 8.81746 15.1953L8.80468 15.1868C5.14413 12.7884 0.820312 9.9559 0.820312 4.82172C0.823153 3.50212 1.43679 2.25917 2.48224 1.45444C3.5284 0.649752 4.88715 0.375606 6.16333 0.710842C7.43889 1.04608 8.48715 1.95444 9.00206 3.16902C9.32948 2.39842 9.87493 1.74075 10.5724 1.27775C11.2698 0.81397 12.0873 0.565336 12.9247 0.5625ZM12.9247 1.2365C11.9794 1.23934 11.0731 1.61363 10.402 2.27983C9.73082 2.94532 9.34872 3.84872 9.33806 4.79401C9.33735 4.97937 9.18749 5.12852 9.00212 5.12852H8.99501C8.81178 5.12355 8.66618 4.97298 8.66759 4.78974C8.65481 3.51346 7.96447 2.3401 6.85509 1.70955C5.7457 1.07815 4.3849 1.08385 3.28127 1.72518C2.17758 2.3658 1.49718 3.54554 1.49576 4.82172C1.49434 9.51482 5.51921 12.2279 9.00212 14.5106L9.01846 14.5C12.5412 12.1938 16.5092 9.59507 16.5092 4.82107V4.82178C16.5056 3.8722 16.1271 2.96178 15.4559 2.28978C14.784 1.61862 13.8743 1.23935 12.9247 1.2365ZM2.74781 7.98432C2.80747 8.115 2.8721 8.24356 2.94099 8.36997C3.01201 8.49994 3.08445 8.62352 3.15902 8.74001H3.15831C3.25917 8.89626 3.46726 8.94172 3.62351 8.84086C3.77976 8.74072 3.82522 8.53263 3.72508 8.37637C3.65405 8.26487 3.58871 8.1555 3.53048 8.04895C3.46869 7.93603 3.41187 7.82168 3.3586 7.70592C3.28119 7.53688 3.08233 7.46303 2.91329 7.53972C2.74497 7.61714 2.6704 7.816 2.74781 7.98503L2.74781 7.98432ZM6.04744 1.90614C5.6135 1.88483 5.17813 1.92389 4.75482 2.02261C3.98992 2.19165 3.31448 2.63838 2.86064 3.27687C2.44444 3.89618 2.21575 4.62203 2.20297 5.36778C2.18592 5.87418 2.23848 6.38056 2.35993 6.87274C2.40538 7.0503 2.58578 7.15825 2.76406 7.11563C2.94304 7.07231 3.05384 6.89332 3.01264 6.71436C2.9061 6.28325 2.85923 5.83865 2.87414 5.39476C2.88267 4.77829 3.06945 4.17743 3.41107 3.66465C3.77187 3.16039 4.30738 2.80812 4.9132 2.67672C5.27613 2.59291 5.64971 2.55953 6.02187 2.57871C6.20794 2.58581 6.3642 2.44093 6.37131 2.25486C6.37841 2.06949 6.23351 1.91325 6.04744 1.90614Z"
+      fill={fill}
     />
   </Svg>
 );
 
-export const ChatIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+export const ChatIcon = ({
+  size = Size12,
+  color = COLORS.black,
+  fill = color,
+  ...props
+}) => (
+  <Svg
+    width={size}
+    height={size * (20 / 21)} // Maintain aspect ratio (21:20)
+    viewBox="0 0 21 20"
+    fill="none"
+    {...props}
+  >
     <Path
-      d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-      stroke={color}
-      strokeWidth="1.5"
-      strokeLinejoin="round"
+      d="M2.75 2H18.75V14H3.92L2.75 15.17V2ZM2.75 0C1.65 0 0.76 0.9 0.76 2L0.75 20L4.75 16H18.75C19.85 16 20.75 15.1 20.75 14V2C20.75 0.9 19.85 0 18.75 0H2.75ZM4.75 10H12.75V12H4.75V10ZM4.75 7H16.75V9H4.75V7ZM4.75 4H16.75V6H4.75V4Z"
+      fill={fill}
     />
   </Svg>
 );
 
 export const AccountIcon = ({
-  width = 24,
-  height = 24,
+  size = Size12,
   color = COLORS.black,
+  fill = color,
+  ...props
 }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+  <Svg
+    width={size}
+    height={size * (22 / 17)} // Maintain aspect ratio (17:22)
+    viewBox="0 0 17 22"
+    fill="none"
+    {...props}
+  >
     <Path
-      d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.418 0-8 2.239-8 5v3h16v-3c0-2.761-3.582-5-8-5z"
-      stroke={color}
-      strokeWidth="1.5"
-      strokeLinejoin="round"
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3.74984 5C3.74984 2.51472 5.76456 0.5 8.24984 0.5C10.7351 0.5 12.7498 2.51472 12.7498 5C12.7498 7.48528 10.7351 9.5 8.24984 9.5C5.76456 9.5 3.74984 7.48528 3.74984 5Z"
+      fill={fill}
+    />
+    <Path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M0.0010885 19.1053C0.0784287 14.6156 3.74183 11 8.24984 11C12.758 11 16.4214 14.6157 16.4986 19.1056C16.5037 19.4034 16.3322 19.676 16.0615 19.8002C13.6826 20.8918 11.0364 21.5 8.25016 21.5C5.4637 21.5 2.81728 20.8917 0.438164 19.7999C0.167494 19.6757 -0.00404083 19.4031 0.0010885 19.1053Z"
+      fill={fill}
     />
   </Svg>
 );
 
+export const UserProfileIcon = ({
+  size = lignHeight26,
+  color = 'black',
+  fill = color,
+  ...props
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 36 36" fill="none" {...props}>
+    <Path
+      d="M17.988 19.0314C19.0516 19.0314 20.1048 18.8219 21.0874 18.4149C22.07 18.0079 22.9629 17.4113 23.7149 16.6592C24.467 15.9071 25.0636 15.0143 25.4706 14.0316C25.8776 13.049 26.0871 11.9958 26.0871 10.9322C26.0871 9.86863 25.8776 8.81545 25.4706 7.83281C25.0636 6.85017 24.467 5.95733 23.7149 5.20525C22.9629 4.45318 22.07 3.8566 21.0874 3.44957C20.1048 3.04255 19.0516 2.83306 17.988 2.83306C15.8399 2.83306 13.7799 3.68636 12.261 5.20525C10.7421 6.72414 9.88881 8.78419 9.88881 10.9322C9.88881 13.0803 10.7421 15.1403 12.261 16.6592C13.7799 18.1781 15.8399 19.0314 17.988 19.0314ZM18.0006 0.0019537C20.3713 0.00118145 22.6764 0.780568 24.5602 2.21986C26.444 3.65915 27.8019 5.67836 28.4242 7.96594C29.0466 10.2535 28.8989 12.6823 28.0039 14.8776C27.1089 17.0729 25.5164 18.9127 23.472 20.1131C30.1097 22.1109 35.0952 27.7047 35.9897 34.652C36.0743 35.3125 35.583 35.9118 34.8918 35.9928C34.2025 36.0738 33.5726 35.6059 33.488 34.9454C32.5161 27.4041 25.9846 21.7257 18.0636 21.7257C10.0994 21.7257 3.48327 27.4149 2.51317 34.9454C2.42858 35.6059 1.79864 36.0738 1.10931 35.9928C0.418184 35.9118 -0.0731653 35.3125 0.011426 34.652C0.904134 27.7335 5.91662 22.1469 12.5651 20.1311C10.5146 18.9361 8.91479 17.0989 7.01311 14.9036C7.11143 12.7082 6.95809 10.2769 7.5768 7.98566C8.19551 5.6944 9.5518 3.67077 11.436 2.22766C13.3201 0.784545 15.6272 0.00232976 18.0006 0.0019537Z"
+      fill={fill}
+    />
+  </Svg>
+);
 export const LightBulbIcon = ({
   width = 20,
   height = 21,
@@ -384,7 +493,6 @@ export const TribeIcon = ({ size = 15, color = COLORS.violet }) => (
   </Svg>
 );
 
-
 export const KidsIcon = ({ size = lignHeight21, color = COLORS.violet }) => (
   <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <Path
@@ -394,40 +502,43 @@ export const KidsIcon = ({ size = lignHeight21, color = COLORS.violet }) => (
   </Svg>
 );
 
-
 export const HeightIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     {/* Main vertical bar */}
-    <Path 
-      d="M13.8917 18.7992H6.11172C5.78172 18.7992 5.51172 18.5292 5.51172 18.1992V1.79922C5.51172 1.46922 5.78172 1.19922 6.11172 1.19922H13.8937C14.2237 1.19922 14.4937 1.46922 14.4937 1.79922V18.1992C14.4937 18.5292 14.2237 18.7992 13.8937 18.7992H13.8917ZM6.11172 1.79922V18.1992H13.8937V1.79922H6.11172Z" 
+    <Path
+      d="M13.8917 18.7992H6.11172C5.78172 18.7992 5.51172 18.5292 5.51172 18.1992V1.79922C5.51172 1.46922 5.78172 1.19922 6.11172 1.19922H13.8937C14.2237 1.19922 14.4937 1.46922 14.4937 1.79922V18.1992C14.4937 18.5292 14.2237 18.7992 13.8937 18.7992H13.8917ZM6.11172 1.79922V18.1992H13.8937V1.79922H6.11172Z"
       fill="black"
     />
-    
+
     {/* Measurement ticks */}
-    <Path 
-      d="M8.48181 4.41641H5.80781C5.64181 4.41641 5.50781 4.28241 5.50781 4.11641C5.50781 3.95041 5.64181 3.81641 5.80781 3.81641H8.48181C8.64781 3.81641 8.78181 3.95041 8.78181 4.11641C8.78181 4.28241 8.64781 4.41641 8.48181 4.41641Z" 
+    <Path
+      d="M8.48181 4.41641H5.80781C5.64181 4.41641 5.50781 4.28241 5.50781 4.11641C5.50781 3.95041 5.64181 3.81641 5.80781 3.81641H8.48181C8.64781 3.81641 8.78181 3.95041 8.78181 4.11641C8.78181 4.28241 8.64781 4.41641 8.48181 4.41641Z"
       fill="black"
     />
-    <Path 
-      d="M8.48181 10.0609H5.80781C5.64181 10.0609 5.50781 9.92694 5.50781 9.76094C5.50781 9.59494 5.64181 9.46094 5.80781 9.46094H8.48181C8.64781 9.46094 8.78181 9.59494 8.78181 9.76094C8.78181 9.92694 8.64781 10.0609 8.48181 10.0609Z" 
+    <Path
+      d="M8.48181 10.0609H5.80781C5.64181 10.0609 5.50781 9.92694 5.50781 9.76094C5.50781 9.59494 5.64181 9.46094 5.80781 9.46094H8.48181C8.64781 9.46094 8.78181 9.59494 8.78181 9.76094C8.78181 9.92694 8.64781 10.0609 8.48181 10.0609Z"
       fill="black"
     />
-    <Path 
-      d="M8.48181 15.7094H5.80781C5.64181 15.7094 5.50781 15.5754 5.50781 15.4094C5.50781 15.2434 5.64181 15.1094 5.80781 15.1094H8.48181C8.64781 15.1094 8.78181 15.2434 8.78181 15.4094C8.78181 15.5754 8.64781 15.7094 8.48181 15.7094Z" 
+    <Path
+      d="M8.48181 15.7094H5.80781C5.64181 15.7094 5.50781 15.5754 5.50781 15.4094C5.50781 15.2434 5.64181 15.1094 5.80781 15.1094H8.48181C8.64781 15.1094 8.78181 15.2434 8.78181 15.4094C8.78181 15.5754 8.64781 15.7094 8.48181 15.7094Z"
       fill="black"
     />
-    <Path 
-      d="M9.75981 7.23672H5.80781C5.64181 7.23672 5.50781 7.10272 5.50781 6.93672C5.50781 6.77072 5.64181 6.63672 5.80781 6.63672H9.75981C9.92581 6.63672 10.0598 6.77072 10.0598 6.93672C10.0598 7.10272 9.92581 7.23672 9.75981 7.23672Z" 
+    <Path
+      d="M9.75981 7.23672H5.80781C5.64181 7.23672 5.50781 7.10272 5.50781 6.93672C5.50781 6.77072 5.64181 6.63672 5.80781 6.63672H9.75981C9.92581 6.63672 10.0598 6.77072 10.0598 6.93672C10.0598 7.10272 9.92581 7.23672 9.75981 7.23672Z"
       fill="black"
     />
-    <Path 
-      d="M9.76372 12.8852H5.81172C5.64572 12.8852 5.51172 12.7512 5.51172 12.5852C5.51172 12.4192 5.64572 12.2852 5.81172 12.2852H9.76372C9.92972 12.2852 10.0637 12.4192 10.0637 12.5852C10.0637 12.7512 9.92972 12.8852 9.76372 12.8852Z" 
+    <Path
+      d="M9.76372 12.8852H5.81172C5.64572 12.8852 5.51172 12.7512 5.51172 12.5852C5.51172 12.4192 5.64572 12.2852 5.81172 12.2852H9.76372C9.92972 12.2852 10.0637 12.4192 10.0637 12.5852C10.0637 12.7512 9.92972 12.8852 9.76372 12.8852Z"
       fill="black"
     />
   </Svg>
 );
 
-export const LanguageIcon = ({ width = 20, height = 20, color = COLORS.black }) => {
+export const LanguageIcon = ({
+  width = 20,
+  height = 20,
+  color = COLORS.black,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 20 20" fill="none">
       <Defs>
@@ -445,7 +556,11 @@ export const LanguageIcon = ({ width = 20, height = 20, color = COLORS.black }) 
   );
 };
 
-export const RupeesIcon = ({ width = 20, height = 20, color = COLORS.black }) => {
+export const RupeesIcon = ({
+  width = 20,
+  height = 20,
+  color = COLORS.black,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 20 20" fill="none">
       <Path
@@ -472,7 +587,11 @@ export const RupeesIcon = ({ width = 20, height = 20, color = COLORS.black }) =>
   );
 };
 
-export const PublicSectorIcon = ({ width = 29, height = 28, color = COLORS.violet }) => {
+export const PublicSectorIcon = ({
+  width = 29,
+  height = 28,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 29 28" fill="none">
       <Defs>
@@ -490,7 +609,11 @@ export const PublicSectorIcon = ({ width = 29, height = 28, color = COLORS.viole
   );
 };
 
-export const WorkIcon = ({ width = 28, height = 28, color = COLORS.violet }) => {
+export const WorkIcon = ({
+  width = 28,
+  height = 28,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 28 28" fill="none">
       <Path
@@ -522,7 +645,11 @@ export const InfinityIcon = ({ width = 24, height = 24, color = 'white' }) => {
   );
 };
 
-export const FilledHeartIcon = ({ width = 24, height = 24, color = 'white' }) => {
+export const FilledHeartIcon = ({
+  width = 24,
+  height = 24,
+  color = 'white',
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
       <Path
@@ -533,7 +660,11 @@ export const FilledHeartIcon = ({ width = 24, height = 24, color = 'white' }) =>
   );
 };
 
-export const RightArrowIcon2 = ({ width = 8, height = 14, color = 'black' }) => (
+export const RightArrowIcon2 = ({
+  width = 8,
+  height = 14,
+  color = 'black',
+}) => (
   <Svg width={8} height={14} viewBox="0 0 8 14" fill="none">
     <Path
       d="M0.716111 13.9886C0.59737 13.9886 0.475854 13.9416 0.384731 13.8505C0.202485 13.6683 0.202485 13.37 0.384731 13.1878L6.62259 6.94714L0.475855 0.800405C0.293609 0.618146 0.293609 0.319907 0.475855 0.137661C0.658101 -0.044585 0.956325 -0.044585 1.13857 0.137661L7.61667 6.61576C7.79892 6.79801 7.79892 7.09624 7.61667 7.27848L1.04745 13.8505C0.956325 13.9416 0.834837 13.9885 0.716097 13.9885L0.716111 13.9886Z"
@@ -542,7 +673,11 @@ export const RightArrowIcon2 = ({ width = 8, height = 14, color = 'black' }) => 
   </Svg>
 );
 
-export const EatingIcon = ({ width = lignHeight21, height = lignHeight21, color = COLORS.violet }) => {
+export const EatingIcon = ({
+  width = lignHeight21,
+  height = lignHeight21,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 19 17" fill="none">
       <Path
@@ -573,7 +708,11 @@ export const EatingIcon = ({ width = lignHeight21, height = lignHeight21, color 
   );
 };
 
-export const DrinkingIcon = ({ width = lignHeight26, height = lignHeight26, color = COLORS.violet }) => {
+export const DrinkingIcon = ({
+  width = lignHeight26,
+  height = lignHeight26,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 20 20" fill="none">
       <Path
@@ -648,7 +787,11 @@ export const DrinkingIcon = ({ width = lignHeight26, height = lignHeight26, colo
   );
 };
 
-export const CigrateIcon = ({ width = lignHeight21, height = lignHeight21, color = COLORS.violet }) => {
+export const CigrateIcon = ({
+  width = lignHeight21,
+  height = lignHeight21,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 19 12" fill="none">
       <Path
@@ -667,7 +810,11 @@ export const CigrateIcon = ({ width = lignHeight21, height = lignHeight21, color
   );
 };
 
-export const HomeWorkOutlineIcon = ({ width = lignHeight32, height = lignHeight32, color = COLORS.violet }) => {
+export const HomeWorkOutlineIcon = ({
+  width = lignHeight32,
+  height = lignHeight32,
+  color = COLORS.violet,
+}) => {
   return (
     <Svg width={width} height={height} viewBox="0 0 29 29" fill="none">
       <Path
@@ -679,7 +826,11 @@ export const HomeWorkOutlineIcon = ({ width = lignHeight32, height = lignHeight3
 };
 
 // Account Screen Icons
-export const EditIcon = ({ width = 24, height = 24, color = COLORS.violet }) => (
+export const EditIcon = ({
+  width = 24,
+  height = 24,
+  color = COLORS.violet,
+}) => (
   <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
     <Path
       d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
@@ -698,7 +849,11 @@ export const EditIcon = ({ width = 24, height = 24, color = COLORS.violet }) => 
   </Svg>
 );
 
-export const CrownIcon = ({ width = 24, height = 24, color = '#FFD600' }) => (
+export const CrownIcon = ({
+  width = 24,
+  height = 24,
+  color = COLORS.white,
+}) => (
   <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
     <Path
       d="M5 16L3 8l5.5 3L12 7l3.5 4L21 8l-2 8H5z"
@@ -711,22 +866,25 @@ export const CrownIcon = ({ width = 24, height = 24, color = '#FFD600' }) => (
   </Svg>
 );
 
-export const SelfieVerifiedIcon = ({ width = 24, height = 24, color = COLORS.primaryBlue }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+export const SelfieVerifiedIcon = ({
+  size = lignHeight20,
+  color = 'white',
+  fill = color,
+  ...props
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 20 20" fill="none" {...props}>
     <Path
-      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2v11z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      d="M17.166 3.58333V6.20833C17.166 6.36304 17.1046 6.51142 16.9952 6.62081C16.8858 6.73021 16.7374 6.79167 16.5827 6.79167C16.428 6.79167 16.2796 6.73021 16.1702 6.62081C16.0608 6.51142 15.9993 6.36304 15.9993 6.20833V4.16667H13.9577C13.803 4.16667 13.6546 4.10521 13.5452 3.99581C13.4358 3.88642 13.3743 3.73804 13.3743 3.58333C13.3743 3.42862 13.4358 3.28025 13.5452 3.17085C13.6546 3.06146 13.803 3 13.9577 3H16.5827C16.7374 3 16.8858 3.06146 16.9952 3.17085C17.1046 3.28025 17.166 3.42862 17.166 3.58333ZM16.5827 13.2083C16.428 13.2083 16.2796 13.2698 16.1702 13.3792C16.0608 13.4886 15.9993 13.637 15.9993 13.7917V15.8333H13.9577C13.803 15.8333 13.6546 15.8948 13.5452 16.0042C13.4358 16.1136 13.3743 16.262 13.3743 16.4167C13.3743 16.5714 13.4358 16.7197 13.5452 16.8291C13.6546 16.9385 13.803 17 13.9577 17H16.5827C16.7374 17 16.8858 16.9385 16.9952 16.8291C17.1046 16.7197 17.166 16.5714 17.166 16.4167V13.7917C17.166 13.637 17.1046 13.4886 16.9952 13.3792C16.8858 13.2698 16.7374 13.2083 16.5827 13.2083ZM6.37435 15.8333H4.33268V13.7917C4.33268 13.637 4.27122 13.4886 4.16183 13.3792C4.05243 13.2698 3.90406 13.2083 3.74935 13.2083C3.59464 13.2083 3.44627 13.2698 3.33687 13.3792C3.22747 13.4886 3.16602 13.637 3.16602 13.7917V16.4167C3.16602 16.5714 3.22747 16.7197 3.33687 16.8291C3.44627 16.9385 3.59464 17 3.74935 17H6.37435C6.52906 17 6.67743 16.9385 6.78683 16.8291C6.89622 16.7197 6.95768 16.5714 6.95768 16.4167C6.95768 16.262 6.89622 16.1136 6.78683 16.0042C6.67743 15.8948 6.52906 15.8333 6.37435 15.8333ZM3.74935 6.79167C3.90406 6.79167 4.05243 6.73021 4.16183 6.62081C4.27122 6.51142 4.33268 6.36304 4.33268 6.20833V4.16667H6.37435C6.52906 4.16667 6.67743 4.10521 6.78683 3.99581C6.89622 3.88642 6.95768 3.73804 6.95768 3.58333C6.95768 3.42862 6.89622 3.28025 6.78683 3.17085C6.67743 3.06146 6.52906 3 6.37435 3H3.74935C3.59464 3 3.44627 3.06146 3.33687 3.17085C3.22747 3.28025 3.16602 3.42862 3.16602 3.58333V6.20833C3.16602 6.36304 3.22747 6.51142 3.33687 6.62081C3.44627 6.73021 3.59464 6.79167 3.74935 6.79167ZM8.19727 10.9851C7.40487 11.3289 6.71612 11.8738 6.19935 12.5659C6.13414 12.6526 6.09438 12.7557 6.08454 12.8637C6.0747 12.9717 6.09516 13.0804 6.14364 13.1774C6.19211 13.2744 6.26667 13.356 6.35895 13.413C6.45122 13.47 6.55756 13.5001 6.66602 13.5H13.666C13.7745 13.5001 13.8808 13.47 13.9731 13.413C14.0654 13.356 14.1399 13.2744 14.1884 13.1774C14.2369 13.0804 14.2573 12.9717 14.2475 12.8637C14.2376 12.7557 14.1979 12.6526 14.1327 12.5659C13.6159 11.8738 12.9272 11.3289 12.1348 10.9851C12.5691 10.5885 12.8734 10.0699 13.0078 9.49731C13.1421 8.9247 13.1002 8.32485 12.8875 7.77649C12.6748 7.22813 12.3014 6.75688 11.8161 6.42458C11.3308 6.09229 10.7564 5.91447 10.1682 5.91447C9.58005 5.91447 9.00563 6.09229 8.52034 6.42458C8.03505 6.75688 7.66156 7.22813 7.44889 7.77649C7.23622 8.32485 7.1943 8.9247 7.32863 9.49731C7.46297 10.0699 7.76728 10.5885 8.20164 10.9851H8.19727Z"
+      fill={fill}
     />
-    <Circle cx="12" cy="13" r="4" stroke={color} strokeWidth="2" />
-    <Path d="M16 6h.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M10 15l1.5 1.5L15 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
 
-export const GovtIdIcon = ({ width = 24, height = 24, color = COLORS.grey }) => (
+export const GovtIdIcon = ({
+  width = lignHeight21,
+  height = lignHeight21,
+  color = COLORS.white,
+}) => (
   <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
     <Path
       d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
@@ -742,11 +900,17 @@ export const GovtIdIcon = ({ width = 24, height = 24, color = COLORS.grey }) => 
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <Path d="M12 11l2 2-2 2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Path
+      d="M12 11l2 2-2 2"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </Svg>
 );
 
-export const GiftIcon = ({ width = 24, color = COLORS.black }) => (
+export const GiftIcon = ({ width = lignHeight21, color = COLORS.black }) => (
   <Svg width={width} height={width} viewBox="0 0 24 24" fill="none">
     <Path
       d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"
@@ -758,36 +922,11 @@ export const GiftIcon = ({ width = 24, color = COLORS.black }) => (
   </Svg>
 );
 
-export const SlidersIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
 export const InfoIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
   <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
-    <Path d="M12 16v-4M12 8h.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-);
-
-export const HeadphonesIcon = ({ width = 24, height = 24, color = COLORS.black }) => (
-  <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
     <Path
-      d="M3 18v-6a9 9 0 0 1 18 0v6"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+      d="M12 16v-4M12 8h.01"
       stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
@@ -796,6 +935,21 @@ export const HeadphonesIcon = ({ width = 24, height = 24, color = COLORS.black }
   </Svg>
 );
 
+export const HeadphonesIcon = ({
+  size = lignHeight26,
+  color = 'black',
+  fill = color,
+  ...props
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 20 20" fill="none" {...props}>
+    <Path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M10 1.75C6.759 1.75 4.244 3.78 3.815 6.25H6C6.19891 6.25 6.38968 6.32902 6.53033 6.46967C6.67098 6.61032 6.75 6.80109 6.75 7V14C6.75 14.1989 6.67098 14.3897 6.53033 14.5303C6.38968 14.671 6.19891 14.75 6 14.75H3C2.27065 14.75 1.57118 14.4603 1.05546 13.9445C0.539731 13.4288 0.25 12.7293 0.25 12V9C0.249873 8.39511 0.449189 7.80705 0.81708 7.32689C1.18497 6.84674 1.70091 6.50127 2.285 6.344C2.667 2.84 6.074 0.25 10 0.25C13.926 0.25 17.333 2.84 17.715 6.344C18.2991 6.50127 18.815 6.84674 19.1829 7.32689C19.5508 7.80705 19.7501 8.39511 19.75 9V12C19.7502 12.6067 19.5497 13.1965 19.1799 13.6774C18.81 14.1583 18.2914 14.5035 17.705 14.659C17.546 15.7937 16.9823 16.8327 16.1177 17.5845C15.253 18.3363 14.1458 18.7502 13 18.75H11.855C11.6809 19.1803 11.3627 19.5366 10.9547 19.7579C10.5467 19.9793 10.0745 20.0518 9.61892 19.9632C9.16333 19.8745 8.75276 19.6302 8.45757 19.272C8.16238 18.9138 8.00095 18.4641 8.00095 18C8.00095 17.5359 8.16238 17.0862 8.45757 16.728C8.75276 16.3698 9.16333 16.1255 9.61892 16.0368C10.0745 15.9482 10.5467 16.0207 10.9547 16.2421C11.3627 16.4634 11.6809 16.8197 11.855 17.25H13C13.7317 17.2502 14.442 17.0034 15.016 16.5497C15.59 16.096 15.9942 15.4619 16.163 14.75H14C13.8011 14.75 13.6103 14.671 13.4697 14.5303C13.329 14.3897 13.25 14.1989 13.25 14V7C13.25 6.80109 13.329 6.61032 13.4697 6.46967C13.6103 6.32902 13.8011 6.25 14 6.25H16.185C15.756 3.78 13.241 1.75 10 1.75ZM3 7.75C2.31 7.75 1.75 8.31 1.75 9V12C1.75 12.69 2.31 13.25 3 13.25H5.25V7.75H3ZM18.25 9C18.25 8.31 17.69 7.75 17 7.75H14.75V13.25H17C17.69 13.25 18.25 12.69 18.25 12V9Z"
+      fill={fill}
+    />
+  </Svg>
+);
 
 export const SettingsIcon = ({ size = 24, color = COLORS.black }) => (
   <Svg width={size} height={size} viewBox="0 0 25 24" fill="none">
@@ -806,8 +960,88 @@ export const SettingsIcon = ({ size = 24, color = COLORS.black }) => (
   </Svg>
 );
 
+export const RocketIcon = ({
+  size = lignHeight26,
+  color = COLORS.black,
+  strokeWidth = 2,
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M4.5 16.5002C3 17.7602 2.5 21.5002 2.5 21.5002C2.5 21.5002 6.24 21.0002 7.5 19.5002C8.21 18.6602 8.2 17.3702 7.41 16.5902C7.02131 16.2193 6.50929 16.0049 5.97223 15.9883C5.43516 15.9717 4.91088 16.154 4.5 16.5002ZM12 15.0002L9 12.0002C9.53214 10.6197 10.2022 9.29631 11 8.05025C12.1652 6.18723 13.7876 4.6533 15.713 3.59434C17.6384 2.53538 19.8027 1.98662 22 2.00025C22 4.72025 21.22 9.50025 16 13.0002C14.7367 13.7987 13.3967 14.4687 12 15.0002Z"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M9 12.0005H4C4 12.0005 4.55 8.97051 6 8.00051C7.62 6.92051 11 8.00051 11 8.00051M12 15.0005V20.0005C12 20.0005 15.03 19.4505 16 18.0005C17.08 16.3805 16 13.0005 16 13.0005"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
 
+export const SlidersIcon = ({
+  size = lignHeight26,
+  color = 'black',
+  fill = color,
+  ...props
+}) => (
+  <Svg
+    width={size}
+    height={size * (25 / 36)} // Maintain aspect ratio (36:25)
+    viewBox="0 0 36 25"
+    fill="none"
+    {...props}
+  >
+    <Path
+      d="M5.95724 24.75V22.9167H9.62391V13.1157L0.878906 0H20.2004L11.4554 13.1157V22.9167H15.1221V24.75H5.95724ZM6.69057 5.5H14.3906L16.8857 1.83333H4.19357L6.69057 5.5ZM25.2109 24.75C23.9398 24.75 22.8575 24.3051 21.9641 23.4153C21.0706 22.5243 20.6239 21.4427 20.6239 20.1703C20.6239 18.898 21.0694 17.8157 21.9604 16.9235C22.8514 16.0313 23.9331 15.5846 25.2054 15.5833C25.6931 15.5833 26.1575 15.6652 26.5987 15.829C27.0412 15.9916 27.4934 16.2666 27.9554 16.654V0H35.2887V3.245H29.7887V20.1667C29.7887 21.4402 29.3439 22.5219 28.4541 23.4117C27.5643 24.3039 26.4832 24.75 25.2109 24.75Z"
+      fill={fill}
+    />
+  </Svg>
+);
 
+export const EducationIcon = ({ 
+  size = lignHeight38, 
+  color = 'black', 
+  strokeWidth = 2.75,
+  ...props 
+}) => (
+  <Svg 
+    width={size} 
+    height={size * (31/38)} // Maintain aspect ratio (38:31)
+    viewBox="0 0 38 31" 
+    fill="none"
+    {...props}
+  >
+    <Path
+      d="M32.375 11.5V26.625C32.375 26.625 24.3285 29.375 20 29.375C15.6715 29.375 7.625 26.625 7.625 26.625V11.5M36.5 8.75L20 1.875L3.5 8.75L20 17L36.5 8.75ZM36.5 8.75V21.125"
+      stroke={color}
+      strokeWidth={strokeWidth}
+    />
+  </Svg>
+);
 
-
-
+export const PersonalityIcon = ({ 
+  size = lignHeight21, 
+  color = COLORS.black, 
+  fill = color,
+  ...props 
+}) => (
+  <Svg 
+    width={size} 
+    height={size * (28/33)} // Maintain aspect ratio (33:28)
+    viewBox="0 0 33 28" 
+    fill="none"
+    {...props}
+  >
+    <Path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M25.3393 10.3661C26.2557 10.3661 27.1346 10.002 27.7826 9.35402C28.4306 8.70602 28.7946 7.82713 28.7946 6.91072C28.7946 5.9943 28.4306 5.11542 27.7826 4.46741C27.1346 3.8194 26.2557 3.45536 25.3393 3.45536C24.4229 3.45536 23.544 3.8194 22.896 4.46741C22.248 5.11542 21.8839 5.9943 21.8839 6.91072C21.8839 7.82713 22.248 8.70602 22.896 9.35402C23.544 10.002 24.4229 10.3661 25.3393 10.3661ZM25.3393 13.8214C26.6318 13.8213 27.8984 13.4587 28.9951 12.7749C30.0919 12.091 30.9749 11.1133 31.5439 9.9527C32.1128 8.79215 32.3449 7.4953 32.2137 6.20946C32.0826 4.92362 31.5934 3.70033 30.8019 2.67855C30.0104 1.65676 28.9481 0.877435 27.7359 0.42909C26.5236 -0.0192556 25.2099 -0.118649 23.944 0.142199C22.6781 0.403047 21.5107 1.01368 20.5744 1.90474C19.6382 2.7958 18.9705 3.93157 18.6474 5.18304H1.72768C1.26947 5.18304 0.830028 5.36506 0.506026 5.68906C0.182023 6.01307 3.98309e-07 6.45251 3.98309e-07 6.91072C3.98309e-07 7.36893 0.182023 7.80837 0.506026 8.13237C0.830028 8.45637 1.26947 8.63839 1.72768 8.63839H18.6474C19.0305 10.1219 19.8957 11.4361 21.107 12.3743C22.3183 13.3125 23.8071 13.8216 25.3393 13.8214ZM10.3661 20.7321C10.3661 21.6486 10.002 22.5274 9.35402 23.1755C8.70602 23.8235 7.82713 24.1875 6.91072 24.1875C5.9943 24.1875 5.11541 23.8235 4.46741 23.1755C3.8194 22.5274 3.45536 21.6486 3.45536 20.7321C3.45536 19.8157 3.8194 18.9368 4.46741 18.2888C5.11541 17.6408 5.9943 17.2768 6.91072 17.2768C7.82713 17.2768 8.70602 17.6408 9.35402 18.2888C10.002 18.9368 10.3661 19.8157 10.3661 20.7321ZM13.6026 22.4598C13.179 24.0854 12.1779 25.5011 10.7865 26.4424C9.39503 27.3837 7.70847 27.7861 6.04197 27.5744C4.37546 27.3627 2.84305 26.5515 1.73111 25.2923C0.619177 24.0331 0.00380469 22.412 3.98309e-07 20.7321C-0.000570522 19.0497 0.612628 17.4249 1.7246 16.1623C2.83658 14.8997 4.37095 14.0861 6.03997 13.8742C7.709 13.6622 9.39803 14.0663 10.7903 15.0108C12.1826 15.9553 13.1826 17.3753 13.6026 19.0045H30.5223C30.9805 19.0045 31.42 19.1865 31.744 19.5105C32.068 19.8345 32.25 20.2739 32.25 20.7321C32.25 21.1904 32.068 21.6298 31.744 21.9538C31.42 22.2778 30.9805 22.4598 30.5223 22.4598H13.6026Z"
+      fill={fill}
+    />
+  </Svg>
+);

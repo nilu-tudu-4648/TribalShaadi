@@ -3,14 +3,13 @@ import { StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
-import AppHeader from '../components/AppHeader';
 import AppTextInput from '../components/AppTextInput';
 import AppDropdown from '../components/AppDropdown';
 import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
 import AppScrollView from '../components/AppScrollView';
 import { COLORS } from '../constants/AppColors';
-import { Size16, Size20, Size25, compPadding } from '../constants/Sizes';
+import { Size20, Size25, Size8, fontSize24 } from '../constants/Sizes';
 import { MOTHER_TONGUE } from '../constants/data';
 import {
   getCommunity,
@@ -28,14 +27,42 @@ import {
   setReducerLoadingfalse,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
+import { UserProfileIcon } from '../components/svg/SvgIcons';
+import ProfileHeader from '../components/Header/ProfileHeader';
 
 const EditPersonalScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  
-  const { user, loader, community, maritalStatuses } = useSelector(
+
+  // Religion and tribe selection states
+  const [selectedReligion, setSelectedReligion] = useState('');
+  const [selectedReligionId, setSelectedReligionId] = useState<number | null>(
+    null,
+  );
+  const [selectedTribe, setSelectedTribe] = useState('');
+  const [selectedTribeId, setSelectedTribeId] = useState<number | null>(null);
+  const [selectedMotherTongue, setSelectedMotherTongue] = useState('');
+  const [showReligionPicker, setShowReligionPicker] = useState(false);
+  const [showTribePicker, setShowTribePicker] = useState(false);
+  const [showMotherTonguePicker, setShowMotherTonguePicker] = useState(false);
+
+  const { user, loader, community, maritalStatuses, religion } = useSelector(
     (state: any) => state.entities.authReducer,
   );
+
+  // Load religions on component mount
+  useEffect(() => {
+    dispatch(getReligion(getReligionUrl));
+  }, [dispatch]);
+
+  // Load communities when religion is selected
+  useEffect(() => {
+    if (selectedReligionId) {
+      dispatch(
+        getCommunity(`${getCommunityUrl}religionId=${selectedReligionId}`),
+      );
+    }
+  }, [dispatch, selectedReligionId]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -51,6 +78,8 @@ const EditPersonalScreen = () => {
     motherTongue: '',
     maritalStatusId: '',
     maritalStatusName: '',
+    religionId: '',
+    religionName: '',
   });
 
   // Picker modal states
@@ -65,9 +94,10 @@ const EditPersonalScreen = () => {
   // Initialize form data from user profile
   useEffect(() => {
     if (user) {
-    //   const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-      const birthDate = user.birthDate ? new Date(user.birthDate).toLocaleDateString() : '';
-      
+      const birthDate = user.birthDate
+        ? new Date(user.birthDate).toLocaleDateString()
+        : '';
+
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -81,7 +111,26 @@ const EditPersonalScreen = () => {
         motherTongue: user.motherTongue || '',
         maritalStatusId: user.maritalStatusId || '',
         maritalStatusName: user.maritalStatus || '',
+        religionId: user.religionId || '',
+        religionName: user.religion || '',
       });
+
+      // Set religion states if user has religion data
+      if (user.religion) {
+        setSelectedReligion(user.religion);
+        setSelectedReligionId(user.religionId);
+      }
+
+      // Set tribe states if user has community data
+      if (user.community) {
+        setSelectedTribe(user.community);
+        setSelectedTribeId(user.communityId);
+      }
+
+      // Set mother tongue if user has it
+      if (user.motherTongue) {
+        setSelectedMotherTongue(user.motherTongue);
+      }
     }
   }, [user]);
 
@@ -92,48 +141,90 @@ const EditPersonalScreen = () => {
     dispatch(getReligion(getReligionUrl));
   }, [dispatch]);
 
-  // Handle name input change
-  const handleNameChange = useCallback((text: string) => {
-    // Remove any numbers and special characters, keep only letters and spaces
-    const filteredText = text.replace(/[^a-zA-Z\s]/g, '');
-    const nameParts = filteredText.trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-    
+  // Handle religion selection
+  const handleReligionSelection = useCallback((religionItem: any) => {
+    setSelectedReligion(religionItem.name);
+    setSelectedReligionId(religionItem.id);
+    setSelectedTribe('');
+    setSelectedTribeId(null);
     setFormData(prev => ({
       ...prev,
-      firstName,
-      lastName,
+      religionId: religionItem.id,
+      religionName: religionItem.name,
+      communityId: '',
+      communityName: '',
+      subCommunityId: '',
+      subCommunityName: '',
     }));
+    setShowReligionPicker(false);
+  }, []);
+
+  // Handle tribe selection
+  const handleTribeSelection = useCallback(
+    (tribeItem: any) => {
+      setSelectedTribe(tribeItem.name);
+      setSelectedTribeId(tribeItem.id);
+      setFormData(prev => ({
+        ...prev,
+        communityId: tribeItem.id,
+        communityName: tribeItem.name,
+        subCommunityId: '',
+        subCommunityName: '',
+      }));
+
+      // Filter sub-communities based on selected tribe
+      const filteredSubCommunities = community.filter(
+        (item: any) => item.parentId === tribeItem.id,
+      );
+      setSubCommunityOptions(filteredSubCommunities);
+      setShowTribePicker(false);
+    },
+    [community],
+  );
+
+  // Handle mother tongue selection
+  const handleMotherTongueSelection = useCallback((motherTongueItem: any) => {
+    setSelectedMotherTongue(motherTongueItem.label || motherTongueItem.name);
+    setFormData(prev => ({
+      ...prev,
+      motherTongue: motherTongueItem.label || motherTongueItem.name,
+    }));
+    setShowMotherTonguePicker(false);
   }, []);
 
   // Handle community selection
-  const handleCommunitySelection = useCallback((selectedCommunity: any) => {
-    setFormData(prev => ({
-      ...prev,
-      communityId: selectedCommunity.id,
-      communityName: selectedCommunity.name,
-      subCommunityId: '', // Reset sub-community when main community changes
-      subCommunityName: '',
-    }));
-    
-    // Filter sub-communities based on selected community
-    const filteredSubCommunities = community.filter(
-      (item: any) => item.parentId === selectedCommunity.id
-    );
-    setSubCommunityOptions(filteredSubCommunities);
-    setShowCommunityPicker(false);
-  }, [community]);
+  const handleCommunitySelection = useCallback(
+    (selectedCommunity: any) => {
+      setFormData(prev => ({
+        ...prev,
+        communityId: selectedCommunity.id,
+        communityName: selectedCommunity.name,
+        subCommunityId: '', // Reset sub-community when main community changes
+        subCommunityName: '',
+      }));
+
+      // Filter sub-communities based on selected community
+      const filteredSubCommunities = community.filter(
+        (item: any) => item.parentId === selectedCommunity.id,
+      );
+      setSubCommunityOptions(filteredSubCommunities);
+      setShowCommunityPicker(false);
+    },
+    [community],
+  );
 
   // Handle sub-community selection
-  const handleSubCommunitySelection = useCallback((selectedSubCommunity: any) => {
-    setFormData(prev => ({
-      ...prev,
-      subCommunityId: selectedSubCommunity.id,
-      subCommunityName: selectedSubCommunity.name,
-    }));
-    setShowSubCommunityPicker(false);
-  }, []);
+  const handleSubCommunitySelection = useCallback(
+    (selectedSubCommunity: any) => {
+      setFormData(prev => ({
+        ...prev,
+        subCommunityId: selectedSubCommunity.id,
+        subCommunityName: selectedSubCommunity.name,
+      }));
+      setShowSubCommunityPicker(false);
+    },
+    [],
+  );
 
   // Handle language selection
   const handleLanguageSelection = useCallback((selectedLanguage: any) => {
@@ -157,57 +248,48 @@ const EditPersonalScreen = () => {
   // Handle form submission
   const handleSave = useCallback(async () => {
     // Validate required fields
-    if (!formData.firstName.trim()) {
-      AppToast('Please enter your name');
-      return;
-    }
-    
-    if (!formData.communityId) {
-      AppToast('Please select your community');
-      return;
-    }
-    
-    if (!formData.motherTongue) {
-      AppToast('Please select your mother tongue');
-      return;
-    }
-    
-    if (!formData.maritalStatusId) {
-      AppToast('Please select your marital status');
-      return;
-    }
-
     try {
       const requestBody = {
         id: user.id,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        communityId: formData.communityId,
-        ...(formData.subCommunityId && { subCommunityId: formData.subCommunityId }),
-        motherTongue: formData.motherTongue,
+        religionId: selectedReligionId,
+        communityId: selectedTribeId,
+        ...(formData.subCommunityId && {
+          subCommunityId: formData.subCommunityId,
+        }),
+        motherTongue: selectedMotherTongue,
         maritalStatusId: formData.maritalStatusId,
       };
-
+      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      
+
       AppToast('Profile updated successfully');
       navigation.goBack();
     } catch (error) {
       console.error('Error updating profile:', error);
       AppToast('Error updating profile. Please try again.');
     }
-  }, [formData, user, dispatch, navigation]);
+  }, [
+    formData,
+    selectedMotherTongue,
+    selectedReligionId,
+    selectedTribeId,
+    user,
+    dispatch,
+    navigation,
+  ]);
 
   const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Personal Details" />
-      
-      <AppScrollView 
+      <ProfileHeader
+        onBackPress={() => navigation.goBack()}
+        title="Personal Details"
+        icon={<UserProfileIcon />}
+      />
+      <AppScrollView
         style={styles.scrollView}
         otherProps={{ contentContainerStyle: styles.scrollContent }}
       >
@@ -216,9 +298,10 @@ const EditPersonalScreen = () => {
           <AppTextInput
             placeholder="Enter your full name"
             value={fullName}
-            onChangeText={handleNameChange}
+            onChangeText={() => {}}
             keyboardType="default"
             style={styles.inputField}
+            editable={false}
           />
         </View>
 
@@ -258,24 +341,24 @@ const EditPersonalScreen = () => {
           />
         </View>
 
-        {/* Community Dropdown */}
+        {/* Religion Dropdown */}
         <View style={styles.fieldContainer}>
           <AppDropdown
             label=""
-            selectedValue={formData.communityName}
-            placeholder="Select Community"
-            onPress={() => setShowCommunityPicker(true)}
+            selectedValue={selectedReligion}
+            placeholder="Select Religion"
+            onPress={() => setShowReligionPicker(true)}
           />
         </View>
 
-        {/* Sub-Community Dropdown */}
+        {/* Tribe Dropdown */}
         <View style={styles.fieldContainer}>
           <AppDropdown
             label=""
-            selectedValue={formData.subCommunityName}
-            placeholder="Select Sub-Community"
-            onPress={() => setShowSubCommunityPicker(true)}
-            disabled={!formData.communityId}
+            selectedValue={selectedTribe}
+            placeholder="Select Tribe"
+            onPress={() => setShowTribePicker(true)}
+            disabled={!selectedReligionId}
           />
         </View>
 
@@ -283,9 +366,9 @@ const EditPersonalScreen = () => {
         <View style={styles.fieldContainer}>
           <AppDropdown
             label=""
-            selectedValue={formData.motherTongue}
-            placeholder="Select Language"
-            onPress={() => setShowLanguagePicker(true)}
+            selectedValue={selectedMotherTongue}
+            placeholder="Select Mother Tongue"
+            onPress={() => setShowMotherTonguePicker(true)}
           />
         </View>
 
@@ -313,6 +396,26 @@ const EditPersonalScreen = () => {
 
       {/* Picker Modals */}
       <AppPickerModal
+        visible={showReligionPicker}
+        items={religion || []}
+        selectedValue={selectedReligion}
+        onSelect={handleReligionSelection}
+        onClose={() => setShowReligionPicker(false)}
+        title="Select Religion"
+        isObjects={true}
+      />
+
+      <AppPickerModal
+        visible={showTribePicker}
+        items={community || []}
+        selectedValue={selectedTribe}
+        onSelect={handleTribeSelection}
+        onClose={() => setShowTribePicker(false)}
+        title="Select Tribe"
+        isObjects={true}
+      />
+
+      <AppPickerModal
         visible={showCommunityPicker}
         items={community}
         selectedValue={formData.communityName}
@@ -329,6 +432,16 @@ const EditPersonalScreen = () => {
         onSelect={handleSubCommunitySelection}
         onClose={() => setShowSubCommunityPicker(false)}
         title="Select Sub-Community"
+        isObjects={true}
+      />
+
+      <AppPickerModal
+        visible={showMotherTonguePicker}
+        items={MOTHER_TONGUE}
+        selectedValue={selectedMotherTongue}
+        onSelect={handleMotherTongueSelection}
+        onClose={() => setShowMotherTonguePicker(false)}
+        title="Select Mother Tongue"
         isObjects={true}
       />
 
@@ -363,24 +476,23 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  title: {
+    fontSize: fontSize24,
+    fontWeight: '800',
+    fontStyle: 'italic',
+  },
   scrollContent: {
-    padding: compPadding,
+    padding: Size8,
     paddingBottom: Size25,
+    gap: Size20,
   },
-  fieldContainer: {
-    marginBottom: Size20,
-  },
-  inputField: {
-    marginBottom: 0,
-  },
+  fieldContainer: {},
+  inputField: {},
   buttonContainer: {
-    padding: compPadding,
-    paddingTop: Size16,
+    padding: Size8,
   },
   saveButton: {
     backgroundColor: COLORS.violet,
-    borderRadius: Size16,
-    paddingVertical: Size16,
   },
   saveButtonText: {
     color: COLORS.white,
