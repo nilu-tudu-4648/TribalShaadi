@@ -2,7 +2,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { BackIcon } from '../svg/SvgIcons';
 import AppText from '../AppText';
-import { fontSize24, Size18 } from '../../constants/Sizes';
+import { fontSize24, Size18, Size8 } from '../../constants/Sizes';
 
 const ProfileHeader = ({
   onBackPress,
@@ -28,6 +28,7 @@ export default ProfileHeader;
 
 const styles = StyleSheet.create({
   container: {
+    padding: Size8,
     gap: Size18,
   },
   title: {

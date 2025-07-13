@@ -3,45 +3,32 @@ import { StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
-import AppHeader from '../components/AppHeader';
 import AppDropdown from '../components/AppDropdown';
 import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
-import AppScrollView from '../components/AppScrollView';
 import AppTextInput from '../components/AppTextInput';
 import { COLORS } from '../constants/AppColors';
-import { Size16, Size20, Size25, compPadding } from '../constants/Sizes';
-import {
+import { Size20, Size25, Size4, Size8, borderWidth } from '../constants/Sizes';
+import { 
   completeUserProfileV2Updated,
+  getEducationTypes,
+  getOccupation,
+  getIncome 
 } from '../store/reducers/authReducer';
 import {
   updateUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
+  getEducationTypeUrl,
+  getOccupationUrl,
+  getIncomeUrl,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
+import ProfileHeader from '../components/Header/ProfileHeader';
+import { EducationIcon } from '../components/svg/SvgIcons';
 
-// Education levels
-const EDUCATION_LEVELS = [
-  { id: '1', name: 'B.E / B.TECH' },
-  { id: '2', name: 'M.E / M.TECH' },
-  { id: '3', name: 'B.SC' },
-  { id: '4', name: 'M.SC' },
-  { id: '5', name: 'BCA' },
-  { id: '6', name: 'MCA' },
-  { id: '7', name: 'MBA' },
-  { id: '8', name: 'B.COM' },
-  { id: '9', name: 'M.COM' },
-  { id: '10', name: 'BA' },
-  { id: '11', name: 'MA' },
-  { id: '12', name: 'PhD' },
-  { id: '13', name: 'Diploma' },
-  { id: '14', name: '12th Pass' },
-  { id: '15', name: 'Graduate' },
-];
-
-// Company types
+// Company types - keeping as hardcoded since no specific API exists
 const COMPANY_TYPES = [
   { id: '1', name: 'Private Company' },
   { id: '2', name: 'Government' },
@@ -52,44 +39,23 @@ const COMPANY_TYPES = [
   { id: '7', name: 'Not Working' },
 ];
 
-// Job roles
-const JOB_ROLES = [
-  { id: '1', name: 'Admin Professional' },
-  { id: '2', name: 'Software Engineer' },
-  { id: '3', name: 'Manager' },
-  { id: '4', name: 'Team Lead' },
-  { id: '5', name: 'Consultant' },
-  { id: '6', name: 'Analyst' },
-  { id: '7', name: 'Designer' },
-  { id: '8', name: 'Developer' },
-  { id: '9', name: 'Teacher' },
-  { id: '10', name: 'Doctor' },
-  { id: '11', name: 'Other' },
-];
-
-// Salary ranges
-const SALARY_RANGES = [
-  { id: '1', name: 'Below 2 Lakh' },
-  { id: '2', name: 'INR 2 Lakh to 5 Lakh' },
-  { id: '3', name: 'INR 5 Lakh to 7 Lakh' },
-  { id: '4', name: 'INR 7 Lakh to 10 Lakh' },
-  { id: '5', name: 'INR 10 Lakh to 15 Lakh' },
-  { id: '6', name: 'INR 15 Lakh to 20 Lakh' },
-  { id: '7', name: 'INR 20 Lakh to 30 Lakh' },
-  { id: '8', name: 'Above 30 Lakh' },
-];
-
 const EditEducationScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  
-  const { user, loader } = useSelector(
+
+  const { user, loader, educationTypes, occupations, income } = useSelector(
     (state: any) => state.entities.authReducer,
   );
 
+  console.log('user', user);
+  // Data from API with fallback to empty arrays
+  const educationTypesList = educationTypes || [];
+  const jobRolesList = occupations || [];
+  const salaryRangesList = income || [];
+
   // Form state
   const [formData, setFormData] = useState({
-    educationId: '',
+    educationTypeId: '',
     educationName: '',
     collegeName: '',
     companyTypeId: '',
@@ -99,6 +65,10 @@ const EditEducationScreen = () => {
     companyName: '',
     salaryId: '',
     salaryName: '',
+    annualIncome: '',
+    annualIncomeId: '',
+    occupationId: '',
+    occupationName: '',
   });
 
   // Picker modal states
@@ -107,29 +77,41 @@ const EditEducationScreen = () => {
   const [showJobRolePicker, setShowJobRolePicker] = useState(false);
   const [showSalaryPicker, setShowSalaryPicker] = useState(false);
 
+  // Fetch API data on component mount
+  useEffect(() => {
+    dispatch(getEducationTypes(getEducationTypeUrl));
+    dispatch(getOccupation(getOccupationUrl));
+    dispatch(getIncome(getIncomeUrl));
+  }, [dispatch]);
+
   // Initialize form data from user profile
   useEffect(() => {
     if (user) {
       setFormData({
-        educationId: user.educationId || '1',
-        educationName: user.educationName || 'B.E / B.TECH',
-        collegeName: user.collegeName || 'NIT, Jamshedpur',
+        occupationId: user.occupationId || '',
+        educationTypeId: user.educationTypeId || '',
+        occupationName: user.occupationName || '',
+        educationName: user.educationType || '',
+        collegeName: user.college_name || '',
         companyTypeId: user.companyTypeId || '1',
         companyTypeName: user.companyTypeName || 'Private Company',
         jobRoleId: user.jobRoleId || '1',
         jobRoleName: user.jobRoleName || 'Admin Professional',
         companyName: user.companyName || 'Tribalshaadi',
-        salaryId: user.salaryId || '4',
-        salaryName: user.salaryName || 'INR 7 Lakh to 10 Lakh',
-      });
+        salaryId: user.annualIncomeId || '',
+        salaryName: user.annualIncome || '',
+        annualIncome: user.annualIncome || '',
+        annualIncomeId: user.annualIncomeId || '',
+      }); 
     }
   }, [user]);
 
   // Handle education selection
   const handleEducationSelection = useCallback((selectedEducation: any) => {
+    console.log('selectedEducation', selectedEducation);
     setFormData(prev => ({
       ...prev,
-      educationId: selectedEducation.id,
+      educationTypeId: selectedEducation.id,
       educationName: selectedEducation.name,
     }));
     setShowEducationPicker(false);
@@ -157,53 +139,35 @@ const EditEducationScreen = () => {
 
   // Handle salary selection
   const handleSalarySelection = useCallback((selectedSalary: any) => {
+    console.log('selectedSalary', selectedSalary);
     setFormData(prev => ({
       ...prev,
-      salaryId: selectedSalary.id,
-      salaryName: selectedSalary.name,
+      annualIncomeId: selectedSalary.id,
+      salaryName: selectedSalary.value,
     }));
     setShowSalaryPicker(false);
   }, []);
 
   // Handle form submission
   const handleSave = useCallback(async () => {
-    // Validate required fields
-    if (!formData.educationId) {
-      AppToast('Please select your education level');
-      return;
-    }
-    
-    if (!formData.collegeName.trim()) {
-      AppToast('Please enter your college/institution name');
-      return;
-    }
-    
-    if (!formData.companyTypeId) {
-      AppToast('Please select your company type');
-      return;
-    }
-    
-    if (!formData.jobRoleId) {
-      AppToast('Please select your job role');
-      return;
-    }
 
     try {
       const requestBody = {
         id: user.id,
-        educationId: formData.educationId,
-        collegeName: formData.collegeName,
+        educationTypeId: formData.educationTypeId,
+        occupationId: formData.occupationId,
+        college_name: formData.collegeName,
         companyTypeId: formData.companyTypeId,
         jobRoleId: formData.jobRoleId,
         companyName: formData.companyName,
-        salaryId: formData.salaryId,
+        annualIncomeId: formData.annualIncomeId,
       };
 
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      
+
       AppToast('Education & Career updated successfully');
       navigation.goBack();
     } catch (error) {
@@ -214,14 +178,14 @@ const EditEducationScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Education & Career" />
-      
-      <AppScrollView 
-        style={styles.scrollView}
-        otherProps={{ contentContainerStyle: styles.scrollContent }}
-      >
+      <ProfileHeader
+        title="Education & Career"
+        onBackPress={() => navigation.goBack()}
+        icon={<EducationIcon size={Size25} />}
+      />
+      <View style={styles.scrollView}>
         {/* Education Level Dropdown */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppDropdown
             label=""
             selectedValue={formData.educationName}
@@ -231,49 +195,55 @@ const EditEducationScreen = () => {
         </View>
 
         {/* College/Institution Name */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppTextInput
             placeholder="College/Institution Name"
             value={formData.collegeName}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, collegeName: text }))}
+            onChangeText={text =>
+              setFormData(prev => ({ ...prev, collegeName: text }))
+            }
             keyboardType="default"
             textInputStyle={styles.textInput}
           />
         </View>
 
         {/* Company Type Dropdown */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppDropdown
             label=""
             selectedValue={formData.companyTypeName}
             placeholder="Select Company Type"
             onPress={() => setShowCompanyTypePicker(true)}
+            disabled={true}
           />
         </View>
 
         {/* Job Role Dropdown */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppDropdown
             label=""
             selectedValue={formData.jobRoleName}
             placeholder="Select Job Role"
             onPress={() => setShowJobRolePicker(true)}
+            disabled={true}
           />
         </View>
 
         {/* Company Name */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppTextInput
             placeholder="Company Name"
             value={formData.companyName}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, companyName: text }))}
+            onChangeText={text =>
+              setFormData(prev => ({ ...prev, companyName: text }))
+            }
             keyboardType="default"
             textInputStyle={styles.textInput}
           />
         </View>
 
         {/* Salary Range Dropdown */}
-        <View style={styles.fieldContainer}>
+        <View>
           <AppDropdown
             label=""
             selectedValue={formData.salaryName}
@@ -281,7 +251,7 @@ const EditEducationScreen = () => {
             onPress={() => setShowSalaryPicker(true)}
           />
         </View>
-      </AppScrollView>
+      </View>
 
       {/* Save Button */}
       <View style={styles.buttonContainer}>
@@ -297,7 +267,7 @@ const EditEducationScreen = () => {
       {/* Picker Modals */}
       <AppPickerModal
         visible={showEducationPicker}
-        items={EDUCATION_LEVELS}
+        items={educationTypesList}
         selectedValue={formData.educationName}
         onSelect={handleEducationSelection}
         onClose={() => setShowEducationPicker(false)}
@@ -317,7 +287,7 @@ const EditEducationScreen = () => {
 
       <AppPickerModal
         visible={showJobRolePicker}
-        items={JOB_ROLES}
+        items={jobRolesList}
         selectedValue={formData.jobRoleName}
         onSelect={handleJobRoleSelection}
         onClose={() => setShowJobRolePicker(false)}
@@ -327,12 +297,13 @@ const EditEducationScreen = () => {
 
       <AppPickerModal
         visible={showSalaryPicker}
-        items={SALARY_RANGES}
+        items={salaryRangesList}
         selectedValue={formData.salaryName}
         onSelect={handleSalarySelection}
         onClose={() => setShowSalaryPicker(false)}
         title="Select Salary Range"
         isObjects={true}
+        displayProperty="value"
       />
     </AppSafeView>
   );
@@ -345,30 +316,19 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: compPadding,
-    paddingBottom: Size25,
-  },
-  fieldContainer: {
-    marginBottom: Size20,
+    padding: Size8,
+    gap: Size20,
+    paddingVertical: Size25,
   },
   textInput: {
-    borderWidth: 1,
-    borderColor: COLORS.borderGrey,
-    borderRadius: Size16,
-    paddingHorizontal: Size16,
-    paddingVertical: Size16,
+    borderBottomWidth: borderWidth,
     backgroundColor: COLORS.white,
   },
   buttonContainer: {
-    padding: compPadding,
-    paddingTop: Size16,
+    padding: Size4,
   },
   saveButton: {
     backgroundColor: COLORS.violet,
-    borderRadius: Size16,
-    paddingVertical: Size16,
   },
   saveButtonText: {
     color: COLORS.white,

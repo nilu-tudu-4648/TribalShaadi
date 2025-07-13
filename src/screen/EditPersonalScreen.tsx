@@ -7,7 +7,6 @@ import AppTextInput from '../components/AppTextInput';
 import AppDropdown from '../components/AppDropdown';
 import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
-import AppScrollView from '../components/AppScrollView';
 import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, Size8, fontSize24 } from '../constants/Sizes';
 import { MOTHER_TONGUE } from '../constants/data';
@@ -289,10 +288,7 @@ const EditPersonalScreen = () => {
         title="Personal Details"
         icon={<UserProfileIcon />}
       />
-      <AppScrollView
-        style={styles.scrollView}
-        otherProps={{ contentContainerStyle: styles.scrollContent }}
-      >
+      <View style={styles.scrollView}>
         {/* Name Field */}
         <View style={styles.fieldContainer}>
           <AppTextInput
@@ -381,7 +377,7 @@ const EditPersonalScreen = () => {
             onPress={() => setShowMaritalStatusPicker(true)}
           />
         </View>
-      </AppScrollView>
+      </View>
 
       {/* Save Button */}
       <View style={styles.buttonContainer}>
@@ -475,6 +471,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    padding: Size8,
+    gap: Size20,
+    paddingVertical: Size25,
   },
   title: {
     fontSize: fontSize24,

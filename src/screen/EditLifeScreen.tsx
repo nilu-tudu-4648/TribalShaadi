@@ -7,7 +7,7 @@ import AppDropdown from '../components/AppDropdown';
 import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
 import { COLORS } from '../constants/AppColors';
-import { Size20, Size8 } from '../constants/Sizes';
+import { Size20, Size25, Size8 } from '../constants/Sizes';
 import {
   completeUserProfileV2Updated,
   getStates,
@@ -42,7 +42,6 @@ const EditLifeScreen = () => {
   const { user, states, cities, loader, height, diet } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-  console.log('user', user);
   // Form state - now using objects for state and city
   const [formData, setFormData] = useState({
     selectedState: null as any,
@@ -254,7 +253,6 @@ const EditLifeScreen = () => {
 
       <View
         style={styles.scrollView}
-        // otherProps={{ contentContainerStyle: styles.scrollContent }}
       >
         {/* State Dropdown */}
         <AppDropdown
@@ -443,13 +441,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Size8,
     gap: Size20,
+    paddingVertical: Size25,
   },
   content: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: Size8,
-    gap: Size20,
   },
   spacer: {
     flex: 1,

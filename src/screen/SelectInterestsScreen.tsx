@@ -20,17 +20,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUrl } from '../constants/functions';
 import { completeUserProfileV2Interests } from '../store/reducers/authReducer';
 import { useNavigation } from '@react-navigation/native';
-import { ROUTES } from '../constants/data';
+import { ROUTES, INTERESTS } from '../constants/data';
 
-const INTERESTS = [
-  '🍳 Cooking', '🖊️ Writing', '🎤 Singing',
-  '📷 Photography', '🎨 Painting',
-  '🎬 Movies & TV', '✂️ DIY Crafts',
-  '🛍️ Shopping', '🎉 Festival & Events',
-  '🍲 Food & Drinks', '🏕️ Camping',
-  '🥾 Trekking', '🌿 Wildlife & Nature',
-  '🛣️ Road & Travel', '🏍️ Motobiking',
-];
+
 
 const SelectInterestsScreen = () => {
   const [selected, setSelected] = useState<string[]>([]);

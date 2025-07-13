@@ -10,6 +10,7 @@ import EditLifeScreen from '../screen/EditLifeScreen';
 import EditEducationScreen from '../screen/EditEducationScreen';
 import EditPersonalityScreen from '../screen/EditPersonalityScreen';
 import HelpScreen from '../screen/HelpScreen';
+import PreferenceScreen from '../screen/PreferenceScreen';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -27,6 +28,7 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.EDIT_EDUCATION} component={EditEducationScreen} />
       <Stack.Screen name={ROUTES.EDIT_PERSONALITY} component={EditPersonalityScreen} />
       <Stack.Screen name={ROUTES.HELP} component={HelpScreen} />
+      <Stack.Screen name={ROUTES.PREFERENCE} component={PreferenceScreen} />    
     </Stack.Navigator>
   );
 };

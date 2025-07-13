@@ -4,8 +4,8 @@ import { COLORS } from '../constants/AppColors';
 import {
   fontSize14,
   Size8,
-  Size20,
-  Size16,
+  borderWidth,
+  Size12,
 } from '../constants/Sizes';
 import AppText from './AppText';
 
@@ -53,26 +53,30 @@ const AppChip: React.FC<AppChipProps> = ({
 
 const styles = StyleSheet.create({
   chip: {
-    paddingHorizontal: Size16,
-    paddingVertical: Size8,
-    borderRadius: Size20,
-    backgroundColor: COLORS.disabledBG,
+    paddingVertical: Size12,
+    paddingHorizontal: Size12,
+    borderRadius: Size8,
+    borderWidth: borderWidth,
+    borderColor: COLORS.bgDisabled,
   },
   chipSelected: {
-    backgroundColor: COLORS.black,
+    backgroundColor: COLORS.chipSelected,
+    borderColor: COLORS.chipSelctedBorder,
+    borderWidth: borderWidth,
   },
   chipDisabled: {
-    backgroundColor: COLORS.borderLight,
-    borderColor: COLORS.borderLight,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.bgDisabled,
     opacity: 0.5,
   },
   chipText: {
     fontSize: fontSize14,
     color: COLORS.black,
     fontWeight: '500',
+    letterSpacing: 1.5,
   },
   chipTextSelected: {
-    color: COLORS.white,
+    color: COLORS.violet,
   },
   chipTextDisabled: {
     color: COLORS.placeholderInactive,

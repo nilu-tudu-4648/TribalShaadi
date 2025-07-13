@@ -38,6 +38,7 @@ export const ROUTES = {
   EDIT_EDUCATION: 'EditEducation',
   EDIT_PERSONALITY: 'EditPersonality',
   HELP: 'Help',
+  PREFERENCE: 'Preference',
 };
 
 // Mother Tongue
@@ -77,4 +78,22 @@ export const SETTLING_DOWN_OPTIONS =
   'Within 2 year',
   'Within 3 year',
   'Undecided',
+];
+export const INTERESTS = [
+  '🍳 Cooking', '🖊️ Writing', '🎤 Singing',
+  '📷 Photography', '🎨 Painting',
+  '🎬 Movies & TV', '✂️ DIY Crafts',
+  '🛍️ Shopping', '🎉 Festival & Events',
+  '🍲 Food & Drinks', '🏕️ Camping',
+  '🥾 Trekking', '🌿 Wildlife & Nature',
+  '🛣️ Road & Travel', '🏍️ Motobiking',
+];
+
+
+export const VALUES_OPTIONS = [
+  'Kindness and empathy',
+  'Respect for culture and traditions',
+  'Ambition and hard work',
+  'Open-mindedness and adaptability',
+  'Strong family values',
 ];

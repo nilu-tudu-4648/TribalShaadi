@@ -31,7 +31,6 @@ import {
   UserProfileIcon,
   SlidersIcon,
   RightArrowIcon,
-  EditIcon,
   EducationIcon,
   PersonalityIcon,
 } from '../components/svg/SvgIcons';
@@ -39,9 +38,12 @@ import { useNavigation } from '@react-navigation/native';
 import AppHeader from '../components/AppHeader';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
+import { useSelector } from 'react-redux';
+import { imageUrl } from '../constants/functions';
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const menuItems = [
     {
       id: 1,
@@ -106,12 +108,12 @@ const EditProfileScreen = () => {
             <View style={styles.profileImage}>
               <View style={styles.profileImagePlaceholder}>
                 <Image
-                  source={require('../assets/images/Female.png')}
+                  source={{ uri: imageUrl + user.image }}
                   style={styles.placeholderImage}
                   resizeMode="cover"
                 />
               </View>
-              <View style={styles.profileImageBanner}>
+              {/* <View style={styles.profileImageBanner}>
                 <AppText
                   text="Profile Image"
                   textStyle={styles.profileImageText}
@@ -119,7 +121,7 @@ const EditProfileScreen = () => {
                 <TouchableOpacity style={styles.editIconWrapper}>
                   <EditIcon width={16} height={16} color={COLORS.white} />
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
           </View>
 

@@ -106,7 +106,7 @@ const HomeScreen = () => {
                     districtName={currentMatchedUser.districtName}
                     stateName={currentMatchedUser.stateName}
                     bio={currentMatchedUser.aboutMe}
-                    image={currentMatchedUser.imageUrl}
+                    image={currentMatchedUser.image}
                     isLoading={loader}
                     maritalStatus={currentMatchedUser.maritalStatus}
                     dob={currentMatchedUser.birthDate}

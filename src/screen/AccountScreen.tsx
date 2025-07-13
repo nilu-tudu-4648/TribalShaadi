@@ -85,7 +85,7 @@ const AccountScreen = () => {
       {/* Profile Image with Edit Icon */}
       <View style={styles.profileContainer}>
         <Image
-          source={{ uri: imageUrl + user?.imageUrl }}
+          source={{ uri: imageUrl + user?.image }}
           style={styles.profileImage}
         />
         <TouchableOpacity

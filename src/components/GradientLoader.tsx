@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {View, StyleSheet, Animated, Easing} from 'react-native';
 import Svg, {Circle, Defs, LinearGradient, Stop} from 'react-native-svg';
+import { COLORS } from '../constants/AppColors';
 
 const GradientLoader = ({size = 20}: {size: number}) => {
   const rotation = useRef(new Animated.Value(0)).current;
@@ -27,7 +28,7 @@ const GradientLoader = ({size = 20}: {size: number}) => {
         <Svg height={size} width={size} viewBox="0 0 50 50">
           <Defs>
             <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor="#B97FFF" />
+              <Stop offset="0%" stopColor={COLORS.violet} />
               <Stop offset="100%" stopColor="#2563EB" />
             </LinearGradient>
           </Defs>

@@ -34,6 +34,7 @@ import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
 } from './src/navigation/StackNavigation';
+import PreferenceScreen from './src/screen/PreferenceScreen';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -114,7 +115,7 @@ const MainApp = () => {
         </>
       ) : (
         <>
-          <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
+          <Stack.Screen name={ROUTES.WELCOME} component={PreferenceScreen} />
           <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
           <Stack.Screen name={ROUTES.OTP} component={OTPScreen} />
           <Stack.Screen

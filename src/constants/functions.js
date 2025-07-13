@@ -146,7 +146,7 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'smoking', screen: ROUTES.PHYSICAL_ATTRIBUTES },
   { field: 'aboutMe', screen: ROUTES.ABOUT },
   { field: 'about_lifepartener', screen: ROUTES.ABOUT_PARTNER },
-  { field: 'imageUrl', screen: ROUTES.UPLOAD_IMAGE },
+  { field: 'image', screen: ROUTES.UPLOAD_IMAGE },
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 

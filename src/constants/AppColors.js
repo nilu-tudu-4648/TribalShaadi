@@ -41,5 +41,9 @@ export const COLORS = {
   borderViolet:"#B97FFF33",
   bgLight:"#0C0C0D0D",
   greytext:"#8E8E93",
-  navBarInactive:"#474747"
+  navBarInactive:"#474747",
+  chipSelected:"rgba(185, 127, 255, 0.2)",
+  chipSelctedBorder:"rgba(185, 127, 255, 1)",
+  bgDisabled:"#D9D9D9",
+  secondaryText:"#1B222B",
 };

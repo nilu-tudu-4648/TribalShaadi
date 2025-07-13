@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   Image,
   StyleSheet,
@@ -29,7 +28,7 @@ import {
   updateUrl,
 } from '../constants/functions';
 import { ROUTES } from '../constants/data';
-
+import AppText from '../components/AppText';
 const GenderSelectionScreen = () => {
   const { user, loader, userProfileGenderUpdated } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -66,7 +65,7 @@ const GenderSelectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>I identify{'\n'}myself as...</Text>
+        <AppText text="I identify\nmyself as..." textStyle={styles.title} />
 
         <TouchableOpacity
           style={[
@@ -80,10 +79,10 @@ const GenderSelectionScreen = () => {
             source={require('../assets/images/Male.png')}
             style={styles.genderImage}
           />
-          <Text style={styles.genderText}>Male</Text>
+          <AppText text="Male" textStyle={styles.genderText} />
           {selectedGender === 'male' && (
             <View style={styles.checkIconContainer}>
-              <Text style={styles.checkIcon}>✓</Text>
+              <AppText text="✓" textStyle={styles.checkIcon} />
             </View>
           )}
         </TouchableOpacity>
@@ -100,10 +99,10 @@ const GenderSelectionScreen = () => {
             source={require('../assets/images/Female.png')}
             style={styles.genderImage}
           />
-          <Text style={styles.genderText}>Female</Text>
+          <AppText text="Female" textStyle={styles.genderText} />
           {selectedGender === 'female' && (
             <View style={styles.checkIconContainer}>
-              <Text style={styles.checkIcon}>✓</Text>
+              <AppText text="✓" textStyle={styles.checkIcon} />
             </View>
           )}
         </TouchableOpacity>
