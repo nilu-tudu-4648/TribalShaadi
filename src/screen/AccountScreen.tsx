@@ -64,9 +64,9 @@ const badgeData: BadgeData[] = [
 
 const actionButtons: ActionButton[] = [
   { key: 'plan', label: 'My Plan', icon: RocketIcon, route: ROUTES.UPGRADE },
-  { key: 'invite', label: 'Invite', icon: GiftIcon },
+  { key: 'invite', label: 'Invite', icon: GiftIcon, route: ROUTES.INVITE },
   { key: 'preference', label: 'Preference', icon: PreferenceIcon, route: ROUTES.PREFERENCE },
-  { key: 'about', label: 'About Us', icon: InfoIcon },
+  { key: 'about', label: 'About Us', icon: InfoIcon, route: ROUTES.ABOUT_US },
   { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
   {
     key: 'settings',

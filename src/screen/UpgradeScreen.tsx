@@ -8,11 +8,7 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import {
-  ArrowIosBackSvg,
-  InfinityIcon,
-  FilledHeartIcon,
-} from '../components/svg/SvgIcons';
+import { ArrowIosBackSvg, HeartIcon2 } from '../components/svg/SvgIcons';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import {
@@ -27,43 +23,26 @@ import {
   Size4,
   Size40,
   SIZES,
+  Size25,
+  fontSize36,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
+import { PRICING_OPTIONS } from '../constants/data';
+import { InfinityIcon } from '../components/svg/SvgIcons2';
 
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const [selectedPlan, setSelectedPlan] = useState('3months');
 
-  const pricingOptions = [
-    {
-      id: '3months',
-      duration: '3 Month',
-      price: '₹449',
-      pricePerMonth: '₹149 per month',
-    },
-    {
-      id: '6months',
-      duration: '6 Months',
-      price: '₹749',
-      pricePerMonth: '₹125 per month',
-    },
-    {
-      id: 'lifetime',
-      duration: 'Till Marriage',
-      price: '₹1499',
-      badge: 'Lifetime Access',
-    },
-  ];
-
   const features = [
     {
-      icon: <InfinityIcon width={28} height={28} color={COLORS.violet} />,
+      icon: <InfinityIcon color={COLORS.white} />,
       title: 'Unlimited Chat Access',
     },
     {
-      icon: <FilledHeartIcon width={24} height={24} color={COLORS.violet} />,
+      icon: <HeartIcon2 color={COLORS.white} />,
       title: 'See All Received Interests',
     },
   ];
@@ -81,15 +60,17 @@ const UpgradeScreen = () => {
     <AppSafeView style={styles.container}>
       <ImageBackground
         source={require('../assets/images/update.jpg')}
-        style={styles.backgroundImage}>
+        style={styles.backgroundImage}
+      >
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            style={styles.backButton}>
-            <ArrowIosBackSvg width={24} height={24} color={COLORS.black} />
+            style={styles.backButton}
+          >
+            <ArrowIosBackSvg  color={COLORS.black} />
           </TouchableOpacity>
           <Image
-            source={require('../assets/images/textlogo.png')}
+            source={require('../assets/images/premiumLogo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -99,10 +80,7 @@ const UpgradeScreen = () => {
           {features.map((feature, index) => (
             <View key={index} style={styles.featureItem}>
               <View style={styles.featureIconContainer}>{feature.icon}</View>
-              <AppText
-                text={feature.title}
-                textStyle={styles.featureTitle}
-              />
+              <AppText text={feature.title} textStyle={styles.featureTitle} />
             </View>
           ))}
         </View>
@@ -111,21 +89,22 @@ const UpgradeScreen = () => {
       <View style={styles.bottomContainer}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.pricingContainer}>
-            {pricingOptions.map((option) => (
+            {PRICING_OPTIONS.map(option => (
               <TouchableOpacity
                 key={option.id}
                 style={[
                   styles.pricingOption,
                   selectedPlan === option.id && styles.selectedPricingOption,
                 ]}
-                onPress={() => handlePlanSelect(option.id)}>
+                onPress={() => handlePlanSelect(option.id)}
+              >
                 <View style={styles.pricingLeft}>
                   <View
                     style={[
                       styles.radioButton,
-                      selectedPlan === option.id &&
-                        styles.selectedRadioButton,
-                    ]}>
+                      selectedPlan === option.id && styles.selectedRadioButton,
+                    ]}
+                  >
                     {selectedPlan === option.id && (
                       <View style={styles.radioButtonInner} />
                     )}
@@ -135,42 +114,43 @@ const UpgradeScreen = () => {
                       text={option.duration}
                       textStyle={styles.pricingDuration}
                     />
-                    {option.pricePerMonth && (
-                      <AppText
-                        text={option.pricePerMonth}
-                        textStyle={styles.pricingSubtext}
-                      />
+                    {option.badge && (
+                      <View style={styles.badgeContainer}>
+                        <AppText
+                          text={option.badge}
+                          textStyle={styles.badgeText}
+                        />
+                      </View>
                     )}
                   </View>
                 </View>
                 <View style={styles.pricingRight}>
-                  <AppText text={option.price} textStyle={styles.pricingPrice} />
-                  {option.badge && (
-                    <View style={styles.badgeContainer}>
-                      <AppText
-                        text={option.badge}
-                        textStyle={styles.badgeText}
-                      />
-                    </View>
+                  <AppText
+                    text={option.price}
+                    textStyle={styles.pricingPrice}
+                  />
+                  {option.pricePerMonth && (
+                    <AppText
+                      text={option.pricePerMonth}
+                      textStyle={styles.pricingSubtext}
+                    />
                   )}
                 </View>
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
-        <View style={styles.buttonContainer}>
-          <AppLinearButton
-            title={`Get ${
-              pricingOptions.find((p) => p.id === selectedPlan)?.duration || ''
-            } for ${
-              pricingOptions.find((p) => p.id === selectedPlan)?.price || ''
-            }`}
-            onPress={handleContinue}
-            linearGradientColors={['#22D3EE', '#A855F7']}
-            buttonStyle={styles.continueButton}
-            textStyle={styles.continueButtonText}
-          />
-        </View>
+        <AppLinearButton
+          title={`Get ${
+            PRICING_OPTIONS.find(p => p.id === selectedPlan)?.duration || ''
+          } for ${
+            PRICING_OPTIONS.find(p => p.id === selectedPlan)?.price || ''
+          }`}
+          onPress={handleContinue}
+          linearGradientColors={['#21BEFE', '#EE50C1']}
+          buttonStyle={styles.continueButton}
+          textStyle={styles.continueButtonText}
+        />
         <AppText
           text="This app can be used without a subscription. With a subscription, you get access to paid features."
           textStyle={styles.disclaimerText}
@@ -186,11 +166,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingHorizontal:0
+    paddingHorizontal: 0,
   },
   backgroundImage: {
     height: SIZES.height * 0.5,
     paddingTop: Size40,
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
@@ -201,33 +182,36 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: Size16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: fontSize36,
+    height: fontSize36,
+    borderRadius: fontSize36/2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.black,
   },
   logo: {
-    width: 180,
-    height: 40,
+    width: '100%',
+    height: Size40,
+    resizeMode: 'contain',
   },
   featuresContainer: {
-    paddingTop: Size40,
-    paddingHorizontal: Size40,
+    paddingVertical: Size40,
     gap: Size16,
+    alignItems: 'flex-start',
+    alignSelf: 'center',
   },
   featureItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    // gap: Size12,
+    gap: Size12,
   },
   featureIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: Size25,
+    height: Size25,
+    borderRadius: Size12,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.violet,
   },
   featureTitle: {
     fontSize: fontSize16,
@@ -235,17 +219,15 @@ const styles = StyleSheet.create({
     color: COLORS.black,
   },
   bottomContainer: {
-    // flex: 1,
     backgroundColor: COLORS.white,
     paddingTop: Size20,
     paddingHorizontal: Size16,
-    borderTopLeftRadius: Size40*5,
-    borderTopRightRadius: Size40*5,
+    borderTopLeftRadius: Size40 * 5,
+    borderTopRightRadius: Size40 * 5,
   },
   pricingContainer: {
     paddingVertical: Size12,
     gap: Size12,
-    
   },
   pricingOption: {
     flexDirection: 'row',
@@ -253,13 +235,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.white,
     borderRadius: Size12,
-    padding: Size16,
+    padding: Size12,
     borderWidth: 1,
     borderColor: COLORS.borderLight,
   },
   selectedPricingOption: {
     borderColor: COLORS.violet,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.chipSelected,
   },
   pricingLeft: {
     flexDirection: 'row',
@@ -282,9 +264,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.violet,
   },
   radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: Size12,
+    height: Size12,
+    borderRadius: Size12 / 2,
     backgroundColor: COLORS.violet,
   },
   pricingDuration: {
@@ -317,17 +299,16 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingVertical: Size12,
-  },
-  continueButton: {
     flex: 1,
   },
+  continueButton: {},
   continueButtonText: {
     fontSize: fontSize18,
     fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
   },
   disclaimerText: {
     textAlign: 'center',
-    color: COLORS.textSecondary,
+    color: COLORS.grey,
     fontSize: fontSize12,
     paddingVertical: Size12,
     paddingHorizontal: Size20,

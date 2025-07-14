@@ -39,6 +39,9 @@ export const ROUTES = {
   EDIT_PERSONALITY: 'EditPersonality',
   HELP: 'Help',
   PREFERENCE: 'Preference',
+  PAYMENT_CONFIRMATION: 'PaymentConfirmation',
+  ABOUT_US: 'AboutUs',
+  INVITE: 'Invite',
 };
 
 // Mother Tongue
@@ -103,3 +106,77 @@ export const VALUES_OPTIONS = [
   'Open-mindedness and adaptability',
   'Strong family values',
 ];
+
+export const PRICING_OPTIONS = [
+  {
+    id: '3months',
+    duration: '3 Month',
+    price: '₹449',
+    pricePerMonth: '₹149 per month',
+  },
+  {
+    id: '6months',
+    duration: '6 Months',
+    price: '₹749',
+    pricePerMonth: '₹125 per month',
+  },
+  {
+    id: 'lifetime',
+    duration: 'Till Marriage',
+    price: '₹1499',
+    badge: 'Lifetime Access',
+  },
+];
+export const ABOUT_US_DATA = [
+  require('../assets/images/about1.png'),
+];
+
+export const ABOUT_US_CARDS = [
+  {
+    title: 'Member-Centric',
+    description:
+      'We care deeply about our members. Every feature we build puts your experience, safety, and comfort first.',
+  },
+  {
+    title: 'Privacy by Design',
+    description:
+      'Your journey stays yours. No forced contact sharing. No pressure. Just meaningful connections, on your terms.',
+  },
+  {
+    title: 'AI with Purpose',
+    description:
+      'Smart tech, human values. We use AI to enhance trust, match meaningfully, and keep the experience respectful.',
+  },
+  {
+    title: 'Culture-Rooted',
+    description:
+      `Built for tribal communities, by those who understand them. We honor your identity, traditions, and preferences every step of the way.`
+  },
+  {
+    title: 'Always Evolving',
+    description:
+      `We're just getting started. Driven by feedback and community needs, we keep building with intention — for today and tomorrow.`
+  },
+];
+
+export const ABOUT_US_CARDS_SEC_1 = {
+  title: 'Bringing AI to tribal matchmaking',
+  description:
+    'TribalShaadi™ is an AI-powered matrimony app connecting tribal communities through culture and meaningful matches.',
+};
+export const ABOUT_US_CARDS_SEC_2 = {
+  title: 'Matrimony Made for Us',
+  description: `We started Tribalshaadi for one reason: 
+mainstream matrimony platforms weren’t built for tribal communities — and we knew our people deserved better.
+Just like tradition deserves a future, we set out to challenge the status quo and build a platform that empowers tribal voices through culture-conscious, AI-powered matchmaking.`,
+};
+export const ABOUT_US_CARDS_SEC_3 = {
+  title: 'Features That Work for You',
+  description: `Because we respect your privacy and community values, Tribalshaadi offers features built to make meaningful connections — not just matches.
+From AI-verified profiles and unlimited interest sending to in-app private chats and a simple, modern experience, everything is designed to protect your space, honor your identity, and simplify your journey to love.`,
+};
+export const ABOUT_US_CARDS_SEC_4 = {
+  title: 'Join the TribalShaadi Community',
+  description:
+    'Be part of a growing movement that’s redefining matrimony for tribal communities. Connect, share, and grow with people who value culture, privacy, and purpose — just like you.',
+};

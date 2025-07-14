@@ -87,13 +87,13 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: COLORS.violet,
+    borderColor: COLORS.red,
     borderRadius: Size25,
   },
   secondaryButton: {
     backgroundColor: COLORS.white,
   },
   buttonText: {
-    color: COLORS.violet,
+    color: COLORS.red,
   },
 });

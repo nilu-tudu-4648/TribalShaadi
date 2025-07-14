@@ -53,7 +53,7 @@ const PreferenceScreen = () => {
     max: number;
   }>({ min: 5 * 12 + 5, max: 6 * 12 + 5 }); // 5ft 5in to 6ft 5in
   const [selectedTribes, setSelectedTribes] = useState<string[]>(['Any']);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>(['Any']);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(['Any']);
   const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
     'Any',
@@ -104,9 +104,10 @@ const PreferenceScreen = () => {
     if (selectedTribes.length === 0) {
       return 'None';
     }
-    if (selectedTribes.length === 1) {
-      return selectedTribes[0];
-    }
+    // if (selectedTribes.length === 1) {
+    //   return selectedTribes[0];
+    // }
+    console.log(selectedTribes, 'selectedTribes');
     return `${selectedTribes.length} selected`;
   };
 

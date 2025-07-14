@@ -46,4 +46,8 @@ export const COLORS = {
   chipSelctedBorder:"rgba(185, 127, 255, 1)",
   bgDisabled:"#D9D9D9",
   secondaryText:"#1B222B",
+  lightgrey:"#F5F4F6",
+  aboutText:"#37264C",
+  cardBg:"#F8F2FF",
+  cardBg1:"#8259B3"
 };

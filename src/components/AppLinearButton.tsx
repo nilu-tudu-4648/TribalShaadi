@@ -8,7 +8,7 @@ import {
 import React from 'react';
 import AppText from './AppText';
 import GradientLoader from './GradientLoader';
-import { Size18, SIZES } from '../constants/Sizes';
+import { Size18, Size8, SIZES } from '../constants/Sizes';
 import { fontSize16 } from '../constants/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import { COLORS } from '../constants/AppColors';
@@ -57,9 +57,6 @@ export default AppLinearButton;
 
 const styles = StyleSheet.create({
   button: {
-    flex: 1,
-    borderRadius: SIZES.radius,
-    shadowColor: '#5167FC',
     shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -71,8 +68,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   connectButton: {
-    flex: 1,
-    borderRadius: SIZES.radius,
+    borderRadius: Size8,
     paddingVertical: SIZES.padding,
     alignItems: 'center',
     justifyContent: 'center',

@@ -23,7 +23,12 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
-import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -46,8 +51,18 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   selectedHeightRange,
   onSelectionChange,
   onApply,
-  heightOptions
+  heightOptions,
 }) => {
+  const formatHeightFromOptions = (heightInInches: number) => {
+    const match = heightOptions.find(
+      opt => parseInt(opt.name) === heightInInches,
+    );
+    if (match) {
+      return formatHeight(parseInt(match.name));
+    }
+    return formatHeight(heightInInches);
+  };
+
   const snapPoints = ['30%', '30%'];
   const [localHeightRange, setLocalHeightRange] = useState(selectedHeightRange);
   const dispatch = useDispatch();
@@ -58,10 +73,14 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   const THUMB_SIZE = Size25;
 
   const minThumbPosition = useSharedValue(
-    ((localHeightRange.min - MIN_HEIGHT_INCHES) / (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)) * SLIDER_WIDTH
+    ((localHeightRange.min - MIN_HEIGHT_INCHES) /
+      (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)) *
+      SLIDER_WIDTH,
   );
   const maxThumbPosition = useSharedValue(
-    ((localHeightRange.max - MIN_HEIGHT_INCHES) / (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)) * SLIDER_WIDTH
+    ((localHeightRange.max - MIN_HEIGHT_INCHES) /
+      (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)) *
+      SLIDER_WIDTH,
   );
 
   const startXMin = useSharedValue(0);
@@ -84,9 +103,11 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         maxThumbPosition.value - THUMB_SIZE,
       );
       minThumbPosition.value = newPosition;
-      
+
       const newMinHeight = Math.round(
-        MIN_HEIGHT_INCHES + (newPosition / SLIDER_WIDTH) * (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)
+        MIN_HEIGHT_INCHES +
+          (newPosition / SLIDER_WIDTH) *
+            (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES),
       );
       runOnJS(updateHeightRange)(newMinHeight, localHeightRange.max);
     });
@@ -102,9 +123,11 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         SLIDER_WIDTH,
       );
       maxThumbPosition.value = newPosition;
-      
+
       const newMaxHeight = Math.round(
-        MIN_HEIGHT_INCHES + (newPosition / SLIDER_WIDTH) * (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)
+        MIN_HEIGHT_INCHES +
+          (newPosition / SLIDER_WIDTH) *
+            (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES),
       );
       runOnJS(updateHeightRange)(localHeightRange.min, newMaxHeight);
     });
@@ -124,18 +147,39 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
 
   const handleApply = async () => {
     try {
+      const cmToInches = (cm: number) => Math.round(cm / 2.54);
+      const inchesToCm = (inches: number) => Math.round(inches * 2.54);
+
+      // Try to find matching options from heightOptions by converting cm to inches
+      const fromOption = heightOptions.find(
+        opt => cmToInches(Number(opt.name)) === localHeightRange.min,
+      );
+      const toOption = heightOptions.find(
+        opt => cmToInches(Number(opt.name)) === localHeightRange.max,
+      );
+
+      if (!fromOption || !toOption) {
+        console.warn(
+          'Height values not found in options. Using fallback conversion.',
+        );
+      }
+
       const requestBody = {
         id: user.id,
-        pFromHeight: localHeightRange.min,
-        pToHeight: localHeightRange.max,
+        pFromHeight:
+          fromOption?.name ?? inchesToCm(localHeightRange.min).toString(),
+        pToHeight:
+          toOption?.name ?? inchesToCm(localHeightRange.max).toString(),
       };
-      console.log('requestBody', requestBody);
+
+      console.log('Sending requestBody:', requestBody);
+
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('Error in handleApply:', error);
     } finally {
       bottomSheetRef.current?.close();
       onApply(localHeightRange);
@@ -173,11 +217,10 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         <View style={styles.sliderContainer}>
           <View style={styles.sliderTrack}>
             <Animated.View style={[styles.activeTrack, activeTrackStyle]} />
-            
             <GestureDetector gesture={minPanGesture}>
               <Animated.View style={[styles.minThumb, minThumbStyle]} />
             </GestureDetector>
-            
+
             <GestureDetector gesture={maxPanGesture}>
               <Animated.View style={[styles.thumb, maxThumbStyle]} />
             </GestureDetector>
@@ -185,8 +228,10 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         </View>
 
         <View style={styles.heightDisplayContainer}>
-          <AppText 
-            text={`${formatHeight(localHeightRange.min)} - ${formatHeight(localHeightRange.max)}`}
+          <AppText
+            text={`${formatHeightFromOptions(
+              localHeightRange.min,
+            )} - ${formatHeightFromOptions(localHeightRange.max)}`}
             textStyle={styles.heightDisplayText}
           />
         </View>
@@ -273,4 +318,4 @@ const styles = StyleSheet.create({
     color: COLORS.textBlack,
     fontWeight: 'bold',
   },
-}); 
+});

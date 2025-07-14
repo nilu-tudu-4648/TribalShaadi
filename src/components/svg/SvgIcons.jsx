@@ -21,6 +21,7 @@ import {
   lignHeight43,
   Size12,
   Size17,
+  Size20,
 } from '../../constants/Sizes';
 
 export const ArrowIosBackSvg = ({
@@ -192,7 +193,7 @@ export const HeartIcon = ({
   </Svg>
 );
 export const HeartIcon2 = ({
-  size = 18,
+  size = Size20,
   color = 'black',
   fill = color,
   ...props

@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
   },
   dialogContainer: {
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   dialog: {
-    gap: 20,
+    gap: SIZES.base1,
     backgroundColor: COLORS.white,
     padding: SIZES.padding2,
     borderRadius: SIZES.radius,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     // gap: 10,
   },
   cancelButton: {

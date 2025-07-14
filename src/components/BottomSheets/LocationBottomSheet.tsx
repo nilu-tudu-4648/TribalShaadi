@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -8,6 +8,7 @@ import BottomSheet, {
 import AppText from '../AppText';
 import { COLORS } from '../../constants/AppColors';
 import {
+  borderWidth,
   fontSize14,
   fontSize16,
   Size12,
@@ -17,98 +18,22 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
-import { getCitiesUrl } from '../../constants/functions';
-import { getCities } from '../../store/reducers/authReducer';
+import {
+  getCitiesByStateId,
+  getUserDetailsUrl,
+  getUserDetailsApi,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-
-// --- Local Svg Icons (Workaround) ---
-const SearchIcon = ({ size = 20, color = COLORS.textInactive }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M21 21L16.65 16.65"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
-const ChipCloseIcon = ({ size = 12, color = COLORS.textBlack }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Line
-      x1="18"
-      y1="6"
-      x2="6"
-      y2="18"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <Line
-      x1="6"
-      y1="6"
-      x2="18"
-      y2="18"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </Svg>
-);
-
-const InfoIcon = ({ size = 20, color = COLORS.black }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
-    <Line x1="12" y1="16" x2="12" y2="12" stroke={color} strokeWidth="2" />
-    <Line
-      x1="12"
-      y1="8"
-      x2="12"
-      y2="8"
-      stroke={color}
-      strokeWidth="2"
-      stroke-linecap="round"
-    />
-  </Svg>
-);
+import { SearchIcon, InfoIcon, ChipCloseIcon } from '../svg/SvgIcons2';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 
 interface LocationBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedLocations: string[];
   onApply: (locations: string[]) => void;
 }
-
-const allLocations = [
-  'Jharkhand(State)',
-  'Jharsuguda',
-  'Dhanbad',
-  'Ranchi',
-  'Jamshedpur',
-  'Bokaro',
-  'Deoghar',
-  'Hazaribagh',
-  'Giridih',
-  'Ramgarh',
-  'Odisha(State)',
-  'Bhubaneswar',
-  'Cuttack',
-  'Rourkela',
-  'Puri',
-  'West Bengal(State)',
-  'Kolkata',
-  'Asansol',
-  'Siliguri',
-  'Durgapur',
-];
 
 const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   bottomSheetRef,
@@ -120,45 +45,89 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   const { user, states } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-  const [localSelected, setLocalSelected] =
-    useState<string[]>(selectedLocations);
+  const [selectedState, setSelectedState] = useState<any>(
+    selectedLocations[0] || null,
+  );
+  const [selectedCities, setSelectedCities] = useState<any[]>(
+    selectedLocations.slice(1) || [],
+  );
+
   const [searchQuery, setSearchQuery] = useState('');
-  useEffect(() => {
-    if (localSelected.length > 0) {
-      dispatch(getCities(`${getCitiesUrl}?stateId=${localSelected[0]}`));
-    }
-  }, [localSelected, dispatch]);
+  const [cities, setCities] = useState<any[]>([]);
+  const allLocations = useMemo(() => {
+    return states.map((state: { id: number; name: string }) => ({
+      id: state.id,
+      name: state.name,
+    }));
+  }, [states]);
+
   const filteredLocations = useMemo(() => {
     if (!searchQuery) return [];
-    return allLocations.filter(
-      loc =>
-        loc.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !localSelected.includes(loc),
-    );
-  }, [searchQuery, localSelected]);
 
-  const addLocation = (location: string) => {
-    if (!localSelected.includes(location)) {
-      setLocalSelected([...localSelected, location]);
+    const query = searchQuery.toLowerCase();
+
+    // Show state if none selected
+    if (!selectedState) {
+      return allLocations
+        .filter((loc: any) => loc.name.toLowerCase().includes(query))
+        .map((loc: any) => ({ ...loc, type: 'state' }));
     }
-    setSearchQuery('');
+
+    // Else, show cities under selected state
+    return cities
+      .filter(
+        (city: any) =>
+          city.name.toLowerCase().includes(query) &&
+          !selectedCities.some(c => c.id === city.id),
+      )
+      .map(city => ({ ...city, type: 'city' }));
+  }, [searchQuery, selectedState, selectedCities, cities, allLocations]);
+
+  const addLocation = async (location: any) => {
+    try {
+      // If selecting state
+      if (!selectedState || location?.type === 'state') {
+        setSelectedState(location);
+        const citiesData = await getCitiesByStateId(location.id);
+        setCities(citiesData);
+        setSelectedCities([]); // Clear old cities if state changes
+      } else {
+        // Selecting cities
+        const alreadyExists = selectedCities.some(
+          city => city.id === location.id,
+        );
+        if (!alreadyExists) {
+          setSelectedCities([...selectedCities, location]);
+        }
+      }
+      setSearchQuery('');
+    } catch (error) {
+      console.log(error, 'error');
+    }
   };
 
-  const removeLocation = (location: string) => {
-    setLocalSelected(localSelected.filter(loc => loc !== location));
-  };
 
   const handleApply = () => {
-    onApply(localSelected);
-    bottomSheetRef.current?.close();
+    try {
+      const requestBody = {
+        id: user.id,
+        pStateLivingInId: selectedState?.id || null,
+        pCityLivingInId:
+          selectedCities.length > 0
+            ? selectedCities.map(city => city.id)
+            : null, // use first city
+      };
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+      // pass state + cities as array
+      onApply([selectedState, ...selectedCities]);
+      bottomSheetRef.current?.close();
+    } catch (error) {
+      console.log(error, 'error');
+    }
   };
-
-  // const handleSheetChanges = (index: number) => {
-  //   if (index === -1) {
-  //     setLocalSelected(selectedLocations);
-  //     setSearchQuery('');
-  //   }
-  // };
 
   const handleSheetChanges = (index: number) => {
     if (index === -1) {
@@ -197,13 +166,13 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         {searchQuery.length > 0 ? (
           <BottomSheetFlatList
             data={filteredLocations}
-            keyExtractor={item => item}
-            renderItem={({ item }) => (
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }: { item: any }) => (
               <TouchableOpacity
                 style={styles.searchResultRow}
                 onPress={() => addLocation(item)}
               >
-                <AppText text={item} />
+                <AppText text={item.name} />
               </TouchableOpacity>
             )}
             ListEmptyComponent={
@@ -227,10 +196,27 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
             </View>
 
             <View style={styles.chipsContainer}>
-              {localSelected.map(loc => (
-                <View key={loc} style={styles.chip}>
-                  <AppText text={loc} textStyle={styles.chipText} />
-                  <TouchableOpacity onPress={() => removeLocation(loc)}>
+              {selectedState && (
+                <View key={selectedState.id} style={styles.chip}>
+                  <AppText
+                    text={selectedState.name}
+                    textStyle={styles.chipText}
+                  />
+                  <TouchableOpacity onPress={() => setSelectedState(null)}>
+                    <ChipCloseIcon />
+                  </TouchableOpacity>
+                </View>
+              )}
+              {selectedCities.map((city: any) => (
+                <View key={city.id} style={styles.chip}>
+                  <AppText text={city.name} textStyle={styles.chipText} />
+                  <TouchableOpacity
+                    onPress={() =>
+                      setSelectedCities(
+                        selectedCities.filter(c => c.id !== city.id),
+                      )
+                    }
+                  >
                     <ChipCloseIcon />
                   </TouchableOpacity>
                 </View>
@@ -298,12 +284,13 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgDisabled,
+    backgroundColor: COLORS.white,
     borderRadius: Size20,
     paddingHorizontal: Size12,
     paddingVertical: Size8,
-    borderWidth: 1,
-    borderColor: COLORS.divider,
+    borderWidth: borderWidth,
+    borderColor: COLORS.grey,
+    elevation: 2,
     gap: Size8,
   },
   chipText: { fontSize: fontSize14, fontFamily: Fonts.OPEN_SANS_REGULAR },

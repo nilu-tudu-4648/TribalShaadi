@@ -258,3 +258,18 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
     const inches = Math.round((cm / 30.48 - feet) * 12);
     return `${feet}'${inches}"`;
   };
+
+  export const getCitiesByStateId = async (stateId) => {
+    try {
+      const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+      const response = await axios.get(`${baseUrl}/${getCitiesUrl}?stateId=${stateId}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.recordList;
+    } catch (error) {
+      console.log(error, 'getCitiesByStateId');
+      return [];
+    }
+  };

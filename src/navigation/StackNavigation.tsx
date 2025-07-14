@@ -11,6 +11,9 @@ import EditEducationScreen from '../screen/EditEducationScreen';
 import EditPersonalityScreen from '../screen/EditPersonalityScreen';
 import HelpScreen from '../screen/HelpScreen';
 import PreferenceScreen from '../screen/PreferenceScreen';
+import PaymentConfirmation from '../screen/PaymentConfirmation';
+import AboutUsScreen from '../screen/AboutUsScreen';
+import InviteScreen from '../screen/InviteScreen';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -29,6 +32,9 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.EDIT_PERSONALITY} component={EditPersonalityScreen} />
       <Stack.Screen name={ROUTES.HELP} component={HelpScreen} />
       <Stack.Screen name={ROUTES.PREFERENCE} component={PreferenceScreen} />    
+      <Stack.Screen name={ROUTES.PAYMENT_CONFIRMATION} component={PaymentConfirmation} />
+      <Stack.Screen name={ROUTES.ABOUT_US} component={AboutUsScreen} />
+      <Stack.Screen name={ROUTES.INVITE} component={InviteScreen} />
     </Stack.Navigator>
   );
 };
