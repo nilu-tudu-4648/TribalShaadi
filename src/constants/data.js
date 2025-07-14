@@ -71,24 +71,30 @@ export const DRINKING_OPTIONS = [
 
 export const SMOKING_OPTIONS = ['No', 'Yes'];
 
-export const SETTLING_DOWN_OPTIONS = 
-  [
-    'Within 6 months',
-    'Within a year',
+export const SETTLING_DOWN_OPTIONS = [
+  'Within 6 months',
+  'Within a year',
   'Within 2 year',
   'Within 3 year',
   'Undecided',
 ];
 export const INTERESTS = [
-  '🍳 Cooking', '🖊️ Writing', '🎤 Singing',
-  '📷 Photography', '🎨 Painting',
-  '🎬 Movies & TV', '✂️ DIY Crafts',
-  '🛍️ Shopping', '🎉 Festival & Events',
-  '🍲 Food & Drinks', '🏕️ Camping',
-  '🥾 Trekking', '🌿 Wildlife & Nature',
-  '🛣️ Road & Travel', '🏍️ Motobiking',
+  '🍳 Cooking',
+  '🖊️ Writing',
+  '🎤 Singing',
+  '📷 Photography',
+  '🎨 Painting',
+  '🎬 Movies & TV',
+  '✂️ DIY Crafts',
+  '🛍️ Shopping',
+  '🎉 Festival & Events',
+  '🍲 Food & Drinks',
+  '🏕️ Camping',
+  '🥾 Trekking',
+  '🌿 Wildlife & Nature',
+  '🛣️ Road & Travel',
+  '🏍️ Motobiking',
 ];
-
 
 export const VALUES_OPTIONS = [
   'Kindness and empathy',

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -18,6 +18,9 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
+import { getCitiesUrl } from '../../constants/functions';
+import { getCities } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 // --- Local Svg Icons (Workaround) ---
 const SearchIcon = ({ size = 20, color = COLORS.textInactive }) => (
@@ -113,10 +116,18 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   onApply,
 }) => {
   const snapPoints = ['30%', '70%'];
+  const dispatch = useDispatch();
+  const { user, states } = useSelector(
+    (state: any) => state.entities.authReducer,
+  );
   const [localSelected, setLocalSelected] =
     useState<string[]>(selectedLocations);
   const [searchQuery, setSearchQuery] = useState('');
-
+  useEffect(() => {
+    if (localSelected.length > 0) {
+      dispatch(getCities(`${getCitiesUrl}?stateId=${localSelected[0]}`));
+    }
+  }, [localSelected, dispatch]);
   const filteredLocations = useMemo(() => {
     if (!searchQuery) return [];
     return allLocations.filter(

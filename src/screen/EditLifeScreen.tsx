@@ -10,9 +10,7 @@ import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, Size8 } from '../constants/Sizes';
 import {
   completeUserProfileV2Updated,
-  getStates,
   getCities,
-  getHeight,
   getDiet,
 } from '../store/reducers/authReducer';
 import {
@@ -20,9 +18,7 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
-  getStatesUrl,
   getCitiesUrl,
-  getHeightUrl,
   convertCmToReadableHeight,
   getDietUrl,
 } from '../constants/functions';
@@ -74,8 +70,6 @@ const EditLifeScreen = () => {
 
   // Fetch states when component mounts
   useEffect(() => {
-    dispatch(getStates(getStatesUrl));
-    dispatch(getHeight(getHeightUrl));
     dispatch(getDiet(getDietUrl));
   }, [dispatch]);
 

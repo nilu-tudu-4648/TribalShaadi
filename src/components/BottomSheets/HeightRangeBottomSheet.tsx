@@ -23,12 +23,16 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface HeightRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedHeightRange: { min: number; max: number }; // in total inches
   onSelectionChange: (range: { min: number; max: number }) => void;
   onApply: (range: { min: number; max: number }) => void;
+  heightOptions: any[];
 }
 
 const formatHeight = (totalInches: number) => {
@@ -42,10 +46,12 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   selectedHeightRange,
   onSelectionChange,
   onApply,
+  heightOptions
 }) => {
   const snapPoints = ['30%', '30%'];
   const [localHeightRange, setLocalHeightRange] = useState(selectedHeightRange);
-
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const MIN_HEIGHT_INCHES = 4 * 12; // 4ft 0in
   const MAX_HEIGHT_INCHES = 7 * 12; // 7ft 0in
   const SLIDER_WIDTH = Dimensions.get('window').width - 64;
@@ -116,8 +122,24 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     width: maxThumbPosition.value - minThumbPosition.value,
   }));
 
-  const handleApply = () => {
-    onApply(localHeightRange);
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pFromHeight: localHeightRange.min,
+        pToHeight: localHeightRange.max,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+      onApply(localHeightRange);
+    }
   };
 
   const handleSheetChanges = (index: number) => {

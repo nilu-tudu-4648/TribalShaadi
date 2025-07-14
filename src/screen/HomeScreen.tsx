@@ -17,6 +17,13 @@ import {
   getProposalsSendByMeUrl,
   getUserDetailsUrl,
   sendProposalUrl,
+  getReligionUrl,
+  getMaritalStatusUrl,
+  getCommunityUrl,
+  getHeightUrl,
+  getDietUrl,
+  getPassedUsersUrl,
+  getStatesUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import GradientLoader from '../components/GradientLoader';
@@ -24,11 +31,13 @@ import AppText from '../components/AppText';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
+  getPassedUsersApi,
   getProposalsSendByMeApi,
   sentProposalApi,
   setMatchedUserApi,
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
+import { getCommunity, getDiet, getHeight, getMaritalStatus, getReligion, getStates } from '../store/reducers/authReducer';
 
 const { width } = Dimensions.get('window');
 
@@ -38,11 +47,17 @@ const HomeScreen = () => {
   );
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
-  console.log(currentMatchedUser, 'currentMatchedUser');
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
-
+  useEffect(() => {
+    dispatch(getCommunity(getCommunityUrl));
+    dispatch(getMaritalStatus(getMaritalStatusUrl));
+    dispatch(getReligion(getReligionUrl));
+    dispatch(getHeight(getHeightUrl));
+    dispatch(getDiet(getDietUrl));
+    dispatch(getStates(getStatesUrl));
+  }, [dispatch]);
   useEffect(() => {
     if (matchedUsers && matchedUsers.length > currentIndex) {
       dispatch(
@@ -69,6 +84,7 @@ const HomeScreen = () => {
         proposalUserId: id,
       }),
     );
+    dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     if (currentIndex < matchedUsers.length - 1) {
       setCurrentIndex(currentIndex + 1);

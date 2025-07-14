@@ -18,6 +18,9 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface JobTypeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -42,7 +45,8 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const snapPoints = ['50%'];
   const [localSelected, setLocalSelected] =
     useState<string[]>(selectedJobTypes);
-
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     setLocalSelected(selectedJobTypes);
   }, [selectedJobTypes]);
@@ -66,9 +70,24 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
     setLocalSelected(updated);
   };
 
-  const handleApply = () => {
-    onApply(localSelected);
-    bottomSheetRef.current?.close();
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pOccupationId: localSelected,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+
+      onApply(localSelected);
+    }
   };
 
   const handleSheetChanges = (index: number) => {

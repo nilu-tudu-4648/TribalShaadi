@@ -19,12 +19,21 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../../constants/functions';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedStatuses: string[];
   onSelectionChange: (statuses: string[]) => void;
   onApply: (statuses: string[]) => void;
+  maritalOptions: string[] | undefined;
 }
 
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
@@ -32,17 +41,13 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   selectedStatuses,
   onSelectionChange,
   onApply,
+  maritalOptions,
 }) => {
   const snapPoints = ['30%', '30%'];
-  const [localSelectedStatuses, setLocalSelectedStatuses] = useState<string[]>(selectedStatuses);
-
-  const maritalOptions = [
-    'Never Married',
-    'Divorced',
-    'Widowed',
-    'Awaiting Divorce',
-  ];
-
+  const [localSelectedStatuses, setLocalSelectedStatuses] =
+    useState<string[]>(selectedStatuses);
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string) => {
     let updatedStatuses;
     if (localSelectedStatuses.includes(status)) {
@@ -54,9 +59,24 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
     onSelectionChange(updatedStatuses);
   };
 
-  const handleApply = () => {
-    onApply(localSelectedStatuses);
-    bottomSheetRef.current?.close();
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pMaritalStatusId: localSelectedStatuses,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+
+      onApply(localSelectedStatuses);
+    }
   };
 
   const handleSheetChanges = (index: number) => {
@@ -93,12 +113,12 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
           </View>
 
           <View style={styles.optionsContainer}>
-            {maritalOptions.map(option => (
+            {maritalOptions?.map((option: any) => (
               <AppChip
-                key={option}
-                title={option}
-                isSelected={localSelectedStatuses.includes(option)}
-                onPress={() => handleStatusToggle(option)}
+                key={option.id}
+                title={option.name}
+                isSelected={localSelectedStatuses.includes(option.id)}
+                onPress={() => handleStatusToggle(option.id)}
                 style={styles.optionChip}
               />
             ))}
@@ -168,4 +188,4 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
   },
-}); 
+});

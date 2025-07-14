@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -17,12 +17,25 @@ import {
   fontSize20,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import {
+  getCommunityUrl,
+  updateUrl,
+  getUserDetailsApi,
+  setReducerLoadingfalse,
+  getUserDetailsUrl,
+} from '../../constants/functions';
+import {
+  completeUserProfileV2Updated,
+  getCommunity,
+} from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedReligion: string;
   onSelectionChange: (religion: string) => void;
   onApply: (religion: string) => void;
+  religionOptions: any[];
 }
 
 const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
@@ -30,33 +43,47 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   selectedReligion,
   onSelectionChange,
   onApply,
+  religionOptions,
 }) => {
   const snapPoints = ['30%', '50%'];
-  const [localSelectedReligion, setLocalSelectedReligion] = useState<string>(selectedReligion);
-
-  const religionOptions = [
-    'Christian AG Church',
-    'Christian CNI',
-    'Christian CSI',
-    'Christian GEL',
-    'Christian NWGEL',
-    'Christian Others',
-    'Christian Pentecostal Church',
-    'Sarna',
-    'Gond',
-    'Pradhan',
-    'Tribal Belief',
-  ];
-
+  const [localSelectedReligion, setLocalSelectedReligion] =
+    useState<string>(selectedReligion);
+  const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
+    string | null
+  >(null);
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusSelect = (religion: string) => {
     setLocalSelectedReligion(religion);
     onSelectionChange(religion);
   };
+  // Load communities when religion is selected
+  useEffect(() => {
+    if (localSelectedReligionId) {
+      dispatch(
+        getCommunity(`${getCommunityUrl}religionId=${localSelectedReligionId}`),
+      );
+    }
+  }, [dispatch, localSelectedReligionId]);
 
-  const handleApply = () => {
-    onApply(localSelectedReligion);
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pReligionId: localSelectedReligionId,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+      onApply(localSelectedReligion);
+    }
   };
-
   const handleSheetChanges = (index: number) => {
     if (index === -1) {
       handleApply();
@@ -83,19 +110,22 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.headerContainer}>
           <AppText text="Religion" textStyle={styles.headerTitle} />
-          <AppText 
-            text="Select one which applies" 
-            textStyle={styles.headerSubtitle} 
+          <AppText
+            text="Select one which applies"
+            textStyle={styles.headerSubtitle}
           />
         </View>
 
         <View style={styles.optionsContainer}>
-          {religionOptions.map((option) => (
+          {religionOptions.map(option => (
             <AppChip
-              key={option}
-              title={option}
-              isSelected={localSelectedReligion === option}
-              onPress={() => handleStatusSelect(option)}
+              key={option.id}
+              title={option.name}
+              isSelected={localSelectedReligion === option.name}
+              onPress={() => {
+                setLocalSelectedReligionId(option.id);
+                handleStatusSelect(option.name);
+              }}
               style={styles.optionChip}
             />
           ))}
@@ -150,4 +180,4 @@ const styles = StyleSheet.create({
   optionChip: {
     alignItems: 'center',
   },
-}); 
+});

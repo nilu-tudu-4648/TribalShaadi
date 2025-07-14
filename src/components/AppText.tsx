@@ -1,17 +1,28 @@
-import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 import React from 'react';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TextProps,
+} from 'react-native';
 import { fontSize16 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import FONT_FAMILY from '../constants/Fonts';
 
-const AppText = ({
-  text,
-  textStyle,
-}: {
-  text: string;
+interface AppTextProps extends TextProps {
+  text?: string;
+  children?: React.ReactNode;
   textStyle?: StyleProp<TextStyle>;
-}) => {
-  return <Text style={[styles.text, textStyle]}>{text}</Text>;
+  useChildren?: boolean; // 🔑 Flag to toggle child-based rendering
+}
+
+const AppText = ({ text, children, textStyle, useChildren = false, ...rest }: AppTextProps) => {
+  return (
+    <Text style={[styles.text, textStyle]} {...rest}>
+      {useChildren ? children : text}
+    </Text>
+  );
 };
 
 export default AppText;

@@ -18,57 +18,68 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import { SETTLING_DOWN_OPTIONS } from '../../constants/data';
+import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedJobTypes: string[];
-  onApply: (jobTypes: string[]) => void;
+  selectedsettleTypes: string[];
+  onApply: (settleTypes: string[]) => void;
 }
-
-const jobTypeOptions = [
-  'Government / Public Sector',
-  'Business / Self Employed',
-  'Private Company',
-  'Civil Services',
-  'Defence',
-  'Any',
-];
 
 const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
   bottomSheetRef,
-  selectedJobTypes,
+  selectedsettleTypes,
   onApply,
 }) => {
   const snapPoints = ['50%'];
   const [localSelected, setLocalSelected] =
-    useState<string[]>(selectedJobTypes);
-
+    useState<string[]>(selectedsettleTypes);
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalSelected(selectedJobTypes);
-  }, [selectedJobTypes]);
+    setLocalSelected(selectedsettleTypes);
+  }, [selectedsettleTypes]);
 
-  const handleToggle = (jobType: string) => {
+  const handleToggle = (settleType: string) => {
     let updated: string[];
-    if (jobType === 'Any') {
+    if (settleType === 'Any') {
       updated = localSelected.includes('Any') ? [] : ['Any'];
     } else {
       const anyIndex = localSelected.indexOf('Any');
       if (anyIndex > -1) {
-        updated = [jobType];
+        updated = [settleType];
       } else {
-        if (localSelected.includes(jobType)) {
-          updated = localSelected.filter(j => j !== jobType);
+        if (localSelected.includes(settleType)) {
+          updated = localSelected.filter(j => j !== settleType);
         } else {
-          updated = [...localSelected, jobType];
+          updated = [...localSelected, settleType];
         }
       }
     }
     setLocalSelected(updated);
   };
 
-  const handleApply = () => {
-    onApply(localSelected);
-    bottomSheetRef.current?.close();
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pSettlingDown: localSelected,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+
+      onApply(localSelected);
+    }
   };
 
   const handleSheetChanges = (index: number) => {
@@ -104,7 +115,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
         </View>
 
         <View style={styles.chipsContainer}>
-          {jobTypeOptions.map(option => (
+          {SETTLING_DOWN_OPTIONS.map(option => (
             <AppChip
               key={option}
               title={option}

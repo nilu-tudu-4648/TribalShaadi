@@ -1,11 +1,10 @@
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
-import React, { useRef, useState } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppScrollView from '../components/AppScrollView';
 import AppText from '../components/AppText';
-import {COLORS} from '../constants/AppColors';
+import { COLORS } from '../constants/AppColors';
 import Fonts from '../constants/Fonts';
-import HeaderBack from '../components/HeaderBack';
 import MaritalStatusBottomSheet from '../components/BottomSheets/MaritalStatusBottomSheet';
 import AgeRangeBottomSheet from '../components/BottomSheets/AgeRangeBottomSheet';
 import ReligionBottomSheet from '../components/BottomSheets/ReligionBottomSheet';
@@ -18,19 +17,21 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import {
   borderWidth,
   fontSize14,
-  fontSize16,
+  fontSize18,
   fontSize22,
-  Size10,
   Size12,
   Size14,
-  Size16,
-  Size20,
-  Size4,
+  Size25,
   Size8,
 } from '../constants/Sizes';
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
+import AppHeader from '../components/AppHeader';
+import { useSelector } from 'react-redux';
+import GradientLoader from '../components/GradientLoader';
 
 const PreferenceScreen = () => {
+  const { user, maritalStatuses, religion, community, height, loader } =
+    useSelector((state: any) => state.entities.authReducer);
   const maritalStatusBottomSheetRef = useRef<BottomSheet>(null);
   const ageRangeBottomSheetRef = useRef<BottomSheet>(null);
   const religionBottomSheetRef = useRef<BottomSheet>(null);
@@ -39,15 +40,41 @@ const PreferenceScreen = () => {
   const locationBottomSheetRef = useRef<BottomSheet>(null);
   const jobTypeBottomSheetRef = useRef<BottomSheet>(null);
   const settleDownBottomSheetRef = useRef<BottomSheet>(null);
-  const [selectedMaritalStatuses, setSelectedMaritalStatuses] = useState<string[]>(['Never Married']);
-  const [selectedAgeRange, setSelectedAgeRange] = useState<{ min: number; max: number }>({ min: 20, max: 45 });
+  const [selectedMaritalStatuses, setSelectedMaritalStatuses] = useState<
+    string[]
+  >([]);
+  const [selectedAgeRange, setSelectedAgeRange] = useState<{
+    min: number;
+    max: number;
+  }>({ min: 20, max: 45 });
   const [selectedReligion, setSelectedReligion] = useState<string>('Sarna');
-  const [selectedHeightRange, setSelectedHeightRange] = useState<{ min: number; max: number }>({ min: 5*12+5, max: 6*12+5 }); // 5ft 5in to 6ft 5in
+  const [selectedHeightRange, setSelectedHeightRange] = useState<{
+    min: number;
+    max: number;
+  }>({ min: 5 * 12 + 5, max: 6 * 12 + 5 }); // 5ft 5in to 6ft 5in
   const [selectedTribes, setSelectedTribes] = useState<string[]>(['Any']);
   const [selectedLocations, setSelectedLocations] = useState<string[]>(['Any']);
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(['Any']);
-  const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>(['Any']);
-
+  const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
+    'Any',
+  ]);
+  useEffect(() => {
+    if (user?.maritalStatus) {
+      // setSelectedMaritalStatuses([user.maritalStatus]);
+    }
+    if (user?.religion) {
+      // setSelectedReligion(user.religion);
+    }
+    if (user?.community) {
+      // setSelectedTribes([user.community]);
+    }
+    if (user?.pFromAge) {
+      setSelectedAgeRange({ min: user.pFromAge, max: user.pToAge });
+    }
+    if (user?.height) {
+      // setSelectedHeightRange({ min: user.pFromHeight, max: user.pToHeight });
+    }
+  }, [user]);
   const getMaritalStatusValue = () => {
     if (selectedMaritalStatuses.length === 0) return 'None';
     if (selectedMaritalStatuses.length === 1) return selectedMaritalStatuses[0];
@@ -65,7 +92,9 @@ const PreferenceScreen = () => {
   };
 
   const getHeightRangeValue = () => {
-    return `${formatHeight(selectedHeightRange.min)} - ${formatHeight(selectedHeightRange.max)}`;
+    return `${formatHeight(selectedHeightRange.min)} - ${formatHeight(
+      selectedHeightRange.max,
+    )}`;
   };
 
   const getTribeValue = () => {
@@ -83,7 +112,7 @@ const PreferenceScreen = () => {
 
   const getLocationValue = () => {
     if (selectedLocations.includes('Any')) {
-        return 'Any';
+      return 'Any';
     }
     if (selectedLocations.length === 0) {
       return 'None';
@@ -121,17 +150,21 @@ const PreferenceScreen = () => {
   };
 
   const mandatoryPreferences = [
-    {title: 'Marital Status', value: getMaritalStatusValue(), isClickable: true},
-    {title: 'Age', value: getAgeRangeValue(), isClickable: true},
-    {title: 'Religion', value: selectedReligion, isClickable: true},
-    {title: 'Height', value: getHeightRangeValue(), isClickable: true},
+    {
+      title: 'Marital Status',
+      value: getMaritalStatusValue(),
+      isClickable: true,
+    },
+    { title: 'Age', value: getAgeRangeValue(), isClickable: true },
+    { title: 'Religion', value: selectedReligion, isClickable: true },
+    { title: 'Height', value: getHeightRangeValue(), isClickable: true },
   ];
 
   const secondaryPreferences = [
-    {title: 'Tribe', value: getTribeValue(), isClickable: true},
-    {title: 'Location', value: getLocationValue(), isClickable: true},
-    {title: 'Job type', value: getJobTypeValue(), isClickable: true},
-    {title: 'Settle Down', value: getSettleDownValue(), isClickable: true},
+    { title: 'Tribe', value: getTribeValue(), isClickable: true },
+    { title: 'Location', value: getLocationValue(), isClickable: true },
+    { title: 'Job type', value: getJobTypeValue(), isClickable: true },
+    { title: 'Settle Down', value: getSettleDownValue(), isClickable: true },
   ];
 
   const handleMaritalStatusPress = () => {
@@ -168,6 +201,7 @@ const PreferenceScreen = () => {
 
   const handleReligionApply = (religion: string) => {
     setSelectedReligion(religion);
+    setSelectedTribes([]);
   };
 
   const handleHeightRangePress = () => {
@@ -218,7 +252,15 @@ const PreferenceScreen = () => {
     setSelectedSettleDown(options);
   };
 
-  const PreferenceCard = ({title, value, isClickable = false}: {title: string; value: string; isClickable?: boolean}) => {
+  const PreferenceCard = ({
+    title,
+    value,
+    isClickable = false,
+  }: {
+    title: string;
+    value: string;
+    isClickable?: boolean;
+  }) => {
     const handlePress = () => {
       if (isClickable) {
         if (title === 'Marital Status') {
@@ -242,13 +284,13 @@ const PreferenceScreen = () => {
     };
 
     return (
-      <TouchableOpacity 
-        style={[styles.card, isClickable && styles.clickableCard]} 
+      <TouchableOpacity
+        style={[styles.card, isClickable && styles.clickableCard]}
         onPress={handlePress}
         disabled={!isClickable}
         activeOpacity={isClickable ? 0.7 : 1}
       >
-        <View>
+        <View style={{ width: '80%' }}>
           <AppText text={title} textStyle={styles.cardTitle} />
           <AppText text={value} textStyle={styles.cardValue} />
         </View>
@@ -257,14 +299,21 @@ const PreferenceScreen = () => {
     );
   };
 
-  return (
-    <AppSafeView style={{padding: 0}}>
+  return loader ? (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <GradientLoader size={Size25*2} />
+    </View>
+  ) : (
+    <AppSafeView style={{ padding: 0 }}>
       <View style={styles.header}>
-        <HeaderBack />
-        <AppText text="Preferences" textStyle={styles.headerTitle} />
-        <TouchableOpacity style={styles.resetButton}>
-          <AppText text="Reset" textStyle={styles.resetButtonText} />
-        </TouchableOpacity>
+        <AppHeader
+          title="Preferences"
+          rightButton={
+            <TouchableOpacity style={styles.resetButton}>
+              <AppText text="Reset" textStyle={styles.resetButtonText} />
+            </TouchableOpacity>
+          }
+        />
       </View>
 
       <AppScrollView style={{}}>
@@ -274,11 +323,17 @@ const PreferenceScreen = () => {
               text="My mandatory preferences"
               textStyle={styles.sectionTitle}
             />
-            <AppText
-              text="The matches you'll receive will exactly meet the mandatory
-              preferences"
-              textStyle={styles.sectionDescription}
-            />
+            <AppText useChildren textStyle={styles.sectionDescription}>
+              The matches you'll receive will{' '}
+              <AppText useChildren textStyle={{ color: COLORS.secondaryText }}>
+                exactly
+              </AppText>{' '}
+              meet the{' '}
+              <AppText useChildren textStyle={{ color: COLORS.secondaryText }}>
+                mandatory preferences.
+              </AppText>
+            </AppText>
+
             <View style={styles.cardContainer}>
               {mandatoryPreferences.map((item, index) => (
                 <PreferenceCard
@@ -314,14 +369,15 @@ const PreferenceScreen = () => {
           </View>
         </View>
       </AppScrollView>
-      
+
       <MaritalStatusBottomSheet
         bottomSheetRef={maritalStatusBottomSheetRef}
         selectedStatuses={selectedMaritalStatuses}
         onSelectionChange={handleMaritalStatusChange}
         onApply={handleMaritalStatusApply}
+        maritalOptions={maritalStatuses}
       />
-      
+
       <AgeRangeBottomSheet
         bottomSheetRef={ageRangeBottomSheetRef}
         selectedAgeRange={selectedAgeRange}
@@ -332,6 +388,7 @@ const PreferenceScreen = () => {
       <ReligionBottomSheet
         bottomSheetRef={religionBottomSheetRef}
         selectedReligion={selectedReligion}
+        religionOptions={religion}
         onSelectionChange={handleReligionChange}
         onApply={handleReligionApply}
       />
@@ -341,11 +398,13 @@ const PreferenceScreen = () => {
         selectedHeightRange={selectedHeightRange}
         onSelectionChange={handleHeightRangeChange}
         onApply={handleHeightRangeApply}
+        heightOptions={height}
       />
 
       <TribeBottomSheet
         bottomSheetRef={tribeBottomSheetRef}
         selectedTribes={selectedTribes}
+        tribeOptions={community}
         onSelectionChange={handleTribeChange}
         onApply={handleTribeApply}
       />
@@ -364,7 +423,7 @@ const PreferenceScreen = () => {
 
       <SettleDownBottomSheet
         bottomSheetRef={settleDownBottomSheetRef}
-        selectedJobTypes={selectedJobTypes}
+        selectedsettleTypes={selectedSettleDown}
         onApply={handleSettleDownApply}
       />
     </AppSafeView>
@@ -374,26 +433,20 @@ const PreferenceScreen = () => {
 export default PreferenceScreen;
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Size14,
-    paddingVertical: Size10,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-  },
+  header: {},
   headerTitle: {
     fontSize: fontSize22,
     fontFamily: Fonts.OPEN_SANS_BOLD,
     color: COLORS.textBlack,
   },
   resetButton: {
+    width: '45%',
     backgroundColor: COLORS.black,
-    paddingHorizontal: Size16,
     paddingVertical: Size8,
     borderRadius: Size8,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   resetButtonText: {
     color: COLORS.white,
@@ -402,39 +455,39 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: Size14,
+    gap: Size14,
   },
   section: {
-    marginBottom: Size20,
+    gap: Size12,
   },
   sectionTitle: {
-    fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
-    color: COLORS.textBlack,
-    marginBottom: Size4,
+    fontSize: fontSize18,
+    fontFamily: Fonts.OPEN_SANS_SEMI_CONDENSED_BOLD,
+    color: COLORS.black,
+    letterSpacing: 0.9,
   },
   sectionDescription: {
     fontSize: fontSize14,
     fontFamily: Fonts.OPEN_SANS_REGULAR,
-    color: COLORS.textInactive,
-    marginBottom: Size12,
+    color: COLORS.secondaryText,
   },
   cardContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: Size12,
   },
   card: {
     width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: Size12,
     padding: Size12,
-    marginBottom: Size12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
   },
@@ -451,6 +504,5 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     fontFamily: Fonts.OPEN_SANS_BOLD,
     color: COLORS.textBlack,
-    marginTop: Size4,
   },
 });

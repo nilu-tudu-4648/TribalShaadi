@@ -19,6 +19,9 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import Svg, { Path } from 'react-native-svg';
+import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Workaround: Defining Checkbox component locally due to issues with SvgIcons.jsx
 const Checkbox = ({ isChecked, size = Size25 }: { isChecked: boolean, size?: number }) => {
@@ -49,49 +52,56 @@ interface TribeBottomSheetProps {
   selectedTribes: string[];
   onSelectionChange: (tribes: string[]) => void;
   onApply: (tribes: string[]) => void;
+  tribeOptions: any[];
 }
 
-const tribeOptions = [
-  'Any', 'Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7', 'Option 8', 'Option 9', 'Option 10', 'Option 11'
-];
 
 const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   bottomSheetRef,
   selectedTribes,
   onSelectionChange,
   onApply,
+  tribeOptions,
 }) => {
   const snapPoints = ['60%', '85%'];
   const [localSelectedTribes, setLocalSelectedTribes] = useState<string[]>(selectedTribes);
-
+  const [localSelectedTribeId, setLocalSelectedTribeId] = useState<string[]>([]);   
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     setLocalSelectedTribes(selectedTribes);
   }, [selectedTribes]);
 
-  const handleTribeToggle = (tribe: string) => {
+    const handleTribeToggle = (tribe: any) => {
     let updatedTribes: string[];
-
-    if (tribe === 'Any') {
-      updatedTribes = localSelectedTribes.includes('Any') ? [] : ['Any'];
+    if (localSelectedTribeId.includes(tribe.id)) {
+      updatedTribes = localSelectedTribeId.filter(t => t !== tribe.id);
+      setLocalSelectedTribeId(updatedTribes);
     } else {
-      const anyIndex = localSelectedTribes.indexOf('Any');
-      if (anyIndex > -1) {
-        // If 'Any' is selected, selecting another tribe deselects 'Any'
-        updatedTribes = [tribe];
-      } else {
-        if (localSelectedTribes.includes(tribe)) {
-          updatedTribes = localSelectedTribes.filter(t => t !== tribe);
-        } else {
-          updatedTribes = [...localSelectedTribes, tribe];
-        }
-      }
+      updatedTribes = [...localSelectedTribeId, tribe.id];
     }
+    setLocalSelectedTribeId(updatedTribes);
     setLocalSelectedTribes(updatedTribes);
     onSelectionChange(updatedTribes);
   };
 
-  const handleApply = () => {
-    onApply(localSelectedTribes);
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pCommunityId: localSelectedTribes,
+      };
+      console.log('requestBody', requestBody);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+      onApply(localSelectedTribes);
+    }
   };
   
   const handleSheetChanges = (index: number) => {
@@ -100,8 +110,8 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
     }
   };
 
-  const renderItem = ({ item }: { item: string }) => {
-    const isSelected = localSelectedTribes.includes(item);
+  const renderItem = ({ item }: { item: any }) => {
+    const isSelected = localSelectedTribeId.includes(item.id);
     return (
       <TouchableOpacity 
         style={styles.optionRow}
@@ -109,7 +119,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
         activeOpacity={0.7}
       >
         <Checkbox isChecked={isSelected} />
-        <AppText text={item} textStyle={styles.optionText} />
+        <AppText text={item.name} textStyle={styles.optionText} />
       </TouchableOpacity>
     );
   };
@@ -143,7 +153,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
         <FlatList
           data={tribeOptions}
           renderItem={renderItem}
-          keyExtractor={item => item}
+          keyExtractor={item => item.id}
           style={styles.list}
           showsVerticalScrollIndicator={false}
         />

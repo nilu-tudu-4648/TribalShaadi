@@ -18,7 +18,6 @@ import {
   SelfieVerifiedIcon,
   GovtIdIcon,
   GiftIcon,
-  SlidersIcon,
   InfoIcon,
   HeadphonesIcon,
   SettingsIcon,
@@ -26,6 +25,7 @@ import {
 } from '../components/svg/SvgIcons';
 import { useSelector } from 'react-redux';
 import { imageUrl } from '../constants/functions';
+import { PreferenceIcon } from '../components/svg/SvgIcons2';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -65,7 +65,7 @@ const badgeData: BadgeData[] = [
 const actionButtons: ActionButton[] = [
   { key: 'plan', label: 'My Plan', icon: RocketIcon, route: ROUTES.UPGRADE },
   { key: 'invite', label: 'Invite', icon: GiftIcon },
-  { key: 'preference', label: 'Preference', icon: SlidersIcon },
+  { key: 'preference', label: 'Preference', icon: PreferenceIcon, route: ROUTES.PREFERENCE },
   { key: 'about', label: 'About Us', icon: InfoIcon },
   { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
   {

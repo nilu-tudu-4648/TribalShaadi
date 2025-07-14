@@ -46,7 +46,6 @@ export const checkUserLoggedIn = async dispatch => {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
 
     if (!userDataString) {
-      console.log('No user data found in storage - checkUserLoggedIn');
       navigate(ROUTES.WELCOME);
       return;
     }
@@ -101,16 +100,13 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     }
   } catch (error) {
     setError('Incorrect OTP, please enter the valid OTP you received');
-    // if (error.response && error.response.data && error.response.data.status === 401) {
-    //   logoutUser(dispatch);
-    // }
     console.log(error);
   }
 };
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token');
+    // console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -196,9 +192,6 @@ export const checkAuth = async dispatch => {
         return;
       }
     }
-
-    // All checks passed - user profile is complete
-    console.log('User profile is complete');
     return true;
   } catch (error) {
     console.error('Error in checkAuth:', error);

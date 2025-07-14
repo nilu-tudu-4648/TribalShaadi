@@ -316,7 +316,6 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
   },
   buttonContainer: {
-    height: 50,
     paddingVertical: Size12,
   },
   continueButton: {

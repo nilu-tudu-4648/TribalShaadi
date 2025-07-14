@@ -42,7 +42,6 @@ const InterestScreen = () => {
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
-  console.log(passedUsers, 'passedUsers');
   const handleCardPress = () => {
     bottomSheetRef.current?.expand(); // Open the bottom sheet
   };

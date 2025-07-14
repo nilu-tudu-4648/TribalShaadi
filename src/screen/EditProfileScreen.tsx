@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   scrollContent: {
-    gap: lignHeight43,
+    gap: Size12,
     paddingBottom: Size20,
   },
   header: {

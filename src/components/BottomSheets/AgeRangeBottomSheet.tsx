@@ -23,6 +23,14 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
+import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  updateUrl,
+} from '../../constants/functions';
+import { setReducerLoadingfalse } from '../../constants/functions';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface AgeRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -39,7 +47,8 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
 }) => {
   const snapPoints = ['30%', '30%'];
   const [localAgeRange, setLocalAgeRange] = useState(selectedAgeRange);
-
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const MIN_AGE = 18;
   const MAX_AGE = 65;
   const SLIDER_WIDTH = Dimensions.get('window').width - 64; // Account for padding
@@ -108,8 +117,23 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     width: maxThumbPosition.value - minThumbPosition.value,
   }));
 
-  const handleApply = () => {
-    onApply(localAgeRange);
+  const handleApply = async () => {
+    try {
+      const requestBody = {
+        id: user.id,
+        pFromAge: localAgeRange.min,
+        pToAge: localAgeRange.max,
+      };
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      bottomSheetRef.current?.close();
+      onApply(localAgeRange);
+    }
   };
 
   const handleSheetChanges = (index: number) => {

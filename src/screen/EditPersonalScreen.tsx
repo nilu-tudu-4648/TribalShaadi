@@ -12,14 +12,10 @@ import { Size20, Size25, Size8, fontSize24 } from '../constants/Sizes';
 import { MOTHER_TONGUE } from '../constants/data';
 import {
   getCommunity,
-  getMaritalStatus,
-  getReligion,
   completeUserProfileV2Updated,
 } from '../store/reducers/authReducer';
 import {
   getCommunityUrl,
-  getMaritalStatusUrl,
-  getReligionUrl,
   updateUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
@@ -48,11 +44,6 @@ const EditPersonalScreen = () => {
   const { user, loader, community, maritalStatuses, religion } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-
-  // Load religions on component mount
-  useEffect(() => {
-    dispatch(getReligion(getReligionUrl));
-  }, [dispatch]);
 
   // Load communities when religion is selected
   useEffect(() => {
@@ -132,13 +123,6 @@ const EditPersonalScreen = () => {
       }
     }
   }, [user]);
-
-  // Fetch initial data
-  useEffect(() => {
-    dispatch(getCommunity(getCommunityUrl));
-    dispatch(getMaritalStatus(getMaritalStatusUrl));
-    dispatch(getReligion(getReligionUrl));
-  }, [dispatch]);
 
   // Handle religion selection
   const handleReligionSelection = useCallback((religionItem: any) => {
