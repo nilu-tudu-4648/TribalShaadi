@@ -49,5 +49,9 @@ export const COLORS = {
   lightgrey:"#F5F4F6",
   aboutText:"#37264C",
   cardBg:"#F8F2FF",
-  cardBg1:"#8259B3"
+  cardBg1:"#8259B3",
+  borderLight3:"#E7E7E7",
+  borderLight4:"#EAECEF",
+  recivedBackground:"#00A3FF",
+  matchBg:"#C799FF"
 };

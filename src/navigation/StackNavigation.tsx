@@ -14,6 +14,8 @@ import PreferenceScreen from '../screen/PreferenceScreen';
 import PaymentConfirmation from '../screen/PaymentConfirmation';
 import AboutUsScreen from '../screen/AboutUsScreen';
 import InviteScreen from '../screen/InviteScreen';
+import ConversationsScreen from '../screen/ConversationsScreen';
+import MathcingScreen from '../screen/MathcingScreen';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -35,6 +37,8 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.PAYMENT_CONFIRMATION} component={PaymentConfirmation} />
       <Stack.Screen name={ROUTES.ABOUT_US} component={AboutUsScreen} />
       <Stack.Screen name={ROUTES.INVITE} component={InviteScreen} />
+      <Stack.Screen name={ROUTES.CONVERSATIONS} component={ConversationsScreen} />
+      <Stack.Screen name={ROUTES.MATCHING} component={MathcingScreen} />
     </Stack.Navigator>
   );
 };

@@ -45,6 +45,7 @@ export const Size16 = screenWidth("3.7%");
 export const Size17 = screenWidth("4%");
 export const Size18 = screenWidth("4.6%");
 export const Size20 = screenWidth("4.8%");
+export const Size22 = screenWidth("5%");
 export const Size25 = screenWidth("6%");
 export const lignHeight20 = screenWidth("4.7%");
 export const lignHeight21 = screenWidth("4.9%");

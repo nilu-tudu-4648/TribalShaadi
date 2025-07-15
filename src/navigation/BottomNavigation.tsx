@@ -11,19 +11,27 @@ import {
 } from '../components/svg/SvgIcons';
 import { COLORS } from '../constants/AppColors';
 import { fontSize12, Size20, Size25 } from '../constants/Sizes';
+import { View } from 'react-native';
+import NotifiNumberChip from '../components/chips/NotifiNumberChip';
+import { ROUTES } from '../constants/data';
 
 const Tab = createBottomTabNavigator();
 
 const getTabBarIcon = (route: any, focused: boolean) => {
   const iconColor = focused ? COLORS.white : COLORS.navBarInactive;
   switch (route.name) {
-    case 'Home':
+    case ROUTES.HOME_TAB:
       return <HomeIcon color={iconColor} width={Size25} height={Size25} />;
-    case 'Interests':
+    case ROUTES.INTEREST:
       return <HeartIcon color={iconColor} width={Size25} height={Size20} />;
-    case 'Chat':
-      return <ChatIcon color={iconColor} width={Size20} height={Size20} />;
-    case 'Account':
+    case ROUTES.CHAT:
+      return (
+        <View>
+          <ChatIcon color={iconColor} width={Size20} height={Size20} />
+          <NotifiNumberChip number={1} />
+        </View>
+      );
+    case ROUTES.ACCOUNT_TAB:
       return <AccountIcon color={iconColor} width={Size25} height={Size20} />;
     default:
       return null;
@@ -47,10 +55,10 @@ function BottomNavigation() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Interests" component={InterestScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Account" component={AccountScreen} />
+      <Tab.Screen name={ROUTES.HOME_TAB} component={HomeScreen} />
+      <Tab.Screen name={ROUTES.INTEREST} component={InterestScreen} />
+      <Tab.Screen name={ROUTES.CHAT} component={ChatScreen} />
+      <Tab.Screen name={ROUTES.ACCOUNT_TAB} component={AccountScreen} />
     </Tab.Navigator>
   );
 }

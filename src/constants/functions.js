@@ -39,6 +39,7 @@ export const getProposalsGotByMeUrl = 'app/proposals/getProposalsGotByMe';
 export const getPassedUsersUrl = 'app/proposals/getPassedUsers';
 export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
+export const getSelectedUserUrl = 'app/users/viewUserDetail';
 
 // https://api.tribalshaadi.co.in/content/user/24/9.jpeg
 export const checkUserLoggedIn = async dispatch => {
@@ -252,24 +253,40 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
   }
 };
 
-  // Function to convert height in cm to readable format
-  export const convertCmToReadableHeight = (cm) => {
-    const feet = Math.floor(cm / 30.48);
-    const inches = Math.round((cm / 30.48 - feet) * 12);
-    return `${feet}'${inches}"`;
-  };
+// Function to convert height in cm to readable format
+export const convertCmToReadableHeight = cm => {
+  const feet = Math.floor(cm / 30.48);
+  const inches = Math.round((cm / 30.48 - feet) * 12);
+  return `${feet}'${inches}"`;
+};
 
-  export const getCitiesByStateId = async (stateId) => {
-    try {
-      const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-      const response = await axios.get(`${baseUrl}/${getCitiesUrl}?stateId=${stateId}`,{
+export const getCitiesByStateId = async stateId => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.get(
+      `${baseUrl}/${getCitiesUrl}?stateId=${stateId}`,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-      return response.data.recordList;
-    } catch (error) {
-      console.log(error, 'getCitiesByStateId');
-      return [];
-    }
-  };
+      },
+    );
+    return response.data.recordList;
+  } catch (error) {
+    console.log(error, 'getCitiesByStateId');
+    return [];
+  }
+};
+export const resetPreferenceApi = async data => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(`${baseUrl}/${updateUrl}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(response, 'resetPreferenceApi');
+  } catch (error) {
+    console.log(error, 'resetPreferenceApi');
+  }
+};

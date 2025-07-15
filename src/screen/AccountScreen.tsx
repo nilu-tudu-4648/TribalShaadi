@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
@@ -23,9 +23,16 @@ import {
   SettingsIcon,
   RocketIcon,
 } from '../components/svg/SvgIcons';
-import { useSelector } from 'react-redux';
-import { imageUrl } from '../constants/functions';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserDetailsApi, getUserDetailsUrl, imageUrl, setReducerLoadingfalse, uploadImage } from '../constants/functions';
 import { PreferenceIcon } from '../components/svg/SvgIcons2';
+import {
+  launchImageLibrary,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
+import AppToast from '../components/AppToast';
+import { setLoadingTrue } from '../store/reducers/authReducer';
+import AppLoader from '../components/AppLoader';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -65,7 +72,12 @@ const badgeData: BadgeData[] = [
 const actionButtons: ActionButton[] = [
   { key: 'plan', label: 'My Plan', icon: RocketIcon, route: ROUTES.UPGRADE },
   { key: 'invite', label: 'Invite', icon: GiftIcon, route: ROUTES.INVITE },
-  { key: 'preference', label: 'Preference', icon: PreferenceIcon, route: ROUTES.PREFERENCE },
+  {
+    key: 'preference',
+    label: 'Preference',
+    icon: PreferenceIcon,
+    route: ROUTES.PREFERENCE,
+  },
   { key: 'about', label: 'About Us', icon: InfoIcon, route: ROUTES.ABOUT_US },
   { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
   {
@@ -78,16 +90,78 @@ const actionButtons: ActionButton[] = [
 
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
-  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const { user, loader } = useSelector((state: any) => state.entities.authReducer);
   const fullName = `${user?.firstName} ${user?.lastName}`.trim();
+  const [selectedImages, setSelectedImages] = useState<
+    { uri: string; base64: string }[]
+  >([]);
+  const dispatch = useDispatch();
+  const handleImageUpload = async (index: number) => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+      includeBase64: true,
+      maxHeight: 2000,
+      maxWidth: 2000,
+      quality: 0.8,
+    };
+
+    launchImageLibrary(options, async response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+        AppToast('Failed to select image. Please try again.');
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        if (asset.uri && asset.base64) {
+          // Update the selected images first
+          const newImages = [...selectedImages];
+          newImages[index] = { uri: asset.uri, base64: asset.base64 };
+          setSelectedImages(newImages);
+          dispatch(setLoadingTrue(true));
+          // Upload the image immediately
+          try {
+            let requestBody;
+
+            if (index === 0) {
+              // First image format
+              requestBody = {
+                id: user.id,
+                image: `data:image/jpeg;base64,${asset.base64}`,
+              };
+              console.log(requestBody, 'requestBody for first image');
+              await uploadImage(requestBody, dispatch, true);
+              setReducerLoadingfalse(dispatch, () => {
+                getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+              });
+            }
+          } catch (error) {
+            console.log('NETWORK ERROR:', error);
+            AppToast('Failed to upload image. Please try again.');
+            // Remove the image from state if upload failed
+            const failedImages = [...selectedImages];
+            failedImages[index] = { uri: '', base64: '' };
+            setSelectedImages(failedImages);
+          }
+        }
+      }
+    });
+  };
   return (
     <View style={styles.container}>
+      {loader && <AppLoader />}
       {/* Profile Image with Edit Icon */}
       <View style={styles.profileContainer}>
-        <Image
-          source={{ uri: imageUrl + user?.image }}
-          style={styles.profileImage}
-        />
+        <TouchableOpacity
+          onPress={() => {
+            handleImageUpload(0);
+          }}
+        >
+          <Image
+            source={{ uri: imageUrl + user?.image }}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate(ROUTES.STACK, {
@@ -100,10 +174,7 @@ const AccountScreen = () => {
         </TouchableOpacity>
       </View>
       {/* Name */}
-      <AppText
-        text={fullName}
-        textStyle={styles.name}
-      />
+      <AppText text={fullName} textStyle={styles.name} />
       {/* Badges */}
       <View style={styles.badgesRow}>
         {badgeData.map(badge => {

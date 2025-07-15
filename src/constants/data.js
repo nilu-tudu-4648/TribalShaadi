@@ -8,6 +8,7 @@ export const INTEREST_TABS = [
 export const ASYNC_VARIBLES = {
   USER_TOKEN: 'userToken',
   USER: 'user',
+  CHAT_MESSAGES: 'chatMessages',
 };
 // Routes
 export const ROUTES = {
@@ -42,6 +43,12 @@ export const ROUTES = {
   PAYMENT_CONFIRMATION: 'PaymentConfirmation',
   ABOUT_US: 'AboutUs',
   INVITE: 'Invite',
+  CONVERSATIONS: 'Conversations',
+  MATCHING: 'Matching',
+  CHAT: 'Chat',
+  INTEREST: 'Interest',
+  HOME_TAB: 'HomeTab',
+  ACCOUNT_TAB: 'Account',
 };
 
 // Mother Tongue
@@ -180,3 +187,11 @@ export const ABOUT_US_CARDS_SEC_4 = {
   description:
     'Be part of a growing movement that’s redefining matrimony for tribal communities. Connect, share, and grow with people who value culture, privacy, and purpose — just like you.',
 };
+
+export const DELETE_OPTIONS = [
+  'I met my tribal match on the app',
+  "I met my life partner somewhere else",
+  'I was just  curious to try the app',
+  "Not actively seeking marriage",
+  "The app did not match my expectations"
+];

@@ -21,13 +21,12 @@ import {
   fontSize22,
   Size12,
   Size14,
-  Size25,
   Size8,
 } from '../constants/Sizes';
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
 import { useSelector } from 'react-redux';
-import GradientLoader from '../components/GradientLoader';
+import AppLoader from '../components/AppLoader';
 
 const PreferenceScreen = () => {
   const { user, maritalStatuses, religion, community, height, loader } =
@@ -77,7 +76,7 @@ const PreferenceScreen = () => {
   }, [user]);
   const getMaritalStatusValue = () => {
     if (selectedMaritalStatuses.length === 0) return 'None';
-    if (selectedMaritalStatuses.length === 1) return selectedMaritalStatuses[0];
+    // if (selectedMaritalStatuses.length === 1) return selectedMaritalStatuses[0];
     return `${selectedMaritalStatuses.length} selected`;
   };
 
@@ -300,12 +299,9 @@ const PreferenceScreen = () => {
     );
   };
 
-  return loader ? (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <GradientLoader size={Size25*2} />
-    </View>
-  ) : (
+  return (
     <AppSafeView style={{ padding: 0 }}>
+      {loader && <AppLoader />}
       <View style={styles.header}>
         <AppHeader
           title="Preferences"

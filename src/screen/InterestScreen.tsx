@@ -21,12 +21,14 @@ import {
   getProposalsSendByMeApi,
   acceptRejectProposalApi,
   getPassedUsersApi,
+  getSelectedUserApi,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
   baseUrl,
   getPassedUsersUrl,
   getProposalsGotByMeUrl,
+  getSelectedUserUrl,
 } from '../constants/functions';
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import GradientLoader from '../components/GradientLoader';
@@ -42,7 +44,8 @@ const InterestScreen = () => {
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
-  const handleCardPress = () => {
+  const handleCardPress = (id: string) => {
+    dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
     bottomSheetRef.current?.expand(); // Open the bottom sheet
   };
   const handleRejectProposal = (id: string) => {
@@ -102,6 +105,7 @@ const InterestScreen = () => {
                     item={item}
                     onDecline={() => handleRejectProposal(item.id)}
                     onConnect={() => handleAcceptProposal(item.id)}
+                    onPress={() => handleCardPress(item.id)}
                   />
                 )}
                 keyExtractor={(item, index) => index.toString()}
@@ -120,7 +124,7 @@ const InterestScreen = () => {
             <FlatList
               data={passedUsers}
               renderItem={({ item }) => (
-                <RecentCard item={item} onPress={handleCardPress} />
+                <RecentCard item={item} onPress={() => handleCardPress(item.id)} />
               )}
               keyExtractor={(item, index) => index.toString()}
               numColumns={2}
@@ -133,9 +137,7 @@ const InterestScreen = () => {
             <FlatList
               data={proposalsSendByMe}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={handleCardPress}>
-                  <SentCard item={item} />
-                </TouchableOpacity>
+                <SentCard item={item} onPress={() => handleCardPress(item.id)} />
               )}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.gridContainer}
@@ -144,7 +146,10 @@ const InterestScreen = () => {
           )}
         </>
       )}
-      <ProfileBottomSheet bottomSheetRef={bottomSheetRef} />
+      <ProfileBottomSheet
+        bottomSheetRef={bottomSheetRef}
+        isButtonVisible={selectedTab === 1}
+      />
     </View>
   );
 };

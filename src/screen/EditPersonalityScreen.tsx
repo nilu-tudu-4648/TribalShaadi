@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
   },
   wordCount: {
     textAlign: 'right',
-    marginTop: 8,
     fontSize: 14,
     color: COLORS.grey,
   },

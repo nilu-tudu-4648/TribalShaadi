@@ -109,13 +109,17 @@ const authReducer = createSlice({
       reducer.loader = false;
       reducer.isInterestsUpdated = true;
     },
+    setLoadingTrue: (reducer, action) => {
+      reducer.loader = true;
+    },
     setLoadingfalse: (reducer, action) => {
       reducer.loader = false;
     },
   },
 });
 
-export const { setUser, logoutFromReducer, setLoadingfalse } = authReducer.actions;
+export const { setUser, logoutFromReducer, setLoadingfalse, setLoadingTrue } =
+  authReducer.actions;
 
 const {
   authReducerDataRequestFailed,

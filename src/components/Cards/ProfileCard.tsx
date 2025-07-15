@@ -130,7 +130,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <AppText text={bio} textStyle={styles.bio} />
         </View>
         <View style={styles.horizontalLine} />
-
         <View style={styles.row}>
           <View style={styles.column}>
             <ReligionIcon />
@@ -441,7 +440,8 @@ const styles = StyleSheet.create({
   horizontalLine: {
     height: Size10,
     backgroundColor: COLORS.divider,
-    width: '100%',
+    width: SIZES.width,
+    alignSelf: 'center',
   },
   verticalLine: {
     width: 1,

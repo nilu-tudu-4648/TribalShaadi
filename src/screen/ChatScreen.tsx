@@ -1,13 +1,34 @@
-import { StyleSheet, View, TouchableOpacity, Image, ScrollView } from 'react-native'
-import React from 'react'
-import AppSafeView from '../components/AppSafeView'
-import AppText from '../components/AppText'
-import { COLORS } from '../constants/AppColors'
-import { fontSize28, fontSize16, fontSize14, Size16, Size12, Size8 } from '../constants/Sizes'
-import { ChatIcon } from '../components/svg/SvgIcons'
-import FONT_FAMILY from '../constants/Fonts'
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Image,
+  FlatList,
+} from 'react-native';
+import React from 'react';
+import AppSafeView from '../components/AppSafeView';
+import AppText from '../components/AppText';
+import { COLORS } from '../constants/AppColors';
+import {
+  fontSize28,
+  fontSize16,
+  fontSize14,
+  Size16,
+  Size12,
+  Size8,
+  Size14,
+  Size4,
+  Size50,
+  Size25,
+} from '../constants/Sizes';
+import FONT_FAMILY from '../constants/Fonts';
+import { ConversationIcon } from '../components/svg/SvgIcons2';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
+import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 
 const ChatScreen = () => {
+  const navigation = useNavigation();
   // Sample conversation data
   const conversations = [
     {
@@ -17,49 +38,152 @@ const ChatScreen = () => {
       profileImage: require('../assets/images/Male.png'),
       isNew: true,
     },
-  ]
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+    {
+      id: 2,
+      name: 'User A',
+      message:
+        'Hi, glad to match with you! Let’s take this forward in a good way.',
+      profileImage: require('../assets/images/Male.png'),
+      // isNew: true,
+    },
+  ];
 
   const renderConversationItem = (item: any) => (
-    <TouchableOpacity key={item.id} style={styles.conversationItem}>
+    <TouchableOpacity
+      key={item.id}
+      style={styles.conversationItem}
+      onPress={() => {
+        (navigation as any).navigate(ROUTES.STACK, {
+          screen: ROUTES.CONVERSATIONS,
+        });
+      }}
+    >
       <Image source={item.profileImage} style={styles.profileImage} />
       <View style={styles.conversationContent}>
         <AppText text={item.name} textStyle={styles.userName} />
         <AppText text={item.message} textStyle={styles.messageText} />
       </View>
-      {item.isNew && (
-        <View style={styles.newButton}>
-          <AppText text="New" textStyle={styles.newButtonText} />
-        </View>
-      )}
+      <View
+        style={{
+          justifyContent: 'space-between',
+          flexDirection: 'column',
+          bottom: Size4,
+          gap: Size4,
+        }}
+      >
+        <AppText
+          text={'10:00'}
+          textStyle={{ color: COLORS.textSecondary, fontSize: fontSize14 }}
+        />
+        <NotifiNumberChip number={1} style={{ position: 'relative' }} />
+      </View>
     </TouchableOpacity>
-  )
+  );
 
   return (
     <AppSafeView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <AppText text="Connections" textStyle={styles.headerTitle} />
-        </View>
+      {/* Fixed Header */}
+      <View style={styles.header}>
+        <AppText text="Connections" textStyle={styles.headerTitle} />
+      </View>
 
-        {/* Conversations Section */}
-        <View style={styles.conversationsSection}>
-          <View style={styles.conversationHeader}>
-            <ChatIcon width={24} height={24} color={COLORS.black} />
-            <AppText text="Conversations" textStyle={styles.sectionTitle} />
-          </View>
+      {/* Fixed Conversations Section Header */}
+      <View style={styles.conversationHeader}>
+        <ConversationIcon width={24} height={24} color={COLORS.black} />
+        <AppText text="Conversations" textStyle={styles.sectionTitle} />
+      </View>
 
-          {/* Conversations List */}
-          <View style={styles.conversationsList}>
-            {conversations.map(renderConversationItem)}
-          </View>
-        </View>
-      </ScrollView>
+      {/* Scrollable Conversations List */}
+      <FlatList
+        data={conversations}
+        renderItem={({ item }) => renderConversationItem(item)}
+        keyExtractor={(item, index) => index.toString()}
+        showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => (
+          <View
+            style={{ height: 1, backgroundColor: COLORS.borderLight4 }}
+          />
+        )}
+        contentContainerStyle={styles.conversationsList}
+        style={styles.flatListContainer}
+      />
     </AppSafeView>
-  )
-}
+  );
+};
 
-export default ChatScreen
+export default ChatScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -68,7 +192,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingVertical: Size16,
-    marginBottom: Size16,
   },
   headerTitle: {
     fontSize: fontSize28,
@@ -82,7 +205,6 @@ const styles = StyleSheet.create({
   conversationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Size16,
     gap: Size8,
   },
   sectionTitle: {
@@ -94,10 +216,13 @@ const styles = StyleSheet.create({
   conversationsList: {
     gap: Size12,
   },
+  flatListContainer: {
+    flex: 1,
+  },
   conversationItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Size16,
+    paddingVertical: Size14,
     paddingHorizontal: Size8,
     backgroundColor: COLORS.white,
     borderRadius: Size12,
@@ -108,23 +233,21 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: Size16,
+    width: Size50,
+    height: Size50,
+    borderRadius: Size25,
   },
   conversationContent: {
     flex: 1,
     justifyContent: 'center',
+    left: Size12,
   },
   userName: {
     fontSize: fontSize16,
     fontWeight: '600',
     color: COLORS.black,
-    marginBottom: Size8 / 2,
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
   },
   messageText: {
@@ -133,15 +256,12 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
   },
   newButton: {
-    backgroundColor: COLORS.violet,
-    paddingHorizontal: Size16,
-    paddingVertical: Size8,
-    borderRadius: Size16,
+    backgroundColor: COLORS.red,
   },
   newButtonText: {
     fontSize: fontSize14,
-    color: COLORS.white,
+    color: COLORS.violet,
     fontWeight: '600',
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
   },
-})
+});

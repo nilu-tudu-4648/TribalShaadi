@@ -34,7 +34,6 @@ import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
 } from './src/navigation/StackNavigation';
-import PreferenceScreen from './src/screen/PreferenceScreen';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;

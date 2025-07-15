@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, SafeAreaView, StyleSheet } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
 import HeaderBack from '../components/HeaderBack';
 import AppTextInput from '../components/AppTextInput';
 import {
@@ -9,11 +8,11 @@ import {
   Size10,
   lignHeight72,
   Size40,
-  Size20,
   fontSize24,
   fontSize16,
   Size12,
   borderWidth,
+  Size18,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppButton from '../components/AppButton';
@@ -26,7 +25,7 @@ import AppText from '../components/AppText';
 
 const NameScreen = () => {
   const [fullName, setFullName] = useState('');
-  // const navigation = useNavigation();
+  const [email, setEmail] = useState('');
   const dispatch = useDispatch();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -39,7 +38,15 @@ const NameScreen = () => {
     const filteredText = text.replace(/[^a-zA-Z\s]/g, '');
     setFullName(filteredText);
   };
+  const [isValidEmail, setIsValidEmail] = useState(true);
 
+  // Email validation regex
+  const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, []);
+
+  useEffect(() => {
+    // Validate email on change
+    setIsValidEmail(emailRegex.test(email));
+  }, [email, emailRegex]);
   // Function to check if name contains only letters and spaces
   const isValidName = (name: string) => {
     const nameRegex = /^[a-zA-Z\s]+$/;
@@ -73,6 +80,7 @@ const NameScreen = () => {
         id: user.id,
         firstName: firstName,
         lastName: lastName,
+        email: email,
       };
       dispatch(completeUserProfileV2Name(updateUrl, requestBody));
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -86,7 +94,7 @@ const NameScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <HeaderBack />
-        <AppText text="Your name" textStyle={styles.title} />
+        <AppText text="Name & Email" textStyle={styles.title} />
         {/* Text Input */}
         <AppTextInput
           placeholder="Full Name"
@@ -97,6 +105,21 @@ const NameScreen = () => {
           textInputStyle={styles.textInput}
           style={styles.inputContainer}
         />
+        <AppTextInput
+          placeholder="Email"
+          placeholderTextColor={COLORS.placeholderText}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="default"
+          textInputStyle={styles.textInput}
+          style={styles.inputContainer}
+        />
+        {!isValidEmail && (
+          <AppText
+            text="Please enter a valid email address"
+            textStyle={styles.errorText}
+          />
+        )}
         <AppButton
           title="Confirm"
           onPress={handleConfirm}
@@ -104,13 +127,13 @@ const NameScreen = () => {
           isButtonDisabled={!fullName.trim() || loader}
           buttonStyle={[
             styles.button,
-            !fullName.trim() || loader
+            !fullName.trim() || !isValidEmail || loader
               ? styles.buttonDisabled
               : styles.buttonEnabled,
           ]}
           textStyle={[
             styles.buttonText,
-            !fullName.trim() || loader
+            !fullName.trim() || !isValidEmail || loader
               ? styles.buttonTextDisabled
               : styles.buttonTextEnabled,
           ]}
@@ -129,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: lignHeight24,
     paddingVertical: lignHeight24,
-    gap: Size20,
+    gap: Size18,
     paddingTop: lignHeight72,
   },
   backButton: {
@@ -170,6 +193,10 @@ const styles = StyleSheet.create({
   buttonText: { fontSize: fontSize14, fontWeight: '600' },
   buttonTextEnabled: { color: COLORS.white },
   buttonTextDisabled: { color: COLORS.disabledText },
+  errorText: {
+    color: COLORS.red,
+    fontSize: fontSize14,
+  },
 });
 
 export default NameScreen;

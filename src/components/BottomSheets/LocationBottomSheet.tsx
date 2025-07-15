@@ -115,7 +115,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         pCityLivingInId:
           selectedCities.length > 0
             ? selectedCities.map(city => city.id)
-            : null, // use first city
+            : null,
       };
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
@@ -182,7 +182,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
             }
           />
         ) : (
-          <View style={{ flex: 1 }}>
+          <View style={styles.selectedLocationsContainer}>
             <AppText
               text="Selected Locations"
               textStyle={styles.sectionTitle}
@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Size16,
     paddingVertical: Size12,
+    gap: Size16,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -250,7 +251,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.divider,
     borderRadius: Size12,
     paddingHorizontal: Size12,
-    marginBottom: Size16,
     gap: Size8,
   },
   searchInput: {
@@ -263,7 +263,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
     color: COLORS.textBlack,
-    marginBottom: Size12,
   },
   infoBanner: {
     flexDirection: 'row',
@@ -271,7 +270,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3EFFF',
     borderRadius: Size8,
     padding: Size12,
-    marginBottom: Size16,
     gap: Size8,
   },
   infoText: {
@@ -279,6 +277,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.OPEN_SANS_REGULAR,
     color: COLORS.textBlack,
     flex: 1,
+  },
+  selectedLocationsContainer: {
+    flex: 1,
+    gap: Size12,
   },
   chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: Size8 },
   chip: {
@@ -299,8 +301,6 @@ const styles = StyleSheet.create({
     paddingVertical: Size14,
     borderRadius: Size12,
     alignItems: 'center',
-    marginTop: 'auto',
-    marginBottom: Size8,
   },
   applyButtonText: {
     color: COLORS.white,

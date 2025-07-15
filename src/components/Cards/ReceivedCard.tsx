@@ -2,6 +2,7 @@ import {
   StyleSheet,
   View,
   ImageBackground,
+  TouchableOpacity,
 } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,13 +23,15 @@ const ReceivedCard = ({
   item,
   onDecline,
   onConnect,
+  onPress,
 }: {
   item: any;
   onDecline: () => void;
   onConnect: () => void;
+  onPress: () => void;
 }) => {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
           source={{ uri: `${imageUrl + item.image}` }}
@@ -79,7 +82,7 @@ const ReceivedCard = ({
           textStyle={styles.connectButtonText}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import AppHeader from '../components/AppHeader';
 import { COLORS } from '../constants/AppColors';
@@ -11,6 +11,8 @@ import AppButton from '../components/AppButton';
 import LogoutDialog from '../components/dialogs/LogoutDialog';
 import { logoutUser } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
+import BottomSheet from '@gorhom/bottom-sheet';
+import DeleteBottomSheet from '../components/BottomSheets/DeleteBottomSheet';
 
 const SettingsScreen = () => {
   const dispatch = useDispatch();
@@ -20,6 +22,13 @@ const SettingsScreen = () => {
     logoutUser(dispatch);
   };
   const navigation = useNavigation();
+  const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
+  const openDeleteBottomSheet = () => {
+    deleteBottomSheetRef?.current?.expand();
+  };
+  const handleDelete = (reason: string) => {
+    console.log('reason', reason);
+  };
   return (
     <AppSafeView style={styles.container}>
       <AppHeader title="Settings" onBackPress={() => navigation.goBack()} />
@@ -42,7 +51,7 @@ const SettingsScreen = () => {
         />
         <AppButton
           title="Delete"
-          onPress={() => {}}
+          onPress={openDeleteBottomSheet}
           buttonStyle={styles.secondaryButton}
           textStyle={styles.buttonText}
         />
@@ -51,6 +60,10 @@ const SettingsScreen = () => {
         isVisible={isLogoutDialogVisible}
         onDismiss={() => setIsLogoutDialogVisible(false)}
         onLogout={handleLogout}
+      />
+      <DeleteBottomSheet
+        bottomSheetRef={deleteBottomSheetRef}
+        onReport={handleDelete}
       />
     </AppSafeView>
   );

@@ -173,15 +173,23 @@ const HomeScreen = () => {
               }}
             >
               <Image
-                source={require('../assets/images/noMatch.png')}
+                source={require('../assets/images/ExhaustedImage.png')}
                 style={{
-                  width: SIZES.width * 0.6,
-                  height: SIZES.height * 0.3,
+                  width: SIZES.width * 0.2,
+                  height: SIZES.height * 0.1,
                   resizeMode: 'contain',
                 }}
               />
               <AppText
-                text="New profiles are joining soon! You'll get notified for new matches."
+                text="All matches exhausted"
+                textStyle={{
+                  fontSize: fontSize20,
+                  textAlign: 'center',
+                  fontWeight: '700',
+                }}
+              />
+              <AppText
+                text="Come back and check tomorrow for more matches"
                 textStyle={{
                   fontSize: fontSize16,
                   color: COLORS.textInactive,

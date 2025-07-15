@@ -15,6 +15,7 @@ interface SentCardProps {
     location?: string;
     image?: any;
     stateName?: string;
+    community?: string;
   };
   onPress?: () => void;
 }
@@ -29,7 +30,7 @@ const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
           textStyle={styles.nameAndAge}
         />
         <View style={styles.detailRow}>
-          <AppText text="\u26EA" textStyle={styles.icon} />
+          <AppText text={item.community || ''} textStyle={styles.icon} />
           <AppText
             text={item.religionName || ''}
             textStyle={styles.detailText}
