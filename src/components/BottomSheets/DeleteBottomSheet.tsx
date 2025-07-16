@@ -23,11 +23,13 @@ import { DELETE_OPTIONS } from '../../constants/data';
 interface DeleteBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   onReport: (reportReason: string) => void;
+  onPressYes: () => void;
 }
 
 const DeleteBottomSheet: React.FC<DeleteBottomSheetProps> = ({
   bottomSheetRef,
   onReport,
+  onPressYes,
 }) => {
   const snapPoints = ['50%', '50%'];
   const [selectedReason, setSelectedReason] = useState<string>('');
@@ -40,6 +42,7 @@ const DeleteBottomSheet: React.FC<DeleteBottomSheetProps> = ({
       setShowContent('3');
     } else if (showContent === '3') {
       if (selectedReason) {
+        onPressYes();
         onReport(selectedReason);
         bottomSheetRef.current?.close();
         setSelectedReason(''); // Reset after reporting

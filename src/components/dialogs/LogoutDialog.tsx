@@ -11,10 +11,12 @@ const LogoutDialog = ({
   isVisible,
   onDismiss,
   onLogout,
+  isDelete = false,
 }: {
   isVisible: boolean;
   onDismiss: () => void;
   onLogout: () => void;
+  isDelete?: boolean;
 }) => {
   return (
     <Modal
@@ -30,8 +32,8 @@ const LogoutDialog = ({
       >
         <TouchableOpacity activeOpacity={1} style={styles.dialogContainer}>
           <View style={styles.dialog}>
-            <AppText text="Logout" textStyle={styles.title} />
-            <AppText text="Do you really want to logout?" textStyle={styles.message} />
+            <AppText text={isDelete ? "Delete" : "Logout"} textStyle={styles.title} />
+            <AppText text={`Do you really want to ${isDelete ? "delete your profile?" : "logout?"}`} textStyle={styles.message} />
             <View style={styles.buttonContainer}>
               <AppButton 
                 title="No" 
@@ -67,12 +69,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   dialog: {
-    gap: SIZES.base1,
+    gap: SIZES.base2,
     backgroundColor: COLORS.white,
     padding: SIZES.padding2,
     borderRadius: SIZES.radius,
     width: width * 0.8,
-    maxWidth: 320,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    alignItems: 'flex-start',
   },
   title: {
     fontSize: fontSize20,
@@ -91,16 +93,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonContainer: {
+    width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    // gap: 10,
+    justifyContent: 'flex-end',
   },
   cancelButton: {
-    flex: 1,
     backgroundColor: COLORS.white,
+    width: '20%',
   },
   confirmButton: {
-    flex: 1,
+    width: '20%',
     backgroundColor: COLORS.white,
   },
   noButton: {

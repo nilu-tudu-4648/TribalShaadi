@@ -18,6 +18,7 @@ import {
   Size8,
   Size2,
   Size5,
+  Size4,
 } from '../constants/Sizes';
 import { completeUserProfileV2Gender } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
@@ -57,7 +58,7 @@ const GenderSelectionScreen = () => {
         }),
       );
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-     } catch (error) {
+    } catch (error) {
       console.log(error);
     }
   };
@@ -65,7 +66,10 @@ const GenderSelectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <AppText text="I identify\nmyself as..." textStyle={styles.title} />
+        <View style={{ gap: Size4 }}>
+          <AppText text="I identify" textStyle={styles.title} />
+          <AppText text="myself as..." textStyle={styles.title} />
+        </View>
 
         <TouchableOpacity
           style={[
@@ -147,8 +151,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.black,
     textAlign: 'left',
-    paddingBottom: Size18 * 2,
-    lineHeight: fontSize32 * 1.2,
+    lineHeight: fontSize32,
   },
   genderOption: {
     alignSelf: 'center',

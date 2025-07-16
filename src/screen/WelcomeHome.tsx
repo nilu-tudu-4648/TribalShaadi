@@ -44,29 +44,20 @@ const WelcomeHome = () => {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
-          {/* Optional: Logo/Icon */}
-          {/* <Image source={require('../assets/images/logo.png')} style={styles.logo} /> */}
-
-          {/* Title Section */}
           <View style={styles.titleContainer}>
-            <AppText text="Welcome to" textStyle={styles.welcomeText} />
-            <AppText text="Tribalshaadi.ai" textStyle={styles.appNameText} />
-            <AppText
-              text="Find your perfect match"
-              textStyle={styles.taglineText}
+            <Image
+              source={require('../assets/images/premiumLogo.png')}
+              style={styles.welcomeImage}
+              resizeMode="contain"
             />
           </View>
 
-          {/* Subtitle Section */}
           <View style={styles.subtitleContainer}>
-            <AppText text="The app designed" textStyle={styles.subtitleText} />
-            <View style={styles.deletedTextContainer}>
-              <AppText text="to be " textStyle={styles.subtitleText} />
-              <AppText text="Deleted!" textStyle={styles.deletedText} />
-            </View>
+            <AppText text="Designed to be" textStyle={styles.subtitleText} />
+            <AppText text="found, matched" textStyle={styles.subtitleText} />
+            <AppText text="by AI" textStyle={styles.subtitleText} />
           </View>
 
-          {/* Welcome Image */}
           <View style={styles.imageCardShadow}>
             <View style={styles.imageWrapper}>
               <Image
@@ -78,7 +69,6 @@ const WelcomeHome = () => {
           </View>
         </View>
 
-        {/* Continue Button */}
         <View style={styles.buttonContainer}>
           <LinearGradient
             colors={[COLORS.violet, COLORS.primaryBlue]}
@@ -186,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   welcomeImage: {
-    width: screenWidth('60%'),
+    width: screenWidth('50%'),
     height: screenHeight('22%'),
   },
   buttonContainer: {

@@ -1,5 +1,12 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  runOnJS,
+  withTiming,
+} from 'react-native-reanimated';
 import { COLORS } from '../constants/AppColors';
 import {
   SIZES,
@@ -37,7 +44,14 @@ import {
   setMatchedUserApi,
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
-import { getCommunity, getDiet, getHeight, getMaritalStatus, getReligion, getStates } from '../store/reducers/authReducer';
+import {
+  getCommunity,
+  getDiet,
+  getHeight,
+  getMaritalStatus,
+  getReligion,
+  getStates,
+} from '../store/reducers/authReducer';
 
 const { width } = Dimensions.get('window');
 
@@ -47,6 +61,85 @@ const HomeScreen = () => {
   );
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Swipe animation values
+  const translateX = useSharedValue(0);
+  const opacity = useSharedValue(1);
+
+  // Reset animation values when index changes
+  const resetAnimation = () => {
+    translateX.value = withTiming(0);
+    opacity.value = withTiming(1);
+  };
+
+  const handleSwipeRight = () => {
+    if (matchedUsers && matchedUsers.length > 0) {
+      if (currentIndex < matchedUsers.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // Loop back to start when reaching the end
+        setCurrentIndex(0);
+      }
+      setTimeout(resetAnimation, 100);
+    }
+  };
+
+  const handleSwipeLeft = () => {
+    if (matchedUsers && matchedUsers.length > 0) {
+      if (currentIndex < matchedUsers.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // Loop back to start when reaching the end
+        setCurrentIndex(0);
+      }
+      setTimeout(resetAnimation, 100);
+    }
+  };
+
+  // Gesture handler for swipe functionality
+  const gestureHandler = Gesture.Pan()
+    .activeOffsetX([-10, 10]) // <--- NEW  (horizontal only)
+    .failOffsetY([-10, 10])
+    .onStart(() => {
+      // Optional: Add haptic feedback here
+    })
+    .onUpdate(event => {
+      translateX.value = event.translationX;
+
+      // Change opacity based on swipe distance
+      const swipeThreshold = width * 0.3;
+      if (Math.abs(event.translationX) > swipeThreshold) {
+        opacity.value = 0.7;
+      } else {
+        opacity.value = 1;
+      }
+    })
+    .onEnd(event => {
+      const swipeThreshold = width * 0.3;
+
+      if (event.translationX > swipeThreshold) {
+        // Swipe right - Connect
+        translateX.value = withTiming(width);
+        runOnJS(handleSwipeRight)();
+      } else if (event.translationX < -swipeThreshold) {
+        // Swipe left - Decline
+        translateX.value = withTiming(-width);
+        runOnJS(handleSwipeLeft)();
+      } else {
+        // Reset if swipe wasn't far enough
+        translateX.value = withTiming(0);
+        opacity.value = withTiming(1);
+      }
+    });
+
+  // Animated style for the profile card
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+      opacity: opacity.value,
+    };
+  });
+
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
@@ -108,42 +201,50 @@ const HomeScreen = () => {
           {currentMatchedUser && currentIndex < matchedUsers.length ? (
             <>
               <View style={styles.carouselContainer}>
-                <View style={styles.profileCardContainer}>
-                  <ProfileCard
-                    name={
-                      currentMatchedUser.firstName +
-                      ' ' +
-                      currentMatchedUser.lastName
-                    }
-                    age={currentMatchedUser.age}
-                    height={currentMatchedUser.height}
-                    religion={currentMatchedUser.religion}
-                    caste={currentMatchedUser.community}
-                    districtName={currentMatchedUser.districtName}
-                    stateName={currentMatchedUser.stateName}
-                    bio={currentMatchedUser.aboutMe}
-                    image={currentMatchedUser.image}
-                    isLoading={loader}
-                    maritalStatus={currentMatchedUser.maritalStatus}
-                    dob={currentMatchedUser.birthDate}
-                    motherTongue={currentMatchedUser.motherTongue}
-                    annualIncome={currentMatchedUser.annualIncome}
-                    partnerExpectation={currentMatchedUser.about_lifepartener}
-                    employedIn={currentMatchedUser.employedIn}
-                    occupation={currentMatchedUser.occupation}
-                    organizationName={currentMatchedUser.companyName}
-                    settlingTime={currentMatchedUser.planingto_settle}
-                    highestQualification={
-                      currentMatchedUser.highestQualification
-                    }
-                    college={currentMatchedUser.college_name}
-                    eatingHabits={currentMatchedUser.diet}
-                    drinkingHabits={currentMatchedUser.drinking}
-                    smokingHabits={currentMatchedUser.smoking}
-                    kids={currentMatchedUser.kids}
-                    interests={currentMatchedUser.intrests}
-                  />
-                </View>
+                <GestureDetector gesture={gestureHandler}>
+                  <Animated.View
+                    style={[
+                      styles.flexContainer,
+                      styles.profileCardContainer,
+                      animatedStyle,
+                    ]}
+                  >
+                    <ProfileCard
+                      name={
+                        currentMatchedUser.firstName +
+                        ' ' +
+                        currentMatchedUser.lastName
+                      }
+                      age={currentMatchedUser.age}
+                      height={currentMatchedUser.height}
+                      religion={currentMatchedUser.religion}
+                      caste={currentMatchedUser.community}
+                      districtName={currentMatchedUser.districtName}
+                      stateName={currentMatchedUser.stateName}
+                      bio={currentMatchedUser.aboutMe}
+                      image={currentMatchedUser.image}
+                      isLoading={loader}
+                      maritalStatus={currentMatchedUser.maritalStatus}
+                      dob={currentMatchedUser.birthDate}
+                      motherTongue={currentMatchedUser.motherTongue}
+                      annualIncome={currentMatchedUser.annualIncome}
+                      partnerExpectation={currentMatchedUser.about_lifepartener}
+                      employedIn={currentMatchedUser.employedIn}
+                      occupation={currentMatchedUser.occupation}
+                      organizationName={currentMatchedUser.companyName}
+                      settlingTime={currentMatchedUser.planingto_settle}
+                      highestQualification={
+                        currentMatchedUser.highestQualification
+                      }
+                      college={currentMatchedUser.college_name}
+                      eatingHabits={currentMatchedUser.diet}
+                      drinkingHabits={currentMatchedUser.drinking}
+                      smokingHabits={currentMatchedUser.smoking}
+                      kids={currentMatchedUser.kids}
+                      interests={currentMatchedUser.intrests}
+                    />
+                  </Animated.View>
+                </GestureDetector>
               </View>
               <View style={styles.floatingButtonContainer}>
                 <AppButton
@@ -235,7 +336,7 @@ const styles = StyleSheet.create({
   },
   floatingButtonContainer: {
     position: 'absolute',
-    bottom: Size10 * 2,
+    bottom: Size10,
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
@@ -245,7 +346,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     width: '45%',
     elevation: 2,
-    borderRadius:Size10
+    borderRadius: Size10,
   },
   declineButtonText: {
     color: COLORS.declineButton,
@@ -256,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.violet,
     width: '45%',
     elevation: 2,
-    borderRadius:Size10
+    borderRadius: Size10,
   },
   connectButtonText: {
     color: COLORS.white,
@@ -264,8 +365,13 @@ const styles = StyleSheet.create({
   carouselContainer: {
     flex: 1,
   },
+  flexContainer: {
+    flex: 1,
+  },
   profileCardContainer: {
     flex: 1,
     width: width,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import AppHeader from '../components/AppHeader';
@@ -13,10 +13,13 @@ import { logoutUser } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import DeleteBottomSheet from '../components/BottomSheets/DeleteBottomSheet';
+import AccountBottomSheet from '../components/BottomSheets/AccountBottomSheet';
 
 const SettingsScreen = () => {
   const dispatch = useDispatch();
   const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const accountBottomSheetRef = useRef<BottomSheet | null>(null);
   const handleLogout = () => {
     setIsLogoutDialogVisible(false);
     logoutUser(dispatch);
@@ -33,14 +36,16 @@ const SettingsScreen = () => {
     <AppSafeView style={styles.container}>
       <AppHeader title="Settings" onBackPress={() => navigation.goBack()} />
       <View style={styles.topContainer}>
-        <View style={styles.iconContainer}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => {
+          accountBottomSheetRef?.current?.expand();
+        }}>
           <View style={styles.iconContainer}>
             <LightBulbIcon />
             <AppText text="Account details" />
             <AppText text="User ID, Emai" textStyle={styles.subText} />
           </View>
           <RightArrowIcon />
-        </View>
+        </TouchableOpacity>
       </View>
       <View style={styles.buttonContainer}>
         <AppButton
@@ -60,11 +65,17 @@ const SettingsScreen = () => {
         isVisible={isLogoutDialogVisible}
         onDismiss={() => setIsLogoutDialogVisible(false)}
         onLogout={handleLogout}
+        isDelete={isDeleteDialogVisible}
       />
       <DeleteBottomSheet
         bottomSheetRef={deleteBottomSheetRef}
         onReport={handleDelete}
+        onPressYes={() =>{
+          setIsDeleteDialogVisible(true);
+          setIsLogoutDialogVisible(true);
+        }}
       />
+      <AccountBottomSheet bottomSheetRef={accountBottomSheetRef} />
     </AppSafeView>
   );
 };
