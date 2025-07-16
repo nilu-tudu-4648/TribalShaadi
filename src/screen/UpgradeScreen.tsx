@@ -5,8 +5,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Pressable,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowIosBackSvg, HeartIcon2 } from '../components/svg/SvgIcons';
 import AppText from '../components/AppText';
@@ -25,17 +26,29 @@ import {
   SIZES,
   Size25,
   fontSize36,
+  fontSize20,
+  Size14,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
-import { PRICING_OPTIONS } from '../constants/data';
+import { PRICING_OPTIONS, ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
-
+import { getPackageListUrl, getTimeDurationUrl } from '../constants/functions';
+import { getPackageListApi, getTimeDurationApi } from '../store/reducers/paymentReducer';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import AppLoader from '../components/AppLoader';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const [selectedPlan, setSelectedPlan] = useState('3months');
-
+  const updated = true;
+  const dispatch = useDispatch();
+  const { packageList, loader, timeDuration } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
+  console.log(packageList, 'packageList');
+  console.log(timeDuration, 'timeDuration');
   const features = [
     {
       icon: <InfinityIcon color={COLORS.white} />,
@@ -55,107 +68,203 @@ const UpgradeScreen = () => {
     // Handle subscription logic here
     console.log('Selected plan:', selectedPlan);
   };
+  useEffect(() => {
+    dispatch(getPackageListApi(getPackageListUrl));
+    dispatch(getTimeDurationApi(getTimeDurationUrl));
+  }, [dispatch]);
 
   return (
     <AppSafeView style={styles.container}>
-      <ImageBackground
-        source={require('../assets/images/update.jpg')}
-        style={styles.backgroundImage}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
+      {loader && <AppLoader />}
+      {updated ? (
+        <>
+          <ImageBackground
+            source={require('../assets/images/update.jpg')}
+            style={styles.backgroundImage}
           >
-            <ArrowIosBackSvg  color={COLORS.black} />
-          </TouchableOpacity>
+            <Pressable
+              onPress={() =>
+                (navigation as any).navigate(ROUTES.MAIN_TABS, {
+                  screen: ROUTES.ACCOUNT,
+                })
+              }
+              style={styles.header}
+            >
+              <View style={styles.backButton}>
+                <ArrowIosBackSvg color={COLORS.black} />
+              </View>
+              <Image
+                source={require('../assets/images/premiumLogo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <View style={styles.featuresContainer}>
+              {features.map((feature, index) => (
+                <View key={index} style={styles.featureItem}>
+                  <View style={styles.featureIconContainer}>
+                    {feature.icon}
+                  </View>
+                  <AppText
+                    text={feature.title}
+                    textStyle={styles.featureTitle}
+                  />
+                </View>
+              ))}
+            </View>
+          </ImageBackground>
+
+          <View style={styles.bottomContainer}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.pricingContainer}>
+                {PRICING_OPTIONS.map(option => (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[
+                      styles.pricingOption,
+                      selectedPlan === option.id &&
+                        styles.selectedPricingOption,
+                    ]}
+                    onPress={() => handlePlanSelect(option.id)}
+                  >
+                    <View style={styles.pricingLeft}>
+                      <View
+                        style={[
+                          styles.radioButton,
+                          selectedPlan === option.id &&
+                            styles.selectedRadioButton,
+                        ]}
+                      >
+                        {selectedPlan === option.id && (
+                          <View style={styles.radioButtonInner} />
+                        )}
+                      </View>
+                      <View style={styles.pricingTextContainer}>
+                        <AppText
+                          text={option.duration}
+                          textStyle={styles.pricingDuration}
+                        />
+                        {option.badge && (
+                          <View style={styles.badgeContainer}>
+                            <AppText
+                              text={option.badge}
+                              textStyle={styles.badgeText}
+                            />
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    <View style={styles.pricingRight}>
+                      <AppText
+                        text={option.price}
+                        textStyle={styles.pricingPrice}
+                      />
+                      {option.pricePerMonth && (
+                        <AppText
+                          text={option.pricePerMonth}
+                          textStyle={styles.pricingSubtext}
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+            <AppLinearButton
+              title={`Get ${
+                PRICING_OPTIONS.find(p => p.id === selectedPlan)?.duration || ''
+              } for ${
+                PRICING_OPTIONS.find(p => p.id === selectedPlan)?.price || ''
+              }`}
+              onPress={handleContinue}
+              linearGradientColors={['#21BEFE', '#EE50C1']}
+              textStyle={styles.continueButtonText}
+            />
+            <AppText
+              text="This app can be used without a subscription. With a subscription, you get access to paid features."
+              textStyle={styles.disclaimerText}
+            />
+          </View>
+        </>
+      ) : (
+        <View style={styles.premiumContainer}>
+          <Pressable
+            onPress={() =>
+              (navigation as any).navigate(ROUTES.MAIN_TABS, {
+                screen: ROUTES.ACCOUNT,
+              })
+            }
+            style={styles.header}
+          >
+            <View style={styles.backButton}>
+              <ArrowIosBackSvg color={COLORS.black} />
+            </View>
+            <Image
+              source={require('../assets/images/premiumLogo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </Pressable>
+          <View style={styles.offerContainer}>
+            <AppText
+              text="Premium Member"
+              textStyle={{
+                ...styles.offerTitle,
+                fontStyle: 'italic',
+                fontWeight: 'bold',
+                color: COLORS.white,
+              }}
+            />
+            <AppText
+              text="₹1499"
+              textStyle={{
+                ...styles.offerTitle,
+                color: COLORS.white,
+              }}
+            />
+            <View
+              style={{
+                backgroundColor: COLORS.offerBg,
+                padding: Size4,
+                borderRadius: Size12,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: Size14,
+              }}
+            >
+              <AppText
+                text="Ends on 20 May, 2025"
+                textStyle={styles.offerContainerText}
+              />
+            </View>
+          </View>
+          <View>
+            <AppText
+              text="Get more with Premium"
+              textStyle={styles.offerTitle}
+            />
+            <AppText
+              text="Go Premium and enjoy full control of"
+              textStyle={styles.offerSubTitle}
+            />
+            <AppText text="your Matchmaking" textStyle={styles.offerSubTitle} />
+          </View>
           <Image
-            source={require('../assets/images/premiumLogo.png')}
-            style={styles.logo}
+            source={require('../assets/images/offers.png')}
+            style={styles.offerImage}
             resizeMode="contain"
           />
-        </View>
-
-        <View style={styles.featuresContainer}>
-          {features.map((feature, index) => (
-            <View key={index} style={styles.featureItem}>
-              <View style={styles.featureIconContainer}>{feature.icon}</View>
-              <AppText text={feature.title} textStyle={styles.featureTitle} />
-            </View>
-          ))}
-        </View>
-      </ImageBackground>
-
-      <View style={styles.bottomContainer}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.pricingContainer}>
-            {PRICING_OPTIONS.map(option => (
-              <TouchableOpacity
-                key={option.id}
-                style={[
-                  styles.pricingOption,
-                  selectedPlan === option.id && styles.selectedPricingOption,
-                ]}
-                onPress={() => handlePlanSelect(option.id)}
-              >
-                <View style={styles.pricingLeft}>
-                  <View
-                    style={[
-                      styles.radioButton,
-                      selectedPlan === option.id && styles.selectedRadioButton,
-                    ]}
-                  >
-                    {selectedPlan === option.id && (
-                      <View style={styles.radioButtonInner} />
-                    )}
-                  </View>
-                  <View style={styles.pricingTextContainer}>
-                    <AppText
-                      text={option.duration}
-                      textStyle={styles.pricingDuration}
-                    />
-                    {option.badge && (
-                      <View style={styles.badgeContainer}>
-                        <AppText
-                          text={option.badge}
-                          textStyle={styles.badgeText}
-                        />
-                      </View>
-                    )}
-                  </View>
-                </View>
-                <View style={styles.pricingRight}>
-                  <AppText
-                    text={option.price}
-                    textStyle={styles.pricingPrice}
-                  />
-                  {option.pricePerMonth && (
-                    <AppText
-                      text={option.pricePerMonth}
-                      textStyle={styles.pricingSubtext}
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
+          <View style={styles.featuresContainer}>
+            {features.map((feature, index) => (
+              <View key={index} style={styles.featureItem}>
+                <View style={styles.featureIconContainer}>{feature.icon}</View>
+                <AppText text={feature.title} textStyle={styles.featureTitle} />
+              </View>
             ))}
           </View>
-        </ScrollView>
-        <AppLinearButton
-          title={`Get ${
-            PRICING_OPTIONS.find(p => p.id === selectedPlan)?.duration || ''
-          } for ${
-            PRICING_OPTIONS.find(p => p.id === selectedPlan)?.price || ''
-          }`}
-          onPress={handleContinue}
-          linearGradientColors={['#21BEFE', '#EE50C1']}
-          buttonStyle={styles.continueButton}
-          textStyle={styles.continueButtonText}
-        />
-        <AppText
-          text="This app can be used without a subscription. With a subscription, you get access to paid features."
-          textStyle={styles.disclaimerText}
-        />
-      </View>
+        </View>
+      )}
     </AppSafeView>
   );
 };
@@ -184,7 +293,7 @@ const styles = StyleSheet.create({
     left: Size16,
     width: fontSize36,
     height: fontSize36,
-    borderRadius: fontSize36/2,
+    borderRadius: fontSize36 / 2,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -301,7 +410,6 @@ const styles = StyleSheet.create({
     paddingVertical: Size12,
     flex: 1,
   },
-  continueButton: {},
   continueButtonText: {
     fontSize: fontSize18,
     fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
@@ -312,5 +420,44 @@ const styles = StyleSheet.create({
     fontSize: fontSize12,
     paddingVertical: Size12,
     paddingHorizontal: Size20,
+  },
+  offerImage: {
+    width: '100%',
+    height: SIZES.height * 0.3,
+    resizeMode: 'contain',
+  },
+  premiumContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    paddingVertical: Size20,
+    justifyContent: 'space-between',
+  },
+  offerTitle: {
+    fontSize: fontSize20,
+    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    color: COLORS.black,
+    textAlign: 'center',
+  },
+  offerSubTitle: {
+    fontSize: fontSize14,
+    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    color: COLORS.black,
+    textAlign: 'center',
+  },
+  offerContainer: {
+    backgroundColor: COLORS.violet,
+    height: SIZES.height * 0.15,
+    borderRadius: Size12,
+    width: '92%',
+    alignSelf: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    padding: Size12,
+  },
+  offerContainerText: {
+    fontSize: fontSize12,
+    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    color: COLORS.black,
+    textAlign: 'center',
   },
 });

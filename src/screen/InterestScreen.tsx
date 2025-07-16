@@ -6,10 +6,10 @@ import {
   Image,
 } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
-import { fontSize14, Size50, SIZES } from '../constants/Sizes';
+import { fontSize14, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
-import { INTEREST_TABS } from '../constants/data';
+import { INTEREST_TABS, ROUTES } from '../constants/data';
 import RecentCard from '../components/Cards/RecentCard';
 import SentCard from '../components/Cards/SentCard';
 import ReceivedCard from '../components/Cards/ReceivedCard';
@@ -22,6 +22,7 @@ import {
   acceptRejectProposalApi,
   getPassedUsersApi,
   getSelectedUserApi,
+  setAcceptedUser,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
@@ -31,12 +32,14 @@ import {
   getSelectedUserUrl,
 } from '../constants/functions';
 import { getProposalsSendByMeUrl } from '../constants/functions';
-import GradientLoader from '../components/GradientLoader';
-
+import { useNavigation } from '@react-navigation/native';
+import AppLoader from '../components/AppLoader';
+    
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
   const bottomSheetRef = useRef<BottomSheet>(null);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
     useSelector((state: any) => state.entities.userReducer);
   useEffect(() => {
@@ -49,22 +52,34 @@ const InterestScreen = () => {
     bottomSheetRef.current?.expand(); // Open the bottom sheet
   };
   const handleRejectProposal = (id: string) => {
-    dispatch(
-      acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
-        proposalUserId: id,
-        status: 0,
-      }),
-    );
-    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-  };
-  const handleAcceptProposal = (id: string) => {
-    dispatch(
-      acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
-        proposalUserId: id,
-        status: 1,
-      }),
-    );
-    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+    try {
+      dispatch(
+        acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
+          proposalUserId: id,
+          status: 0,
+        }),
+      );
+      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+    } catch (error) {
+      console.log(error)
+    }
+ };
+  const handleAcceptProposal = (item: any) => {
+    try {
+      dispatch(
+        acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
+          proposalUserId: item.id,
+          status: 1,
+        }),
+      );
+      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+      dispatch(setAcceptedUser(item));
+      (navigation as any).navigate(ROUTES.STACK, {
+        screen: ROUTES.MATCHING,
+      });
+    } catch (error) {
+      console.log(error, 'error');
+    }
   };
 
   return (
@@ -88,13 +103,7 @@ const InterestScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
-      {loader ? (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <GradientLoader size={Size50} />
-        </View>
-      ) : (
+      {loader ? <AppLoader visible={loader} /> : (
         <>
           {selectedTab === 0 &&
             (proposalsGotByMe.length > 0 ? (
@@ -104,7 +113,7 @@ const InterestScreen = () => {
                   <ReceivedCard
                     item={item}
                     onDecline={() => handleRejectProposal(item.id)}
-                    onConnect={() => handleAcceptProposal(item.id)}
+                    onConnect={() => handleAcceptProposal(item)}
                     onPress={() => handleCardPress(item.id)}
                   />
                 )}
@@ -124,7 +133,10 @@ const InterestScreen = () => {
             <FlatList
               data={passedUsers}
               renderItem={({ item }) => (
-                <RecentCard item={item} onPress={() => handleCardPress(item.id)} />
+                <RecentCard
+                  item={item}
+                  onPress={() => handleCardPress(item.id)}
+                />
               )}
               keyExtractor={(item, index) => index.toString()}
               numColumns={2}
@@ -137,7 +149,10 @@ const InterestScreen = () => {
             <FlatList
               data={proposalsSendByMe}
               renderItem={({ item }) => (
-                <SentCard item={item} onPress={() => handleCardPress(item.id)} />
+                <SentCard
+                  item={item}
+                  onPress={() => handleCardPress(item.id)}
+                />
               )}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.gridContainer}

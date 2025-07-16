@@ -15,6 +15,8 @@ const initialState = {
   cancelProposalRequest: [],
   acceptRejectProposal: [],
   selectedUser: null,
+  acceptedUser: [],
+  homeTabRefr: false,
 };
 
 const userReducer = createSlice({
@@ -71,10 +73,17 @@ const userReducer = createSlice({
       userReducer.loader = false;
       userReducer.selectedUser = action.payload.recordList[0];
     },
+    setAcceptedUser: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.acceptedUser = action.payload;
+    },
+    setHomeTabRefr: (userReducer, action) => {
+      userReducer.homeTabRefr = action.payload;
+    },
   },
 });
 
-export const { setUser, setUserRegistrationCompleted } = userReducer.actions;
+export const { setUser, setUserRegistrationCompleted, setAcceptedUser, setHomeTabRefr } = userReducer.actions;
 
 const {
   userReducerDataRequestFailed,

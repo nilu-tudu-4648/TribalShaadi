@@ -14,6 +14,8 @@ import { fontSize12, Size20, Size25 } from '../constants/Sizes';
 import { View } from 'react-native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { ROUTES } from '../constants/data';
+import { useDispatch, useSelector } from 'react-redux';
+import { setHomeTabRefr } from '../store/reducers/userReducer';
 
 const Tab = createBottomTabNavigator();
 
@@ -39,6 +41,10 @@ const getTabBarIcon = (route: any, focused: boolean) => {
 };
 
 function BottomNavigation() {
+  const { homeTabRefr } = useSelector(
+    (state: any) => state.entities.userReducer,
+  );
+  const dispatch = useDispatch();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -56,7 +62,15 @@ function BottomNavigation() {
       })}
     >
       <Tab.Screen name={ROUTES.HOME_TAB} component={HomeScreen} />
-      <Tab.Screen name={ROUTES.INTEREST} component={InterestScreen} />
+      <Tab.Screen
+        name={ROUTES.INTEREST}
+        listeners={() => ({
+          tabPress: () => {
+            dispatch(setHomeTabRefr(!homeTabRefr));
+          },
+        })}
+        component={InterestScreen}
+      />
       <Tab.Screen name={ROUTES.CHAT} component={ChatScreen} />
       <Tab.Screen name={ROUTES.ACCOUNT_TAB} component={AccountScreen} />
     </Tab.Navigator>

@@ -12,7 +12,6 @@ import {
   SIZES,
   fontSize16,
   fontSize20,
-  Size50,
   Size10,
 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
@@ -33,7 +32,6 @@ import {
   getStatesUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-import GradientLoader from '../components/GradientLoader';
 import AppText from '../components/AppText';
 import {
   cancelProposalRequestApi,
@@ -162,16 +160,22 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
 
   const handleSendProposal = (id: string) => {
-    dispatch(
-      sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
-    );
-    dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
-    if (currentIndex < matchedUsers.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    try {
+      dispatch(
+        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
+      );
+      dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+      if (currentIndex < matchedUsers.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      }
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+    } catch (error) {
+      console.log(error, 'error');
     }
   };
 
   const handleCancelProposal = (id: string) => {
+   try {
     dispatch(
       cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
         proposalUserId: id,
@@ -184,18 +188,14 @@ const HomeScreen = () => {
     } else {
       setCurrentIndex(currentIndex + 1);
     }
+    dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+   } catch (error) {
+    console.log(error, 'error');
+   }
   };
 
   return (
     <AppSafeView style={styles.container}>
-      {/* Top Bar */}
-      {loader ? (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <GradientLoader size={Size50} />
-        </View>
-      ) : (
         <>
           {/* Profile Card */}
           {currentMatchedUser && currentIndex < matchedUsers.length ? (
@@ -301,7 +301,6 @@ const HomeScreen = () => {
             </View>
           )}
         </>
-      )}
     </AppSafeView>
   );
 };

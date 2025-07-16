@@ -40,8 +40,6 @@ import { ReportIcon } from '../svg/SvgIcons2';
 import { useDispatch, useSelector } from 'react-redux';
 import ReportBottomSheet from './ReportBottomSheet';
 import AppLoader from '../AppLoader';
-import { ROUTES } from '../../constants/data';
-import { useNavigation } from '@react-navigation/native';
 import {
   getProposalsSendByMeApi,
   sentProposalApi,
@@ -72,14 +70,18 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
   };
-  const navigation = useNavigation();
   const dispatch = useDispatch();
   const handleSendProposal = (id: number) => {
-    dispatch(
-      sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
-    );
-    dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
-  };
+    try {
+      dispatch(
+        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
+      );
+      bottomSheetRef.current?.close();
+      dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+    } catch (error) {
+      console.log(error, 'error');
+    }
+ };
   return (
     <>
       <BottomSheet
@@ -345,9 +347,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 title="Connect"
                 onPress={() => {
                   handleSendProposal(selectedUser?.id);
-                  (navigation as any).navigate(ROUTES.STACK, {
-                    screen: ROUTES.MATCHING,
-                  });
                 }}
                 textStyle={styles.connectButtonText}
                 buttonStyle={styles.connectButton}

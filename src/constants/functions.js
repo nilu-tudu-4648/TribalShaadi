@@ -40,8 +40,10 @@ export const getPassedUsersUrl = 'app/proposals/getPassedUsers';
 export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
 export const getSelectedUserUrl = 'app/users/viewUserDetail';
+//payment
+export const getPackageListUrl = 'admin/package/getpackage';
+export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
 
-// https://api.tribalshaadi.co.in/content/user/24/9.jpeg
 export const checkUserLoggedIn = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
@@ -107,7 +109,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    // console.log(token, 'token');
+    console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,

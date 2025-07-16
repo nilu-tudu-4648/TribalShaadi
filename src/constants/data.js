@@ -47,7 +47,7 @@ export const ROUTES = {
   MATCHING: 'Matching',
   CHAT: 'Chat',
   INTEREST: 'Interest',
-  HOME_TAB: 'HomeTab',
+  HOME_TAB: 'Home',
   ACCOUNT_TAB: 'Account',
 };
 

@@ -27,14 +27,14 @@ const ReceivedCard = ({
 }: {
   item: any;
   onDecline: () => void;
-  onConnect: () => void;
+  onConnect: (item: any) => void;
   onPress: () => void;
 }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={{ uri: `${imageUrl + item.image}` }}
+          source={{ uri: `${imageUrl + item.profileImage}` }}
           style={styles.profileImage}
         >
           <LinearGradient
@@ -45,19 +45,19 @@ const ReceivedCard = ({
           />
           <View style={styles.cardContent}>
             <AppText
-              text={`${item.name}, ${item.age}`}
+              text={`${item.firstName} ${item.lastName}, ${item.age}`}
               textStyle={styles.name}
             />
             <AppText
               text={`${convertCmToReadableHeight(item.height)} · ${
                 item.religion
-              } · ${item.caste}`}
+              } · ${item.community}`}
               textStyle={styles.details}
             />
             <View style={styles.homeIconContainer}>
               <HomeIcon2 color={COLORS.white} />
               <AppText
-                text={`${item.districtName}, ${item.stateName}`}
+                text={`${item.city ? item.city : ''}, ${item.state}`}
                 textStyle={styles.location}
               />
             </View>
@@ -75,7 +75,7 @@ const ReceivedCard = ({
         />
         <AppButton
           title="Accept"
-          onPress={onConnect}
+          onPress={() => onConnect(item)}
           isButtonDisabled={false}
           isLoading={false}
           buttonStyle={styles.connectButton}
@@ -171,13 +171,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SIZES.padding,
     gap: SIZES.padding,
-    bottom:20
+    bottom: 20,
   },
   connectButton: {
     backgroundColor: COLORS.violet,
     width: '47%',
     elevation: 2,
-    borderRadius:Size10
+    borderRadius: Size10,
   },
   connectButtonText: {
     color: COLORS.white,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     width: '47%',
     elevation: 2,
-    borderRadius:Size10
+    borderRadius: Size10,
   },
   declineButtonText: {
     color: COLORS.declineButton,

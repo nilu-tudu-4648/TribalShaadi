@@ -35,7 +35,7 @@ const ReportBottomSheet: React.FC<ReportBottomSheetProps> = ({
   bottomSheetRef,
   onReport,
 }) => {
-  const snapPoints = ['50%', '50%'];
+  const snapPoints = ['35%', '35%'];
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [isPickerVisible, setIsPickerVisible] = useState(false);
 

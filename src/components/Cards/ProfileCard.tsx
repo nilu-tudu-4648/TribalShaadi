@@ -10,6 +10,7 @@ import {
   fontSize16,
   Size10,
   Size8,
+  lignHeight57,
 } from '../../constants/Sizes';
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import {
@@ -509,7 +510,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: SIZES.padding,
+    paddingBottom: lignHeight57,
   },
   thinLine: {
     height: 1,

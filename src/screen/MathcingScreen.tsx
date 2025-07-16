@@ -14,6 +14,8 @@ import AppButton from '../components/AppButton';
 import { CloseIcon } from '../components/svg/SvgIcons2';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../constants/data';
+import { useSelector } from 'react-redux';
+import { imageUrl } from '../constants/functions';
 
 const MathcingScreen = () => {
   // Animation values
@@ -24,6 +26,8 @@ const MathcingScreen = () => {
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const imageScale = useRef(new Animated.Value(0.8)).current;
   const navigation = useNavigation();
+  const { acceptedUser } = useSelector((state: any) => state.entities.userReducer);
+  console.log(acceptedUser, 'acceptedUser');
   useEffect(() => {
     // Animation sequence
     const animateSequence = () => {
@@ -104,7 +108,7 @@ const MathcingScreen = () => {
           ]}
         >
           <Image
-            source={require('../assets/images/match.jpg')}
+            source={{ uri: `${imageUrl + acceptedUser.profileImage}` }}
             style={styles.matchImage}
             resizeMode="cover"
           />
