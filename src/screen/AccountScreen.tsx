@@ -96,6 +96,7 @@ const AccountScreen = () => {
     { uri: string; base64: string }[]
   >([]);
   const dispatch = useDispatch();
+
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',

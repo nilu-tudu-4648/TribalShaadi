@@ -14,6 +14,10 @@ import {
   fontSize14,
   fontSize16,
   Size10,
+  Size14,
+  Size40,
+  Size20,
+  Size25,
 } from '../../constants/Sizes';
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import { HomeIcon2 } from '../svg/SvgIcons';
@@ -30,12 +34,14 @@ const ReceivedCard = ({
   onConnect: (item: any) => void;
   onPress: () => void;
 }) => {
+  const planPurchased = true;
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
           source={{ uri: `${imageUrl + item.profileImage}` }}
           style={styles.profileImage}
+          blurRadius={planPurchased ? 0 : 50}
         >
           <LinearGradient
             colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
@@ -43,45 +49,54 @@ const ReceivedCard = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-          <View style={styles.cardContent}>
-            <AppText
-              text={`${item.firstName} ${item.lastName}, ${item.age}`}
-              textStyle={styles.name}
-            />
-            <AppText
-              text={`${convertCmToReadableHeight(item.height)} · ${
-                item.religion
-              } · ${item.community}`}
-              textStyle={styles.details}
-            />
-            <View style={styles.homeIconContainer}>
-              <HomeIcon2 color={COLORS.white} />
+          {planPurchased ? (
+            <View style={styles.cardContent}>
               <AppText
-                text={`${item.city ? item.city : ''}, ${item.state}`}
-                textStyle={styles.location}
+                text={`${item.firstName} ${item.lastName}, ${item.age}`}
+                textStyle={styles.name}
               />
+              <AppText
+                text={`${convertCmToReadableHeight(item.height)} · ${
+                  item.religion
+                } · ${item.community}`}
+                textStyle={styles.details}
+              />
+              <View style={styles.homeIconContainer}>
+                <HomeIcon2 color={COLORS.white} />
+                <AppText
+                  text={`${item.city ? item.city : ''}, ${item.state}`}
+                  textStyle={styles.location}
+                />
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.whiteLineContainer}>
+              <View style={{ ...styles.whiteLine, width: '60%' }} />
+              <View style={styles.whiteLine} />
+            </View>
+          )}
         </ImageBackground>
       </View>
-      <View style={styles.buttonRow}>
-        <AppButton
-          title="Decline"
-          onPress={onDecline}
-          isButtonDisabled={false}
-          isLoading={false}
-          buttonStyle={styles.declineButton}
-          textStyle={styles.declineButtonText}
-        />
-        <AppButton
-          title="Accept"
-          onPress={() => onConnect(item)}
-          isButtonDisabled={false}
-          isLoading={false}
-          buttonStyle={styles.connectButton}
-          textStyle={styles.connectButtonText}
-        />
-      </View>
+      {planPurchased && (
+        <View style={styles.buttonRow}>
+          <AppButton
+            title="Decline"
+            onPress={onDecline}
+            isButtonDisabled={false}
+            isLoading={false}
+            buttonStyle={styles.declineButton}
+            textStyle={styles.declineButtonText}
+          />
+          <AppButton
+            title="Accept"
+            onPress={() => onConnect(item)}
+            isButtonDisabled={false}
+            isLoading={false}
+            buttonStyle={styles.connectButton}
+            textStyle={styles.connectButtonText}
+          />
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -91,19 +106,15 @@ export default ReceivedCard;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
-    shadowColor: COLORS.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
     paddingBottom: SIZES.padding,
   },
   imageContainer: {
-    position: 'relative',
     width: '100%',
     height: SIZES.height * 0.5,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: Size14,
+    overflow: 'hidden',
   },
   profileImage: {
     width: '100%',
@@ -112,6 +123,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
   },
+
   imageOverlay: {
     position: 'absolute',
     top: '50%',
@@ -157,21 +169,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
     zIndex: 1,
   },
-  bioLabel: {
-    fontWeight: '700',
-    fontStyle: 'italic',
-    color: COLORS.textGrey,
-  },
-  bio: {
-    fontSize: fontSize14,
-    color: COLORS.textGrey,
-  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: SIZES.padding,
     gap: SIZES.padding,
-    bottom: 20,
+    bottom: Size25,
   },
   connectButton: {
     backgroundColor: COLORS.violet,
@@ -203,8 +206,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: fontSize16,
   },
-  bioSection: {
-    padding: SIZES.padding,
-    gap: SIZES.base,
+  whiteLine: {
+    backgroundColor: COLORS.white,
+    height: Size20,
+    width: '100%',
+    borderRadius: Size10,
+  },
+  whiteLineContainer: {
+    height: Size40,
+    width: '60%',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: Size10,
+    bottom: Size40,
+    gap: Size10,
   },
 });

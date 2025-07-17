@@ -8,12 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { COLORS } from '../constants/AppColors';
-import {
-  SIZES,
-  fontSize16,
-  fontSize20,
-  Size10,
-} from '../constants/Sizes';
+import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
 import ProfileCard from '../components/Cards/ProfileCard';
 import {
@@ -62,37 +57,18 @@ const HomeScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Swipe animation values
-  const translateX = useSharedValue(0);
-  const opacity = useSharedValue(1);
-
+  const translateX   = useSharedValue(0);
+  const opacity      = useSharedValue(1);
+  const entryX = useSharedValue(0); 
   // Reset animation values when index changes
-  const resetAnimation = () => {
-    translateX.value = withTiming(0);
-    opacity.value = withTiming(1);
-  };
-
   const handleSwipeRight = () => {
-    if (matchedUsers && matchedUsers.length > 0) {
-      if (currentIndex < matchedUsers.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        // Loop back to start when reaching the end
-        setCurrentIndex(0);
-      }
-      setTimeout(resetAnimation, 100);
-    }
+    if (matchedUsers.length === 0) return;
+    setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
   };
-
+  
   const handleSwipeLeft = () => {
-    if (matchedUsers && matchedUsers.length > 0) {
-      if (currentIndex < matchedUsers.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        // Loop back to start when reaching the end
-        setCurrentIndex(0);
-      }
-      setTimeout(resetAnimation, 100);
-    }
+    if (matchedUsers.length === 0) return;
+    setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
   };
 
   // Gesture handler for swipe functionality
@@ -115,21 +91,22 @@ const HomeScreen = () => {
     })
     .onEnd(event => {
       const swipeThreshold = width * 0.3;
-
+    
       if (event.translationX > swipeThreshold) {
-        // Swipe right - Connect
-        translateX.value = withTiming(width);
-        runOnJS(handleSwipeRight)();
+        // ACCEPT  – next card must come from LEFT
+        entryX.value = -width;                // start off-screen left
+        translateX.value = withTiming(width); // current card exits right
+        runOnJS(handleSwipeRight)();          // your original function
       } else if (event.translationX < -swipeThreshold) {
-        // Swipe left - Decline
-        translateX.value = withTiming(-width);
-        runOnJS(handleSwipeLeft)();
+        // DECLINE – next card must come from RIGHT
+        entryX.value = width;                 // start off-screen right
+        translateX.value = withTiming(-width); // current card exits left
+        runOnJS(handleSwipeLeft)();           // your original function
       } else {
-        // Reset if swipe wasn't far enough
         translateX.value = withTiming(0);
         opacity.value = withTiming(1);
       }
-    });
+    })
 
   // Animated style for the profile card
   const animatedStyle = useAnimatedStyle(() => {
@@ -138,7 +115,14 @@ const HomeScreen = () => {
       opacity: opacity.value,
     };
   });
-
+// 3.  whenever currentIndex changes -> animate in
+useEffect(() => {
+  translateX.value = entryX.value;        // off-screen direction
+  translateX.value = withTiming(0, {duration: 250});
+  opacity.value = 0;
+  opacity.value = withTiming(1, {duration: 250});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [currentIndex]);
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
@@ -163,9 +147,13 @@ const HomeScreen = () => {
   const handleSendProposal = (id: string) => {
     try {
       dispatch(
-        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
+        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+          proposalUserId: id,
+        }),
       );
-      dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+      dispatch(
+        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+      );
       if (currentIndex < matchedUsers.length - 1) {
         setCurrentIndex(currentIndex + 1);
       }
@@ -175,29 +163,34 @@ const HomeScreen = () => {
     }
   };
 
-  const handleCancelProposal = (id: string) => {
-   try {
-    dispatch(
-      cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
-        proposalUserId: id,
-      }),
-    );
-    dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
-    dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
-    if (currentIndex < matchedUsers.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(currentIndex + 1);
+  const handleCancelProposal = async (id: string) => {
+    try {
+      dispatch(
+        cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
+          proposalUserId: id,
+        }),
+      );
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
+      dispatch(
+        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+      );
+      if (currentIndex < matchedUsers.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setCurrentIndex(currentIndex + 1);
+      }
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+    } catch (error) {
+      console.log(error, 'error');
     }
-    dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-   } catch (error) {
-    console.log(error, 'error');
-   }
   };
 
   return (
     <AppSafeView style={styles.container}>
-      {loader && <AppLoader />}
+      {loader ? (
+        <AppLoader />
+      ) : (
         <>
           {/* Profile Card */}
           {currentMatchedUser && currentIndex < matchedUsers.length ? (
@@ -303,6 +296,7 @@ const HomeScreen = () => {
             </View>
           )}
         </>
+      )} 
     </AppSafeView>
   );
 };

@@ -34,7 +34,7 @@ const LoginScreen: React.FC = () => {
 
     useEffect(() => {
       let mounted = true;
-      if (otpSent && mounted) {
+      if (otpSent && mounted && phoneNumber.length === 10) {
         navigation.navigate('OTP', { phoneNumber });
       }
       return () => { mounted = false; };

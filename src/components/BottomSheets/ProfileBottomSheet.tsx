@@ -44,10 +44,12 @@ import {
   getProposalsSendByMeApi,
   sentProposalApi,
   getPassedUsersApi,
+  setSelectedUser,
 } from '../../store/reducers/userReducer';
 import {
   baseUrl,
   convertCmToReadableHeight,
+  formatDateShort,
   getPassedUsersUrl,
   getProposalsSendByMeUrl,
   imageUrl,
@@ -68,6 +70,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const { selectedUser, loader } = useSelector(
     (state: any) => state.entities.userReducer,
   );
+  console.log(selectedUser, 'selectedUser');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -85,11 +88,16 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       console.log(error, 'error');
     }
  };
+ const handleClose = () => {
+  bottomSheetRef.current?.close();
+  console.log('close');
+  // dispatch(setSelectedUser(null));
+ }
   return (
     <>
       <BottomSheet
         onClose={() => {
-          bottomSheetRef.current?.close();
+          handleClose();
         }}
         ref={bottomSheetRef}
         index={-1} // -1 means hidden
@@ -163,7 +171,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                   <View style={styles.detailText}>
                     <AppText text="Date of Birth" textStyle={styles.label} />
                     <AppText
-                      text={selectedUser?.birthDate}
+                      text={formatDateShort(selectedUser?.birthDate)}
                       textStyle={styles.value}
                     />
                   </View>

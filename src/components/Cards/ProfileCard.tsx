@@ -12,7 +12,11 @@ import {
   Size8,
   lignHeight57,
 } from '../../constants/Sizes';
-import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
+import {
+  convertCmToReadableHeight,
+  imageUrl,
+  formatDateShort,
+} from '../../constants/functions';
 import {
   CalendarIcon,
   HomeIcon2,
@@ -168,7 +172,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <CalendarIcon color={COLORS.black} />
           <View style={styles.detailText}>
             <AppText text="Date of Birth" textStyle={styles.label} />
-            <AppText text={dob} textStyle={styles.value} />
+            <AppText text={formatDateShort(dob)} textStyle={styles.value} />
           </View>
         </View>
         <View style={styles.detailRow}>

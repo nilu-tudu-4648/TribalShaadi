@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
@@ -10,13 +10,19 @@ import AppPickerModal from '../AppPickerModal';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
+  fontSize16,
   fontSize18,
+  fontSize22,
   Size12,
   Size16,
   Size20,
+  Size25,
+  Size50,
+  Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import AppButton from '../AppButton';
+import GradientLoader from '../GradientLoader';
 
 interface ReportBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -38,17 +44,25 @@ const ReportBottomSheet: React.FC<ReportBottomSheetProps> = ({
   const snapPoints = ['35%', '35%'];
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [isPickerVisible, setIsPickerVisible] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [loader, setLoader] = useState(false);
 
   const handleReport = () => {
+    setLoader(true);
+    setTimeout(() => {
+      setLoader(false);
+      setReportSubmitted(true);
+    }, 2000);
     if (selectedReason) {
       onReport(selectedReason);
-      bottomSheetRef.current?.close();
       setSelectedReason(''); // Reset after reporting
     }
   };
 
   const handleSheetChanges = (index: number) => {
     if (index === -1) {
+      bottomSheetRef.current?.close();
+      setReportSubmitted(false);
       setSelectedReason(''); // Reset when closed
     }
   };
@@ -72,31 +86,56 @@ const ReportBottomSheet: React.FC<ReportBottomSheetProps> = ({
         backgroundStyle={styles.bottomSheetBackground}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View style={styles.headerContainer}>
-            {/* <AppText text="Report Profile" textStyle={styles.headerTitle} /> */}
-            <AppText
-              text="YOU are safe with us! We will never inform this profile about your safety concern & this reporting shall always be anonymous"
-              textStyle={styles.headerSubtitle}
-            />
-          </View>
-
-          <AppDropdown
-            label="Reason"
-            selectedValue={selectedReason}
-            placeholder="Select a reason"
-            onPress={() => setIsPickerVisible(true)}
-          />
-
-          <AppButton
-            title="Report"
-            onPress={handleReport}
-            textStyle={styles.reportButtonText}
-            buttonStyle={[
-              styles.reportButton,
-              !selectedReason && styles.reportButtonDisabled
-            ]}
-            isButtonDisabled={!selectedReason}
-          />
+          {loader ? (
+            <View style={styles.loaderContainer}>
+              <GradientLoader size={Size50} />
+            </View>
+          ) : reportSubmitted ? (
+            <View style={styles.reportSubmittedContainer}>
+              <Image
+                source={require('../../assets/images/shield2.png')}
+                style={styles.reportSubmittedImage}
+              />
+              <AppText
+                text="Submitted Successfully"
+                textStyle={{
+                  ...styles.reportSubmittedText,
+                  fontSize: fontSize22,
+                  color: COLORS.black,
+                }}
+              />
+              <AppText
+                text="Thank you for your report. Our team will review this profile and take appropriate action if needed. Your safety is our priority."
+                textStyle={styles.reportSubmittedText}
+              />
+            </View>
+          ) : (
+            <>
+              <View style={styles.headerContainer}>
+                <AppText
+                  text="YOU are safe with us! We will never inform this profile about your safety concern & this reporting shall always be anonymous"
+                  textStyle={styles.headerSubtitle}
+                />
+              </View>
+              <AppDropdown
+                label="Reason"
+                selectedValue={selectedReason}
+                placeholder="Select a reason"
+                onPress={() => setIsPickerVisible(true)}
+                dropdownStyle={styles.dropdownStyle}
+              />
+              <AppButton
+                title="Report"
+                onPress={handleReport}
+                textStyle={styles.reportButtonText}
+                buttonStyle={[
+                  styles.reportButton,
+                  !selectedReason && styles.reportButtonDisabled,
+                ]}
+                isButtonDisabled={!selectedReason}
+              />
+            </>
+          )}
         </BottomSheetView>
       </BottomSheet>
 
@@ -136,16 +175,43 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: fontSize14,
     fontFamily: Fonts.OPEN_SANS_REGULAR,
-    color: COLORS.textInactive,
+    color: COLORS.black,
   },
   reportButton: {
     backgroundColor: COLORS.violet,
-    borderRadius: Size12,
+    borderRadius: Size25,
   },
   reportButtonDisabled: {
     backgroundColor: COLORS.textInactive,
   },
   reportButtonText: {
     color: COLORS.white,
+  },
+  dropdownStyle: {
+    borderWidth: 1,
+    borderColor: COLORS.divider,
+    borderRadius: Size8,
+  },
+  reportSubmittedContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+    gap: Size12,
+  },
+  reportSubmittedText: {
+    fontSize: fontSize16,
+    color: COLORS.greytext,
+    textAlign: 'center',
+  },
+  reportSubmittedImage: {
+    width: Size50 * 2,
+    height: Size50 * 1.5,
+    resizeMode: 'contain',
+  },
+  loaderContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    paddingTop: Size50*1.5,
   },
 });

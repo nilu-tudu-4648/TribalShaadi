@@ -1,3 +1,4 @@
+
 // Interest Tabs
 export const INTEREST_TABS = [
   { label: 'Received' },

@@ -40,10 +40,47 @@ export const getPassedUsersUrl = 'app/proposals/getPassedUsers';
 export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
 export const getSelectedUserUrl = 'app/users/viewUserDetail';
+export const getGalleryImageListUrl = 'app/users/getGalleryImageList';
 //payment
 export const getPackageListUrl = 'admin/package/getpackage';
 export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
 export const getPaymentGatewaysUrl = 'app/paymentGateways/getPaymentgatewaysForPackage?appPlatform=androidApp';
+export const generateRazorPayOrderIdUrl = 'app/paymentGateways/generateRazorPayOrderId';
+export const verifyPaymentUrl = 'app/paymentGateways/verifyPayment';
+
+// Date formatting function
+export const formatDateOfBirth = (dateString) => {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  } catch (error) {
+    console.log('Error formatting date:', error);
+    return dateString;
+  }
+};
+
+// Alternative shorter format (DD/MM/YYYY)
+export const formatDateShort = (dateString) => {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.log('Error formatting date:', error);
+    return dateString;
+  }
+};
 
 export const checkUserLoggedIn = async dispatch => {
   try {
@@ -110,7 +147,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token');
+    // console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -280,7 +317,21 @@ export const getCitiesByStateId = async stateId => {
     return [];
   }
 };
-export const resetPreferenceApi = async data => {
+export const resetPreferenceApi = async () => {
+  const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+  const user = JSON.parse(userDataString);
+  const data = {
+    id: user.id,
+    pReligionId:"",
+    pCommunityId: "",
+    pMaritalStatusId:"",
+    pFromAge: "",
+    pToAge: "",
+    pStateLivingInId:"",
+    pCityLivingInId:"",
+    pOccupationId:"",
+    pSettlingDown:"",
+  };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const response = await axios.post(`${baseUrl}/${updateUrl}`, data, {

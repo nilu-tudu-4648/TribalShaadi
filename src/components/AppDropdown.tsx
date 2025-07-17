@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import AppText from './AppText';
 import { COLORS } from '../constants/AppColors';
 import {
@@ -19,6 +19,8 @@ interface AppDropdownProps {
   placeholder: string;
   onPress: () => void;
   disabled?: boolean;
+  dropdownContainerStyle?: StyleProp<ViewStyle>;
+  dropdownStyle?: StyleProp<ViewStyle>;
 }
 
 const AppDropdown: React.FC<AppDropdownProps> = ({
@@ -27,14 +29,17 @@ const AppDropdown: React.FC<AppDropdownProps> = ({
   placeholder,
   onPress,
   disabled = false,
+  dropdownContainerStyle,
+  dropdownStyle,
 }) => {
   return (
-    <View style={styles.dropdownContainer}>
+    <View style={[styles.dropdownContainer, dropdownContainerStyle]}>
       {label && <AppText text={label} textStyle={styles.dropdownLabel} />}
       <TouchableOpacity 
         style={[
           styles.dropdown,
           disabled && styles.dropdownDisabled,
+          dropdownStyle,
         ]} 
         onPress={disabled ? undefined : onPress}
         disabled={disabled}

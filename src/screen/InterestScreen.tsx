@@ -60,10 +60,10 @@ const InterestScreen = () => {
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
   const handleCardPress = async (id: string) => {
+    console.log(id, 'id');
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(selectedUser, 'selectedUser');
       bottomSheetRef.current?.expand(); // Open the bottom sheet
     } catch (error) {
       console.log(error, 'error');
@@ -134,7 +134,7 @@ const InterestScreen = () => {
                     item={item}
                     onDecline={() => handleRejectProposal(item.id)}
                     onConnect={() => handleAcceptProposal(item)}
-                    onPress={() => handleCardPress(item.id)}
+                    onPress={() => handleCardPress(item.senderUserId)}
                   />
                 )}
                 keyExtractor={(item, index) => index.toString()}
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: SIZES.base * 4, // Approximately 48
-    paddingHorizontal: SIZES.padding,
+    paddingHorizontal: SIZES.padding2,
     gap: SIZES.padding,
   },
   title: {

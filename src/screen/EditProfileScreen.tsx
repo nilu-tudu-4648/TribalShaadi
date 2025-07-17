@@ -6,7 +6,7 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize12,
@@ -20,10 +20,10 @@ import {
   lignHeight20,
   lignHeight32,
   lignHeight38,
-  lignHeight43,
   lignHeight53,
   compPadding,
   fontSize20,
+  Size50,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppText from '../components/AppText';
@@ -38,12 +38,23 @@ import { useNavigation } from '@react-navigation/native';
 import AppHeader from '../components/AppHeader';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
-import { useSelector } from 'react-redux';
-import { imageUrl } from '../constants/functions';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getGalleryImageListUrl, getUserDetailsApi, getUserDetailsUrl, imageUrl, setReducerLoadingfalse, uploadImage } from '../constants/functions';
+import { getGalleryImageListApi } from '../store/reducers/userReducer';
+import AppToast from '../components/AppToast';
+import { setLoadingTrue } from '../store/reducers/authReducer';
+import {
+  launchImageLibrary,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
+  const dispatch = useDispatch();
+  const [selectedImages, setSelectedImages] = useState<
+  { uri: string; base64: string }[]
+>([]);
+  const { galleryImageList } = useSelector((state: any) => state.entities.userReducer);
   const menuItems = [
     {
       id: 1,
@@ -92,7 +103,62 @@ const EditProfileScreen = () => {
       },
     },
   ];
+  useEffect(() => {
+    dispatch(getGalleryImageListApi(getGalleryImageListUrl, {
+      userId: user.id,
+    }));
+  }, [dispatch, user.id]);
+  const handleImageUpload = async (index: number) => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+      includeBase64: true,
+      maxHeight: 2000,
+      maxWidth: 2000,
+      quality: 0.8,
+    };
 
+    launchImageLibrary(options, async response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+        AppToast('Failed to select image. Please try again.');
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        if (asset.uri && asset.base64) {
+          // Update the selected images first
+          const newImages = [...selectedImages];
+          newImages[index] = { uri: asset.uri, base64: asset.base64 };
+          setSelectedImages(newImages);
+          dispatch(setLoadingTrue(true));
+          // Upload the image immediately
+          try {
+            let requestBody;
+
+            if (index === 0) {
+              // First image format
+              requestBody = {
+                id: user.id,
+                image: `data:image/jpeg;base64,${asset.base64}`,
+              };
+              console.log(requestBody, 'requestBody for first image');
+              await uploadImage(requestBody, dispatch, true);
+              setReducerLoadingfalse(dispatch, () => {
+                getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+              });
+            }
+          } catch (error) {
+            console.log('NETWORK ERROR:', error);
+            AppToast('Failed to upload image. Please try again.');
+            // Remove the image from state if upload failed
+            const failedImages = [...selectedImages];
+            failedImages[index] = { uri: '', base64: '' };
+            setSelectedImages(failedImages);
+          }
+        }
+      }
+    });
+  };
   return (
     <AppSafeView style={styles.container}>
       <ScrollView
@@ -106,13 +172,13 @@ const EditProfileScreen = () => {
         <View style={styles.profileImagesContainer}>
           <View style={styles.profileImageWrapper}>
             <View style={styles.profileImage}>
-              <View style={styles.profileImagePlaceholder}>
+              <TouchableOpacity style={styles.profileImagePlaceholder} onPress={() => handleImageUpload(0)}>
                 <Image
                   source={{ uri: imageUrl + user.image }}
                   style={styles.placeholderImage}
                   resizeMode="cover"
                 />
-              </View>
+              </TouchableOpacity>
               {/* <View style={styles.profileImageBanner}>
                 <AppText
                   text="Profile Image"
@@ -128,7 +194,7 @@ const EditProfileScreen = () => {
           <View style={styles.profileImage}>
             <View style={styles.profileImagePlaceholder}>
               <Image
-                source={require('../assets/images/Female (1).png')}
+                source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
                 style={styles.placeholderImage}
                 resizeMode="cover"
               />
@@ -138,7 +204,7 @@ const EditProfileScreen = () => {
           <View style={styles.profileImage}>
             <View style={styles.profileImagePlaceholder}>
               <Image
-                source={require('../assets/images/Female.png')}
+                source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
                 style={styles.placeholderImage}
                 resizeMode="cover"
               />
@@ -268,6 +334,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     paddingHorizontal: compPadding,
+    paddingTop: Size50,
     gap: Size25,
   },
   menuItem: {

@@ -5,6 +5,7 @@ const initialState = {
   packageList: [],
   timeDuration: [],
   paymentGateways: [],
+  razorPayOrderId: '',
 };
 
 const paymentReducer = createSlice({
@@ -30,6 +31,14 @@ const paymentReducer = createSlice({
       paymentReducer.loader = false;
       paymentReducer.paymentGateways = action.payload.recordList[0];
     },
+    paymentReducerRazorPayOrderIdReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      paymentReducer.razorPayOrderId = action.payload.recordList;
+    },
+    paymentReducerPaymentVerificationReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      // Handle payment verification success
+    },
   },
 });
 
@@ -41,6 +50,8 @@ const {
   paymentReducerDataReceived,
   paymentReducerTimeDurationReceived,
   paymentReducerPaymentGatewaysReceived,
+  paymentReducerRazorPayOrderIdReceived,
+  paymentReducerPaymentVerificationReceived,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -65,6 +76,25 @@ export const getPaymentGatewaysApi = url =>
     url,
     onStart: paymentReducerDataRequested.type,
     onSuccess: paymentReducerPaymentGatewaysReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const generateRazorPayOrderIdApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerRazorPayOrderIdReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+
+export const verifyPaymentApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerPaymentVerificationReceived.type,
     onError: paymentReducerDataRequestFailed.type,
   });
 export default paymentReducer.reducer;

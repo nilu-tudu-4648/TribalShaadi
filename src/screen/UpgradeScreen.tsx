@@ -28,28 +28,40 @@ import {
   fontSize36,
   fontSize20,
   Size14,
+  Size10,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
-import { getPackageListUrl, getPaymentGatewaysUrl } from '../constants/functions';
+import { generateRazorPayOrderIdUrl, getPackageListUrl, getPaymentGatewaysUrl } from '../constants/functions';
 import {
   getPackageListApi,
   getPaymentGatewaysApi,
+  generateRazorPayOrderIdApi,
 } from '../store/reducers/paymentReducer';
 import { useDispatch,useSelector } from 'react-redux';
 import AppLoader from '../components/AppLoader';
+import AppToast from '../components/AppToast';
+import RazorpayCheckout from 'react-native-razorpay';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
-  const { packageList, loader, paymentGateways } = useSelector(
+  const { packageList, loader, paymentGateways, razorPayOrderId } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
+  const { user } = useSelector(
+    (state: any) => state.entities.userReducer,
+  );
   const [selectedPlan, setSelectedPlan] = useState(1);
+  const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const updated = true;
   const dispatch = useDispatch();
-  console.log('paymentGateways', paymentGateways);
+  const creds = {
+    apiKey: 'rzp_test_vw4GSmnwPX83jT',
+    secretKey: 'nd5fniNolVnGhHlVDr1AM2Qs',
+  };
+
   const features = [
     {
       icon: <InfinityIcon color={COLORS.white} />,
@@ -65,10 +77,82 @@ const UpgradeScreen = () => {
     setSelectedPlan(planId);
   };
 
-  const handleContinue = () => {
-    // Handle subscription logic here
-    console.log('Selected plan:', selectedPlan);
+  const openRazorpayCheckout = () => {
+    if (!paymentGateways) {
+      AppToast('Payment configuration not ready. Please try again.');
+      return;
+    }
+
+    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
+    if (!selectedPackage) return;
+
+    setCheckoutInProgress(true);
+    dispatch(
+      generateRazorPayOrderIdApi(generateRazorPayOrderIdUrl, {
+        amount: selectedPackage.package[0].baseAmount,
+        currency: 'INR',
+      }),
+    );
   };
+
+  useEffect(() => {
+    if (checkoutInProgress && razorPayOrderId) {
+      const selectedPackage = packageList.find(
+        (p: any) => p.id === selectedPlan,
+      );
+      if (!selectedPackage) {
+        setCheckoutInProgress(false);
+        return;
+      }
+
+      const options = {
+        key: creds.apiKey,
+        amount: selectedPackage.package[0].baseAmount * 100,
+        currency: 'INR',
+        name: 'TribalShaadi',
+        description: `${selectedPackage.package[0].value} Months Premium Subscription`,
+        order_id: razorPayOrderId.id,
+        handler: function (response: any) {
+          console.log('response', response);
+        },
+        // prefill: {
+        //   name: `${user.firstName} ${user.lastName}`,
+        //   email: user.email,
+        //   contact: user.phone,
+        // },
+        notes: {
+          package_name: 'Premium Package',
+        },
+        theme: {
+          color: '#21BEFE',
+        },
+      };
+
+      RazorpayCheckout.open(options)
+        .then((data: any) => {
+          console.log('Payment success:', data);
+        })
+        .catch((error: any) => {
+          console.log('Payment error:', error);
+          if (error.code === 'payment_cancelled') {
+            AppToast('Payment cancelled by user');
+          } else {
+            AppToast('Payment failed. Please try again.');
+          }
+        })
+        .finally(() => {
+          setCheckoutInProgress(false);
+        });
+    }
+  }, [
+    checkoutInProgress,
+    razorPayOrderId,
+    selectedPlan,
+    packageList,
+    creds.apiKey,
+    user,
+  ]);
+
   useEffect(() => {
     dispatch(getPackageListApi(getPackageListUrl));
     dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
@@ -180,7 +264,7 @@ const UpgradeScreen = () => {
                 packageList.find((p: any) => p.id === selectedPlan)?.package[0]
                   .baseAmount
               }`}
-              onPress={handleContinue}
+              onPress={openRazorpayCheckout}
               linearGradientColors={['#21BEFE', '#EE50C1']}
               textStyle={styles.continueButtonText}
             />
@@ -281,7 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   backgroundImage: {
-    height: SIZES.height * 0.5,
+    flex: 1,
     paddingTop: Size40,
     justifyContent: 'space-between',
   },
@@ -332,10 +416,13 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     backgroundColor: COLORS.white,
-    paddingTop: Size20,
-    paddingHorizontal: Size16,
-    borderTopLeftRadius: Size40 * 5,
-    borderTopRightRadius: Size40 * 5,
+    padding: Size16,
+    paddingBottom: 0,
+    justifyContent: 'space-between',
+    borderTopLeftRadius: Size40,
+    borderTopRightRadius: Size40,
+    bottom: Size25,
+    height: SIZES.height * 0.47,
   },
   pricingContainer: {
     paddingVertical: Size12,
@@ -347,7 +434,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.white,
     borderRadius: Size12,
-    padding: Size12,
+    padding: Size10,
     borderWidth: 1,
     borderColor: COLORS.borderLight,
   },

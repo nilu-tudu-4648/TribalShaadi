@@ -27,6 +27,7 @@ import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
 import { useSelector } from 'react-redux';
 import AppLoader from '../components/AppLoader';
+import { resetPreferenceApi } from '../constants/functions';
 
 const PreferenceScreen = () => {
   const { user, maritalStatuses, religion, community, height, loader } =
@@ -46,7 +47,7 @@ const PreferenceScreen = () => {
     min: number;
     max: number;
   }>({ min: 20, max: 45 });
-  const [selectedReligion, setSelectedReligion] = useState<string>('Sarna');
+  const [selectedReligion, setSelectedReligion] = useState<string>('');
   const [selectedHeightRange, setSelectedHeightRange] = useState<{
     min: number;
     max: number;
@@ -252,6 +253,10 @@ const PreferenceScreen = () => {
     setSelectedSettleDown(options);
   };
 
+  const handleResetPress = () => {
+    resetPreferenceApi();
+  };
+
   const PreferenceCard = ({
     title,
     value,
@@ -306,7 +311,10 @@ const PreferenceScreen = () => {
         <AppHeader
           title="Preferences"
           rightButton={
-            <TouchableOpacity style={styles.resetButton}>
+            <TouchableOpacity
+              onPress={handleResetPress}
+              style={styles.resetButton}
+            >
               <AppText text="Reset" textStyle={styles.resetButtonText} />
             </TouchableOpacity>
           }

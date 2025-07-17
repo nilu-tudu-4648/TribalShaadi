@@ -17,6 +17,7 @@ const initialState = {
   selectedUser: null,
   acceptedUser: [],
   homeTabRefr: false,
+  galleryImageList: [],
 };
 
 const userReducer = createSlice({
@@ -71,6 +72,7 @@ const userReducer = createSlice({
     },
     setSelectedUserDataReceived: (userReducer, action) => {
       userReducer.loader = false;
+      console.log(action.payload, 'action.payload.recordList[0]');
       userReducer.selectedUser = action.payload.recordList[0];
     },
     setAcceptedUser: (userReducer, action) => {
@@ -80,10 +82,24 @@ const userReducer = createSlice({
     setHomeTabRefr: (userReducer, action) => {
       userReducer.homeTabRefr = action.payload;
     },
+    setSelectedUser: (userReducer, action) => {
+      userReducer.selectedUser = action.payload;
+    },
+    setGalleryImageDataReceived: (userReducer, action) => {
+      console.log(action.payload, 'action.payload.recordList[0]');
+      userReducer.galleryImageList = action.payload.recordList;
+      userReducer.loader = false;
+    },
   },
 });
 
-export const { setUser, setUserRegistrationCompleted, setAcceptedUser, setHomeTabRefr } = userReducer.actions;
+export const {
+  setUser,
+  setUserRegistrationCompleted,
+  setAcceptedUser,
+  setHomeTabRefr,
+  setSelectedUser,
+} = userReducer.actions;
 
 const {
   userReducerDataRequestFailed,
@@ -97,7 +113,8 @@ const {
   setAcceptRejectProposalDataReceived,
   setCurrentMatchedDataReceived,
   setSelectedUserDataReceived,
-  } = userReducer.actions;
+  setGalleryImageDataReceived,
+} = userReducer.actions;
 export const setMatchedUserApi = url =>
   apiCallBegan({
     method: 'get',
@@ -117,7 +134,7 @@ export const sentProposalApi = (url, data) =>
     onError: userReducerDataRequestFailed.type,
   });
 
-export const getProposalsSendByMeApi = (url, data={}) =>
+export const getProposalsSendByMeApi = (url, data = {}) =>
   apiCallBegan({
     method: 'post',
     url,
@@ -126,7 +143,7 @@ export const getProposalsSendByMeApi = (url, data={}) =>
     onSuccess: setProposalsSendByMeDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
-export const getProposalsGotByMeApi = (url, data={}) =>
+export const getProposalsGotByMeApi = (url, data = {}) =>
   apiCallBegan({
     method: 'post',
     url,
@@ -146,7 +163,7 @@ export const cancelProposalRequestApi = (url, data) =>
     onError: userReducerDataRequestFailed.type,
   });
 
-  export const acceptRejectProposalApi = (url, data) =>
+export const acceptRejectProposalApi = (url, data) =>
   apiCallBegan({
     method: 'post',
     url,
@@ -156,28 +173,37 @@ export const cancelProposalRequestApi = (url, data) =>
     onError: userReducerDataRequestFailed.type,
   });
 
-  export const getCurrentMatchedApi = (url) =>
-    apiCallBegan({
-      method: 'get',
-      url,
-      onStart: userReducerDataRequested.type,
-      onSuccess: setCurrentMatchedDataReceived.type,
-      onError: userReducerDataRequestFailed.type,
-    }); 
-    export const getPassedUsersApi = (url) =>
-    apiCallBegan({
-      method: 'get',
-      url,
-      onStart: userReducerDataRequested.type,
-      onSuccess: setPassedUsersDataReceived.type,
-      onError: userReducerDataRequestFailed.type,
-    });
-    export const getSelectedUserApi = (url) =>
-    apiCallBegan({
-      method: 'get',
-      url,
-      onStart: userReducerDataRequested.type,
-      onSuccess: setSelectedUserDataReceived.type,
-      onError: userReducerDataRequestFailed.type,
-    });
-    export default userReducer.reducer;
+export const getCurrentMatchedApi = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: userReducerDataRequested.type,
+    onSuccess: setCurrentMatchedDataReceived.type,
+    onError: userReducerDataRequestFailed.type,
+  });
+export const getPassedUsersApi = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: userReducerDataRequested.type,
+    onSuccess: setPassedUsersDataReceived.type,
+    onError: userReducerDataRequestFailed.type,
+  });
+export const getSelectedUserApi = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: userReducerDataRequested.type,
+    onSuccess: setSelectedUserDataReceived.type,
+    onError: userReducerDataRequestFailed.type,
+  });
+  export const getGalleryImageListApi = (url, data) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: userReducerDataRequested.type,
+    onSuccess: setGalleryImageDataReceived.type,
+    onError: userReducerDataRequestFailed.type,
+  });
+  export default userReducer.reducer;
