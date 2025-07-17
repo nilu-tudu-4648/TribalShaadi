@@ -4,6 +4,7 @@ const initialState = {
   loader: false,
   packageList: [],
   timeDuration: [],
+  paymentGateways: [],
 };
 
 const paymentReducer = createSlice({
@@ -25,6 +26,10 @@ const paymentReducer = createSlice({
       paymentReducer.loader = false;
       paymentReducer.timeDuration = action.payload.recordList;
     },
+    paymentReducerPaymentGatewaysReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      paymentReducer.paymentGateways = action.payload.recordList[0];
+    },
   },
 });
 
@@ -35,6 +40,7 @@ const {
   paymentReducerDataRequested,
   paymentReducerDataReceived,
   paymentReducerTimeDurationReceived,
+  paymentReducerPaymentGatewaysReceived,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -51,6 +57,14 @@ export const getTimeDurationApi = url =>
     url,
     onStart: paymentReducerDataRequested.type,
     onSuccess: paymentReducerTimeDurationReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const getPaymentGatewaysApi = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerPaymentGatewaysReceived.type,
     onError: paymentReducerDataRequestFailed.type,
   });
 export default paymentReducer.reducer;

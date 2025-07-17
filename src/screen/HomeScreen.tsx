@@ -50,6 +50,7 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
+import AppLoader from '../components/AppLoader';
 
 const { width } = Dimensions.get('window');
 
@@ -196,6 +197,7 @@ const HomeScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
+      {loader && <AppLoader />}
         <>
           {/* Profile Card */}
           {currentMatchedUser && currentIndex < matchedUsers.length ? (

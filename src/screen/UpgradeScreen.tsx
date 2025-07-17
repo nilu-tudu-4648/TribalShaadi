@@ -32,23 +32,24 @@ import {
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
-import { PRICING_OPTIONS, ROUTES } from '../constants/data';
+import { ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
-import { getPackageListUrl, getTimeDurationUrl } from '../constants/functions';
-import { getPackageListApi, getTimeDurationApi } from '../store/reducers/paymentReducer';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
+import { getPackageListUrl, getPaymentGatewaysUrl } from '../constants/functions';
+import {
+  getPackageListApi,
+  getPaymentGatewaysApi,
+} from '../store/reducers/paymentReducer';
+import { useDispatch,useSelector } from 'react-redux';
 import AppLoader from '../components/AppLoader';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
-  const [selectedPlan, setSelectedPlan] = useState('3months');
-  const updated = true;
-  const dispatch = useDispatch();
-  const { packageList, loader, timeDuration } = useSelector(
+  const { packageList, loader, paymentGateways } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
-  console.log(packageList, 'packageList');
-  console.log(timeDuration, 'timeDuration');
+  const [selectedPlan, setSelectedPlan] = useState(1);
+  const updated = true;
+  const dispatch = useDispatch();
+  console.log('paymentGateways', paymentGateways);
   const features = [
     {
       icon: <InfinityIcon color={COLORS.white} />,
@@ -60,7 +61,7 @@ const UpgradeScreen = () => {
     },
   ];
 
-  const handlePlanSelect = (planId: string) => {
+  const handlePlanSelect = (planId: number) => {
     setSelectedPlan(planId);
   };
 
@@ -70,7 +71,7 @@ const UpgradeScreen = () => {
   };
   useEffect(() => {
     dispatch(getPackageListApi(getPackageListUrl));
-    dispatch(getTimeDurationApi(getTimeDurationUrl));
+    dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
   }, [dispatch]);
 
   return (
@@ -118,7 +119,7 @@ const UpgradeScreen = () => {
           <View style={styles.bottomContainer}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.pricingContainer}>
-                {PRICING_OPTIONS.map(option => (
+                {packageList.map((option: any) => (
                   <TouchableOpacity
                     key={option.id}
                     style={[
@@ -142,7 +143,7 @@ const UpgradeScreen = () => {
                       </View>
                       <View style={styles.pricingTextContainer}>
                         <AppText
-                          text={option.duration}
+                          text={`${option.package[0].value} Months`}
                           textStyle={styles.pricingDuration}
                         />
                         {option.badge && (
@@ -157,15 +158,15 @@ const UpgradeScreen = () => {
                     </View>
                     <View style={styles.pricingRight}>
                       <AppText
-                        text={option.price}
+                        text={`₹${option.package[0].baseAmount}`}
                         textStyle={styles.pricingPrice}
                       />
-                      {option.pricePerMonth && (
-                        <AppText
-                          text={option.pricePerMonth}
-                          textStyle={styles.pricingSubtext}
-                        />
-                      )}
+                      <AppText
+                        text={`₹${Math.floor(
+                          option.package[0].baseAmount / option.package[0].value,
+                        )} per month`}
+                        textStyle={styles.pricingSubtext}
+                      />
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -173,9 +174,11 @@ const UpgradeScreen = () => {
             </ScrollView>
             <AppLinearButton
               title={`Get ${
-                PRICING_OPTIONS.find(p => p.id === selectedPlan)?.duration || ''
-              } for ${
-                PRICING_OPTIONS.find(p => p.id === selectedPlan)?.price || ''
+                packageList.find((p: any) => p.id === selectedPlan)?.package[0]
+                  .value
+              } Months for ₹${
+                packageList.find((p: any) => p.id === selectedPlan)?.package[0]
+                  .baseAmount
               }`}
               onPress={handleContinue}
               linearGradientColors={['#21BEFE', '#EE50C1']}
@@ -384,7 +387,7 @@ const styles = StyleSheet.create({
   },
   pricingSubtext: {
     fontSize: fontSize14,
-    color: COLORS.textSecondary,
+    color: COLORS.black,
   },
   pricingRight: {
     alignItems: 'flex-end',

@@ -91,7 +91,7 @@ const actionButtons: ActionButton[] = [
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
   const { user, loader } = useSelector((state: any) => state.entities.authReducer);
-  const fullName = `${user?.firstName} ${user?.lastName}`.trim();
+  const fullName = `${user?.firstName} ${user?.lastName || ''}`.trim();
   const [selectedImages, setSelectedImages] = useState<
     { uri: string; base64: string }[]
   >([]);

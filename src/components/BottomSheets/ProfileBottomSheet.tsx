@@ -43,10 +43,12 @@ import AppLoader from '../AppLoader';
 import {
   getProposalsSendByMeApi,
   sentProposalApi,
+  getPassedUsersApi,
 } from '../../store/reducers/userReducer';
 import {
   baseUrl,
   convertCmToReadableHeight,
+  getPassedUsersUrl,
   getProposalsSendByMeUrl,
   imageUrl,
   sendProposalUrl,
@@ -78,6 +80,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       );
       bottomSheetRef.current?.close();
       dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+      dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (error) {
       console.log(error, 'error');
     }

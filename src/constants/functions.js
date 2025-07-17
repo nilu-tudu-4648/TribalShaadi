@@ -43,6 +43,7 @@ export const getSelectedUserUrl = 'app/users/viewUserDetail';
 //payment
 export const getPackageListUrl = 'admin/package/getpackage';
 export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
+export const getPaymentGatewaysUrl = 'app/paymentGateways/getPaymentgatewaysForPackage?appPlatform=androidApp';
 
 export const checkUserLoggedIn = async dispatch => {
   try {

@@ -34,22 +34,40 @@ import {
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import AppLoader from '../components/AppLoader';
-    
+
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
   const bottomSheetRef = useRef<BottomSheet>(null);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
-    useSelector((state: any) => state.entities.userReducer);
+  const {
+    proposalsSendByMe,
+    proposalsGotByMe,
+    loader,
+    passedUsers,
+    selectedUser,
+  } = useSelector((state: any) => state.entities.userReducer);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      bottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   useEffect(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
-  const handleCardPress = (id: string) => {
-    dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
-    bottomSheetRef.current?.expand(); // Open the bottom sheet
+  const handleCardPress = async (id: string) => {
+    try {
+      dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log(selectedUser, 'selectedUser');
+      bottomSheetRef.current?.expand(); // Open the bottom sheet
+    } catch (error) {
+      console.log(error, 'error');
+    }
   };
   const handleRejectProposal = (id: string) => {
     try {
@@ -61,9 +79,9 @@ const InterestScreen = () => {
       );
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
- };
+  };
   const handleAcceptProposal = (item: any) => {
     try {
       dispatch(
@@ -103,7 +121,9 @@ const InterestScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
-      {loader ? <AppLoader visible={loader} /> : (
+      {loader ? (
+        <AppLoader visible={loader} />
+      ) : (
         <>
           {selectedTab === 0 &&
             (proposalsGotByMe.length > 0 ? (
@@ -161,10 +181,11 @@ const InterestScreen = () => {
           )}
         </>
       )}
+
       <ProfileBottomSheet
         bottomSheetRef={bottomSheetRef}
         isButtonVisible={selectedTab === 1}
-      />
+        />
     </View>
   );
 };
