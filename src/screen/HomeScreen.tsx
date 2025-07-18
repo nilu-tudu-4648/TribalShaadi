@@ -25,12 +25,14 @@ import {
   getDietUrl,
   getPassedUsersUrl,
   getStatesUrl,
+  getGalleryImageListUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
+  getCurrentMatchedUserGalleryImageListApi,
   getPassedUsersApi,
   getProposalsSendByMeApi,
   sentProposalApi,
@@ -50,22 +52,21 @@ import AppLoader from '../components/AppLoader';
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
-  const { matchedUsers, loader, currentMatchedUser } = useSelector(
-    (state: any) => state.entities.userReducer,
-  );
+  const { matchedUsers, loader, currentMatchedUser ,currentMatchedUserGalleryImageList} =
+    useSelector((state: any) => state.entities.userReducer);
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Swipe animation values
-  const translateX   = useSharedValue(0);
-  const opacity      = useSharedValue(1);
-  const entryX = useSharedValue(0); 
+  const translateX = useSharedValue(0);
+  const opacity = useSharedValue(1);
+  const entryX = useSharedValue(0);
   // Reset animation values when index changes
   const handleSwipeRight = () => {
     if (matchedUsers.length === 0) return;
     setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
   };
-  
+
   const handleSwipeLeft = () => {
     if (matchedUsers.length === 0) return;
     setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
@@ -91,22 +92,22 @@ const HomeScreen = () => {
     })
     .onEnd(event => {
       const swipeThreshold = width * 0.3;
-    
+
       if (event.translationX > swipeThreshold) {
         // ACCEPT  – next card must come from LEFT
-        entryX.value = -width;                // start off-screen left
+        entryX.value = -width; // start off-screen left
         translateX.value = withTiming(width); // current card exits right
-        runOnJS(handleSwipeRight)();          // your original function
+        runOnJS(handleSwipeRight)(); // your original function
       } else if (event.translationX < -swipeThreshold) {
         // DECLINE – next card must come from RIGHT
-        entryX.value = width;                 // start off-screen right
+        entryX.value = width; // start off-screen right
         translateX.value = withTiming(-width); // current card exits left
-        runOnJS(handleSwipeLeft)();           // your original function
+        runOnJS(handleSwipeLeft)(); // your original function
       } else {
         translateX.value = withTiming(0);
         opacity.value = withTiming(1);
       }
-    })
+    });
 
   // Animated style for the profile card
   const animatedStyle = useAnimatedStyle(() => {
@@ -115,14 +116,14 @@ const HomeScreen = () => {
       opacity: opacity.value,
     };
   });
-// 3.  whenever currentIndex changes -> animate in
-useEffect(() => {
-  translateX.value = entryX.value;        // off-screen direction
-  translateX.value = withTiming(0, {duration: 250});
-  opacity.value = 0;
-  opacity.value = withTiming(1, {duration: 250});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [currentIndex]);
+  // 3.  whenever currentIndex changes -> animate in
+  useEffect(() => {
+    translateX.value = entryX.value; // off-screen direction
+    translateX.value = withTiming(0, { duration: 250 });
+    opacity.value = 0;
+    opacity.value = withTiming(1, { duration: 250 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
@@ -141,16 +142,25 @@ useEffect(() => {
           `${baseUrl}/${getUserDetailsUrl}id=${matchedUsers[currentIndex].id}`,
         ),
       );
+      dispatch(
+        getCurrentMatchedUserGalleryImageListApi(
+          `${baseUrl}/${getGalleryImageListUrl}`,
+          {
+            userId: matchedUsers[currentIndex].id,
+          },
+        ),
+      );
     }
   }, [dispatch, matchedUsers, currentIndex]);
 
-  const handleSendProposal = (id: string) => {
+  const handleSendProposal = async (id: string) => {
     try {
       dispatch(
         sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
           proposalUserId: id,
         }),
       );
+      await new Promise(resolve => setTimeout(resolve, 1000));
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
@@ -185,7 +195,6 @@ useEffect(() => {
       console.log(error, 'error');
     }
   };
-
   return (
     <AppSafeView style={styles.container}>
       {loader ? (
@@ -218,6 +227,7 @@ useEffect(() => {
                       stateName={currentMatchedUser.stateName}
                       bio={currentMatchedUser.aboutMe}
                       image={currentMatchedUser.image}
+                      galleryImageList={currentMatchedUserGalleryImageList}
                       isLoading={loader}
                       maritalStatus={currentMatchedUser.maritalStatus}
                       dob={currentMatchedUser.birthDate}
@@ -296,7 +306,7 @@ useEffect(() => {
             </View>
           )}
         </>
-      )} 
+      )}
     </AppSafeView>
   );
 };

@@ -22,6 +22,7 @@ import {
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import { HomeIcon2 } from '../svg/SvgIcons';
 import AppButton from '../AppButton';
+import { useSelector } from 'react-redux';
 
 const ReceivedCard = ({
   item,
@@ -34,7 +35,10 @@ const ReceivedCard = ({
   onConnect: (item: any) => void;
   onPress: () => void;
 }) => {
-  const planPurchased = true;
+  const { packageByUserId } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
+  const planPurchased = packageByUserId.length > 0;
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>

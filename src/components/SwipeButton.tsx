@@ -1,20 +1,17 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  useAnimatedGestureHandler,
   runOnJS,
   interpolate,
   Extrapolate,
 } from 'react-native-reanimated';
 import {
-  lignHeight24,
   Size10,
   Size25,
-  Size8,
   screenWidth,
 } from '../constants/Sizes';
 import { PhoneSvg } from './svg/SvgIcons';
@@ -50,22 +47,22 @@ const SwipeButton = React.forwardRef<
     }
   };
 
-  const animatedGestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx) => {
-      ctx.startX = X.value;
-    },
-    onActive: (e, ctx) => {
-      X.value = ctx.startX + e.translationX;
-    },
-    onEnd: () => {
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      // Store initial position for gesture
+    })
+    .onUpdate((e) => {
+      const newValue = e.translationX;
+      X.value = Math.max(0, Math.min(newValue, H_SWIPE_RANGE));
+    })
+    .onEnd(() => {
       if (X.value < H_SWIPE_RANGE) {
         X.value = withSpring(0);
       } else {
         X.value = withSpring(H_SWIPE_RANGE);
         runOnJS(handleComplete)(true);
       }
-    },
-  });
+    });
 
   const AnimatedStyles = {
     swipeable: useAnimatedStyle(() => {
@@ -87,11 +84,11 @@ const SwipeButton = React.forwardRef<
 
   return (
     <View style={styles.swipeCont}>
-      <PanGestureHandler onGestureEvent={animatedGestureHandler}>
+      <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.swipeable, AnimatedStyles.swipeable]}>
-          <PhoneSvg />
+          <PhoneSvg  />
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
       <Animated.Text style={[styles.swipeText, AnimatedStyles.swipeText]}>
         Register with phone
       </Animated.Text>
@@ -116,11 +113,12 @@ const styles = StyleSheet.create({
     left: BUTTON_PADDING,
     height: SWIPEABLE_DIMENSIONS,
     width: SWIPEABLE_DIMENSIONS,
-    borderRadius: SWIPEABLE_DIMENSIONS,
+    borderRadius: SWIPEABLE_DIMENSIONS / 2,
     backgroundColor: COLORS.white,
     zIndex: 3,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   swipeText: {
     alignSelf: 'center',

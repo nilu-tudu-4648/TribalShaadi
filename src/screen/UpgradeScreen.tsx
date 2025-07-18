@@ -7,7 +7,7 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowIosBackSvg, HeartIcon2 } from '../components/svg/SvgIcons';
 import AppText from '../components/AppText';
@@ -35,21 +35,42 @@ import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
-import { getPackageListUrl } from '../constants/functions';
+import {
+  formatDateShort,
+  generateRazorPayOrderIdUrl,
+  getPackageByUserIdUrl,
+  getPackageListUrl,
+  getPaymentGatewaysUrl,
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  insertPaymentUrl,
+  savePremiumAccountUrl,
+  setReducerLoadingfalse,
+} from '../constants/functions';
 import {
   getPackageListApi,
+  getPaymentGatewaysApi,
+  generateRazorPayOrderIdApi,
+  insertPaymentApi,
+  savePremiumAccountApi,
+  getPackageByUserIdApi,
 } from '../store/reducers/paymentReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import AppLoader from '../components/AppLoader';
 import AppToast from '../components/AppToast';
-
+import RazorpayCheckout from 'react-native-razorpay';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
-  const { packageList, loader } = useSelector(
-    (state: any) => state.entities.paymentReducer,
-  );
+  const {
+    packageList,
+    loader,
+    paymentGateways,
+    razorPayOrderId,
+    packageByUserId,
+  } = useSelector((state: any) => state.entities.paymentReducer);
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const [selectedPlan, setSelectedPlan] = useState(1);
-  const [paymentStep, setPaymentStep] = useState(0); // 0: normal, 1: justpay, 2: wallet, 3: success
-  const updated = true;
+  const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
 
   const features = [
@@ -63,85 +84,187 @@ const UpgradeScreen = () => {
     },
   ];
 
+  const calculateEndDate = useCallback((months: number) => {
+    const currentDate = new Date();
+    const endDate = new Date(currentDate);
+    endDate.setMonth(currentDate.getMonth() + months);
+    return endDate.toISOString();
+  }, []);
+
   const handlePlanSelect = (planId: number) => {
     setSelectedPlan(planId);
   };
-
-  const handlePayment = () => {
-    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
-    if (!selectedPackage) {
-      AppToast('Please select a plan');
+  const paymentSuccessfull = useCallback(
+    async (data: any, selectedPackage: any) => {
+      try {
+        dispatch(
+          insertPaymentApi(insertPaymentUrl, {
+            paymentReference: data.razorpay_payment_id,
+            amount: selectedPackage.package[0].baseAmount,
+            currency: 'INR',
+            paymentStatus: 'Success',
+            signature: data.razorpay_signature,
+            orderId: data.razorpay_order_id,
+            paymentMode: 'Razorpay',
+          }),
+        );
+      } catch (error) {
+        console.log(error);
+      } finally {
+        dispatch(
+          savePremiumAccountApi(savePremiumAccountUrl, {
+            packageId: selectedPackage.id,
+            packageDurationId: selectedPackage.package[0].packageDurationId,
+            startDate: new Date().toISOString(),
+            endate: calculateEndDate(selectedPackage.package[0].value),
+            netAmount: selectedPackage.package[0].baseAmount,
+            purchaseDate: new Date().toISOString(),
+          }),
+        );
+        setReducerLoadingfalse(dispatch, () => {
+          getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+        });
+      }
+    },
+    [dispatch, calculateEndDate, user.id],
+  );
+  const openRazorpayCheckout = () => {
+    if (!paymentGateways) {
+      AppToast('Payment configuration not ready. Please try again.');
       return;
     }
 
-    // Start payment sequence
-    setPaymentStep(1); // Show justpay screen
-    
-    // After 2 seconds, show wallet screen
-    setTimeout(() => {
-      setPaymentStep(2);
-    }, 2000);
-    
-    // After another 2 seconds, navigate to success page
-    setTimeout(() => {
-      setPaymentStep(0);
-      (navigation as any).navigate(ROUTES.STACK, {
-        screen: ROUTES.PAYMENT_SUCCESS,
-      });
-    }, 4000); // Total 4 seconds
+    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
+    console.log('selectedPackage found:', selectedPackage);
+
+    if (!selectedPackage) {
+      console.log('No selected package found for planId:', selectedPlan);
+      return;
+    }
+
+    console.log('Setting checkout in progress to true');
+    setCheckoutInProgress(true);
+
+    const paymentData = {
+      amount: selectedPackage.package[0].baseAmount,
+      currency: 'INR',
+    };
+
+    dispatch(
+      generateRazorPayOrderIdApi(generateRazorPayOrderIdUrl, paymentData),
+    );
   };
 
   useEffect(() => {
+    if (checkoutInProgress && razorPayOrderId) {
+      const selectedPackage = packageList.find(
+        (p: any) => p.id === selectedPlan,
+      );
+
+      if (!selectedPackage) {
+        setCheckoutInProgress(false);
+        return;
+      }
+
+      const options = {
+        key: paymentGateways.jsonData.apiKey,
+        amount: selectedPackage.package[0].baseAmount * 100,
+        currency: 'INR',
+        name: 'TribalShaadi',
+        description: `${selectedPackage.package[0].value} Months Premium Subscription`,
+        order_id: razorPayOrderId.id,
+        handler: function (response: any) {
+          console.log('Payment handler response:', response);
+        },
+        prefill: {
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          contact: user.contactNo,
+        },
+        notes: {
+          package_name: 'Premium Package',
+        },
+        theme: {
+          color: COLORS.violet,
+        },
+      };
+
+      // Validate Razorpay options before opening
+      if (!options.key || options.key.trim() === '') {
+        console.error('Invalid Razorpay key:', options.key);
+        AppToast('Payment configuration error: Invalid key');
+        setCheckoutInProgress(false);
+        return;
+      }
+
+      if (!options.order_id || options.order_id.trim() === '') {
+        console.error('Invalid order ID:', options.order_id);
+        AppToast('Payment configuration error: Invalid order ID');
+        setCheckoutInProgress(false);
+        return;
+      }
+
+      if (!options.amount || options.amount < 100) {
+        console.error('Invalid amount (minimum ₹1):', options.amount);
+        AppToast('Payment configuration error: Invalid amount');
+        setCheckoutInProgress(false);
+        return;
+      }
+
+      RazorpayCheckout.open(options)
+        .then((data: any) => {
+          console.log('Razorpay checkout completed successfully:', data);
+          paymentSuccessfull(data, selectedPackage);
+        })
+        .catch((error: any) => {
+          console.log('=== RAZORPAY ERROR DETAILS ===');
+          console.log('Full error object:', JSON.stringify(error, null, 2));
+          console.log('=== END ERROR DETAILS ===');
+
+          // Handle specific error cases
+          if (error.code === 'payment_cancelled') {
+            console.log('User cancelled payment');
+            AppToast('Payment cancelled by user');
+          } else if (error.code === 'network_error') {
+            console.log('Network error occurred');
+            AppToast('Network error. Please check your internet connection.');
+          } else if (error.code === 'invalid_order_id') {
+            console.log('Invalid order ID error');
+            AppToast('Payment failed: Invalid order. Please try again.');
+          } else if (error.code === 'payment_failed') {
+            console.log('Payment failed');
+            AppToast('Payment failed. Please try again.');
+          } else {
+            console.log('Unknown error occurred');
+            AppToast(`Payment error: ${error.description || 'Unknown error'}`);
+          }
+        })
+        .finally(() => {
+          console.log('Setting checkout in progress to false');
+          setCheckoutInProgress(false);
+        });
+    }
+  }, [
+    checkoutInProgress,
+    razorPayOrderId,
+    selectedPlan,
+    packageList,
+    user,
+    paymentGateways?.jsonData?.apiKey,
+    dispatch,
+    paymentSuccessfull,
+  ]);
+
+  useEffect(() => {
     dispatch(getPackageListApi(getPackageListUrl));
-  }, [dispatch]);
-
-  // Custom Payment Processing Screens
-  const renderJustPayScreen = () => (
-    <View style={styles.paymentOverlay}>
-      <View style={styles.justpayContainer}>
-        <Image
-          source={require('../assets/images/justpay.png')}
-          style={styles.justpayLogo}
-          resizeMode="contain"
-        />
-        <AppText text="Processing your payment" textStyle={styles.processingText} />
-      </View>
-    </View>
-  );
-
-  const renderWalletScreen = () => (
-    <View style={styles.paymentOverlay}>
-      <View style={styles.walletContainer}>
-        <Image
-          source={require('../assets/images/wallet.png')}
-          style={styles.walletImage}
-          resizeMode="contain"
-        />
-        <View style={styles.walletTextContainer}>
-          <AppText text="Processing your payment..." textStyle={styles.processingTextLarge} />
-          <AppText 
-            text="This may take a few seconds, please don't exit the app" 
-            textStyle={styles.warningText} 
-          />
-        </View>
-      </View>
-    </View>
-  );
+    dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
+    dispatch(getPackageByUserIdApi(getPackageByUserIdUrl, { userId: user.id }));
+  }, [dispatch, user.id]);
 
   return (
     <AppSafeView style={styles.container}>
-      {loader && (
-        <View style={styles.paymentOverlay}>
-          <View style={styles.paymentContainer}>
-            <AppText text="Loading..." textStyle={styles.processingText} />
-          </View>
-        </View>
-      )}
-      
-      {paymentStep === 1 && renderJustPayScreen()}
-      {paymentStep === 2 && renderWalletScreen()}
-      
-      {updated ? (
+      {loader && <AppLoader />}
+      {packageByUserId.length === 0 ? (
         <>
           <ImageBackground
             source={require('../assets/images/update.jpg')}
@@ -227,7 +350,8 @@ const UpgradeScreen = () => {
                       />
                       <AppText
                         text={`₹${Math.floor(
-                          option.package[0].baseAmount / option.package[0].value,
+                          option.package[0].baseAmount /
+                            option.package[0].value,
                         )} per month`}
                         textStyle={styles.pricingSubtext}
                       />
@@ -244,7 +368,7 @@ const UpgradeScreen = () => {
                 packageList.find((p: any) => p.id === selectedPlan)?.package[0]
                   .baseAmount
               }`}
-              onPress={handlePayment}
+              onPress={openRazorpayCheckout}
               linearGradientColors={['#21BEFE', '#EE50C1']}
               textStyle={styles.continueButtonText}
             />
@@ -274,34 +398,14 @@ const UpgradeScreen = () => {
             />
           </Pressable>
           <View style={styles.offerContainer}>
+            <AppText text="Premium Member" textStyle={styles.offerTitleWhite} />
             <AppText
-              text="Premium Member"
-              textStyle={{
-                ...styles.offerTitle,
-                fontStyle: 'italic',
-                fontWeight: 'bold',
-                color: COLORS.white,
-              }}
+              text={`₹${packageByUserId[0].netAmount}`}
+              textStyle={styles.offerPriceWhite}
             />
-            <AppText
-              text="₹1499"
-              textStyle={{
-                ...styles.offerTitle,
-                color: COLORS.white,
-              }}
-            />
-            <View
-              style={{
-                backgroundColor: COLORS.offerBg,
-                padding: Size4,
-                borderRadius: Size12,
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingHorizontal: Size14,
-              }}
-            >
+            <View style={styles.offerBadge}>
               <AppText
-                text="Ends on 20 May, 2025"
+                text={`Ends on ${formatDateShort(packageByUserId[0].endDate)}`}
                 textStyle={styles.offerContainerText}
               />
             </View>
@@ -343,71 +447,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     paddingHorizontal: 0,
-  },
-  // Payment Processing Overlay Styles
-  paymentOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: COLORS.white,
-    zIndex: 1000,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  paymentContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Size20,
-  },
-  justpayContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Size20,
-    gap: Size12,
-  },
-  walletContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Size20,
-    gap: Size20,
-  },
-  walletTextContainer: {
-    alignItems: 'center',
-    gap: Size12,
-    paddingHorizontal: Size20,
-  },
-  justpayLogo: {
-    width: Size40*2.5,
-    height: Size40*2.5,
-  },
-  juspayText: {
-    fontSize: fontSize18,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
-    color: COLORS.black,
-  },
-  processingText: {
-    fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
-    color: COLORS.black,
-    textAlign: 'center',
-  },
-  walletImage: {
-    width: Size40 * 5,
-    height: Size40 * 4,
-  },
-  processingTextLarge: {
-    fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
-    color: COLORS.black,
-    textAlign: 'center',
-  },
-  warningText: {
-    fontSize: fontSize12,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
-    color: COLORS.grey,
-    textAlign: 'center',
   },
   backgroundImage: {
     flex: 1,
@@ -594,5 +633,27 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
     color: COLORS.black,
     textAlign: 'center',
+  },
+  offerTitleWhite: {
+    fontSize: fontSize20,
+    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+  offerPriceWhite: {
+    fontSize: fontSize20,
+    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    textAlign: 'center',
+    color: COLORS.white,
+  },
+  offerBadge: {
+    backgroundColor: COLORS.offerBg,
+    padding: Size4,
+    borderRadius: Size12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Size14,
   },
 });

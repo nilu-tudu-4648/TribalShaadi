@@ -23,10 +23,12 @@ import {
   getPassedUsersApi,
   getSelectedUserApi,
   setAcceptedUser,
+  getCurrentMatchedUserGalleryImageListApi,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
   baseUrl,
+  getGalleryImageListUrl,
   getPassedUsersUrl,
   getProposalsGotByMeUrl,
   getSelectedUserUrl,
@@ -45,7 +47,6 @@ const InterestScreen = () => {
     proposalsGotByMe,
     loader,
     passedUsers,
-    selectedUser,
   } = useSelector((state: any) => state.entities.userReducer);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
@@ -63,6 +64,14 @@ const InterestScreen = () => {
     console.log(id, 'id');
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
+      dispatch(
+        getCurrentMatchedUserGalleryImageListApi(
+          `${baseUrl}/${getGalleryImageListUrl}`,
+          {
+            userId: id,
+          },
+        ),
+      );
       await new Promise(resolve => setTimeout(resolve, 1000));
       bottomSheetRef.current?.expand(); // Open the bottom sheet
     } catch (error) {
@@ -171,7 +180,7 @@ const InterestScreen = () => {
               renderItem={({ item }) => (
                 <SentCard
                   item={item}
-                  onPress={() => handleCardPress(item.id)}
+                  onPress={() => handleCardPress(item.proposalUserId)}
                 />
               )}
               keyExtractor={(item, index) => index.toString()}
@@ -185,7 +194,7 @@ const InterestScreen = () => {
       <ProfileBottomSheet
         bottomSheetRef={bottomSheetRef}
         isButtonVisible={selectedTab === 1}
-        />
+      />
     </View>
   );
 };

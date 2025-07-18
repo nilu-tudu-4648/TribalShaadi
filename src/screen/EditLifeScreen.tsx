@@ -98,10 +98,12 @@ const EditLifeScreen = () => {
 
       // Find state object from the fetched data
       const userState = states.find(
-        (state: any) => String(state.id) === String(user.stateId),
+        (state: any) => String(state.name) === String(user.stateName),
       );
       console.log('Found user state:', userState);
-
+      dispatch(
+        getCities(`${getCitiesUrl}?stateId=${userState.id}`),
+      );
       setFormData(prev => ({
         ...prev,
         selectedState: user.stateName || null,
@@ -113,9 +115,10 @@ const EditLifeScreen = () => {
         drinkingName: user.drinking || 'No',
         smokingName: user.smoking || '',
         timelineName: user.planingto_settle || '',
+        stateId: userState.id,
       }));
     }
-  }, [user, states]);
+  }, [user, states, dispatch]);
 
   // Initialize city when cities are loaded
   useEffect(() => {

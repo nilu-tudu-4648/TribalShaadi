@@ -89,25 +89,6 @@ const badgeData: BadgeData[] = [
   // },
 ];
 
-const actionButtons: ActionButton[] = [
-  { key: 'plan', label: 'My Plan', icon: RocketIcon, route: ROUTES.UPGRADE },
-  { key: 'invite', label: 'Invite', icon: GiftIcon, route: ROUTES.INVITE },
-  {
-    key: 'preference',
-    label: 'Preference',
-    icon: PreferenceIcon,
-    route: ROUTES.PREFERENCE,
-  },
-  { key: 'about', label: 'About Us', icon: InfoIcon, route: ROUTES.ABOUT_US },
-  { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
-  {
-    key: 'settings',
-    label: 'Settings',
-    icon: SettingsIcon,
-    route: ROUTES.SETTINGS,
-  },
-];
-
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
   const { user, loader } = useSelector(
@@ -117,8 +98,33 @@ const AccountScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
     { uri: string; base64: string }[]
   >([]);
+  const { packageByUserId } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
   const dispatch = useDispatch();
-
+  const actionButtons: ActionButton[] = [
+    {
+      key: 'plan',
+      label: packageByUserId.length > 0 ? 'My Plan' : 'Upgrade',
+      icon: RocketIcon,
+      route: ROUTES.UPGRADE,
+    },
+    { key: 'invite', label: 'Invite', icon: GiftIcon, route: ROUTES.INVITE },
+    {
+      key: 'preference',
+      label: 'Preference',
+      icon: PreferenceIcon,
+      route: ROUTES.PREFERENCE,
+    },
+    { key: 'about', label: 'About Us', icon: InfoIcon, route: ROUTES.ABOUT_US },
+    { key: 'help', label: 'Help', icon: HeadphonesIcon, route: ROUTES.HELP },
+    {
+      key: 'settings',
+      label: 'Settings',
+      icon: SettingsIcon,
+      route: ROUTES.SETTINGS,
+    },
+  ];
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',

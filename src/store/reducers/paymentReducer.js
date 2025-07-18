@@ -6,6 +6,9 @@ const initialState = {
   timeDuration: [],
   paymentGateways: [],
   razorPayOrderId: '',
+  payment: [],
+  savePremiumAccount: [],
+  packageByUserId: [],
 };
 
 const paymentReducer = createSlice({
@@ -35,9 +38,19 @@ const paymentReducer = createSlice({
       paymentReducer.loader = false;
       paymentReducer.razorPayOrderId = action.payload.recordList;
     },
-    paymentReducerPaymentVerificationReceived: (paymentReducer, action) => {
+    paymentReducerPaymentReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      // Handle payment verification success
+      console.log(action.payload, 'reducer payment');
+      paymentReducer.payment = action.payload.recordList;
+    },
+    paymentReducerSavePremiumAccountReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      console.log(action.payload, 'reducer save premium account');
+      paymentReducer.savePremiumAccount = action.payload.recordList;
+    },
+    paymentReducerPackageByUserIdReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      paymentReducer.packageByUserId = action.payload.recordList;
     },
   },
 });
@@ -51,7 +64,9 @@ const {
   paymentReducerTimeDurationReceived,
   paymentReducerPaymentGatewaysReceived,
   paymentReducerRazorPayOrderIdReceived,
-  paymentReducerPaymentVerificationReceived,
+  paymentReducerPaymentReceived,
+  paymentReducerSavePremiumAccountReceived,
+  paymentReducerPackageByUserIdReceived,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -87,14 +102,31 @@ export const generateRazorPayOrderIdApi = (url, data = {}) =>
     onSuccess: paymentReducerRazorPayOrderIdReceived.type,
     onError: paymentReducerDataRequestFailed.type,
   });
-
-export const verifyPaymentApi = (url, data = {}) =>
+export const insertPaymentApi = (url, data = {}) =>
   apiCallBegan({
     method: 'post',
     url,
     data,
     onStart: paymentReducerDataRequested.type,
-    onSuccess: paymentReducerPaymentVerificationReceived.type,
+    onSuccess: paymentReducerPaymentReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const savePremiumAccountApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerSavePremiumAccountReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const getPackageByUserIdApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerPackageByUserIdReceived.type,
     onError: paymentReducerDataRequestFailed.type,
   });
 export default paymentReducer.reducer;

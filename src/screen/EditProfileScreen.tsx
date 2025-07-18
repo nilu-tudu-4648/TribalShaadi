@@ -6,7 +6,7 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize12,
@@ -33,14 +33,20 @@ import {
   RightArrowIcon,
   EducationIcon,
   PersonalityIcon,
+  EditIcon,
 } from '../components/svg/SvgIcons';
 import { useNavigation } from '@react-navigation/native';
 import AppHeader from '../components/AppHeader';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGalleryImageListUrl, getUserDetailsApi, getUserDetailsUrl, imageUrl, setReducerLoadingfalse, uploadImage } from '../constants/functions';
-import { getGalleryImageListApi } from '../store/reducers/userReducer';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  imageUrl,
+  setReducerLoadingfalse,
+  uploadImage,
+} from '../constants/functions';
 import AppToast from '../components/AppToast';
 import { setLoadingTrue } from '../store/reducers/authReducer';
 import {
@@ -52,9 +58,11 @@ const EditProfileScreen = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const [selectedImages, setSelectedImages] = useState<
-  { uri: string; base64: string }[]
->([]);
-  const { galleryImageList } = useSelector((state: any) => state.entities.userReducer);
+    { uri: string; base64: string }[]
+  >([]);
+  const { galleryImageList } = useSelector(
+    (state: any) => state.entities.userReducer,
+  );
   const menuItems = [
     {
       id: 1,
@@ -103,11 +111,6 @@ const EditProfileScreen = () => {
       },
     },
   ];
-  useEffect(() => {
-    dispatch(getGalleryImageListApi(getGalleryImageListUrl, {
-      userId: user.id,
-    }));
-  }, [dispatch, user.id]);
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
@@ -144,7 +147,10 @@ const EditProfileScreen = () => {
               console.log(requestBody, 'requestBody for first image');
               await uploadImage(requestBody, dispatch, true);
               setReducerLoadingfalse(dispatch, () => {
-                getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+                getUserDetailsApi(
+                  `${getUserDetailsUrl}id=${user.id}`,
+                  dispatch,
+                );
               });
             }
           } catch (error) {
@@ -172,22 +178,25 @@ const EditProfileScreen = () => {
         <View style={styles.profileImagesContainer}>
           <View style={styles.profileImageWrapper}>
             <View style={styles.profileImage}>
-              <TouchableOpacity style={styles.profileImagePlaceholder} onPress={() => handleImageUpload(0)}>
+              <TouchableOpacity
+                style={styles.profileImagePlaceholder}
+                onPress={() => handleImageUpload(0)}
+              >
                 <Image
                   source={{ uri: imageUrl + user.image }}
                   style={styles.placeholderImage}
                   resizeMode="cover"
                 />
+                <View style={styles.profileImageBanner}>
+                  <AppText
+                    text="Profile Image"
+                    textStyle={styles.profileImageText}
+                  />
+                  <TouchableOpacity style={styles.editIconWrapper}>
+                    <EditIcon width={16} height={16} color={COLORS.white} />
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
-              {/* <View style={styles.profileImageBanner}>
-                <AppText
-                  text="Profile Image"
-                  textStyle={styles.profileImageText}
-                />
-                <TouchableOpacity style={styles.editIconWrapper}>
-                  <EditIcon width={16} height={16} color={COLORS.white} />
-                </TouchableOpacity>
-              </View> */}
             </View>
           </View>
 
@@ -296,49 +305,14 @@ const styles = StyleSheet.create({
   profileImageWrapper: {
     position: 'relative',
   },
-  profileImage: {
-    width: lignHeight53 * 2,
-    height: lignHeight53 * 2.2,
-    borderRadius: Size16,
-    overflow: 'hidden',
-  },
-  profileImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: COLORS.borderLight,
-    borderRadius: Size16,
-    overflow: 'hidden',
-  },
   placeholderImage: {
     width: '100%',
     height: '100%',
-  },
-  profileImageBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: COLORS.violet,
-    paddingVertical: Size12,
-    paddingHorizontal: Size12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopLeftRadius: Size16,
-    borderTopRightRadius: Size16,
   },
   profileImageText: {
     color: COLORS.white,
     fontSize: fontSize12,
     fontWeight: '600',
-  },
-  editIconWrapper: {
-    width: lignHeight20,
-    height: lignHeight20,
-    borderRadius: lignHeight20 / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   menuContainer: {
     paddingHorizontal: compPadding,
@@ -380,5 +354,34 @@ const styles = StyleSheet.create({
     height: lignHeight20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  profileImage: {
+    position: 'relative',
+    width: lignHeight53 * 2,
+    height: lignHeight53 * 2,
+    borderRadius: Size16,
+    overflow: 'hidden',
+  },
+
+  profileImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  profileImageBanner: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+
+  editIconWrapper: {
+    padding: 4,
   },
 });

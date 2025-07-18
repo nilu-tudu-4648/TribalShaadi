@@ -1,4 +1,10 @@
-import { StyleSheet, View, ImageBackground, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ImageBackground,
+  ScrollView,
+  Image,
+} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import AppText from '../AppText';
@@ -64,6 +70,7 @@ export interface ProfileCardProps {
   smokingHabits: string;
   kids: string;
   interests: string;
+  galleryImageList: any;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -92,6 +99,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   kids,
   interests,
   settlingTime,
+  galleryImageList,
 }) => {
   return (
     <ScrollView
@@ -198,14 +206,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         />
         <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
       </View>
-
-      <View style={{ height: 200, backgroundColor: COLORS.divider }}>
-        <ImageBackground
-          source={{ uri: `${imageUrl + image}` }}
-          style={{ width: '100%', height: '100%' }}
+        <Image
+          source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
+          style={{ width: '100%', height: SIZES.height * 0.7 }}
         />
-      </View>
-
       <View style={styles.section}>
         <View style={styles.detailRow2}>
           <View style={styles.detailText}>
@@ -240,10 +244,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <AppText text={settlingTime} textStyle={styles.bannerTitle} />
       </View>
 
-      <View style={{ height: 200, backgroundColor: COLORS.divider }}>
-        <ImageBackground
-          source={{ uri: `${imageUrl + image}` }}
-          style={{ width: '100%', height: '100%' }}
+      <View style={{ backgroundColor: COLORS.divider }}>
+        <Image
+          source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
+          style={{ width: '100%', height: SIZES.height * 0.7 }}
         />
       </View>
 

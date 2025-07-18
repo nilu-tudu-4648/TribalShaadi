@@ -3,7 +3,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ImageBackground,
 } from 'react-native';
 import React, { useRef } from 'react';
 import BottomSheet, {
@@ -44,7 +43,6 @@ import {
   getProposalsSendByMeApi,
   sentProposalApi,
   getPassedUsersApi,
-  setSelectedUser,
 } from '../../store/reducers/userReducer';
 import {
   baseUrl,
@@ -67,10 +65,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   isButtonVisible = false,
 }) => {
   const snapPoints = ['55%', '50%'];
-  const { selectedUser, loader } = useSelector(
+  const { selectedUser, loader,currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  console.log(selectedUser, 'selectedUser');
+  console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -79,20 +77,23 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const handleSendProposal = (id: number) => {
     try {
       dispatch(
-        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, { proposalUserId: id }),
+        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+          proposalUserId: id,
+        }),
       );
       bottomSheetRef.current?.close();
-      dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+      dispatch(
+        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+      );
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (error) {
       console.log(error, 'error');
     }
- };
- const handleClose = () => {
-  bottomSheetRef.current?.close();
-  console.log('close');
-  // dispatch(setSelectedUser(null));
- }
+  };
+  const handleClose = () => {
+    bottomSheetRef.current?.close();
+    console.log('close');
+  };
   return (
     <>
       <BottomSheet
@@ -115,14 +116,14 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       >
         <BottomSheetScrollView style={styles.contentContainer}>
           {loader && <AppLoader />}
-          <View style={styles.headerContainer}>
+          <View>
             <Image
               source={{ uri: `${imageUrl + selectedUser?.image}` }}
               style={styles.profileImage}
             />
             <View style={styles.bioSection}>
               <AppText text="Bio" textStyle={styles.bioLabel} />
-              <AppText text={selectedUser?.bio} textStyle={styles.bio} />
+              <AppText text={selectedUser?.aboutMe} textStyle={styles.bio} />
               <View style={styles.horizontalLine} />
               <View style={styles.row}>
                 <View style={styles.column}>
@@ -209,12 +210,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 />
               </View>
 
-              <View style={{ height: 200, backgroundColor: COLORS.divider }}>
-                <ImageBackground
-                  source={{ uri: `${imageUrl + selectedUser?.image}` }}
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </View>
+              <Image
+                source={{ uri: imageUrl + currentMatchedUserGalleryImageList[0].imageUrl }}
+                style={{ width: '100%', height: SIZES.height * 0.6 }}
+              />
 
               <View style={styles.section}>
                 <View style={styles.detailRow2}>
@@ -265,12 +264,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 />
               </View>
 
-              <View style={{ height: 200, backgroundColor: COLORS.divider }}>
-                <ImageBackground
-                  source={{ uri: `${imageUrl + selectedUser?.image}` }}
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </View>
+              <Image
+                source={{ uri: imageUrl + currentMatchedUserGalleryImageList[1].imageUrl }}
+                style={{ width: '100%', height: SIZES.height * 0.6 }}
+              />
             </View>
             <AppText text="College/University" textStyle={styles.headerLabel} />
             <AppText
@@ -345,7 +342,9 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               </View>
             )}
           </View>
-          <View style={{ gap: SIZES.padding * 3, paddingVertical: SIZES.padding}}>
+          <View
+            style={{ gap: SIZES.padding * 3, paddingVertical: SIZES.padding }}
+          >
             <TouchableOpacity
               onPress={openReport}
               style={styles.reportButtonContainer}
@@ -395,10 +394,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: SIZES.padding,
     gap: SIZES.base * 2,
   },
-  headerContainer: {},
   headerLabel: {
     fontSize: SIZES.font,
     color: COLORS.textInactive,
@@ -444,8 +441,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SIZES.base,
-
-    // justifyContent: 'center',
   },
   reportButtonContainer: {
     alignItems: 'center',

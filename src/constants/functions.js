@@ -5,11 +5,12 @@ import {
   logoutFromReducer,
   setLoadingfalse,
 } from '../store/reducers/authReducer';
-import { setUserRegistrationCompleted } from '../store/reducers/userReducer';
+import { getGalleryImageListApi, setUserRegistrationCompleted } from '../store/reducers/userReducer';
 import axios from 'axios';
 import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
+import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
 
 export const baseUrl = 'https://api.tribalshaadi.co.in/api';
 export const updateUrl = 'app/users/completeUserProfileV2';
@@ -44,20 +45,25 @@ export const getGalleryImageListUrl = 'app/users/getGalleryImageList';
 //payment
 export const getPackageListUrl = 'admin/package/getpackage';
 export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
-export const getPaymentGatewaysUrl = 'app/paymentGateways/getPaymentgatewaysForPackage?appPlatform=androidApp';
-export const generateRazorPayOrderIdUrl = 'app/paymentGateways/generateRazorPayOrderId';
+export const getPaymentGatewaysUrl =
+  'app/paymentGateways/getPaymentgatewaysForPackage?appPlatform=androidApp';
+export const generateRazorPayOrderIdUrl =
+  'app/paymentGateways/generateRazorPayOrderId';
 export const verifyPaymentUrl = 'app/paymentGateways/verifyPayment';
+export const insertPaymentUrl = 'app/payment/insertPayment';
+export const savePremiumAccountUrl = 'app/package/savePremiumAccount';
+export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
 
 // Date formatting function
-export const formatDateOfBirth = (dateString) => {
+export const formatDateOfBirth = dateString => {
   if (!dateString) return '';
-  
+
   try {
     const date = new Date(dateString);
     const options = {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     };
     return date.toLocaleDateString('en-US', options);
   } catch (error) {
@@ -67,9 +73,9 @@ export const formatDateOfBirth = (dateString) => {
 };
 
 // Alternative shorter format (DD/MM/YYYY)
-export const formatDateShort = (dateString) => {
+export const formatDateShort = dateString => {
   if (!dateString) return '';
-  
+
   try {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -158,6 +164,16 @@ export const getUserDetailsApi = async (url, dispatch) => {
       JSON.stringify(response.data.recordList[0]),
     );
     dispatch(setUser({ ...response.data.recordList[0], token: token }));
+    dispatch(
+      getPackageByUserIdApi(getPackageByUserIdUrl, {
+        userId: response.data.recordList[0].id,
+      }),
+    );
+    dispatch(
+      getGalleryImageListApi(getGalleryImageListUrl, {
+        userId: response.data.recordList[0].id,
+      }),
+    );
   } catch (error) {
     if (error.response && error.response.data) {
       if (
@@ -322,15 +338,15 @@ export const resetPreferenceApi = async () => {
   const user = JSON.parse(userDataString);
   const data = {
     id: user.id,
-    pReligionId:"",
-    pCommunityId: "",
-    pMaritalStatusId:"",
-    pFromAge: "",
-    pToAge: "",
-    pStateLivingInId:"",
-    pCityLivingInId:"",
-    pOccupationId:"",
-    pSettlingDown:"",
+    pReligionId: '',
+    pCommunityId: '',
+    pMaritalStatusId: '',
+    pFromAge: '',
+    pToAge: '',
+    pStateLivingInId: '',
+    pCityLivingInId: '',
+    pOccupationId: '',
+    pSettlingDown: '',
   };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
