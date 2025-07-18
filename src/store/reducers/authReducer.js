@@ -43,6 +43,7 @@ const authReducer = createSlice({
     sendOTPDataReceived: (authReducer, action) => {
       authReducer.loader = false;
       authReducer.otpSent = true;
+      console.log(action.payload, 'action.payload');
       AppToast('OTP sent successfully');
     },
     completeUserProfileV2GenderDataReceived: (authReducer, action) => {

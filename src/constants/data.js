@@ -50,6 +50,9 @@ export const ROUTES = {
   INTEREST: 'Interest',
   HOME_TAB: 'Home',
   ACCOUNT_TAB: 'Account',
+  SELFIE_VERIFY: 'SelfieVerify',
+  CAMERA: 'Camera',
+  PAYMENT_SUCCESS: 'PaymentSuccess',
 };
 
 // Mother Tongue

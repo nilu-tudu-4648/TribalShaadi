@@ -123,10 +123,10 @@ const styles = StyleSheet.create({
     fontSize: fontSize20,
     fontFamily: Fonts.OPEN_SANS_BOLD,
     color: COLORS.textBlack,
+    paddingBottom: Size12,
   },
   accountDetailsContainer: {
     gap: Size16,
-    marginTop: Size12,
   },
   accountDetailItem: {
     flexDirection: 'row',

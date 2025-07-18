@@ -16,6 +16,9 @@ import AboutUsScreen from '../screen/AboutUsScreen';
 import InviteScreen from '../screen/InviteScreen';
 import ConversationsScreen from '../screen/ConversationsScreen';
 import MathcingScreen from '../screen/MathcingScreen';
+import SelfieVerifyScreen from '../screen/SelfieVerifyScreen';
+import CameraScreen from '../screen/CameraScreen';
+import PaymentSuccess from '../screen/PaymentSuccess';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -39,6 +42,9 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.INVITE} component={InviteScreen} />
       <Stack.Screen name={ROUTES.CONVERSATIONS} component={ConversationsScreen} />
       <Stack.Screen name={ROUTES.MATCHING} component={MathcingScreen} />
+      <Stack.Screen name={ROUTES.SELFIE_VERIFY} component={SelfieVerifyScreen} />
+      <Stack.Screen name={ROUTES.CAMERA} component={CameraScreen} />
+      <Stack.Screen name={ROUTES.PAYMENT_SUCCESS} component={PaymentSuccess} />
     </Stack.Navigator>
   );
 };

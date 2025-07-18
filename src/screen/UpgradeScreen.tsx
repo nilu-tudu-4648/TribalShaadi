@@ -35,32 +35,22 @@ import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
-import { generateRazorPayOrderIdUrl, getPackageListUrl, getPaymentGatewaysUrl } from '../constants/functions';
+import { getPackageListUrl } from '../constants/functions';
 import {
   getPackageListApi,
-  getPaymentGatewaysApi,
-  generateRazorPayOrderIdApi,
 } from '../store/reducers/paymentReducer';
-import { useDispatch,useSelector } from 'react-redux';
-import AppLoader from '../components/AppLoader';
+import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import RazorpayCheckout from 'react-native-razorpay';
+
 const UpgradeScreen = () => {
   const navigation = useNavigation();
-  const { packageList, loader, paymentGateways, razorPayOrderId } = useSelector(
+  const { packageList, loader } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
-  const { user } = useSelector(
-    (state: any) => state.entities.userReducer,
-  );
   const [selectedPlan, setSelectedPlan] = useState(1);
-  const [checkoutInProgress, setCheckoutInProgress] = useState(false);
+  const [paymentStep, setPaymentStep] = useState(0); // 0: normal, 1: justpay, 2: wallet, 3: success
   const updated = true;
   const dispatch = useDispatch();
-  const creds = {
-    apiKey: 'rzp_test_vw4GSmnwPX83jT',
-    secretKey: 'nd5fniNolVnGhHlVDr1AM2Qs',
-  };
 
   const features = [
     {
@@ -77,90 +67,80 @@ const UpgradeScreen = () => {
     setSelectedPlan(planId);
   };
 
-  const openRazorpayCheckout = () => {
-    if (!paymentGateways) {
-      AppToast('Payment configuration not ready. Please try again.');
+  const handlePayment = () => {
+    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
+    if (!selectedPackage) {
+      AppToast('Please select a plan');
       return;
     }
 
-    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
-    if (!selectedPackage) return;
-
-    setCheckoutInProgress(true);
-    dispatch(
-      generateRazorPayOrderIdApi(generateRazorPayOrderIdUrl, {
-        amount: selectedPackage.package[0].baseAmount,
-        currency: 'INR',
-      }),
-    );
+    // Start payment sequence
+    setPaymentStep(1); // Show justpay screen
+    
+    // After 2 seconds, show wallet screen
+    setTimeout(() => {
+      setPaymentStep(2);
+    }, 2000);
+    
+    // After another 2 seconds, navigate to success page
+    setTimeout(() => {
+      setPaymentStep(0);
+      (navigation as any).navigate(ROUTES.STACK, {
+        screen: ROUTES.PAYMENT_SUCCESS,
+      });
+    }, 4000); // Total 4 seconds
   };
 
   useEffect(() => {
-    if (checkoutInProgress && razorPayOrderId) {
-      const selectedPackage = packageList.find(
-        (p: any) => p.id === selectedPlan,
-      );
-      if (!selectedPackage) {
-        setCheckoutInProgress(false);
-        return;
-      }
-
-      const options = {
-        key: creds.apiKey,
-        amount: selectedPackage.package[0].baseAmount * 100,
-        currency: 'INR',
-        name: 'TribalShaadi',
-        description: `${selectedPackage.package[0].value} Months Premium Subscription`,
-        order_id: razorPayOrderId.id,
-        handler: function (response: any) {
-          console.log('response', response);
-        },
-        // prefill: {
-        //   name: `${user.firstName} ${user.lastName}`,
-        //   email: user.email,
-        //   contact: user.phone,
-        // },
-        notes: {
-          package_name: 'Premium Package',
-        },
-        theme: {
-          color: '#21BEFE',
-        },
-      };
-
-      RazorpayCheckout.open(options)
-        .then((data: any) => {
-          console.log('Payment success:', data);
-        })
-        .catch((error: any) => {
-          console.log('Payment error:', error);
-          if (error.code === 'payment_cancelled') {
-            AppToast('Payment cancelled by user');
-          } else {
-            AppToast('Payment failed. Please try again.');
-          }
-        })
-        .finally(() => {
-          setCheckoutInProgress(false);
-        });
-    }
-  }, [
-    checkoutInProgress,
-    razorPayOrderId,
-    selectedPlan,
-    packageList,
-    creds.apiKey,
-    user,
-  ]);
-
-  useEffect(() => {
     dispatch(getPackageListApi(getPackageListUrl));
-    dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
   }, [dispatch]);
+
+  // Custom Payment Processing Screens
+  const renderJustPayScreen = () => (
+    <View style={styles.paymentOverlay}>
+      <View style={styles.justpayContainer}>
+        <Image
+          source={require('../assets/images/justpay.png')}
+          style={styles.justpayLogo}
+          resizeMode="contain"
+        />
+        <AppText text="Processing your payment" textStyle={styles.processingText} />
+      </View>
+    </View>
+  );
+
+  const renderWalletScreen = () => (
+    <View style={styles.paymentOverlay}>
+      <View style={styles.walletContainer}>
+        <Image
+          source={require('../assets/images/wallet.png')}
+          style={styles.walletImage}
+          resizeMode="contain"
+        />
+        <View style={styles.walletTextContainer}>
+          <AppText text="Processing your payment..." textStyle={styles.processingTextLarge} />
+          <AppText 
+            text="This may take a few seconds, please don't exit the app" 
+            textStyle={styles.warningText} 
+          />
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <AppSafeView style={styles.container}>
-      {loader && <AppLoader />}
+      {loader && (
+        <View style={styles.paymentOverlay}>
+          <View style={styles.paymentContainer}>
+            <AppText text="Loading..." textStyle={styles.processingText} />
+          </View>
+        </View>
+      )}
+      
+      {paymentStep === 1 && renderJustPayScreen()}
+      {paymentStep === 2 && renderWalletScreen()}
+      
       {updated ? (
         <>
           <ImageBackground
@@ -264,7 +244,7 @@ const UpgradeScreen = () => {
                 packageList.find((p: any) => p.id === selectedPlan)?.package[0]
                   .baseAmount
               }`}
-              onPress={openRazorpayCheckout}
+              onPress={handlePayment}
               linearGradientColors={['#21BEFE', '#EE50C1']}
               textStyle={styles.continueButtonText}
             />
@@ -363,6 +343,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     paddingHorizontal: 0,
+  },
+  // Payment Processing Overlay Styles
+  paymentOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: COLORS.white,
+    zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paymentContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Size20,
+  },
+  justpayContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Size20,
+    gap: Size12,
+  },
+  walletContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Size20,
+    gap: Size20,
+  },
+  walletTextContainer: {
+    alignItems: 'center',
+    gap: Size12,
+    paddingHorizontal: Size20,
+  },
+  justpayLogo: {
+    width: Size40*2.5,
+    height: Size40*2.5,
+  },
+  juspayText: {
+    fontSize: fontSize18,
+    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    color: COLORS.black,
+  },
+  processingText: {
+    fontSize: fontSize14,
+    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    color: COLORS.black,
+    textAlign: 'center',
+  },
+  walletImage: {
+    width: Size40 * 5,
+    height: Size40 * 4,
+  },
+  processingTextLarge: {
+    fontSize: fontSize16,
+    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    color: COLORS.black,
+    textAlign: 'center',
+  },
+  warningText: {
+    fontSize: fontSize12,
+    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    color: COLORS.grey,
+    textAlign: 'center',
   },
   backgroundImage: {
     flex: 1,

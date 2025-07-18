@@ -86,7 +86,7 @@ const ChatScreen = () => {
       </View>
 
       {/* Scrollable Conversations List */}
-      <FlatList
+      {/* <FlatList
         data={conversations}
         renderItem={({ item }) => renderConversationItem(item)}
         keyExtractor={(item, index) => index.toString()}
@@ -98,7 +98,7 @@ const ChatScreen = () => {
         )}
         contentContainerStyle={styles.conversationsList}
         style={styles.flatListContainer}
-      />
+      /> */}
     </AppSafeView>
   );
 };

@@ -47,7 +47,7 @@ const PreferenceScreen = () => {
     min: number;
     max: number;
   }>({ min: 20, max: 45 });
-  const [selectedReligion, setSelectedReligion] = useState<string>('');
+  const [selectedReligion, setSelectedReligion] = useState<string>('Any');
   const [selectedHeightRange, setSelectedHeightRange] = useState<{
     min: number;
     max: number;
@@ -63,7 +63,7 @@ const PreferenceScreen = () => {
       // setSelectedMaritalStatuses([user.maritalStatus]);
     }
     if (user?.religion) {
-      // setSelectedReligion(user.religion);
+      // setSelectedReligion('Any');
     }
     if (user?.community) {
       // setSelectedTribes([user.community]);

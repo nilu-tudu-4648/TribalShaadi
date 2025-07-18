@@ -60,7 +60,6 @@ const QualificationScreen = () => {
     { id: 0, name: 'No' },
   ];
   const incomeList = income || [];
-  console.log(selectedWorkExperience, 'selectedWorkExperience');
   useEffect(() => {
     dispatch(getEducationTypes(getEducationTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
@@ -71,8 +70,7 @@ const QualificationScreen = () => {
     if (
       !selectedQualification ||
       !selectedWorkExperience ||
-      !selectedOccupation ||
-      !selectedIncome
+      !selectedOccupation
     ) {
       AppToast('Please select all required fields');
       return false;

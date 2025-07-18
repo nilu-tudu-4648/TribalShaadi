@@ -1,4 +1,10 @@
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import React, { useState } from 'react';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -16,7 +22,7 @@ import {
   EditIcon,
   CrownIcon,
   SelfieVerifiedIcon,
-  GovtIdIcon,
+  // GovtIdIcon,
   GiftIcon,
   InfoIcon,
   HeadphonesIcon,
@@ -24,7 +30,13 @@ import {
   RocketIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserDetailsApi, getUserDetailsUrl, imageUrl, setReducerLoadingfalse, uploadImage } from '../constants/functions';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  imageUrl,
+  setReducerLoadingfalse,
+  uploadImage,
+} from '../constants/functions';
 import { PreferenceIcon } from '../components/svg/SvgIcons2';
 import {
   launchImageLibrary,
@@ -44,6 +56,7 @@ type BadgeData = {
   label: string;
   color: string;
   icon: React.ComponentType<any>;
+  route?: string;
 };
 
 type ActionButton = {
@@ -54,19 +67,26 @@ type ActionButton = {
 };
 
 const badgeData: BadgeData[] = [
-  { key: 'crown', label: 'Crown\nbadge', color: '#FFD600', icon: CrownIcon },
+  {
+    key: 'crown',
+    label: 'Crown\nbadge',
+    color: '#FFD600',
+    icon: CrownIcon,
+    route: ROUTES.UPGRADE,
+  },
   {
     key: 'selfie',
     label: 'Selfie\nverified',
     color: COLORS.primaryBlue,
     icon: SelfieVerifiedIcon,
+    route: ROUTES.SELFIE_VERIFY,
   },
-  {
-    key: 'govt',
-    label: 'Govt. ID\nverified',
-    color: COLORS.grey,
-    icon: GovtIdIcon,
-  },
+  // {
+  //   key: 'govt',
+  //   label: 'Govt. ID\nverified',
+  //   color: COLORS.grey,
+  //   icon: GovtIdIcon,
+  // },
 ];
 
 const actionButtons: ActionButton[] = [
@@ -90,7 +110,9 @@ const actionButtons: ActionButton[] = [
 
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
-  const { user, loader } = useSelector((state: any) => state.entities.authReducer);
+  const { user, loader } = useSelector(
+    (state: any) => state.entities.authReducer,
+  );
   const fullName = `${user?.firstName} ${user?.lastName || ''}`.trim();
   const [selectedImages, setSelectedImages] = useState<
     { uri: string; base64: string }[]
@@ -133,7 +155,10 @@ const AccountScreen = () => {
               console.log(requestBody, 'requestBody for first image');
               await uploadImage(requestBody, dispatch, true);
               setReducerLoadingfalse(dispatch, () => {
-                getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+                getUserDetailsApi(
+                  `${getUserDetailsUrl}id=${user.id}`,
+                  dispatch,
+                );
               });
             }
           } catch (error) {
@@ -181,7 +206,15 @@ const AccountScreen = () => {
         {badgeData.map(badge => {
           const IconComponent = badge.icon;
           return (
-            <View key={badge.key} style={styles.badgeItem}>
+            <Pressable
+              key={badge.key}
+              style={styles.badgeItem}
+              onPress={() => {
+                navigation.navigate(ROUTES.STACK, {
+                  screen: ROUTES.SELFIE_VERIFY,
+                } as never);
+              }}
+            >
               <View
                 style={[styles.badgeIcon, { backgroundColor: badge.color }]}
               >
@@ -191,7 +224,7 @@ const AccountScreen = () => {
                 />
               </View>
               <AppText text={badge.label} textStyle={styles.badgeLabel} />
-            </View>
+            </Pressable>
           );
         })}
       </View>

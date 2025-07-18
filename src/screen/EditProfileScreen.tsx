@@ -193,21 +193,29 @@ const EditProfileScreen = () => {
 
           <View style={styles.profileImage}>
             <View style={styles.profileImagePlaceholder}>
-              <Image
-                source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
-                style={styles.placeholderImage}
-                resizeMode="cover"
-              />
+              {galleryImageList && galleryImageList[0]?.imageUrl ? (
+                <Image
+                  source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
+                  style={styles.placeholderImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.placeholderImage} />
+              )}
             </View>
           </View>
 
           <View style={styles.profileImage}>
             <View style={styles.profileImagePlaceholder}>
-              <Image
-                source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
-                style={styles.placeholderImage}
-                resizeMode="cover"
-              />
+              {galleryImageList && galleryImageList[1]?.imageUrl ? (
+                <Image
+                  source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
+                  style={styles.placeholderImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.placeholderImage} />
+              )}
             </View>
           </View>
         </View>
