@@ -69,6 +69,7 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const MIN_HEIGHT_INCHES = 4 * 12; // 4ft 0in
   const MAX_HEIGHT_INCHES = 7 * 12; // 7ft 0in
+  const MIN_RANGE = 5; // Minimum 5 inches gap
   const SLIDER_WIDTH = Dimensions.get('window').width - 64;
   const THUMB_SIZE = Size25;
 
@@ -87,6 +88,11 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   const startXMax = useSharedValue(0);
 
   const updateHeightRange = (newMin: number, newMax: number) => {
+    // Ensure minimum 5-inch gap
+    if (newMax - newMin < MIN_RANGE) {
+      return; // Don't update if the range is less than 5 inches
+    }
+    
     const range = { min: newMin, max: newMax };
     setLocalHeightRange(range);
     onSelectionChange(range);
@@ -102,14 +108,18 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         0,
         maxThumbPosition.value - THUMB_SIZE,
       );
-      minThumbPosition.value = newPosition;
 
       const newMinHeight = Math.round(
         MIN_HEIGHT_INCHES +
           (newPosition / SLIDER_WIDTH) *
             (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES),
       );
-      runOnJS(updateHeightRange)(newMinHeight, localHeightRange.max);
+      
+      // Ensure minimum 5-inch gap
+      if (localHeightRange.max - newMinHeight >= MIN_RANGE) {
+        minThumbPosition.value = newPosition;
+        runOnJS(updateHeightRange)(newMinHeight, localHeightRange.max);
+      }
     });
 
   const maxPanGesture = Gesture.Pan()
@@ -122,14 +132,18 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
         minThumbPosition.value + THUMB_SIZE,
         SLIDER_WIDTH,
       );
-      maxThumbPosition.value = newPosition;
 
       const newMaxHeight = Math.round(
         MIN_HEIGHT_INCHES +
           (newPosition / SLIDER_WIDTH) *
             (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES),
       );
-      runOnJS(updateHeightRange)(localHeightRange.min, newMaxHeight);
+      
+      // Ensure minimum 5-inch gap
+      if (newMaxHeight - localHeightRange.min >= MIN_RANGE) {
+        maxThumbPosition.value = newPosition;
+        runOnJS(updateHeightRange)(localHeightRange.min, newMaxHeight);
+      }
     });
 
   const minThumbStyle = useAnimatedStyle(() => ({

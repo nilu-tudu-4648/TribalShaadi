@@ -51,6 +51,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const MIN_AGE = 18;
   const MAX_AGE = 65;
+  const MIN_RANGE = 5; // Minimum 5 years gap
   const SLIDER_WIDTH = Dimensions.get('window').width - 64; // Account for padding
   const THUMB_SIZE = 24;
 
@@ -65,6 +66,11 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
   const startXMax = useSharedValue(0);
 
   const updateAgeRange = (newMin: number, newMax: number) => {
+    // Ensure minimum 5-year gap
+    if (newMax - newMin < MIN_RANGE) {
+      return; // Don't update if the range is less than 5 years
+    }
+    
     const range = { min: newMin, max: newMax };
     setLocalAgeRange(range);
     onSelectionChange(range);
@@ -80,11 +86,16 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
         0,
         maxThumbPosition.value - THUMB_SIZE,
       );
-      minThumbPosition.value = newPosition;
+      
       const newMinAge = Math.round(
         MIN_AGE + (newPosition / SLIDER_WIDTH) * (MAX_AGE - MIN_AGE),
       );
-      runOnJS(updateAgeRange)(newMinAge, localAgeRange.max);
+      
+      // Ensure minimum 5-year gap
+      if (localAgeRange.max - newMinAge >= MIN_RANGE) {
+        minThumbPosition.value = newPosition;
+        runOnJS(updateAgeRange)(newMinAge, localAgeRange.max);
+      }
     });
 
   const maxPanGesture = Gesture.Pan()
@@ -97,11 +108,16 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
         minThumbPosition.value + THUMB_SIZE,
         SLIDER_WIDTH,
       );
-      maxThumbPosition.value = newPosition;
+      
       const newMaxAge = Math.round(
         MIN_AGE + (newPosition / SLIDER_WIDTH) * (MAX_AGE - MIN_AGE),
       );
-      runOnJS(updateAgeRange)(localAgeRange.min, newMaxAge);
+      
+      // Ensure minimum 5-year gap
+      if (newMaxAge - localAgeRange.min >= MIN_RANGE) {
+        maxThumbPosition.value = newPosition;
+        runOnJS(updateAgeRange)(localAgeRange.min, newMaxAge);
+      }
     });
 
   const minThumbStyle = useAnimatedStyle(() => ({

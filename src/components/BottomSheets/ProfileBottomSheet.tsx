@@ -3,6 +3,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
 import React, { useRef } from 'react';
 import BottomSheet, {
@@ -34,6 +35,7 @@ import {
   HeightIcon,
   TribeIcon,
   ReligionIcon,
+  HomeIcon2,
 } from '../svg/SvgIcons';
 import { ReportIcon } from '../svg/SvgIcons2';
 import { useDispatch, useSelector } from 'react-redux';
@@ -65,10 +67,9 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   isButtonVisible = false,
 }) => {
   const snapPoints = ['55%', '50%'];
-  const { selectedUser, loader,currentMatchedUserGalleryImageList } = useSelector(
-    (state: any) => state.entities.userReducer,
-  );
-  console.log(selectedUser);
+  const { selectedUser, loader, currentMatchedUserGalleryImageList } =
+    useSelector((state: any) => state.entities.userReducer);
+  // console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -92,7 +93,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   };
   const handleClose = () => {
     bottomSheetRef.current?.close();
-    console.log('close');
   };
   return (
     <>
@@ -117,10 +117,30 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
         <BottomSheetScrollView style={styles.contentContainer}>
           {loader && <AppLoader />}
           <View>
-            <Image
+            <ImageBackground
               source={{ uri: `${imageUrl + selectedUser?.image}` }}
-              style={styles.profileImage}
-            />
+              style={[styles.profileImage, { justifyContent: 'flex-end' }]}
+            >
+              <View style={styles.cardContent}>
+                <AppText
+                  text={`${selectedUser?.firstName} ${selectedUser?.lastName}, ${selectedUser?.age}`}
+                  textStyle={styles.name}
+                />
+                <AppText
+                  text={`${convertCmToReadableHeight(selectedUser?.height)} · ${
+                    selectedUser?.religion
+                  } · ${selectedUser?.community}`}
+                  textStyle={styles.details}
+                />
+                <View style={styles.homeIconContainer}>
+                  <HomeIcon2 color={COLORS.white} />
+                  <AppText
+                    text={`${selectedUser?.districtName}, ${selectedUser?.stateName}`}
+                    textStyle={styles.location}
+                  />
+                </View>
+              </View>
+            </ImageBackground>
             <View style={styles.bioSection}>
               <AppText text="Bio" textStyle={styles.bioLabel} />
               <AppText text={selectedUser?.aboutMe} textStyle={styles.bio} />
@@ -211,7 +231,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               </View>
 
               <Image
-                source={{ uri: imageUrl + currentMatchedUserGalleryImageList[0].imageUrl }}
+                source={{
+                  uri:
+                    imageUrl + currentMatchedUserGalleryImageList[0]?.imageUrl,
+                }}
                 style={{ width: '100%', height: SIZES.height * 0.6 }}
               />
 
@@ -265,7 +288,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               </View>
 
               <Image
-                source={{ uri: imageUrl + currentMatchedUserGalleryImageList[1].imageUrl }}
+                source={{
+                  uri:
+                    imageUrl + currentMatchedUserGalleryImageList[1]?.imageUrl,
+                }}
                 style={{ width: '100%', height: SIZES.height * 0.6 }}
               />
             </View>
@@ -389,12 +415,51 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.radius,
     resizeMode: 'cover',
   },
+  cardContent: {
+    padding: SIZES.padding,
+    gap: SIZES.base / 2,
+    paddingBottom: SIZES.largeTitle,
+  },
+  name: {
+    fontSize: fontSize24,
+    fontWeight: '700',
+    color: COLORS.white,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+    zIndex: 1,
+  },
+  age: {
+    fontWeight: '400',
+  },
+  details: {
+    fontSize: fontSize14,
+    color: COLORS.white,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+    zIndex: 1,
+  },
+  homeIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.base / 2,
+  },
+  location: {
+    fontSize: fontSize14,
+    color: COLORS.white,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+    zIndex: 1,
+  },
   handleIndicator: {
     backgroundColor: COLORS.grey, // Style the grabber handle
   },
   contentContainer: {
     flex: 1,
     gap: SIZES.base * 2,
+    paddingHorizontal: SIZES.padding,
   },
   headerLabel: {
     fontSize: SIZES.font,
@@ -465,7 +530,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bioSection: {
-    padding: SIZES.padding,
+    // padding: SIZES.padding,
     gap: SIZES.base,
   },
   horizontalLine: {

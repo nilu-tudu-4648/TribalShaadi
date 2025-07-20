@@ -21,7 +21,7 @@ interface SentCardProps {
 }
 
 const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
-  console.log(item, 'item');
+  // console.log(item, 'item');
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image  source={{ uri: `${imageUrl + item.image}` }} style={styles.profileImage} />

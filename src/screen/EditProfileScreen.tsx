@@ -33,7 +33,6 @@ import {
   RightArrowIcon,
   EducationIcon,
   PersonalityIcon,
-  EditIcon,
 } from '../components/svg/SvgIcons';
 import { useNavigation } from '@react-navigation/native';
 import AppHeader from '../components/AppHeader';
@@ -187,16 +186,12 @@ const EditProfileScreen = () => {
                   style={styles.placeholderImage}
                   resizeMode="cover"
                 />
-                <View style={styles.profileImageBanner}>
-                  <AppText
-                    text="Profile Image"
-                    textStyle={styles.profileImageText}
-                  />
-                  <TouchableOpacity style={styles.editIconWrapper}>
-                    <EditIcon width={16} height={16} color={COLORS.white} />
-                  </TouchableOpacity>
-                </View>
               </TouchableOpacity>
+              <Image
+                source={require('../assets/images/imageBanner.png')}
+                style={styles.bannerOverlay}
+                resizeMode="contain"
+              />
             </View>
           </View>
 
@@ -368,20 +363,12 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'flex-end',
   },
-  profileImageBanner: {
+  
+  bannerOverlay: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-
-  editIconWrapper: {
-    padding: 4,
+    left: -10,
+    width: 80,
+    height: 70,
+    zIndex: 1000,
   },
 });

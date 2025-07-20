@@ -2,10 +2,10 @@ import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
 import {
   fontSize14,
-  fontSize16,
   Size16,
   Size4,
   screenHeight,
+  fontSize12,
 } from '../../constants/Sizes';
 import AppText from '../AppText';
 import LinearGradient from 'react-native-linear-gradient';
@@ -27,7 +27,7 @@ const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
           textStyle={styles.profileName}
         />
         <AppText
-          text={item.districtName + ', ' + item.stateName}
+          text={item.district + ', ' + item.state}
           textStyle={styles.profileLocation}
         />
       </View>
@@ -74,12 +74,12 @@ const styles = StyleSheet.create({
   },
   profileName: {
     color: '#fff',
-    fontSize: fontSize16,
+    fontSize: fontSize14,
     fontWeight: 'bold',
   },
   profileLocation: {
     color: '#fff',
-    fontSize: fontSize14,
+    fontSize: fontSize12,
     opacity: 0.9,
   },
 });

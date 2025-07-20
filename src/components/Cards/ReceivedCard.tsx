@@ -2,7 +2,7 @@ import {
   StyleSheet,
   View,
   ImageBackground,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,25 +22,23 @@ import {
 import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
 import { HomeIcon2 } from '../svg/SvgIcons';
 import AppButton from '../AppButton';
-import { useSelector } from 'react-redux';
 
 const ReceivedCard = ({
   item,
   onDecline,
   onConnect,
   onPress,
+  planPurchased,
 }: {
   item: any;
   onDecline: () => void;
   onConnect: (item: any) => void;
   onPress: () => void;
+  planPurchased: boolean;
 }) => {
-  const { packageByUserId } = useSelector(
-    (state: any) => state.entities.paymentReducer,
-  );
-  const planPurchased = packageByUserId.length > 0;
+
   return (
-    <TouchableOpacity onPress={onPress} style={styles.card}>
+    <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
           source={{ uri: `${imageUrl + item.profileImage}` }}
@@ -101,7 +99,7 @@ const ReceivedCard = ({
           />
         </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

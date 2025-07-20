@@ -60,6 +60,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   };
 
   const handleApply = async () => {
+    console.log("loading started")
     try {
       const requestBody = {
         id: user.id,
@@ -74,8 +75,8 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-
       onApply(localSelectedStatuses);
+      console.log("loading ended")
     }
   };
 

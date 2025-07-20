@@ -40,14 +40,13 @@ import AppLoader from '../components/AppLoader';
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const { packageByUserId } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const {
-    proposalsSendByMe,
-    proposalsGotByMe,
-    loader,
-    passedUsers,
-  } = useSelector((state: any) => state.entities.userReducer);
+  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
+    useSelector((state: any) => state.entities.userReducer);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close();
@@ -143,7 +142,16 @@ const InterestScreen = () => {
                     item={item}
                     onDecline={() => handleRejectProposal(item.id)}
                     onConnect={() => handleAcceptProposal(item)}
-                    onPress={() => handleCardPress(item.senderUserId)}
+                    onPress={() => {
+                      if (packageByUserId.length > 0) {
+                        handleCardPress(item.senderUserId);
+                      } else {
+                        (navigation as any).navigate(ROUTES.STACK, {
+                          screen: ROUTES.UPGRADE,
+                        });
+                      }
+                    }}
+                    planPurchased={packageByUserId.length > 0}
                   />
                 )}
                 keyExtractor={(item, index) => index.toString()}

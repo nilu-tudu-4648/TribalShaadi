@@ -94,6 +94,13 @@ const userReducer = createSlice({
         action.payload.recordList;
       userReducer.loader = false;
     },
+    setReducerCleaned: (userReducer, action) => {
+      userReducer.loader = false;
+      userReducer.matchedUsers = [];
+      userReducer.currentMatchedUser = null;
+      userReducer.currentMatchedUserGalleryImageList = [];
+      userReducer.sentProposal = [];
+    },
   },
 });
 
@@ -103,6 +110,7 @@ export const {
   setAcceptedUser,
   setHomeTabRefr,
   setSelectedUser,
+  setReducerCleaned
 } = userReducer.actions;
 
 const {
@@ -216,7 +224,7 @@ export const getGalleryImageListApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setGalleryImageDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });

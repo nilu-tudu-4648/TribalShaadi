@@ -28,6 +28,7 @@ import {
   HeadphonesIcon,
   SettingsIcon,
   RocketIcon,
+  GovtIdIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -81,12 +82,12 @@ const badgeData: BadgeData[] = [
     icon: SelfieVerifiedIcon,
     route: ROUTES.SELFIE_VERIFY,
   },
-  // {
-  //   key: 'govt',
-  //   label: 'Govt. ID\nverified',
-  //   color: COLORS.grey,
-  //   icon: GovtIdIcon,
-  // },
+  {
+    key: 'govt',
+    label: 'Govt. ID\nverified',
+    color: COLORS.grey,
+    icon: GovtIdIcon,
+  },
 ];
 
 const AccountScreen = () => {
@@ -217,7 +218,7 @@ const AccountScreen = () => {
               style={styles.badgeItem}
               onPress={() => {
                 navigation.navigate(ROUTES.STACK, {
-                  screen: ROUTES.SELFIE_VERIFY,
+                  screen: badge.route,
                 } as never);
               }}
             >

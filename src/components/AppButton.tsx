@@ -8,7 +8,7 @@ import {
 import React from 'react';
 import AppText from './AppText';
 import GradientLoader from './GradientLoader';
-import { Size12, Size16, Size4 } from '../constants/Sizes';
+import { Size12, Size25, Size4 } from '../constants/Sizes';
 import { fontSize16 } from '../constants/Sizes';
 
 const AppButton = ({
@@ -33,7 +33,7 @@ const AppButton = ({
       disabled={isButtonDisabled || isLoading}
       activeOpacity={0.8}>
       {isLoading ? (
-        <GradientLoader size={Size16} />
+        <GradientLoader size={Size25} />
       ) : (
         <AppText text={title} textStyle={[styles.text, textStyle]} />
       )}

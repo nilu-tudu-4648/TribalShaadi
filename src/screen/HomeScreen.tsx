@@ -56,7 +56,6 @@ const HomeScreen = () => {
     useSelector((state: any) => state.entities.userReducer);
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
-
   // Swipe animation values
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -127,6 +126,14 @@ const HomeScreen = () => {
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
+  
+  // Reset currentIndex if it goes out of bounds when matchedUsers array changes
+  useEffect(() => {
+    if (matchedUsers.length > 0 && currentIndex >= matchedUsers.length) {
+      setCurrentIndex(0);
+    }
+  }, [matchedUsers.length, currentIndex]);
+  
   useEffect(() => {
     dispatch(getCommunity(getCommunityUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -164,12 +171,12 @@ const HomeScreen = () => {
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
-      if (currentIndex < matchedUsers.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      }
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+      // Reset currentIndex to 0 to avoid out of bounds issues
+      setCurrentIndex(0);
     } catch (error) {
       console.log(error, 'error');
+    }finally{
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
 
@@ -185,14 +192,12 @@ const HomeScreen = () => {
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
-      if (currentIndex < matchedUsers.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex(currentIndex + 1);
-      }
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+      // Reset currentIndex to 0 to avoid out of bounds issues
+      setCurrentIndex(0);
     } catch (error) {
       console.log(error, 'error');
+    }finally{
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
   return (

@@ -5,7 +5,7 @@ import {
   Image,
   FlatList,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -26,9 +26,32 @@ import { ConversationIcon } from '../components/svg/SvgIcons2';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
+import { useDispatch, useSelector } from 'react-redux';
+import { getFriendsByUserIdUrl } from '../constants/functions';
+import { getFriendsByUserIdApi } from '../store/reducers/chatReducer';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const { friendsByUserId } = useSelector((state: any) => state.entities.chatReducer);
+  const dispatch = useDispatch();
+  // console.log("allChatHistoryByUserId", allChatHistoryByUserId,user.id);
+  console.log("friendsByUserId", friendsByUserId);
+  useEffect(() => {
+    // dispatch(getUserChatApi(getUserChatUrl, {
+    //   partnerId: user.id,
+    // }));
+    // dispatch(getUserChatListApi(getUserChatListUrl, {
+    //   startIndex: '1',
+    //   fetchRecord: '10',
+    // }));
+    // dispatch(getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
+    //   userId: user.id,
+    // }));
+    dispatch(getFriendsByUserIdApi(getFriendsByUserIdUrl, {
+      userId: user.id,
+    }));
+  }, [dispatch, user.id]);
   // Sample conversation data
   const conversations = [
     {
@@ -86,7 +109,7 @@ const ChatScreen = () => {
       </View>
 
       {/* Scrollable Conversations List */}
-      {/* <FlatList
+      <FlatList
         data={conversations}
         renderItem={({ item }) => renderConversationItem(item)}
         keyExtractor={(item, index) => index.toString()}
@@ -98,7 +121,7 @@ const ChatScreen = () => {
         )}
         contentContainerStyle={styles.conversationsList}
         style={styles.flatListContainer}
-      /> */}
+      />
     </AppSafeView>
   );
 };

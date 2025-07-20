@@ -108,17 +108,17 @@ const EditLifeScreen = () => {
         ...prev,
         selectedState: user.stateName || null,
         districtName: user.districtName || null,
-        heightId: user.heightId || '8',
-        heightName: user.height || '5\'7"',
-        dietId: user.dietId || '1',
-        dietName: user.diet || 'Vegetarian',
-        drinkingName: user.drinking || 'No',
+        heightId: user.heightId || '',
+        heightName: user.height || '',
+        dietId: user.dietId || '',
+        dietName: user.diet || '',
+        drinkingName: user.drinking || '',
         smokingName: user.smoking || '',
         timelineName: user.planingto_settle || '',
         stateId: userState.id,
       }));
     }
-  }, [user, states, dispatch]);
+  }, [user, states, dispatch,cities]);
 
   // Initialize city when cities are loaded
   useEffect(() => {

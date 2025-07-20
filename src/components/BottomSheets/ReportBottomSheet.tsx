@@ -127,7 +127,7 @@ const ReportBottomSheet: React.FC<ReportBottomSheetProps> = ({
               <AppButton
                 title="Report"
                 onPress={handleReport}
-                textStyle={styles.reportButtonText}
+                textStyle={!selectedReason ? styles.reportButtonTextDisabled : styles.reportButtonText}
                 buttonStyle={[
                   styles.reportButton,
                   !selectedReason && styles.reportButtonDisabled,
@@ -182,7 +182,10 @@ const styles = StyleSheet.create({
     borderRadius: Size25,
   },
   reportButtonDisabled: {
-    backgroundColor: COLORS.textInactive,
+    backgroundColor: COLORS.disabledBG,
+  },
+  reportButtonTextDisabled: {
+    color: COLORS.disabledText,
   },
   reportButtonText: {
     color: COLORS.white,

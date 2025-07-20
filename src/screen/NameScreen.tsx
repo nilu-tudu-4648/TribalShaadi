@@ -16,10 +16,10 @@ import {
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppButton from '../components/AppButton';
-import { completeUserProfileV2Name } from '../store/reducers/authReducer';
+import { completeUserProfileV2Updated } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import { getUserDetailsApi, updateUrl } from '../constants/functions';
+import { getUserDetailsApi, setReducerLoadingfalse, updateUrl } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppText from '../components/AppText';
 
@@ -82,9 +82,10 @@ const NameScreen = () => {
         lastName: lastName,
         email: email,
       };
-      dispatch(completeUserProfileV2Name(updateUrl, requestBody));
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
     } catch (error) {
       console.log(error);
     }

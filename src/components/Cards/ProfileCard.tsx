@@ -207,7 +207,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
       </View>
         <Image
-          source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
+          source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
           style={{ width: '100%', height: SIZES.height * 0.7 }}
         />
       <View style={styles.section}>
@@ -246,7 +246,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
       <View style={{ backgroundColor: COLORS.divider }}>
         <Image
-          source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
+          source={{ uri: imageUrl + galleryImageList[1]?.imageUrl }}
           style={{ width: '100%', height: SIZES.height * 0.7 }}
         />
       </View>

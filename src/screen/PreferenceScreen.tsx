@@ -32,6 +32,7 @@ import { resetPreferenceApi } from '../constants/functions';
 const PreferenceScreen = () => {
   const { user, maritalStatuses, religion, community, height, loader } =
     useSelector((state: any) => state.entities.authReducer);
+    console.log(loader,'loader')
   const maritalStatusBottomSheetRef = useRef<BottomSheet>(null);
   const ageRangeBottomSheetRef = useRef<BottomSheet>(null);
   const religionBottomSheetRef = useRef<BottomSheet>(null);

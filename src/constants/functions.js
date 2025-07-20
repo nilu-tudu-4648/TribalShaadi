@@ -5,7 +5,7 @@ import {
   logoutFromReducer,
   setLoadingfalse,
 } from '../store/reducers/authReducer';
-import { getGalleryImageListApi, setUserRegistrationCompleted } from '../store/reducers/userReducer';
+import { getGalleryImageListApi, setReducerCleaned, setUserRegistrationCompleted } from '../store/reducers/userReducer';
 import axios from 'axios';
 import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
@@ -54,6 +54,11 @@ export const insertPaymentUrl = 'app/payment/insertPayment';
 export const savePremiumAccountUrl = 'app/package/savePremiumAccount';
 export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
 
+//chatUrl
+export const getUserChatUrl = 'app/userChat/userChat';
+export const getUserChatListUrl = 'app/userChat/getUserChatList';
+export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
+export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
 // Date formatting function
 export const formatDateOfBirth = dateString => {
   if (!dateString) return '';
@@ -260,6 +265,7 @@ export const logoutUser = async dispatch => {
     dispatch(setUserRegistrationCompleted(false));
     await AsyncStorage.clear();
     dispatch(logoutFromReducer());
+    dispatch(setReducerCleaned());
     navigate(ROUTES.WELCOME);
   } catch (error) {
     console.log(error);
