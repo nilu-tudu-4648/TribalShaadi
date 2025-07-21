@@ -24,6 +24,7 @@ import {
   getUserDetailsApi,
   setReducerLoadingfalse,
   updateUrl,
+  searchCitiesApi,
 } from '../../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { SearchIcon, InfoIcon, ChipCloseIcon } from '../svg/SvgIcons2';
@@ -42,7 +43,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
 }) => {
   const snapPoints = ['30%', '70%'];
   const dispatch = useDispatch();
-  const { user, states } = useSelector(
+  const { user, states, allCities } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   const [selectedState, setSelectedState] = useState<any>(
@@ -51,7 +52,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   const [selectedCities, setSelectedCities] = useState<any[]>(
     selectedLocations.slice(1) || [],
   );
-
+  console.log(allCities,'allCities')
   const [searchQuery, setSearchQuery] = useState('');
   const [cities, setCities] = useState<any[]>([]);
   const allLocations = useMemo(() => {
@@ -61,11 +62,12 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
     }));
   }, [states]);
 
-  const filteredLocations = useMemo(() => {
+  const filteredLocations = useMemo(async () => {
     if (!searchQuery) return [];
 
     const query = searchQuery.toLowerCase();
-
+    const citiesData = await searchCitiesApi(query);
+    console.log(citiesData, 'citiesData');    
     // Show state if none selected
     if (!selectedState) {
       return allLocations

@@ -52,8 +52,12 @@ import AppLoader from '../components/AppLoader';
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
-  const { matchedUsers, loader, currentMatchedUser ,currentMatchedUserGalleryImageList} =
-    useSelector((state: any) => state.entities.userReducer);
+  const {
+    matchedUsers,
+    loader,
+    currentMatchedUser,
+    currentMatchedUserGalleryImageList,
+  } = useSelector((state: any) => state.entities.userReducer);
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   // Swipe animation values
@@ -126,14 +130,13 @@ const HomeScreen = () => {
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
   }, [dispatch]);
-  
   // Reset currentIndex if it goes out of bounds when matchedUsers array changes
   useEffect(() => {
     if (matchedUsers.length > 0 && currentIndex >= matchedUsers.length) {
       setCurrentIndex(0);
     }
   }, [matchedUsers.length, currentIndex]);
-  
+
   useEffect(() => {
     dispatch(getCommunity(getCommunityUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -175,7 +178,7 @@ const HomeScreen = () => {
       setCurrentIndex(0);
     } catch (error) {
       console.log(error, 'error');
-    }finally{
+    } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
@@ -196,7 +199,7 @@ const HomeScreen = () => {
       setCurrentIndex(0);
     } catch (error) {
       console.log(error, 'error');
-    }finally{
+    } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
@@ -221,8 +224,8 @@ const HomeScreen = () => {
                     <ProfileCard
                       name={
                         currentMatchedUser.firstName +
-                        ' ' +
-                        currentMatchedUser.lastName
+                          ' ' +
+                          (currentMatchedUser.lastName ?? '')
                       }
                       age={currentMatchedUser.age}
                       height={currentMatchedUser.height}

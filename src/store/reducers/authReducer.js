@@ -11,6 +11,7 @@ const initialState = {
   community: [],
   states: [],
   cities: [],
+  allCities: [],
   maritalStatuses: [],
   educationTypes: [],
   occupations: [],
@@ -78,6 +79,10 @@ const authReducer = createSlice({
       reducer.loader = false;
       reducer.cities = action.payload.recordList;
     },
+    getAllCitiesDataReceived: (reducer, action) => {
+      reducer.loader = false;
+      reducer.allCities = action.payload.recordList;
+    },
     getMaritalStatusDataReceived: (reducer, action) => {
       reducer.loader = false;
       reducer.maritalStatuses = action.payload.recordList;
@@ -140,6 +145,7 @@ const {
   getHeightDataReceived,
   getDietDataReceived,
   completeUserProfileV2InterestsDataReceived,
+  getAllCitiesDataReceived,
 } = authReducer.actions;
 export const sendOTP = (url, data) =>
   apiCallBegan({
@@ -199,6 +205,14 @@ export const getCities = url =>
     url,
     onStart: authReducerDataRequested.type,
     onSuccess: getCitiesDataReceived.type,
+    onError: authReducerDataRequestFailed.type,
+  });
+export const getAllCities = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: authReducerDataRequested.type,
+    onSuccess: getAllCitiesDataReceived.type,
     onError: authReducerDataRequestFailed.type,
   });
 export const getMaritalStatus = url =>

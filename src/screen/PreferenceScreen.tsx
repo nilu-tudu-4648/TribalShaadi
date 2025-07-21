@@ -32,7 +32,6 @@ import { resetPreferenceApi } from '../constants/functions';
 const PreferenceScreen = () => {
   const { user, maritalStatuses, religion, community, height, loader } =
     useSelector((state: any) => state.entities.authReducer);
-    console.log(loader,'loader')
   const maritalStatusBottomSheetRef = useRef<BottomSheet>(null);
   const ageRangeBottomSheetRef = useRef<BottomSheet>(null);
   const religionBottomSheetRef = useRef<BottomSheet>(null);
@@ -61,24 +60,35 @@ const PreferenceScreen = () => {
   ]);
   useEffect(() => {
     if (user?.maritalStatus) {
-      // setSelectedMaritalStatuses([user.maritalStatus]);
+      setSelectedMaritalStatuses([user.maritalStatus]);
     }
     if (user?.religion) {
-      // setSelectedReligion('Any');
+      setSelectedReligion(user.religion);
     }
     if (user?.community) {
       // setSelectedTribes([user.community]);
     }
-    if (user?.pFromAge) {
+    if (user?.pFromAge && user?.pToAge) {
       setSelectedAgeRange({ min: user.pFromAge, max: user.pToAge });
     }
-    if (user?.height) {
-      // setSelectedHeightRange({ min: user.pFromHeight, max: user.pToHeight });
+    if (user?.pFromHeight && user?.pToHeight) {
+      setSelectedHeightRange({ min: user.pFromHeight, max: user.pToHeight });
+    }
+    if (user?.preferredLocation) {
+      setSelectedLocations(Array.isArray(user.preferredLocation) ? user.preferredLocation : [user.preferredLocation]);
+    }
+    if (user?.preferredJobType) {
+      setSelectedJobTypes(Array.isArray(user.preferredJobType) ? user.preferredJobType : [user.preferredJobType]);
+    }
+    if (user?.preferredSettleDown) {
+      setSelectedSettleDown(Array.isArray(user.preferredSettleDown) ? user.preferredSettleDown : [user.preferredSettleDown]);
     }
   }, [user]);
   const getMaritalStatusValue = () => {
     if (selectedMaritalStatuses.length === 0) return 'None';
-    // if (selectedMaritalStatuses.length === 1) return selectedMaritalStatuses[0];
+    if (selectedMaritalStatuses.length === 1) {
+      return selectedMaritalStatuses[0];
+    }
     return `${selectedMaritalStatuses.length} selected`;
   };
 

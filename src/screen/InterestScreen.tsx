@@ -60,7 +60,6 @@ const InterestScreen = () => {
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
   const handleCardPress = async (id: string) => {
-    console.log(id, 'id');
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
       dispatch(

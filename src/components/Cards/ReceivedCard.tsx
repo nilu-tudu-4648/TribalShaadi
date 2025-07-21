@@ -51,10 +51,10 @@ const ReceivedCard = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-          {planPurchased ? (
+          {planPurchased  ? (
             <View style={styles.cardContent}>
               <AppText
-                text={`${item.firstName} ${item.lastName}, ${item.age}`}
+                text={`${item.firstName} ${(item.lastName??"")}, ${item.age}`}
                 textStyle={styles.name}
               />
               <AppText

@@ -69,7 +69,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const snapPoints = ['55%', '50%'];
   const { selectedUser, loader, currentMatchedUserGalleryImageList } =
     useSelector((state: any) => state.entities.userReducer);
-  // console.log(selectedUser);
+  console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();

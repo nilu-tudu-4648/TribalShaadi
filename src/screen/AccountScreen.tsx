@@ -22,7 +22,6 @@ import {
   EditIcon,
   CrownIcon,
   SelfieVerifiedIcon,
-  // GovtIdIcon,
   GiftIcon,
   InfoIcon,
   HeadphonesIcon,
@@ -221,6 +220,7 @@ const AccountScreen = () => {
                   screen: badge.route,
                 } as never);
               }}
+              disabled={!badge.route}
             >
               <View
                 style={[styles.badgeIcon, { backgroundColor: badge.color }]}

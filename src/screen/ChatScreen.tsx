@@ -27,27 +27,29 @@ import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
-import { getFriendsByUserIdUrl } from '../constants/functions';
-import { getFriendsByUserIdApi } from '../store/reducers/chatReducer';
+import { getAllChatHistoryByUserIdUrl, getFriendsByUserIdUrl, getUserChatListUrl, getUserChatUrl } from '../constants/functions';
+import { getAllChatHistoryByUserIdApi, getFriendsByUserIdApi, getUserChatApi, getUserChatListApi } from '../store/reducers/chatReducer';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const { friendsByUserId } = useSelector((state: any) => state.entities.chatReducer);
+  const {chatList,allChatHistoryByUserId, friendsByUserId, userChatList } = useSelector((state: any) => state.entities.chatReducer);
   const dispatch = useDispatch();
-  // console.log("allChatHistoryByUserId", allChatHistoryByUserId,user.id);
+  console.log("chatList", chatList);
+  console.log("allChatHistoryByUserId", allChatHistoryByUserId);
   console.log("friendsByUserId", friendsByUserId);
+  console.log("userChatList", userChatList);
   useEffect(() => {
-    // dispatch(getUserChatApi(getUserChatUrl, {
-    //   partnerId: user.id,
-    // }));
-    // dispatch(getUserChatListApi(getUserChatListUrl, {
-    //   startIndex: '1',
-    //   fetchRecord: '10',
-    // }));
-    // dispatch(getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
-    //   userId: user.id,
-    // }));
+      dispatch(getUserChatApi(getUserChatUrl, {
+        partnerId: user.id,
+      }));
+      dispatch(getUserChatListApi(getUserChatListUrl, {
+        startIndex: '1',
+        fetchRecord: '10',
+      }));
+      dispatch(getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
+        userId: user.id,
+      }));
     dispatch(getFriendsByUserIdApi(getFriendsByUserIdUrl, {
       userId: user.id,
     }));

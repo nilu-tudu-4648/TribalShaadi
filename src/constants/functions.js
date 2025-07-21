@@ -12,6 +12,21 @@ import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
 import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
 
+// Configuration for user profile completion checks
+const PROFILE_COMPLETION_STEPS = [
+  { field: 'gender', screen: ROUTES.GENDER },
+  { field: 'firstName', screen: ROUTES.NAME },
+  { field: 'birthDate', screen: ROUTES.BIRTH_DATE },
+  { field: 'motherTongue', screen: ROUTES.RELIGION },
+  { field: 'planingto_settle', screen: ROUTES.ADDRESS },
+  { field: 'occupationId', screen: ROUTES.QUALIFICATION },
+  { field: 'smoking', screen: ROUTES.PHYSICAL_ATTRIBUTES },
+  { field: 'aboutMe', screen: ROUTES.ABOUT },
+  { field: 'about_lifepartener', screen: ROUTES.ABOUT_PARTNER },
+  { field: 'image', screen: ROUTES.UPLOAD_IMAGE },
+  { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
+];
+
 export const baseUrl = 'https://api.tribalshaadi.co.in/api';
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
@@ -19,6 +34,7 @@ export const getReligionUrl = 'admin/religion/getReligion';
 export const getCommunityUrl = 'admin/community/getCommunity?isActive=true&';
 export const getStatesUrl = 'admin/states/getStates';
 export const getCitiesUrl = 'admin/districts/getDistricts';
+export const getAllCitiesUrl = 'admin/cities/getCitiesV2?searchString=';
 export const getMaritalStatusUrl = 'admin/maritalStatus/getMaritalStatus';
 export const getEducationUrl = 'admin/education/getEducation';
 export const getEducationTypeUrl = 'admin/education/getEducationType';
@@ -92,7 +108,6 @@ export const formatDateShort = dateString => {
     return dateString;
   }
 };
-
 export const checkUserLoggedIn = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
@@ -158,7 +173,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    // console.log(token, 'token');
+    console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -192,22 +207,6 @@ export const getUserDetailsApi = async (url, dispatch) => {
     }
   }
 };
-
-// Configuration for user profile completion checks
-const PROFILE_COMPLETION_STEPS = [
-  { field: 'gender', screen: ROUTES.GENDER },
-  { field: 'firstName', screen: ROUTES.NAME },
-  { field: 'birthDate', screen: ROUTES.BIRTH_DATE },
-  { field: 'motherTongue', screen: ROUTES.RELIGION },
-  { field: 'planingto_settle', screen: ROUTES.ADDRESS },
-  { field: 'occupationId', screen: ROUTES.QUALIFICATION },
-  { field: 'smoking', screen: ROUTES.PHYSICAL_ATTRIBUTES },
-  { field: 'aboutMe', screen: ROUTES.ABOUT },
-  { field: 'about_lifepartener', screen: ROUTES.ABOUT_PARTNER },
-  { field: 'image', screen: ROUTES.UPLOAD_IMAGE },
-  { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
-];
-
 export const checkAuth = async dispatch => {
   try {
     // Get user from Redux store instead of AsyncStorage to avoid race conditions
@@ -314,14 +313,11 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
     dispatch(setLoadingfalse());
   }
 };
-
-// Function to convert height in cm to readable format
 export const convertCmToReadableHeight = cm => {
   const feet = Math.floor(cm / 30.48);
   const inches = Math.round((cm / 30.48 - feet) * 12);
   return `${feet}'${inches}"`;
 };
-
 export const getCitiesByStateId = async stateId => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -364,5 +360,48 @@ export const resetPreferenceApi = async () => {
     console.log(response, 'resetPreferenceApi');
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
+  }
+};
+export const searchCitiesApi = async (data) => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.get(`${baseUrl}/${getAllCitiesUrl}${data}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    // Filter out duplicate districts by districtId
+    const uniqueDistricts = new Map();
+    response.data.recordList.forEach(item => {
+      if (!uniqueDistricts.has(item.districtId)) {
+        uniqueDistricts.set(item.districtId, {
+          id: item.id,
+          districtName: item.districtName,
+          districtId: item.districtId,
+          stateName: item.stateName,
+        });
+      }
+    });
+    return Array.from(uniqueDistricts.values());
+  } catch (error) {
+    console.log(error, 'searchCitiesApi');
+    return [];
+  }
+};
+export const getCitiesByStateIdV2 = async stateId => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.get(
+      `${baseUrl}/${getCitiesUrl}?stateId=${stateId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data.recordList;
+  } catch (error) {
+    console.log(error, 'getCitiesByStateId');
+    return [];
   }
 };
