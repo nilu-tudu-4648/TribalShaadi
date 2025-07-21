@@ -34,7 +34,7 @@ export const getReligionUrl = 'admin/religion/getReligion';
 export const getCommunityUrl = 'admin/community/getCommunity?isActive=true&';
 export const getStatesUrl = 'admin/states/getStates';
 export const getCitiesUrl = 'admin/districts/getDistricts';
-export const getAllCitiesUrl = 'admin/cities/getCitiesV2?searchString=';
+export const getAllCitiesUrl = 'admin/districts/getDistrictsV2?searchString=';
 export const getMaritalStatusUrl = 'admin/maritalStatus/getMaritalStatus';
 export const getEducationUrl = 'admin/education/getEducation';
 export const getEducationTypeUrl = 'admin/education/getEducationType';
@@ -313,10 +313,11 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
     dispatch(setLoadingfalse());
   }
 };
-export const convertCmToReadableHeight = cm => {
-  const feet = Math.floor(cm / 30.48);
-  const inches = Math.round((cm / 30.48 - feet) * 12);
-  return `${feet}'${inches}"`;
+export const convertCmToReadableHeight = (cm) => {
+  const n = Number(cm);    
+  const feet = Math.floor(n / 30.48);
+  const inches = Math.round((n / 30.48 - feet) * 12);
+  return `${feet}'${String(inches).padStart(2, "0")}"`;
 };
 export const getCitiesByStateId = async stateId => {
   try {
@@ -370,19 +371,7 @@ export const searchCitiesApi = async (data) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    // Filter out duplicate districts by districtId
-    const uniqueDistricts = new Map();
-    response.data.recordList.forEach(item => {
-      if (!uniqueDistricts.has(item.districtId)) {
-        uniqueDistricts.set(item.districtId, {
-          id: item.id,
-          districtName: item.districtName,
-          districtId: item.districtId,
-          stateName: item.stateName,
-        });
-      }
-    });
-    return Array.from(uniqueDistricts.values());
+    return response.data.recordList;
   } catch (error) {
     console.log(error, 'searchCitiesApi');
     return [];

@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
   BottomSheetFlatList,
+  BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
 import { COLORS } from '../../constants/AppColors';
@@ -43,7 +44,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
 }) => {
   const snapPoints = ['30%', '70%'];
   const dispatch = useDispatch();
-  const { user, states, allCities } = useSelector(
+  const { user, states } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   const [selectedState, setSelectedState] = useState<any>(
@@ -52,49 +53,64 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   const [selectedCities, setSelectedCities] = useState<any[]>(
     selectedLocations.slice(1) || [],
   );
-  console.log(allCities,'allCities')
   const [searchQuery, setSearchQuery] = useState('');
-  const [cities, setCities] = useState<any[]>([]);
-  const allLocations = useMemo(() => {
-    return states.map((state: { id: number; name: string }) => ({
-      id: state.id,
-      name: state.name,
-    }));
-  }, [states]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  // Handle search with useEffect instead of useMemo
+  useEffect(() => {
+    const searchCities = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
 
-  const filteredLocations = useMemo(async () => {
-    if (!searchQuery) return [];
+      setIsSearching(true);
+      try {
+        const query = searchQuery.toLowerCase();
+        
+        // Filter states based on search query
+        const filteredStates = states
+          .filter((state: any) => 
+            state.name.toLowerCase().includes(query)
+          )
+          .map((state: any) => ({
+            ...state,
+            type: 'state',
+            displayName: state.name
+          }));
 
-    const query = searchQuery.toLowerCase();
-    const citiesData = await searchCitiesApi(query);
-    console.log(citiesData, 'citiesData');    
-    // Show state if none selected
-    if (!selectedState) {
-      return allLocations
-        .filter((loc: any) => loc.name.toLowerCase().includes(query))
-        .map((loc: any) => ({ ...loc, type: 'state' }));
-    }
+        // Search cities via API
+        const citiesData = await searchCitiesApi(query);
+        const filteredCities = (citiesData || []).map((city: any) => ({
+          ...city,
+          type: 'city',
+          displayName: city.districtName || city.name
+        }));
 
-    // Else, show cities under selected state
-    return cities
-      .filter(
-        (city: any) =>
-          city.name.toLowerCase().includes(query) &&
-          !selectedCities.some(c => c.id === city.id),
-      )
-      .map(city => ({ ...city, type: 'city' }));
-  }, [searchQuery, selectedState, selectedCities, cities, allLocations]);
+        // Combine states and cities, with states first
+        const combinedResults = [...filteredStates, ...filteredCities];
+        setSearchResults(combinedResults);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchCities, 300); // Debounce search
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, states]);
 
   const addLocation = async (location: any) => {
     try {
-      // If selecting state
-      if (!selectedState || location?.type === 'state') {
+      // If selecting a state
+      if (location?.type === 'state') {
         setSelectedState(location);
-        const citiesData = await getCitiesByStateId(location.id);
-        setCities(citiesData);
-        setSelectedCities([]); // Clear old cities if state changes
+        // Fetch cities for the selected state
+        await getCitiesByStateId(location.id);
       } else {
-        // Selecting cities
+        // Selecting cities/districts
         const alreadyExists = selectedCities.some(
           city => city.id === location.id,
         );
@@ -107,7 +123,6 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
       console.log(error, 'error');
     }
   };
-
 
   const handleApply = () => {
     try {
@@ -167,19 +182,25 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
 
         {searchQuery.length > 0 ? (
           <BottomSheetFlatList
-            data={filteredLocations}
+            data={searchResults}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }: { item: any }) => (
               <TouchableOpacity
                 style={styles.searchResultRow}
                 onPress={() => addLocation(item)}
               >
-                <AppText text={item.name} />
+                <View style={styles.searchResultContent}>
+                  <AppText text={item.displayName} textStyle={styles.searchResultName} />
+                  <AppText 
+                    text={item.type === 'state' ? 'State' : 'City'} 
+                    textStyle={styles.searchResultType} 
+                  />
+                </View>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
               <View style={styles.searchResultRow}>
-                <AppText text="No results found" />
+                <AppText text={isSearching ? "Searching..." : "No results found"} />
               </View>
             }
           />
@@ -197,33 +218,46 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
               />
             </View>
 
-            <View style={styles.chipsContainer}>
-              {selectedState && (
-                <View key={selectedState.id} style={styles.chip}>
-                  <AppText
-                    text={selectedState.name}
-                    textStyle={styles.chipText}
-                  />
-                  <TouchableOpacity onPress={() => setSelectedState(null)}>
-                    <ChipCloseIcon />
-                  </TouchableOpacity>
-                </View>
-              )}
-              {selectedCities.map((city: any) => (
-                <View key={city.id} style={styles.chip}>
-                  <AppText text={city.name} textStyle={styles.chipText} />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setSelectedCities(
-                        selectedCities.filter(c => c.id !== city.id),
-                      )
-                    }
-                  >
-                    <ChipCloseIcon />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
+            <BottomSheetScrollView 
+              style={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.chipsContainer}>
+                {selectedState && (
+                  <View key={selectedState.id} style={styles.chip}>
+                    <AppText
+                      text={selectedState.name}
+                      textStyle={styles.chipText}
+                    />
+                    <TouchableOpacity onPress={() => setSelectedState(null)}>
+                      <ChipCloseIcon />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {selectedCities.map((city: any) => (
+                  <View key={city.id} style={styles.chip}>
+                    <AppText text={city.name} textStyle={styles.chipText} />
+                    <TouchableOpacity
+                      onPress={() =>
+                        setSelectedCities(
+                          selectedCities.filter(c => c.id !== city.id),
+                        )
+                      }
+                    >
+                      <ChipCloseIcon />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {selectedState === null && selectedCities.length === 0 && (
+                  <View style={styles.emptySelectionContainer}>
+                    <AppText 
+                      text="No locations selected yet. Search above to add locations." 
+                      textStyle={styles.emptyText} 
+                    />
+                  </View>
+                )}
+              </View>
+            </BottomSheetScrollView>
           </View>
         )}
       </BottomSheetView>
@@ -284,7 +318,26 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: Size12,
   },
-  chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: Size8 },
+  scrollContainer: {
+    flex: 1,
+  },
+  chipsContainer: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: Size8,
+    paddingBottom: Size16,
+  },
+  emptySelectionContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Size20,
+  },
+  emptyText: {
+    fontSize: fontSize14,
+    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    color: COLORS.textGrey,
+    textAlign: 'center',
+  },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -313,5 +366,24 @@ const styles = StyleSheet.create({
     paddingVertical: Size14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.divider,
+  },
+  searchResultContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  searchResultName: {
+    fontSize: fontSize14,
+    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    color: COLORS.textBlack,
+  },
+  searchResultType: {
+    fontSize: fontSize14,
+    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    color: COLORS.textGrey,
+    backgroundColor: COLORS.lightgrey,
+    paddingHorizontal: Size8,
+    paddingVertical: Size8,
+    borderRadius: Size8,
   },
 });

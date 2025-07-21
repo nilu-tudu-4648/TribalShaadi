@@ -66,12 +66,12 @@ const HomeScreen = () => {
   const entryX = useSharedValue(0);
   // Reset animation values when index changes
   const handleSwipeRight = () => {
-    if (matchedUsers.length === 0) return;
+    if (matchedUsers.length === 0 || matchedUsers.length === 1) return;
     setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
   };
 
   const handleSwipeLeft = () => {
-    if (matchedUsers.length === 0) return;
+    if (matchedUsers.length === 0 || matchedUsers.length === 1) return;
     setCurrentIndex(prev => (prev + 1) % matchedUsers.length);
   };
 
@@ -83,6 +83,9 @@ const HomeScreen = () => {
       // Optional: Add haptic feedback here
     })
     .onUpdate(event => {
+      // Don't allow swipe visual feedback if there's only one user
+      if (matchedUsers.length <= 1) return;
+      
       translateX.value = event.translationX;
 
       // Change opacity based on swipe distance
@@ -94,17 +97,26 @@ const HomeScreen = () => {
       }
     })
     .onEnd(event => {
+      // Don't allow swipe actions if there's only one user
+      if (matchedUsers.length <= 1) {
+        translateX.value = withTiming(0);
+        opacity.value = withTiming(1);
+        return;
+      }
+
       const swipeThreshold = width * 0.3;
 
       if (event.translationX > swipeThreshold) {
         // ACCEPT  – next card must come from LEFT
         entryX.value = -width; // start off-screen left
-        translateX.value = withTiming(width); // current card exits right
+        translateX.value = withTiming(width, { duration: 250 }); // current card exits right
+        opacity.value = withTiming(0, { duration: 250 });
         runOnJS(handleSwipeRight)(); // your original function
       } else if (event.translationX < -swipeThreshold) {
         // DECLINE – next card must come from RIGHT
         entryX.value = width; // start off-screen right
-        translateX.value = withTiming(-width); // current card exits left
+        translateX.value = withTiming(-width, { duration: 250 }); // current card exits left
+        opacity.value = withTiming(0, { duration: 250 });
         runOnJS(handleSwipeLeft)(); // your original function
       } else {
         translateX.value = withTiming(0);
@@ -121,10 +133,18 @@ const HomeScreen = () => {
   });
   // 3.  whenever currentIndex changes -> animate in
   useEffect(() => {
+    // Ensure proper animation sequence
     translateX.value = entryX.value; // off-screen direction
-    translateX.value = withTiming(0, { duration: 250 });
     opacity.value = 0;
+    
+    // Animate to center position
+    translateX.value = withTiming(0, { duration: 250 });
     opacity.value = withTiming(1, { duration: 250 });
+    
+    // Reset entryX to 0 after animation to prevent gaps
+    setTimeout(() => {
+      entryX.value = 0;
+    }, 250);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
   useEffect(() => {
@@ -203,6 +223,8 @@ const HomeScreen = () => {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
+  console.log(currentMatchedUser, 'currentMatchedUser');
+  console.log(matchedUsers, 'matchedUsers');
   return (
     <AppSafeView style={styles.container}>
       {loader ? (
@@ -377,6 +399,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     flex: 1,
+    overflow: 'hidden', // Prevent content from showing outside bounds
   },
   flexContainer: {
     flex: 1,
@@ -386,5 +409,7 @@ const styles = StyleSheet.create({
     width: width,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+    left: 0, // Ensure no left offset
   },
 });

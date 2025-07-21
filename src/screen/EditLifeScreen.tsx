@@ -10,7 +10,6 @@ import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, Size8 } from '../constants/Sizes';
 import {
   completeUserProfileV2Updated,
-  getCities,
   getDiet,
 } from '../store/reducers/authReducer';
 import {
@@ -18,9 +17,9 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
-  getCitiesUrl,
   convertCmToReadableHeight,
   getDietUrl,
+  getCitiesByStateIdV2,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import { SlidersIcon } from '../components/svg/SvgIcons';
@@ -35,7 +34,7 @@ const EditLifeScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const { user, states, cities, loader, height, diet } = useSelector(
+  const { user, states, loader, height, diet } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   // Form state - now using objects for state and city
@@ -68,7 +67,7 @@ const EditLifeScreen = () => {
   // Loading state for cities
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [localCities, setLocalCities] = useState([]);
-  
+
   // Fetch states when component mounts
   useEffect(() => {
     dispatch(getDiet(getDietUrl));
@@ -76,70 +75,74 @@ const EditLifeScreen = () => {
 
   // Load cities when state is selected
   useEffect(() => {
-    if (formData.selectedState?.id) {
-      setCitiesLoading(true);
-      dispatch(
-        getCities(`${getCitiesUrl}?stateId=${formData.selectedState.id}`),
-      );
-    }
-  }, [formData.selectedState?.id, dispatch]);
-
-  // Stop loading when cities are received
-  useEffect(() => {
-    if (cities && cities.length >= 0) {
-      setCitiesLoading(false);
-    }
-  }, [cities]);
+    const fetchCities = async () => {
+      if (formData.selectedState?.id) {
+        setCitiesLoading(true);
+        try {
+          const cities = await getCitiesByStateIdV2(formData.selectedState.id);
+          setLocalCities(cities);
+        } catch (error) {
+          console.error('Error fetching cities:', error);
+          setLocalCities([]);
+        } finally {
+          setCitiesLoading(false);
+        }
+      }
+    };
+    fetchCities();
+  }, [formData.selectedState?.id]);
 
   // Initialize form data from user profile
   useEffect(() => {
-    if (user && states && states.length > 0) {
-      console.log('Initializing form data. User stateId:', user.stateId);
-      console.log('Available states:', states);
+    const initializeFormData = async () => {
+      if (user && states && states.length > 0) {
+        console.log('Initializing form data. User stateId:', user.stateId);
+        console.log('Available states:', states);
 
-      // Find state object from the fetched data
-      const userState = states.find(
-        (state: any) => String(state.name) === String(user.stateName),
-      );
-      console.log('Found user state:', userState);
-      dispatch(
-        getCities(`${getCitiesUrl}?stateId=${userState.id}`),
-      );
-      setFormData(prev => ({
-        ...prev,
-        selectedState: user.stateName || null,
-        districtName: user.districtName || null,
-        heightId: user.heightId || '8',
-        heightName: user.height || '5\'7"',
-        dietId: user.dietId || '1',
-        dietName: user.diet || 'Vegetarian',
-        drinkingName: user.drinking || 'No',
-        smokingName: user.smoking || '',
-        timelineName: user.planingto_settle || '',
-        stateId: userState.id,
-      }));
-    }
-  }, [user, states, dispatch]);
-
-  // Initialize city when cities are loaded
-  useEffect(() => {
-    if (user && cities && cities.length > 0 && formData.selectedState) {
-      console.log('Initializing city. User cityId:', user.cityId);
-      console.log('Available cities:', cities);
-
-      const userCity = cities.find(
-        (city: any) => String(city.id) === String(user.cityId),
-      );
-      console.log('Found user city:', userCity);
-
-      if (userCity) {
-        setFormData(prev => ({
-          ...prev,
-          selectedCity: userCity,
-        }));
+        // Find state object from the fetched data
+        const userState = states.find(
+          (state: any) => String(state.name) === String(user.stateName),
+        );
+        console.log('Found user state:', userState);
+        
+        if (userState) {
+          setCitiesLoading(true);
+          try {
+            const cities = await getCitiesByStateIdV2(userState.id);
+            console.log('cities', cities);
+            setLocalCities(cities);
+            
+            // Find user's city from the fetched cities
+            const userCity = cities.find(
+              (city: any) => String(city.id) === String(user.cityId),
+            );
+            
+            setFormData(prev => ({
+              ...prev,
+              selectedState: userState, // Set the state object, not just the name
+              selectedCity: userCity || null,
+              heightId: user.heightId || '8',
+              heightName: user.height || '5\'7"',
+              dietId: user.dietId || '1',
+              dietName: user.diet || '',
+              drinkingName: user.drinking || '',
+              smokingName: user.smoking || '',
+              timelineName: user.planingto_settle || '',
+              stateId: userState.id,
+              districtId: userCity?.id || '',
+            }));
+          } catch (error) {
+            console.error('Error fetching cities during initialization:', error);
+          } finally {
+            setCitiesLoading(false);
+          }
+        }
       }
-    }
-  }, [user, cities, formData.selectedState]);
+    };
+    initializeFormData();
+  }, [user, states]);
+
+
 
   // Handle state selection and reset city when state changes
   const handleStateSelection = useCallback((selectedState: any) => {
@@ -204,13 +207,7 @@ const EditLifeScreen = () => {
     setShowTimelinePicker(false);
   }, []);
 
-  // Get filtered cities based on selected state
-  const filteredCities = React.useMemo(() => {
-    if (!formData.selectedState?.id || !cities) return [];
-    return cities.filter(
-      (city: any) => city.stateId === formData.selectedState.id,
-    );
-  }, [formData.selectedState?.id, cities]);
+
 
   // Handle form submission
   const handleSave = useCallback(async () => {
@@ -220,7 +217,7 @@ const EditLifeScreen = () => {
         permanentAddress: {
           stateId: formData.stateId,
           districtId: formData.districtId,
-        },    
+        },
         heightId: formData.heightId,
         dietId: formData.dietId,
         drinking: formData.drinkingName,
@@ -249,9 +246,7 @@ const EditLifeScreen = () => {
         icon={<SlidersIcon />}
       />
 
-      <View
-        style={styles.scrollView}
-      >
+      <View style={styles.scrollView}>
         {/* State Dropdown */}
         <AppDropdown
           label=""
@@ -273,8 +268,8 @@ const EditLifeScreen = () => {
           label=""
           selectedValue={formData.selectedCity?.name || user.districtName}
           placeholder={citiesLoading ? 'Loading cities...' : 'Select City'}
-          onPress={() => !citiesLoading && setShowCityPicker(true)}
-          disabled={citiesLoading || !formData.selectedState}
+          onPress={() => !citiesLoading && localCities.length > 0 && setShowCityPicker(true)}
+          disabled={citiesLoading || !formData.selectedState || localCities.length === 0}
         />
 
         {/* Height Dropdown */}
@@ -347,7 +342,7 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showCityPicker}
-        items={filteredCities}
+        items={localCities}
         selectedValue={formData.selectedCity?.name || ''}
         onSelect={handleCitySelection}
         onClose={() => setShowCityPicker(false)}

@@ -199,10 +199,25 @@ const PhysicalAttributesScreen = () => {
         title="Select Height"
         items={
           height
-            ? height.map((h: any) => ({
-                ...h,
-                displayName: convertCmToReadableHeight(h.name),
-              }))
+            ? (() => {
+                // Create a map to track unique display names and keep only the first occurrence
+                const uniqueHeights = new Map();
+                const processedHeights = height.map((h: any) => ({
+                  ...h,
+                  displayName: convertCmToReadableHeight(h.name),
+                }));
+                
+                // Filter out duplicates based on displayName, keeping the first occurrence
+                const deduplicatedHeights = processedHeights.filter((h: any) => {
+                  if (!uniqueHeights.has(h.displayName)) {
+                    uniqueHeights.set(h.displayName, true);
+                    return true;
+                  }
+                  return false;
+                });
+                
+                return deduplicatedHeights;
+              })()
             : []
         }
         selectedValue={selectedHeight}

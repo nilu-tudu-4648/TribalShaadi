@@ -75,7 +75,7 @@ const PreferenceScreen = () => {
       setSelectedHeightRange({ min: user.pFromHeight, max: user.pToHeight });
     }
     if (user?.preferredLocation) {
-      setSelectedLocations(Array.isArray(user.preferredLocation) ? user.preferredLocation : [user.preferredLocation]);
+      // setSelectedLocations(Array.isArray(user.preferredLocation) ? user.preferredLocation : [user.preferredLocation]);
     }
     if (user?.preferredJobType) {
       setSelectedJobTypes(Array.isArray(user.preferredJobType) ? user.preferredJobType : [user.preferredJobType]);
@@ -127,7 +127,7 @@ const PreferenceScreen = () => {
       return 'Any';
     }
     if (selectedLocations.length === 0) {
-      return 'None';
+      return 'Any';
     }
     if (selectedLocations.length === 1) {
       return selectedLocations[0];
