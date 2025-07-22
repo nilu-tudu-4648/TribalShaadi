@@ -33,12 +33,12 @@ import { getAllChatHistoryByUserIdApi, getFriendsByUserIdApi, getUserChatApi, ge
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const {chatList,allChatHistoryByUserId, friendsByUserId, userChatList } = useSelector((state: any) => state.entities.chatReducer);
+  // const {chatList,allChatHistoryByUserId, friendsByUserId, userChatList } = useSelector((state: any) => state.entities.chatReducer);
   const dispatch = useDispatch();
-  console.log("chatList", chatList);
-  console.log("allChatHistoryByUserId", allChatHistoryByUserId);
-  console.log("friendsByUserId", friendsByUserId);
-  console.log("userChatList", userChatList);
+  // console.log("chatList", chatList);
+  // console.log("allChatHistoryByUserId", allChatHistoryByUserId);
+  // console.log("friendsByUserId", friendsByUserId);
+  // console.log("userChatList", userChatList);
   useEffect(() => {
       dispatch(getUserChatApi(getUserChatUrl, {
         partnerId: user.id,

@@ -223,8 +223,8 @@ const HomeScreen = () => {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     }
   };
-  console.log(currentMatchedUser, 'currentMatchedUser');
-  console.log(matchedUsers, 'matchedUsers');
+  // console.log(currentMatchedUser, 'currentMatchedUser');
+  // console.log(matchedUsers, 'matchedUsers');
   return (
     <AppSafeView style={styles.container}>
       {loader ? (

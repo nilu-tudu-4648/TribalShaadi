@@ -1,42 +1,22 @@
 /* eslint-disable semi */
 import messaging from '@react-native-firebase/messaging';
-import { getApp, getApps, initializeApp } from '@react-native-firebase/app';
+import { getApp, getApps } from '@react-native-firebase/app';
 // import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-// Get the default app instance - with proper initialization check
-let app;
-try {
-  if (getApps().length === 0) {
-    // If no apps are initialized, try to initialize with minimal config
-    // Note: For React Native Firebase to work properly, you need:
-    // 1. google-services.json in android/app/ directory
-    // 2. GoogleService-Info.plist in ios/ directory
-    console.warn('Firebase not initialized. Please add proper Firebase configuration files (google-services.json and GoogleService-Info.plist).');
-    
-    // Initialize with minimal config to prevent crashes
-    try {
-      app = initializeApp({
-        apiKey: "fake-api-key",
-        authDomain: "fake-domain.firebaseapp.com",
-        projectId: "fake-project-id",
-        storageBucket: "fake-project.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:android:fake-app-id"
-      });
-      console.log('Firebase initialized with placeholder config. Replace with actual configuration.');
-    } catch (initError) {
-      console.error('Failed to initialize Firebase with placeholder config:', initError);
-      app = null;
-    }
-  } else {
-    app = getApp();
+// Silence the modular API deprecation warning
+global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+
+// Function to check if Firebase is ready
+const isFirebaseReady = () => {
+  try {
+    return getApps().length > 0;
+  } catch (error) {
+    console.error('Error checking Firebase status:', error);
+    return false;
   }
-} catch (error) {
-  console.error('Error getting Firebase app:', error);
-  app = null;
-}
+};
 
 export const createNotificationChannel = () => {
   // PushNotification.createChannel(
@@ -53,13 +33,13 @@ export const createNotificationChannel = () => {
 }
 
 export const requestUserPermission = async () => {
-  if (!app) {
-    console.warn('Firebase app not initialized. Skipping notification permission request.');
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping notification permission request.');
     return;
   }
   
   try {
-    const authStatus = await messaging(app).requestPermission();
+    const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
@@ -69,20 +49,20 @@ export const requestUserPermission = async () => {
       getfcmToken();
     }
   } catch (error) {
-    // console.error('Error requesting user permission:', error);
+    console.error('Error requesting user permission:', error);
   }
 };
 
 const getfcmToken = async () => {
-  if (!app) {
-    console.warn('Firebase app not initialized. Skipping FCM token retrieval.');
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping FCM token retrieval.');
     return;
   }
   
   let fcmToken = await AsyncStorage.getItem('fcmToken');
   if (!fcmToken) {
     try {
-      const token = await messaging(app).getToken();
+      const token = await messaging().getToken();
       if (token) {
         console.log('FCM Token:', token);
         await AsyncStorage.setItem('fcmToken', token);
@@ -134,14 +114,14 @@ const sendTokenToServer = async (token) => {
 
 // Function to refresh FCM token
 export const refreshFCMToken = async () => {
-  if (!app) {
-    console.warn('Firebase app not initialized. Skipping FCM token refresh.');
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping FCM token refresh.');
     return;
   }
   
   try {
-    await messaging(app).deleteToken();
-    const newToken = await messaging(app).getToken();
+    await messaging().deleteToken();
+    const newToken = await messaging().getToken();
     if (newToken) {
       await AsyncStorage.setItem('fcmToken', newToken);
       await sendTokenToServer(newToken);
@@ -153,14 +133,14 @@ export const refreshFCMToken = async () => {
 };
 
 export const notificationListner = async () => {
-  if (!app) {
-    console.warn('Firebase app not initialized. Skipping notification listeners setup.');
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping notification listeners setup.');
     return;
   }
   
   try {
     // Handle notification when app is opened from background
-    messaging(app).onNotificationOpenedApp(remoteMessage => {
+    messaging().onNotificationOpenedApp(remoteMessage => {
       console.log(
         'Notification caused app to open from background state:',
         remoteMessage.notification,
@@ -170,7 +150,7 @@ export const notificationListner = async () => {
     });
 
     // Handle notification when app is opened from quit state
-    messaging(app)
+    messaging()
       .getInitialNotification()
       .then(async remoteMessage => {
         if (remoteMessage) {
@@ -184,7 +164,7 @@ export const notificationListner = async () => {
       });
 
     // Handle background messages
-    messaging(app).setBackgroundMessageHandler(async remoteMessage => {
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
       
       // Important: Firebase automatically displays notifications when app is in background/quit state
@@ -202,13 +182,13 @@ export const notificationListner = async () => {
     });
 
     // Handle token refresh
-    messaging(app).onTokenRefresh(token => {
+    messaging().onTokenRefresh(token => {
       console.log('FCM token refreshed:', token);
       AsyncStorage.setItem('fcmToken', token);
       sendTokenToServer(token);
     });
   } catch (error) {
-    // console.error('Error setting up notification listeners:', error);
+    console.error('Error setting up notification listeners:', error);
   }
 };
 
@@ -311,16 +291,16 @@ export const getCurrentFCMToken = async () => {
 
 // Subscribe all users to general topics
 const subscribeToAllUsersTopics = async () => {
-  if (!app) {
-    console.warn('Firebase app not initialized. Skipping topic subscription.');
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping topic subscription.');
     return;
   }
   
   try {
     // Subscribe to topic for all users - this allows sending notifications to everyone
-    await messaging(app).subscribeToTopic('all_users');
-    await messaging(app).subscribeToTopic('general_updates');
-    await messaging(app).subscribeToTopic('contest_updates');
+    await messaging().subscribeToTopic('all_users');
+    await messaging().subscribeToTopic('general_updates');
+    await messaging().subscribeToTopic('contest_updates');
     
     console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
   } catch (error) {

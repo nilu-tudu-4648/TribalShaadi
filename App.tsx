@@ -34,6 +34,12 @@ import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
 } from './src/navigation/StackNavigation';
+import { 
+  requestUserPermission, 
+  notificationListner, 
+  createNotificationChannel 
+} from './src/notification/notifications';
+import ForegroundHandler from './src/notification/ForegroundHandler';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -90,6 +96,31 @@ const MainApp = () => {
   }, [user, navigation, dispatch, tokenExpired]);
 
   useEffect(() => {
+    // Initialize push notification setup with a delay to allow Firebase to auto-initialize
+    const setupNotifications = async () => {
+      // Wait for Firebase to auto-initialize from config files
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      try {
+        // Create notification channel (Android)
+        createNotificationChannel();
+        
+        // Request permission and get FCM token
+        await requestUserPermission();
+        
+        // Set up notification listeners
+        await notificationListner();
+        
+        console.log('Push notifications initialized successfully');
+      } catch (error) {
+        console.error('Error initializing push notifications:', error);
+      }
+    };
+
+    setupNotifications();
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2000); // 2 seconds
@@ -101,55 +132,58 @@ const MainApp = () => {
   }
 
   return (
-    <Stack.Navigator
-      initialRouteName={
-        userRegistrationCompleted ? ROUTES.MAIN_TABS : ROUTES.WELCOME
-      }
-      screenOptions={{ headerShown: false }}
-    >
-      {userRegistrationCompleted ? (
-        <>
-          <Stack.Screen name={ROUTES.MAIN_TABS} component={BottomNavigation} />
-          <Stack.Screen name={ROUTES.STACK} component={StackNavigation} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
-          <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
-          <Stack.Screen name={ROUTES.OTP} component={OTPScreen} />
-          <Stack.Screen
-            name={ROUTES.GENDER}
-            component={GenderSelectionScreen}
-          />
-          <Stack.Screen name={ROUTES.NAME} component={NameScreen} />
-          <Stack.Screen name={ROUTES.BIRTH_DATE} component={BirthDateScreen} />
-          <Stack.Screen name={ROUTES.RELIGION} component={ReligionScreen} />
-          <Stack.Screen name={ROUTES.ADDRESS} component={AddressScreen} />
-          <Stack.Screen
-            name={ROUTES.QUALIFICATION}
-            component={QualificationScreen}
-          />
-          <Stack.Screen
-            name={ROUTES.PHYSICAL_ATTRIBUTES}
-            component={PhysicalAttributesScreen}
-          />
-          <Stack.Screen name={ROUTES.ABOUT} component={AboutScreen} />
-          <Stack.Screen
-            name={ROUTES.ABOUT_PARTNER}
-            component={AboutPartnerScreen}
-          />
-          <Stack.Screen
-            name={ROUTES.UPLOAD_IMAGE}
-            component={UploadImageScreen}
-          />
-          <Stack.Screen
-            name={ROUTES.SELECT_INTERESTS}
-            component={SelectInterestsScreen}
-          />
-          <Stack.Screen name={ROUTES.WELCOME_HOME} component={WelcomeHome} />
-        </>
-      )}
-    </Stack.Navigator>
+    <>
+      <ForegroundHandler />
+      <Stack.Navigator
+        initialRouteName={
+          userRegistrationCompleted ? ROUTES.MAIN_TABS : ROUTES.WELCOME
+        }
+        screenOptions={{ headerShown: false }}
+      >
+        {userRegistrationCompleted ? (
+          <>
+            <Stack.Screen name={ROUTES.MAIN_TABS} component={BottomNavigation} />
+            <Stack.Screen name={ROUTES.STACK} component={StackNavigation} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
+            <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
+            <Stack.Screen name={ROUTES.OTP} component={OTPScreen} />
+            <Stack.Screen
+              name={ROUTES.GENDER}
+              component={GenderSelectionScreen}
+            />
+            <Stack.Screen name={ROUTES.NAME} component={NameScreen} />
+            <Stack.Screen name={ROUTES.BIRTH_DATE} component={BirthDateScreen} />
+            <Stack.Screen name={ROUTES.RELIGION} component={ReligionScreen} />
+            <Stack.Screen name={ROUTES.ADDRESS} component={AddressScreen} />
+            <Stack.Screen
+              name={ROUTES.QUALIFICATION}
+              component={QualificationScreen}
+            />
+            <Stack.Screen
+              name={ROUTES.PHYSICAL_ATTRIBUTES}
+              component={PhysicalAttributesScreen}
+            />
+            <Stack.Screen name={ROUTES.ABOUT} component={AboutScreen} />
+            <Stack.Screen
+              name={ROUTES.ABOUT_PARTNER}
+              component={AboutPartnerScreen}
+            />
+            <Stack.Screen
+              name={ROUTES.UPLOAD_IMAGE}
+              component={UploadImageScreen}
+            />
+            <Stack.Screen
+              name={ROUTES.SELECT_INTERESTS}
+              component={SelectInterestsScreen}
+            />
+            <Stack.Screen name={ROUTES.WELCOME_HOME} component={WelcomeHome} />
+          </>
+        )}
+      </Stack.Navigator>
+    </>
   );
 };
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "470197089725",
+    "project_id": "tribal-shaadi-7c34f",
+    "storage_bucket": "tribal-shaadi-7c34f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:470197089725:android:0cda882ff69d80d73d4ed4",
+        "android_client_info": {
+          "package_name": "com.tribalshaadi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_BwxktA8u8SGpWXf7wHbg525UWRnb1Ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

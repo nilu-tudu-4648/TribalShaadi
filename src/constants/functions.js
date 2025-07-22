@@ -155,6 +155,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     const response = await axios.post(`${baseUrl}/${url}`, data);
     AppToast('OTP verified successfully');
     if (response.data.status === 200) {
+      console.log(response.data.recordList[0], 'verifyOTP');
       await saveUserToStorage(response.data.recordList[0]);
       await getUserDetailsApi(
         `${getUserDetailsUrl}id=${response.data.recordList[0].id}`,
@@ -179,6 +180,7 @@ export const getUserDetailsApi = async (url, dispatch) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(response.data.recordList[0], 'getUserDetailsApi');
     await AsyncStorage.setItem(
       ASYNC_VARIBLES.USER,
       JSON.stringify(response.data.recordList[0]),
