@@ -110,7 +110,7 @@ const MathcingScreen = () => {
           <Image
             source={{ uri: `${imageUrl + acceptedUser.profileImage}` }}
             style={styles.matchImage}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         </Animated.View>
 
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     height: SIZES.height * 0.3,
     borderRadius: SIZES.radius,
     overflow: 'hidden',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.transparent,
   },
   matchImage: {
     width: SIZES.width * 0.6,

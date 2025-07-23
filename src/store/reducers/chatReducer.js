@@ -6,6 +6,9 @@ const initialState = {
   userChatList: [],
   allChatHistoryByUserId: [],
   friendsByUserId: [],
+  sendMessage: [],
+  messages: [],
+  friendRequestAccept: [],
 };
 
 const chatReducer = createSlice({
@@ -35,6 +38,20 @@ const chatReducer = createSlice({
       chatReducer.loader = false;
       chatReducer.friendsByUserId = action.payload.recordList;
     },
+    chatReducerSendMessageReceived: (chatReducer, action) => {
+      chatReducer.loader = false;
+      chatReducer.sendMessage = action.payload;
+      console.log('action.payload', action.payload);
+    },
+    chatReducerMessagesReceived: (chatReducer, action) => {
+      chatReducer.loader = false;
+      chatReducer.messages = action.payload.recordList;
+    },
+    chatReducerFriendRequestAcceptReceived: (chatReducer, action) => {
+      chatReducer.loader = false;
+      console.log('chatReducerFriendRequestAcceptReceived', action.payload);
+      chatReducer.friendRequestAccept = action.payload;
+    },
   },
 });
 
@@ -47,6 +64,9 @@ const {
   chatReducerUserChatListReceived,
   chatReducerAllChatHistoryByUserIdReceived,
   chatReducerFriendsByUserIdReceived,
+  chatReducerSendMessageReceived,
+  chatReducerMessagesReceived,
+  chatReducerFriendRequestAcceptReceived,
 } = chatReducer.actions;
 export const getUserChatApi = (url, data = {}) =>
   apiCallBegan({
@@ -82,6 +102,33 @@ export const getAllChatHistoryByUserIdApi = (url, data = {}) =>
     data,
     onStart: chatReducerDataRequested.type,
     onSuccess: chatReducerFriendsByUserIdReceived.type,
+    onError: chatReducerDataRequestFailed.type,
+  });
+export const sendMessageApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: chatReducerDataRequested.type,
+    onSuccess: chatReducerSendMessageReceived.type,
+    onError: chatReducerDataRequestFailed.type,
+  });
+export const getMessagesApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: chatReducerDataRequested.type,
+    onSuccess: chatReducerMessagesReceived.type,
+    onError: chatReducerDataRequestFailed.type,
+  });
+export const friendRequestAcceptApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: chatReducerDataRequested.type,
+    onSuccess: chatReducerFriendRequestAcceptReceived.type,
     onError: chatReducerDataRequestFailed.type,
   });
 export default chatReducer.reducer;

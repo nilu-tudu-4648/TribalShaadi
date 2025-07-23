@@ -97,6 +97,8 @@ const InterestScreen = () => {
           status: 1,
         }),
       );
+      console.log('item', { proposalUserId: item.id, status: 1 });
+
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(setAcceptedUser(item));
       (navigation as any).navigate(ROUTES.STACK, {

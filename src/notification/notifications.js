@@ -45,7 +45,7 @@ export const requestUserPermission = async () => {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-      console.log('Authorization status:', authStatus);
+      // console.log('Authorization status:', authStatus);
       getfcmToken();
     }
   } catch (error) {
@@ -67,7 +67,7 @@ const getfcmToken = async () => {
         console.log('FCM Token:', token);
         await AsyncStorage.setItem('fcmToken', token);
         // Send token to your server
-        await sendTokenToServer(token);
+        // await sendTokenToServer(token);
         // Subscribe to general topics for all users
         await subscribeToAllUsersTopics();
       }
@@ -75,11 +75,11 @@ const getfcmToken = async () => {
       console.log('Error getting FCM token:', error);
     }
   } else {
-    console.log('FCM Token from storage:', fcmToken);
+    // console.log('FCM Token from storage:', fcmToken);
     // Verify token is still valid and send to server
-    await sendTokenToServer(fcmToken);
+    // await sendTokenToServer(fcmToken);
     // Ensure user is subscribed to general topics
-    await subscribeToAllUsersTopics();
+    // await subscribeToAllUsersTopics();
   }
 };
 
@@ -103,7 +103,7 @@ const sendTokenToServer = async (token) => {
     });
     
     if (response.ok) {
-      console.log('FCM token sent to server successfully');
+      // console.log('FCM token sent to server successfully');
     } else {
       console.log('Failed to send FCM token to server');
     }
@@ -124,8 +124,8 @@ export const refreshFCMToken = async () => {
     const newToken = await messaging().getToken();
     if (newToken) {
       await AsyncStorage.setItem('fcmToken', newToken);
-      await sendTokenToServer(newToken);
-      console.log('FCM token refreshed:', newToken);
+      // await sendTokenToServer(newToken);
+      // console.log('FCM token refreshed:', newToken);
     }
   } catch (error) {
     console.log('Error refreshing FCM token:', error);
@@ -185,7 +185,7 @@ export const notificationListner = async () => {
     messaging().onTokenRefresh(token => {
       console.log('FCM token refreshed:', token);
       AsyncStorage.setItem('fcmToken', token);
-      sendTokenToServer(token);
+      // sendTokenToServer(token);
     });
   } catch (error) {
     console.error('Error setting up notification listeners:', error);
@@ -302,7 +302,7 @@ const subscribeToAllUsersTopics = async () => {
     await messaging().subscribeToTopic('general_updates');
     await messaging().subscribeToTopic('contest_updates');
     
-    console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
+    // console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
   } catch (error) {
     console.log('Error subscribing to general topics:', error);
   }

@@ -44,7 +44,7 @@ import ForegroundHandler from './src/notification/ForegroundHandler';
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
   [ROUTES.LOGIN]: undefined;
-  [ROUTES.OTP]: { phoneNumber: string };
+  [ROUTES.OTP]: { phoneNumber: string | number };
   [ROUTES.GENDER]: undefined;
   [ROUTES.NAME]: undefined;
   [ROUTES.BIRTH_DATE]: undefined;
@@ -111,7 +111,6 @@ const MainApp = () => {
         // Set up notification listeners
         await notificationListner();
         
-        console.log('Push notifications initialized successfully');
       } catch (error) {
         console.error('Error initializing push notifications:', error);
       }

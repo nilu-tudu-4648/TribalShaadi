@@ -31,8 +31,7 @@ const OTPScreen = () => {
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const route = useRoute<RouteProp<RootStackParamList, 'OTP'>>();
-  const { phoneNumber } = route.params;
-  // const phoneNumber = "+9155186701";
+  const { phoneNumber } = (route.params as { phoneNumber: string | number }) || {};
   const { loader } = useSelector((state: any) => state.entities.authReducer);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();

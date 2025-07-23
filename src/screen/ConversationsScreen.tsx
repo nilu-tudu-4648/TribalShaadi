@@ -6,8 +6,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Pressable,
 } from 'react-native';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
@@ -25,14 +26,17 @@ import {
   Size5,
   Size22,
   Size10,
+  fontSize30,
+  Size25,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { ASYNC_VARIBLES } from '../constants/data';
 import { useSelector } from 'react-redux';
 import { imageUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
+import { io, Socket } from 'socket.io-client';
 
 // Message type definitions
 interface Message {
@@ -42,6 +46,7 @@ interface Message {
   time?: string;
   date?: string;
   timestamp?: number;
+  status?: 'sent' | 'sending' | 'failed';
 }
 
 // Initial story starter message
@@ -56,32 +61,20 @@ const ConversationsScreen = () => {
   const navigation = useNavigation();
   const [messageText, setMessageText] = useState('');
   const [chatData, setChatData] = useState<Message[]>([INITIAL_STORY_STARTER]);
-  const [_loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'failed'>('connecting');
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  // Load chat messages from AsyncStorage
-  const loadChatMessages = useCallback(async () => {
-    try {
-      const savedMessages = await AsyncStorage.getItem(
-        ASYNC_VARIBLES.CHAT_MESSAGES,
-      );
-      if (savedMessages) {
-        const parsedMessages: Message[] = JSON.parse(savedMessages);
-        setChatData(parsedMessages);
-      } else {
-        // If no saved messages, initialize with story starter
-        setChatData([INITIAL_STORY_STARTER]);
-        await saveChatMessages([INITIAL_STORY_STARTER]);
-      }
-    } catch (error) {
-      console.error('Error loading chat messages:', error);
-      setChatData([INITIAL_STORY_STARTER]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { userDetails } = useRoute().params as { userDetails: any };
+  const socket = useRef<Socket | null>(null);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollViewRef = useRef<ScrollView | null>(null);
+
+  const { messages } = useSelector((state: any) => state.entities.chatReducer);
+  console.log('messages', messages);
+  console.log('user:', user);
+  console.log('userDetails:', userDetails);
 
   // Save chat messages to AsyncStorage
-  const saveChatMessages = async (messages: Message[]) => {
+  const saveChatMessages = useCallback(async (messages: Message[]) => {
     try {
       await AsyncStorage.setItem(
         ASYNC_VARIBLES.CHAT_MESSAGES,
@@ -90,12 +83,218 @@ const ConversationsScreen = () => {
     } catch (error) {
       console.error('Error saving chat messages:', error);
     }
-  };
+  }, []);
+
+  // Auto scroll to bottom
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  }, []);
+
+  // Add new message to chat
+  const addMessage = useCallback(
+    (message: Omit<Message, 'id' | 'timestamp'>) => {
+      const newMessage: Message = {
+        ...message,
+        id: Date.now(), // Use timestamp as unique ID
+        timestamp: Date.now(),
+      };
+
+      setChatData(currentChatData => {
+        const updatedMessages = [...currentChatData, newMessage];
+        saveChatMessages(updatedMessages);
+        scrollToBottom(); // Auto-scroll when new message is added
+        return updatedMessages;
+      });
+    },
+    [saveChatMessages, scrollToBottom],
+  );
+
+  // Initialize socket connection with fallback URLs
+  const initializeSocket = useCallback((attempt: number = 0) => {
+    const serverUrls = [
+      'https://api.tribalshaadi.co.in',
+      'http://api.tribalshaadi.co.in',
+      'https://api.tribalshaadi.co.in:4000',
+      'http://api.tribalshaadi.co.in:4000',
+    ];
+    
+    if (attempt >= serverUrls.length) {
+      console.error('❌ All connection attempts failed');
+      setConnectionStatus('failed');
+      return;
+    }
+
+    const SERVER_URL = serverUrls[attempt];
+    console.log(`🔄 Connection attempt ${attempt + 1}: ${SERVER_URL}`);
+    setConnectionStatus('connecting');
+    
+    // Cleanup previous socket if exists
+    if (socket.current) {
+      socket.current.removeAllListeners();
+      socket.current.disconnect();
+    }
+    
+    socket.current = io(SERVER_URL, {
+      transports: ['websocket', 'polling'], // Try both transports
+      timeout: 10000, // 10 second timeout
+      reconnection: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
+      forceNew: true,
+      upgrade: true,
+    });
+
+    socket.current.on('connect', () => {
+      console.log('🟢 Connected to socket server');
+      console.log('Socket ID:', socket.current?.id);
+      console.log('Transport:', socket.current?.io?.engine?.transport?.name);
+      console.log('Server URL:', SERVER_URL);
+      setConnectionStatus('connected');
+      
+      if (user?.id) {
+        console.log(`📝 Registering user ${user.id}...`);
+        socket.current?.emit('register', user.id);
+      } else {
+        console.error('❌ No user ID found for registration');
+      }
+    });
+
+    socket.current.on('connect_error', (error) => {
+      console.error(`❌ Connection attempt ${attempt + 1} failed:`, error.message);
+      setConnectionStatus('disconnected');
+      
+      // Try next URL after a short delay
+      setTimeout(() => {
+        initializeSocket(attempt + 1);
+      }, 1500);
+    });
+
+    // Handle registration confirmation from server
+    socket.current.on('registration_confirmed', ({ userId, socketId }) => {
+      console.log(`✅ Registration confirmed for user ${userId} with socket ${socketId}`);
+    });
+
+    // Handle reconnection events
+    socket.current.on('reconnect', (attemptNumber) => {
+      console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
+      setConnectionStatus('connected');
+      // Re-register user after reconnection
+      if (user?.id) {
+        console.log(`📝 Re-registering user ${user.id} after reconnection...`);
+        socket.current?.emit('register', user.id);
+      }
+    });
+
+    socket.current.on('reconnect_error', (error) => {
+      console.error('❌ Reconnection failed:', error.message);
+      setConnectionStatus('disconnected');
+    });
+
+    socket.current.on('reconnect_failed', () => {
+      console.error('❌ All reconnection attempts failed');
+      setConnectionStatus('failed');
+    });
+
+    socket.current.on('receive_message', ({ from, content, timestamp }) => {
+      console.log('📨 Received message:', { from, content, timestamp });
+      console.log('Expected from userDetails.id:', userDetails?.id);
+      
+      // Convert IDs to string for comparison (in case one is number, one is string)
+      if (String(from) === String(userDetails?.id)) {
+        console.log('✅ Message is from the correct user, adding to chat');
+        addMessage({
+          type: 'received',
+          message: content,
+          time: new Date(timestamp).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          }),
+        });
+      } else {
+        console.log('⚠️ Message from unexpected user, ignoring');
+      }
+    });
+
+    socket.current.on('message_sent', ({ to, content, timestamp }) => {
+      console.log('✅ Message sent confirmation:', { to, content, timestamp });
+      
+      setChatData(currentChatData =>
+        currentChatData.map(msg =>
+          msg.message === content && msg.status === 'sending'
+            ? { ...msg, status: 'sent', time: getCurrentTime() }
+            : msg,
+        ),
+      );
+      scrollToBottom(); // Auto-scroll when message status updates
+    });
+
+    socket.current.on('error_message', (error) => {
+      console.error('❌ Socket Error:', error);
+      
+      // Update any sending messages to failed status
+      setChatData(currentChatData =>
+        currentChatData.map(msg =>
+          msg.status === 'sending'
+            ? { ...msg, status: 'failed', time: 'Failed' }
+            : msg,
+        ),
+      );
+    });
+
+    socket.current.on('disconnect', (reason) => {
+      console.log('🔴 Disconnected from socket server. Reason:', reason);
+      setConnectionStatus('disconnected');
+      
+      if (reason === 'io server disconnect') {
+        // Server disconnected the socket, it will try to reconnect automatically
+        console.log('🔄 Server disconnected, will attempt to reconnect...');
+      }
+    });
+
+    // Handle server pings for connection health
+    socket.current.on('pong', () => {
+      console.log('🏓 Received pong from server');
+    });
+
+    // Send periodic pings to test connection
+    const pingInterval = setInterval(() => {
+      if (socket.current?.connected) {
+        socket.current.emit('ping');
+      }
+    }, 30000); // Ping every 30 seconds
+
+    // Store interval reference for cleanup
+    pingIntervalRef.current = pingInterval;
+
+  }, [user?.id, userDetails?.id, addMessage, scrollToBottom]);
 
   // Load messages on component mount
   useEffect(() => {
-    loadChatMessages();
-  }, [loadChatMessages]);
+    initializeSocket(0);
+
+    return () => {
+      console.log('🧹 Cleaning up socket connection');
+      if (socket.current) {
+        socket.current.removeAllListeners();
+        socket.current.disconnect();
+      }
+      // Clear ping interval
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+    };
+  }, [initializeSocket]);
+
+  // Auto-scroll when chatData changes
+  useEffect(() => {
+    if (chatData.length > 1) { // Skip initial story starter
+      scrollToBottom();
+    }
+  }, [chatData, scrollToBottom]);
 
   // Generate current time string
   const getCurrentTime = () => {
@@ -107,58 +306,44 @@ const ConversationsScreen = () => {
     });
   };
 
-  // Add new message to chat
-  const addMessage = async (message: Omit<Message, 'id' | 'timestamp'>) => {
-    const newMessage: Message = {
-      ...message,
-      id: Date.now(), // Use timestamp as unique ID
-      timestamp: Date.now(),
-    };
+  const handleSendMessage = () => {
+    if (!socket.current?.connected) {
+      console.error('❌ Cannot send message: Not connected to server');
+      return;
+    }
 
-    const updatedMessages = [...chatData, newMessage];
-    setChatData(updatedMessages);
-    await saveChatMessages(updatedMessages);
-    return newMessage;
-  };
+    if (messageText.trim() && user?.id && userDetails?.id) {
+      const content = messageText.trim();
+      console.log('📤 Sending message:', {
+        from: user.id,
+        to: userDetails.id,
+        content,
+      });
+      
+      addMessage({
+        type: 'sent',
+        message: content,
+        time: 'sending...',
+        status: 'sending',
+      });
 
-  const handleSendMessage = async () => {
-    if (messageText.trim()) {
-      try {
-        await addMessage({
-          type: 'sent',
-          message: messageText.trim(),
-          time: getCurrentTime(),
-        });
-        setMessageText('');
+      socket.current?.emit('send_message', {
+        from: String(user.id), // Ensure it's a string
+        to: String(userDetails.id), // Ensure it's a string
+        content,
+      });
 
-        setTimeout(async () => {
-          await addMessage({
-            type: 'received',
-            message:
-              'Hi, glad to match with you! Let\'s take this forward in a good way.',
-            time: getCurrentTime(),
-          });
-        }, 2000);
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
+      setMessageText('');
+      scrollToBottom(); // Auto-scroll immediately after sending
+    } else {
+      console.error('❌ Cannot send message:', {
+        messageEmpty: !messageText.trim(),
+        noUserId: !user?.id,
+        noUserDetailsId: !userDetails?.id,
+        notConnected: !socket.current?.connected,
+      });
     }
   };
-
-  // Utility functions for future use:
-  // const addReceivedMessage = async (message: string) => {
-  //   await addMessage({
-  //     type: 'received',
-  //     message,
-  //     time: getCurrentTime(),
-  //   })
-  // }
-
-//   const clearChatHistory = async () => {
-//     const initialData = [INITIAL_STORY_STARTER];
-//     setChatData(initialData);
-//     await saveChatMessages(initialData);
-//   };
 
   const renderMessage = (item: Message) => {
     if (item.type === 'story_starter') {
@@ -172,8 +357,9 @@ const ConversationsScreen = () => {
               />
             </View>
             <View style={[styles.userImageWrapper, styles.overlappingImage]}>
-              <View
-                style={[styles.userImage, { backgroundColor: COLORS.primary }]}
+            <Image
+                source={{ uri: imageUrl + userDetails?.imageUrl }}
+                style={styles.userImage}
               />
             </View>
           </View>
@@ -205,7 +391,10 @@ const ConversationsScreen = () => {
       return (
         <View key={item.id} style={styles.messageContainer}>
           <View style={styles.timeContainer}>
-            <AppText text={item.time} textStyle={styles.timeText} />
+            <AppText
+              text={item.status === 'sending' ? 'sending...' : item.status === 'failed' ? 'Failed' : item.time}
+              textStyle={[styles.timeText, item.status === 'failed' && { color: COLORS.red }]}
+            />
           </View>
           <View style={styles.sentMessageBubble}>
             <AppText text={item.message} textStyle={styles.sentMessageText} />
@@ -222,28 +411,41 @@ const ConversationsScreen = () => {
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : Size20}
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <ArrowIosBackSvg
-              width={Size22}
-              height={Size22}
-              color={COLORS.black}
+          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ArrowIosBackSvg color={COLORS.black} width={Size25} height={Size25} />
+          </Pressable>
+          <View style={styles.headerCenter}>
+            <AppText
+              text={userDetails.firstname + ' ' + userDetails.lastName}
+              textStyle={styles.headerTitle}
             />
-          </TouchableOpacity>
-          <AppText text="User A" textStyle={styles.headerTitle} />
+            {/* <AppText
+              text={
+                connectionStatus === 'connected' ? 'Online' :
+                connectionStatus === 'connecting' ? 'Connecting...' :
+                connectionStatus === 'disconnected' ? 'Reconnecting...' :
+                'Connection failed'
+              }
+              textStyle={[
+                styles.connectionStatus,
+                { color: connectionStatus === 'connected' ? COLORS.violet : COLORS.textSecondary }
+              ]}
+            /> */}
+          </View>
           <View style={styles.headerSpacer} />
         </View>
 
         {/* Messages */}
         <ScrollView
+          ref={scrollViewRef}
           style={styles.messagesContainer}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.messagesContent}
+          keyboardShouldPersistTaps="handled"
         >
           {chatData.map(renderMessage)}
         </ScrollView>
@@ -287,6 +489,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
+    paddingTop: Size16,
   },
   header: {
     flexDirection: 'row',
@@ -295,10 +498,16 @@ const styles = StyleSheet.create({
     paddingVertical: Size12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight2,
-    gap: Size12,
+    backgroundColor: COLORS.white,
   },
   backButton: {
-    padding: Size4,
+    width: fontSize30,
+    height: fontSize30,
+    borderRadius: fontSize30 / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.black,
   },
   headerTitle: {
     fontSize: fontSize16,
@@ -306,15 +515,26 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
   },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  connectionStatus: {
+    fontSize: fontSize12,
+    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    marginTop: Size4,
+  },
   headerSpacer: {
     flex: 1,
   },
   messagesContainer: {
     flex: 1,
+    backgroundColor: COLORS.white,
   },
   messagesContent: {
     padding: Size16,
     gap: Size22,
+    paddingBottom: Size20,
   },
   storyStarterContainer: {
     alignItems: 'center',
@@ -390,12 +610,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: Size16,
     paddingVertical: Size12,
     borderTopWidth: 1,
     borderTopColor: COLORS.borderLight2,
     gap: Size12,
+    backgroundColor: COLORS.white,
+    minHeight: Size40 + Size12 * 2,
   },
   textInputContainer: {
     flex: 1,
@@ -404,22 +626,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.violet,
     paddingHorizontal: Size16,
-    paddingVertical: Size8,
+    paddingVertical: Size10,
     minHeight: Size40,
+    maxHeight: Size40 * 3,
   },
   textInput: {
     fontSize: fontSize14,
     color: COLORS.black,
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
     textAlignVertical: 'top',
-    minHeight: Size16,
-    maxHeight: fontSize14 * 1.4 * 3, // Approximately 3 lines (fontSize * lineHeight * lines)
+    minHeight: Size20,
+    maxHeight: fontSize14 * 1.4 * 4, // Approximately 4 lines
     borderWidth: 0,
     borderBottomWidth: 0,
   },
   sendButton: {
     backgroundColor: COLORS.transparent,
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    marginBottom: Size4,
   },
 });

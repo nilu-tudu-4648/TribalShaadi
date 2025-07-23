@@ -27,57 +27,97 @@ import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllChatHistoryByUserIdUrl, getFriendsByUserIdUrl, getUserChatListUrl, getUserChatUrl } from '../constants/functions';
-import { getAllChatHistoryByUserIdApi, getFriendsByUserIdApi, getUserChatApi, getUserChatListApi } from '../store/reducers/chatReducer';
+import {
+  friendRequestAcceptUrl,
+  getAllChatHistoryByUserIdUrl,
+  getFriendsByUserIdUrl,
+  getUserChatListUrl,
+  getUserChatUrl,
+  imageUrl,
+} from '../constants/functions';
+import {
+  getAllChatHistoryByUserIdApi,
+  getFriendsByUserIdApi,
+  getUserChatApi,
+  getUserChatListApi,
+} from '../store/reducers/chatReducer';
+import { friendRequestAcceptApi } from '../store/reducers/chatReducer';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  // const {chatList,allChatHistoryByUserId, friendsByUserId, userChatList } = useSelector((state: any) => state.entities.chatReducer);
+  const { chatList, allChatHistoryByUserId, friendsByUserId } = useSelector(
+    (state: any) => state.entities.chatReducer,
+  );
   const dispatch = useDispatch();
-  // console.log("chatList", chatList);
-  // console.log("allChatHistoryByUserId", allChatHistoryByUserId);
-  // console.log("friendsByUserId", friendsByUserId);
-  // console.log("userChatList", userChatList);
-  useEffect(() => {
-      dispatch(getUserChatApi(getUserChatUrl, {
-        partnerId: user.id,
-      }));
-      dispatch(getUserChatListApi(getUserChatListUrl, {
-        startIndex: '1',
-        fetchRecord: '10',
-      }));
-      dispatch(getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
-        userId: user.id,
-      }));
-    dispatch(getFriendsByUserIdApi(getFriendsByUserIdUrl, {
-      userId: user.id,
-    }));
-  }, [dispatch, user.id]);
-  // Sample conversation data
-  const conversations = [
+  console.log('chatList', chatList);
+  console.log('allChatHistoryByUserId', allChatHistoryByUserId);
+  console.log('friendsByUserId', friendsByUserId);
+  const userChatList = [
     {
-      id: 1,
-      name: 'User A',
-      message: 'Send a message',
-      profileImage: require('../assets/images/Male.png'),
-      isNew: true,
+      id:44,
+      firstname: 'Nisha',
+      lastName: 'Nilu',
+      message: 'Hello, how are you?',
+      imageUrl: 'content/user/46/61.jpeg',
+      chatId: '46_44',
     },
   ];
+  console.log('userChatList', userChatList);
+  useEffect(() => {
+    dispatch(
+      getUserChatApi(getUserChatUrl, {
+        partnerId: user.id,
+      }),
+    );
+    dispatch(
+      getUserChatListApi(getUserChatListUrl, {
+        startIndex: '1',
+        fetchRecord: '10',
+      }),
+    );
+    dispatch(
+      getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
+        userId: user.id,
+      }),
+    );
+    dispatch(
+      getFriendsByUserIdApi(getFriendsByUserIdUrl, {
+        userId: user.id,
+      }),
+    );
+  }, [dispatch, user?.id]);
+  const acceptFriendRequest = (item: any) => {
+    try {
+      dispatch(
+        friendRequestAcceptApi(friendRequestAcceptUrl, {
+          chatId: item.chatId,
+        }),
+      );
+      (navigation as any).navigate(ROUTES.STACK, {
+        screen: ROUTES.CONVERSATIONS,
+        params: {
+          userDetails: item,
+        },
+      });
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   const renderConversationItem = (item: any) => (
     <TouchableOpacity
       key={item.id}
       style={styles.conversationItem}
-      onPress={() => {
-        (navigation as any).navigate(ROUTES.STACK, {
-          screen: ROUTES.CONVERSATIONS,
-        });
-      }}
+      onPress={() => acceptFriendRequest(item)}
     >
-      <Image source={item.profileImage} style={styles.profileImage} />
+      <Image
+        source={{ uri: imageUrl + item.imageUrl }}
+        style={styles.profileImage}
+        resizeMode="cover"
+      />
       <View style={styles.conversationContent}>
-        <AppText text={item.name} textStyle={styles.userName} />
+        <AppText text={item.firstname} textStyle={styles.userName} />
         <AppText text={item.message} textStyle={styles.messageText} />
       </View>
       <View
@@ -112,14 +152,12 @@ const ChatScreen = () => {
 
       {/* Scrollable Conversations List */}
       <FlatList
-        data={conversations}
+        data={userChatList}
         renderItem={({ item }) => renderConversationItem(item)}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => (
-          <View
-            style={{ height: 1, backgroundColor: COLORS.borderLight4 }}
-          />
+          <View style={{ height: 1, backgroundColor: COLORS.borderLight4 }} />
         )}
         contentContainerStyle={styles.conversationsList}
         style={styles.flatListContainer}

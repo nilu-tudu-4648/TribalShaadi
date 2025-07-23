@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, SafeAreaView, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
   fontSize18,
@@ -111,6 +111,7 @@ const QualificationScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView>
       <View style={styles.content}>
         <HeaderBack />
 
@@ -181,7 +182,8 @@ const QualificationScreen = () => {
         )}
         {/* Spacer */}
         <View style={styles.spacer} />
-
+        <View style={styles.spacer} />
+        <View style={styles.spacer} />
         {/* Continue Button */}
         <AppButton
           title="Continue"
@@ -199,9 +201,10 @@ const QualificationScreen = () => {
             isFormValid
               ? styles.continueButtonTextActive
               : styles.continueButtonTextInactive,
-          ]}
-        />
-      </View>
+            ]}
+          />
+        </View>
+      </ScrollView>
 
       {/* Qualification Picker Modal */}
       <AppPickerModal

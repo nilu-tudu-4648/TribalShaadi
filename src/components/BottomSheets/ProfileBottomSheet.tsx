@@ -40,7 +40,6 @@ import {
 import { ReportIcon } from '../svg/SvgIcons2';
 import { useDispatch, useSelector } from 'react-redux';
 import ReportBottomSheet from './ReportBottomSheet';
-import AppLoader from '../AppLoader';
 import {
   getProposalsSendByMeApi,
   sentProposalApi,
@@ -67,7 +66,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   isButtonVisible = false,
 }) => {
   const snapPoints = ['55%', '50%'];
-  const { selectedUser, loader, currentMatchedUserGalleryImageList } =
+  const { selectedUser, currentMatchedUserGalleryImageList } =
     useSelector((state: any) => state.entities.userReducer);
   console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
@@ -115,7 +114,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
         backgroundStyle={styles.bottomSheetBackground}
       >
         <BottomSheetScrollView style={styles.contentContainer}>
-          {loader && <AppLoader />}
           <View>
             <ImageBackground
               source={{ uri: `${imageUrl + selectedUser?.image}` }}

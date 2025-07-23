@@ -73,8 +73,13 @@ export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
 //chatUrl
 export const getUserChatUrl = 'app/userChat/userChat';
 export const getUserChatListUrl = 'app/userChat/getUserChatList';
-export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
+export const sendMessageUrl = 'app/userChat/sendMessage';
+export const getMessagesUrl = 'app/userChat/getMessages';
+export const friendRequestAcceptUrl = 'app/userChat/friendRequestAccept';
+export const friendRequestRejectOrBlockUrl = 'app/userChat/friendRequestRejectOrBlock';
 export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
+export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
+
 // Date formatting function
 export const formatDateOfBirth = dateString => {
   if (!dateString) return '';
@@ -180,7 +185,6 @@ export const getUserDetailsApi = async (url, dispatch) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data.recordList[0], 'getUserDetailsApi');
     await AsyncStorage.setItem(
       ASYNC_VARIBLES.USER,
       JSON.stringify(response.data.recordList[0]),
