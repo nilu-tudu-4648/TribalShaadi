@@ -48,6 +48,7 @@ export const COLORS = {
   secondaryText:"#1B222B",
   lightgrey:"#F5F4F6",
   aboutText:"#37264C",
+  emptyText:"#ACACAC",
   cardBg:"#F8F2FF",
   cardBg1:"#8259B3",
   borderLight3:"#E7E7E7",

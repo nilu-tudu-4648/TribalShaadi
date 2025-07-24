@@ -20,6 +20,7 @@ const AppHeader = ({
   style,
   titleStyle,
   arrowColor = COLORS.black,
+  leftButtonStyle,
 }: {
   title: string;
   onBackPress?: () => void;
@@ -27,6 +28,7 @@ const AppHeader = ({
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
   arrowColor?: string;
+  leftButtonStyle?: StyleProp<ViewStyle>;
 }) => {
   const navigation = useNavigation();
   return (
@@ -37,7 +39,7 @@ const AppHeader = ({
         style,
       ]}
     >
-      <View style={styles.leftButton}>
+      <View style={[styles.leftButton, leftButtonStyle]}>
         <TouchableOpacity
           onPress={onBackPress || navigation.goBack}
           style={styles.backButton}
@@ -64,6 +66,7 @@ const styles = StyleSheet.create({
     width: '60%',
     flexDirection: 'row',
     gap: Size8,
+    
   },
   backButton: {
     alignItems: 'center',

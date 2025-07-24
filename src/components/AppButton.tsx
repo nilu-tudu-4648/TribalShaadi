@@ -18,6 +18,7 @@ const AppButton = ({
   buttonStyle,
   textStyle,
   isLoading,
+  loaderSize,
 }: {
   title: string;
   onPress: () => void;
@@ -25,6 +26,7 @@ const AppButton = ({
   buttonStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   isLoading?: boolean;
+  loaderSize?: number;
 }) => {
   return (
     <TouchableOpacity
@@ -33,7 +35,7 @@ const AppButton = ({
       disabled={isButtonDisabled || isLoading}
       activeOpacity={0.8}>
       {isLoading ? (
-        <GradientLoader size={Size25} />
+        <GradientLoader size={loaderSize || Size25} />
       ) : (
         <AppText text={title} textStyle={[styles.text, textStyle]} />
       )}

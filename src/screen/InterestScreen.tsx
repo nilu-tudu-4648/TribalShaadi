@@ -6,7 +6,7 @@ import {
   Image,
 } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
-import { fontSize14, SIZES } from '../constants/Sizes';
+import { fontSize14, fontSize16, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import { INTEREST_TABS, ROUTES } from '../constants/data';
@@ -71,7 +71,7 @@ const InterestScreen = () => {
         ),
       );
       await new Promise(resolve => setTimeout(resolve, 1000));
-      bottomSheetRef.current?.expand(); // Open the bottom sheet
+      bottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
       console.log(error, 'error');
     }
@@ -195,6 +195,12 @@ const InterestScreen = () => {
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.gridContainer}
               showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyStateContainer}>
+                  <AppText text="Oops. No interests sent!" textStyle={styles.emptyText} />
+                  <AppText text="We know it’s hard. Be patient. Keep exploring & don’t shy away from sending your interersts" textStyle={styles.emptySubText} />
+                </View>
+              }
             />
           )}
         </>
@@ -291,15 +297,23 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   emptyStateContainer: {
-    flex: 1,
+    height: SIZES.height * 0.5,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '90%',
+    alignSelf: 'center',
   },
   emptyText: {
     fontSize: SIZES.h2,
     fontWeight: 'bold',
-    color: '#E5D8F6',
+    color: COLORS.black,
     fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  emptySubText: {
+    fontSize: fontSize16,
+    color: COLORS.emptyText,
+    textAlign: 'center',
   },
   heartImage: {
     width: SIZES.width * 0.55,

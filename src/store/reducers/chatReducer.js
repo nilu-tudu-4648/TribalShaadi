@@ -2,13 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 import { apiCallBegan } from '../api';
 const initialState = {
   loader: false,
-  chatList: [],
   userChatList: [],
   allChatHistoryByUserId: [],
-  friendsByUserId: [],
   sendMessage: [],
   messages: [],
   friendRequestAccept: [],
+  acceptedProposalById: [],
 };
 
 const chatReducer = createSlice({
@@ -34,10 +33,6 @@ const chatReducer = createSlice({
       chatReducer.loader = false;
       chatReducer.allChatHistoryByUserId = action.payload.recordList;
     },
-    chatReducerFriendsByUserIdReceived: (chatReducer, action) => {
-      chatReducer.loader = false;
-      chatReducer.friendsByUserId = action.payload.recordList;
-    },
     chatReducerSendMessageReceived: (chatReducer, action) => {
       chatReducer.loader = false;
       chatReducer.sendMessage = action.payload;
@@ -49,8 +44,11 @@ const chatReducer = createSlice({
     },
     chatReducerFriendRequestAcceptReceived: (chatReducer, action) => {
       chatReducer.loader = false;
-      console.log('chatReducerFriendRequestAcceptReceived', action.payload);
       chatReducer.friendRequestAccept = action.payload;
+    },
+    chatReducerAcceptedProposalByIdReceived: (chatReducer, action) => {
+      chatReducer.loader = false;
+      chatReducer.acceptedProposalById = action.payload.recordList;
     },
   },
 });
@@ -63,20 +61,11 @@ const {
   chatReducerDataReceived,
   chatReducerUserChatListReceived,
   chatReducerAllChatHistoryByUserIdReceived,
-  chatReducerFriendsByUserIdReceived,
   chatReducerSendMessageReceived,
   chatReducerMessagesReceived,
   chatReducerFriendRequestAcceptReceived,
+  chatReducerAcceptedProposalByIdReceived,
 } = chatReducer.actions;
-export const getUserChatApi = (url, data = {}) =>
-  apiCallBegan({
-    method: 'post',
-    url,
-    data,
-    onStart: chatReducerDataRequested.type,
-    onSuccess: chatReducerDataReceived.type,
-    onError: chatReducerDataRequestFailed.type,
-  });
 export const getUserChatListApi = (url, data = {}) =>
   apiCallBegan({
     method: 'post',
@@ -95,15 +84,6 @@ export const getAllChatHistoryByUserIdApi = (url, data = {}) =>
     onSuccess: chatReducerAllChatHistoryByUserIdReceived.type,
     onError: chatReducerDataRequestFailed.type,
   });   
-  export const getFriendsByUserIdApi = (url, data = {}) =>
-  apiCallBegan({
-    method: 'post',
-    url,
-    data,
-    onStart: chatReducerDataRequested.type,
-    onSuccess: chatReducerFriendsByUserIdReceived.type,
-    onError: chatReducerDataRequestFailed.type,
-  });
 export const sendMessageApi = (url, data = {}) =>
   apiCallBegan({
     method: 'post',
@@ -129,6 +109,15 @@ export const friendRequestAcceptApi = (url, data = {}) =>
     data,
     onStart: chatReducerDataRequested.type,
     onSuccess: chatReducerFriendRequestAcceptReceived.type,
+    onError: chatReducerDataRequestFailed.type,
+  });
+export const getAcceptedProposalByIdApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    data,
+    onStart: chatReducerDataRequested.type,
+    onSuccess: chatReducerAcceptedProposalByIdReceived.type,
     onError: chatReducerDataRequestFailed.type,
   });
 export default chatReducer.reducer;

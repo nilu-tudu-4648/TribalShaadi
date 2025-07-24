@@ -160,13 +160,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   interestChipSelected: {
-    backgroundColor: COLORS.textBlack,
+    backgroundColor: COLORS.violet,
   },
   interestChipUnselected: {
     backgroundColor: COLORS.lightGreyBackground,
   },
   interestText: {
     fontSize: fontSize14,
+    letterSpacing: 1.3,
   },
   interestTextSelected: {
     color: COLORS.white,

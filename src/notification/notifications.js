@@ -1,9 +1,11 @@
 /* eslint-disable semi */
 import messaging from '@react-native-firebase/messaging';
-import { getApp, getApps } from '@react-native-firebase/app';
+import { getApps } from '@react-native-firebase/app';
 // import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { baseUrl, updateUrl } from '../constants/functions';
+import { ASYNC_VARIBLES } from '../constants/data';
+import axios from 'axios';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -30,14 +32,16 @@ export const createNotificationChannel = () => {
   //   },
   //   (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
   // );
-}
+};
 
 export const requestUserPermission = async () => {
   if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping notification permission request.');
+    console.warn(
+      'Firebase not initialized. Skipping notification permission request.',
+    );
     return;
   }
-  
+
   try {
     const authStatus = await messaging().requestPermission();
     const enabled =
@@ -58,7 +62,7 @@ const getfcmToken = async () => {
     console.warn('Firebase not initialized. Skipping FCM token retrieval.');
     return;
   }
-  
+
   let fcmToken = await AsyncStorage.getItem('fcmToken');
   if (!fcmToken) {
     try {
@@ -67,7 +71,7 @@ const getfcmToken = async () => {
         console.log('FCM Token:', token);
         await AsyncStorage.setItem('fcmToken', token);
         // Send token to your server
-        // await sendTokenToServer(token);
+        await sendTokenToServer(token);
         // Subscribe to general topics for all users
         await subscribeToAllUsersTopics();
       }
@@ -77,33 +81,34 @@ const getfcmToken = async () => {
   } else {
     // console.log('FCM Token from storage:', fcmToken);
     // Verify token is still valid and send to server
-    // await sendTokenToServer(fcmToken);
+    await sendTokenToServer(fcmToken);
     // Ensure user is subscribed to general topics
     // await subscribeToAllUsersTopics();
   }
 };
 
 // Function to send FCM token to your server
-const sendTokenToServer = async (token) => {
+const sendTokenToServer = async token => {
   try {
+    const userToken = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+    const user = JSON.parse(userDataString);
+    console.log('user', user);
+    console.log('userToken', userToken);
+    console.log('fcmToken', token);
     // Replace with your actual server endpoint
-    const response = await fetch('https://johar11-notification-server-hkt762foe-nilu-tudu-4648s-projects.vercel.app/api/fcm-token', {
-      method: 'POST',
+    const response = await axios.post(`${baseUrl}/${updateUrl}`, {
+      id: user.id,
+      fcmToken: token,
+    }, {
       headers: {
         'Content-Type': 'application/json',
-        // Add authorization headers if needed
-        // 'Authorization': `Bearer ${userAuthToken}`,
-      },
-      body: JSON.stringify({
-        token: token,
-        platform: Platform.OS,
-        // Add user ID or other identifier
-        // userId: currentUserId,
-      }),
+        Authorization: `Bearer ${userToken}`,
+      }
     });
-    
-    if (response.ok) {
-      // console.log('FCM token sent to server successfully');
+    console.log('response', response);
+    if (response.status === 200) {
+      console.log('FCM token saved to server successfully');
     } else {
       console.log('Failed to send FCM token to server');
     }
@@ -118,7 +123,7 @@ export const refreshFCMToken = async () => {
     console.warn('Firebase not initialized. Skipping FCM token refresh.');
     return;
   }
-  
+
   try {
     await messaging().deleteToken();
     const newToken = await messaging().getToken();
@@ -134,10 +139,12 @@ export const refreshFCMToken = async () => {
 
 export const notificationListner = async () => {
   if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping notification listeners setup.');
+    console.warn(
+      'Firebase not initialized. Skipping notification listeners setup.',
+    );
     return;
   }
-  
+
   try {
     // Handle notification when app is opened from background
     messaging().onNotificationOpenedApp(remoteMessage => {
@@ -166,14 +173,14 @@ export const notificationListner = async () => {
     // Handle background messages
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
-      
+
       // Important: Firebase automatically displays notifications when app is in background/quit state
       // if the message contains a 'notification' property. We should NOT create additional local notifications here
       // as it would cause duplicates. This handler is primarily for:
       // 1. Processing data-only messages
       // 2. Updating app state/storage
       // 3. Custom logic that doesn't involve showing notifications
-      
+
       // Process any data-only logic here if needed
       if (remoteMessage.data) {
         console.log('Processing background data:', remoteMessage.data);
@@ -193,10 +200,10 @@ export const notificationListner = async () => {
 };
 
 // Handle notification actions (navigation, etc.)
-const handleNotificationAction = (remoteMessage) => {
+const handleNotificationAction = remoteMessage => {
   if (remoteMessage?.data) {
     const { type, screen, params } = remoteMessage.data;
-    
+
     // You can add navigation logic here based on notification data
     switch (type) {
       case 'match_update':
@@ -217,7 +224,11 @@ const handleNotificationAction = (remoteMessage) => {
   }
 };
 
-export const schedulePushNotification = async (title, message, imageUrl = null) => {
+export const schedulePushNotification = async (
+  title,
+  message,
+  imageUrl = null,
+) => {
   const notificationConfig = {
     channelId: 'johar11',
     title,
@@ -256,7 +267,8 @@ export const sendTestNotification = async () => {
       notification: {
         title: '🏆 Test Notification',
         body: 'This is a test notification with image support',
-        image: 'https://firebasestorage.googleapis.com/v0/b/desktime-e2f82.firebasestorage.app/o/profileImages%2F3XxW6kBEIGbZ5zvzgfyn26UivuR2?alt=media&token=f5d4d3db-7eaa-4f6a-a64a-8247f54ab4e0'
+        image:
+          'https://firebasestorage.googleapis.com/v0/b/desktime-e2f82.firebasestorage.app/o/profileImages%2F3XxW6kBEIGbZ5zvzgfyn26UivuR2?alt=media&token=f5d4d3db-7eaa-4f6a-a64a-8247f54ab4e0',
       },
       data: {
         type: 'test',
@@ -266,12 +278,12 @@ export const sendTestNotification = async () => {
 
     console.log('Sending test notification:', notificationData);
     // You would send this to your server endpoint that handles Firebase admin notifications
-    
+
     // For immediate testing, schedule a local notification with image
     await schedulePushNotification(
-      notificationData.notification.title, 
-      notificationData.notification.body, 
-      notificationData.notification.image
+      notificationData.notification.title,
+      notificationData.notification.body,
+      notificationData.notification.image,
     );
   } catch (error) {
     console.log('Error sending test notification:', error);
@@ -295,13 +307,13 @@ const subscribeToAllUsersTopics = async () => {
     console.warn('Firebase not initialized. Skipping topic subscription.');
     return;
   }
-  
+
   try {
     // Subscribe to topic for all users - this allows sending notifications to everyone
     await messaging().subscribeToTopic('all_users');
     await messaging().subscribeToTopic('general_updates');
     await messaging().subscribeToTopic('contest_updates');
-    
+
     // console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
   } catch (error) {
     console.log('Error subscribing to general topics:', error);
@@ -316,4 +328,3 @@ export default {
   getCurrentFCMToken,
   refreshFCMToken,
 };
-

@@ -53,6 +53,13 @@ export const ROUTES = {
   SELFIE_VERIFY: 'SelfieVerify',
   CAMERA: 'Camera',
   PAYMENT_SUCCESS: 'PaymentSuccess',
+  YOUR_STORY: 'YourStory',
+  SUPPORT: 'Support',
+  FAQ: 'FAQ',
+  TERMS_AND_CONDITIONS: 'TermsAndConditions',
+  PRIVACY_POLICY: 'PrivacyPolicy',
+  REFUND_POLICY: 'RefundPolicy',
+  TIPS: 'Tips',
 };
 
 // Mother Tongue

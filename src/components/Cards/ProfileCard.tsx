@@ -25,7 +25,6 @@ import {
 } from '../../constants/functions';
 import {
   CalendarIcon,
-  HomeIcon2,
   ReligionIcon,
   TribeIcon,
   EatingIcon,
@@ -42,6 +41,7 @@ import {
 } from '../svg/SvgIcons';
 import AppChip from '../AppChip';
 import FONT_FAMILY from '../../constants/Fonts';
+import NameComponent from '../NameComponent';
 
 export interface ProfileCardProps {
   name: string;
@@ -71,6 +71,8 @@ export interface ProfileCardProps {
   kids: string;
   interests: string;
   galleryImageList: any;
+  isVerified: boolean;
+  isPremium: boolean;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -100,6 +102,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   interests,
   settlingTime,
   galleryImageList,
+  isVerified,
+  isPremium,
 }) => {
   return (
     <ScrollView
@@ -120,22 +124,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-          <View style={styles.cardContent}>
-            <AppText text={`${name}, ${age}`} textStyle={styles.name} />
-            <AppText
-              text={`${convertCmToReadableHeight(
-                height,
-              )} · ${religion} · ${caste}`}
-              textStyle={styles.details}
-            />
-            <View style={styles.homeIconContainer}>
-              <HomeIcon2 color={COLORS.white} />
-              <AppText
-                text={`${districtName}, ${stateName}`}
-                textStyle={styles.location}
-              />
-            </View>
-          </View>
+          <NameComponent
+            name={name}
+            age={age}
+            isVerified={isVerified}
+            isPremium={isPremium}
+            height={height}
+            religion={religion}
+            caste={caste}
+            districtName={districtName}
+            stateName={stateName}
+          />
         </ImageBackground>
       </View>
       <View style={styles.bioSection}>
@@ -206,10 +205,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         />
         <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
       </View>
-        <Image
-          source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
-          style={{ width: '100%', height: SIZES.height * 0.7 }}
-        />
+      <Image
+        source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
+        style={styles.galleryImage}
+      />
       <View style={styles.section}>
         <View style={styles.detailRow2}>
           <View style={styles.detailText}>
@@ -244,10 +243,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <AppText text={settlingTime} textStyle={styles.bannerTitle} />
       </View>
 
-      <View style={{ backgroundColor: COLORS.divider }}>
+      <View style={styles.imageWrapper}>
         <Image
           source={{ uri: imageUrl + galleryImageList[1]?.imageUrl }}
-          style={{ width: '100%', height: SIZES.height * 0.7 }}
+          style={styles.galleryImage}
         />
       </View>
 
@@ -280,13 +279,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <AppText text={'Drinking Habits'} textStyle={styles.label} />
         </View>
       </View>
-      <View
-        style={{
-          height: 1,
-          backgroundColor: COLORS.borderViolet,
-          width: '100%',
-        }}
-      />
+      <View style={styles.thinLine} />
       <View style={styles.row}>
         <View style={styles.column}>
           <CigrateIcon />
@@ -308,12 +301,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <AppChip
               key={index}
               title={interest}
-              style={{
-                backgroundColor: COLORS.transparent,
-                borderColor: COLORS.borderBottom2,
-                borderWidth: 1,
-                borderRadius: Size8,
-              }}
+              style={styles.interestChip}
               onPress={() => {}}
             />
           ))}
@@ -346,44 +334,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  homeIconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SIZES.base / 2,
-  },
-  cardContent: {
-    padding: SIZES.padding,
-    gap: SIZES.base / 2,
-    paddingBottom: SIZES.largeTitle,
-  },
-  name: {
-    fontSize: fontSize24,
-    fontWeight: '700',
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
-  },
-  age: {
-    fontWeight: '400',
-  },
-  details: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
-  },
-  location: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
   },
   bioLabel: {
     fontWeight: '700',
@@ -524,5 +474,18 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.borderViolet,
     width: '100%',
+  },
+  galleryImage: {
+    width: '100%',
+    height: SIZES.height * 0.7,
+  },
+  imageWrapper: {
+    backgroundColor: COLORS.divider,
+  },
+  interestChip: {
+    backgroundColor: COLORS.transparent,
+    borderColor: COLORS.borderBottom2,
+    borderWidth: 1,
+    borderRadius: Size8,
   },
 });

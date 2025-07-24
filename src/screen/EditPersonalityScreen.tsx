@@ -156,7 +156,11 @@ const handleSave = useCallback(async () => {
         onBackPress={() => navigation.goBack()}
         icon={<PersonalityIcon size={Size25} />}
       />
-      <View style={styles.scrollView}>
+      <ScrollView 
+        style={styles.mainScrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Bio Text Area */}
         <View style={styles.bioContainer}>
           <AppTextInput
@@ -183,11 +187,7 @@ const handleSave = useCallback(async () => {
         </View>
 
         {/* Interests */}
-        <ScrollView
-          contentContainerStyle={styles.interestsContainer}
-          showsVerticalScrollIndicator={false}
-          style={styles.scrollView}
-        >
+        <View style={styles.interestsContainer}>
           {INTERESTS.map(item => {
             const isSelected = selected.includes(item);
             return (
@@ -213,8 +213,8 @@ const handleSave = useCallback(async () => {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
 
       {/* Save Button */}
       <View style={styles.buttonContainer}>
@@ -249,8 +249,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  scrollView: {
+  mainScrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
     padding: Size8,
     gap: Size20,
     paddingVertical: Size25,
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
   },
   wordCount: {
     textAlign: 'right',
-    fontSize: 14,
+    fontSize: fontSize14,
     color: COLORS.grey,
   },
   buttonContainer: {
@@ -285,7 +287,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: '600',
   },
-
   interestsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',

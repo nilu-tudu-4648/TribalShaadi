@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { apiCallBegan } from '../api';
 const initialState = {
-  loader: false,
+  loader: true,
   connectLoader: false,
   declineLoader: false,
   userRegistrationCompleted: false,
@@ -142,7 +142,7 @@ export const sentProposalApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: sentProposalDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -171,7 +171,7 @@ export const cancelProposalRequestApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setCancelProposalRequestDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });

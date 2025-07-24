@@ -40,6 +40,7 @@ const AddressScreen = () => {
   const [selectedCity, setSelectedCity] = useState<any>(null);
   const [selectedMaritalStatus, setSelectedMaritalStatus] = useState<any>(null);
   const [selectedSettlingDown, setSelectedSettlingDown] = useState('');
+  const [selectedKids, setSelectedKids] = useState('');
   const [showStatePicker, setShowStatePicker] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [showMaritalStatusPicker, setShowMaritalStatusPicker] = useState(false);
@@ -94,6 +95,15 @@ const AddressScreen = () => {
     ],
     [],
   );
+  // Kids
+  const kidsOptions = useMemo(
+    () => [
+      'Want Someday',
+      'Don’t Want',
+      'Undecided',
+    ],
+    [],
+  );
 
   const handleContinue = useCallback(async () => {
     if (
@@ -115,6 +125,7 @@ const AddressScreen = () => {
           districtId: selectedCity.id,
         },
         planingto_settle: selectedSettlingDown,
+        // kids: selectedKids,
       };
       console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -152,6 +163,11 @@ const AddressScreen = () => {
   // Handle settling down selection
   const handleSettlingDownSelection = useCallback((option: string) => {
     setSelectedSettlingDown(option);
+  }, []);
+
+  // Handle kids selection
+  const handleKidsSelection = useCallback((option: string) => {
+    setSelectedKids(option);
   }, []);
 
   // Memoize form validation
@@ -212,6 +228,22 @@ const AddressScreen = () => {
                 title={option}
                 onPress={() => handleSettlingDownSelection(option)}
                 isSelected={selectedSettlingDown === option}
+              />
+            ))}
+          </View>
+        </View>
+        <View style={styles.chipSection}>
+          <AppText
+            text="Kids"
+            textStyle={styles.chipSectionTitle}
+          />
+          <View style={styles.chipContainer}>
+            {kidsOptions.map((option, index) => (
+              <AppChip
+                key={index}
+                title={option}
+                onPress={() => handleKidsSelection(option)}
+                isSelected={selectedKids === option}
               />
             ))}
           </View>

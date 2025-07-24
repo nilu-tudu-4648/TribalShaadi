@@ -3,9 +3,9 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize14,
-  Size8,
-  borderWidth,
-  Size12,
+  Size10,
+  Size14,
+  Size25,
 } from '../constants/Sizes';
 import AppText from './AppText';
 
@@ -53,30 +53,25 @@ const AppChip: React.FC<AppChipProps> = ({
 
 const styles = StyleSheet.create({
   chip: {
-    paddingVertical: Size12,
-    paddingHorizontal: Size12,
-    borderRadius: Size8,
-    borderWidth: borderWidth,
-    borderColor: COLORS.bgDisabled,
+    paddingVertical: Size10,
+    paddingHorizontal: Size14,
+    borderRadius: Size25,
+    backgroundColor: COLORS.disabledBG,
   },
   chipSelected: {
-    backgroundColor: COLORS.chipSelected,
-    borderColor: COLORS.chipSelctedBorder,
-    borderWidth: borderWidth,
+    backgroundColor: COLORS.violet,
   },
   chipDisabled: {
-    backgroundColor: COLORS.white,
-    borderColor: COLORS.bgDisabled,
-    opacity: 0.5,
+    backgroundColor: COLORS.disabledBG,
   },
   chipText: {
     fontSize: fontSize14,
     color: COLORS.black,
     fontWeight: '500',
-    letterSpacing: 1.5,
+    letterSpacing: 1.3,
   },
   chipTextSelected: {
-    color: COLORS.violet,
+    color: COLORS.white,
   },
   chipTextDisabled: {
     color: COLORS.placeholderInactive,

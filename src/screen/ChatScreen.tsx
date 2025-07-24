@@ -29,46 +29,33 @@ import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   friendRequestAcceptUrl,
+  getAcceptedProposalByIdUrl,
   getAllChatHistoryByUserIdUrl,
-  getFriendsByUserIdUrl,
   getUserChatListUrl,
-  getUserChatUrl,
   imageUrl,
 } from '../constants/functions';
 import {
   getAllChatHistoryByUserIdApi,
-  getFriendsByUserIdApi,
-  getUserChatApi,
   getUserChatListApi,
 } from '../store/reducers/chatReducer';
-import { friendRequestAcceptApi } from '../store/reducers/chatReducer';
+import {
+  friendRequestAcceptApi,
+  getAcceptedProposalByIdApi,
+} from '../store/reducers/chatReducer';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const { chatList, allChatHistoryByUserId, friendsByUserId } = useSelector(
-    (state: any) => state.entities.chatReducer,
-  );
+  const {
+    allChatHistoryByUserId,
+    acceptedProposalById,
+  } = useSelector((state: any) => state.entities.chatReducer);
   const dispatch = useDispatch();
-  console.log('chatList', chatList);
   console.log('allChatHistoryByUserId', allChatHistoryByUserId);
-  console.log('friendsByUserId', friendsByUserId);
-  const userChatList = [
-    {
-      id:44,
-      firstname: 'Nisha',
-      lastName: 'Nilu',
-      message: 'Hello, how are you?',
-      imageUrl: 'content/user/46/61.jpeg',
-      chatId: '46_44',
-    },
-  ];
-  console.log('userChatList', userChatList);
+  console.log('acceptedProposalById', acceptedProposalById);
   useEffect(() => {
     dispatch(
-      getUserChatApi(getUserChatUrl, {
-        partnerId: user.id,
-      }),
+      getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user.id}`),
     );
     dispatch(
       getUserChatListApi(getUserChatListUrl, {
@@ -78,11 +65,6 @@ const ChatScreen = () => {
     );
     dispatch(
       getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
-        userId: user.id,
-      }),
-    );
-    dispatch(
-      getFriendsByUserIdApi(getFriendsByUserIdUrl, {
         userId: user.id,
       }),
     );
@@ -112,12 +94,15 @@ const ChatScreen = () => {
       onPress={() => acceptFriendRequest(item)}
     >
       <Image
-        source={{ uri: imageUrl + item.imageUrl }}
+        source={{ uri: imageUrl + item.image }}
         style={styles.profileImage}
         resizeMode="cover"
       />
       <View style={styles.conversationContent}>
-        <AppText text={item.firstname} textStyle={styles.userName} />
+        <AppText
+          text={item.firstName + ' ' + `${item.lastName ?? ''}`}
+          textStyle={styles.userName}
+        />
         <AppText text={item.message} textStyle={styles.messageText} />
       </View>
       <View
@@ -152,7 +137,7 @@ const ChatScreen = () => {
 
       {/* Scrollable Conversations List */}
       <FlatList
-        data={userChatList}
+        data={acceptedProposalById}
         renderItem={({ item }) => renderConversationItem(item)}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}

@@ -9,6 +9,7 @@ const initialState = {
   payment: [],
   savePremiumAccount: [],
   packageByUserId: [],
+  currentUserPackage: [],
 };
 
 const paymentReducer = createSlice({
@@ -52,6 +53,10 @@ const paymentReducer = createSlice({
       paymentReducer.loader = false;
       paymentReducer.packageByUserId = action.payload.recordList;
     },
+    paymentReducerCurrentUserPackageReceived: (paymentReducer, action) => {
+      paymentReducer.loader = false;
+      paymentReducer.currentUserPackage = action.payload.recordList;
+    },
   },
 });
 
@@ -67,6 +72,7 @@ const {
   paymentReducerPaymentReceived,
   paymentReducerSavePremiumAccountReceived,
   paymentReducerPackageByUserIdReceived,
+  paymentReducerCurrentUserPackageReceived,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -127,6 +133,15 @@ export const getPackageByUserIdApi = (url, data = {}) =>
     data,
     onStart: paymentReducerDataRequested.type,
     onSuccess: paymentReducerPackageByUserIdReceived.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const getCurrentUserPackageApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: paymentReducerDataRequested.type,
+    onSuccess: paymentReducerCurrentUserPackageReceived.type,
     onError: paymentReducerDataRequestFailed.type,
   });
 export default paymentReducer.reducer;

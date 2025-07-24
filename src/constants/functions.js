@@ -79,6 +79,7 @@ export const friendRequestAcceptUrl = 'app/userChat/friendRequestAccept';
 export const friendRequestRejectOrBlockUrl = 'app/userChat/friendRequestRejectOrBlock';
 export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
 export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
+export const getAcceptedProposalByIdUrl = 'app/proposals/getAcceptedProposalById';
 
 // Date formatting function
 export const formatDateOfBirth = dateString => {
@@ -113,6 +114,7 @@ export const formatDateShort = dateString => {
     return dateString;
   }
 };
+
 export const checkUserLoggedIn = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
@@ -179,7 +181,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token');
+    // console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,

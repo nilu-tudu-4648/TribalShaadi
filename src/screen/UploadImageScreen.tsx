@@ -50,20 +50,7 @@ const UploadImageScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
-  const GATEWAY_URL = 'https://868yomkyf7.execute-api.us-east-1.amazonaws.com';
-  const validateImage = async (base64: string) => {
-    try {
-      const resp = await fetch(`${GATEWAY_URL}/validate`, {
-        method: 'POST',
-        body: JSON.stringify({ image: base64 }),
-      });
-      console.log('resp: ', resp);
-      return resp.json();
-    } catch (error) {
-      console.log('Error validating image: ', error);
-      return null;
-    }
-  };
+
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',

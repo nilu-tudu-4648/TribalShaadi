@@ -34,7 +34,7 @@ import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ASYNC_VARIBLES } from '../constants/data';
 import { useSelector } from 'react-redux';
-import { imageUrl } from '../constants/functions';
+import { formatDateShort, imageUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
 
@@ -61,7 +61,6 @@ const ConversationsScreen = () => {
   const navigation = useNavigation();
   const [messageText, setMessageText] = useState('');
   const [chatData, setChatData] = useState<Message[]>([INITIAL_STORY_STARTER]);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'failed'>('connecting');
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const { userDetails } = useRoute().params as { userDetails: any };
   const socket = useRef<Socket | null>(null);
@@ -112,164 +111,173 @@ const ConversationsScreen = () => {
   );
 
   // Initialize socket connection with fallback URLs
-  const initializeSocket = useCallback((attempt: number = 0) => {
-    const serverUrls = [
-      'https://api.tribalshaadi.co.in',
-      'http://api.tribalshaadi.co.in',
-      'https://api.tribalshaadi.co.in:4000',
-      'http://api.tribalshaadi.co.in:4000',
-    ];
-    
-    if (attempt >= serverUrls.length) {
-      console.error('❌ All connection attempts failed');
-      setConnectionStatus('failed');
-      return;
-    }
+  const initializeSocket = useCallback(
+    (attempt: number = 0) => {
+      const serverUrls = [
+        'https://api.tribalshaadi.co.in',
+        'http://api.tribalshaadi.co.in',
+        'https://api.tribalshaadi.co.in:4000',
+        'http://api.tribalshaadi.co.in:4000',
+      ];
 
-    const SERVER_URL = serverUrls[attempt];
-    console.log(`🔄 Connection attempt ${attempt + 1}: ${SERVER_URL}`);
-    setConnectionStatus('connecting');
-    
-    // Cleanup previous socket if exists
-    if (socket.current) {
-      socket.current.removeAllListeners();
-      socket.current.disconnect();
-    }
-    
-    socket.current = io(SERVER_URL, {
-      transports: ['websocket', 'polling'], // Try both transports
-      timeout: 10000, // 10 second timeout
-      reconnection: true,
-      reconnectionAttempts: 3,
-      reconnectionDelay: 2000,
-      forceNew: true,
-      upgrade: true,
-    });
+      if (attempt >= serverUrls.length) {
+        console.error('❌ All connection attempts failed');
 
-    socket.current.on('connect', () => {
-      console.log('🟢 Connected to socket server');
-      console.log('Socket ID:', socket.current?.id);
-      console.log('Transport:', socket.current?.io?.engine?.transport?.name);
-      console.log('Server URL:', SERVER_URL);
-      setConnectionStatus('connected');
-      
-      if (user?.id) {
-        console.log(`📝 Registering user ${user.id}...`);
-        socket.current?.emit('register', user.id);
-      } else {
-        console.error('❌ No user ID found for registration');
+        return;
       }
-    });
 
-    socket.current.on('connect_error', (error) => {
-      console.error(`❌ Connection attempt ${attempt + 1} failed:`, error.message);
-      setConnectionStatus('disconnected');
-      
-      // Try next URL after a short delay
-      setTimeout(() => {
-        initializeSocket(attempt + 1);
-      }, 1500);
-    });
+      const SERVER_URL = serverUrls[attempt];
+      console.log(`🔄 Connection attempt ${attempt + 1}: ${SERVER_URL}`);
 
-    // Handle registration confirmation from server
-    socket.current.on('registration_confirmed', ({ userId, socketId }) => {
-      console.log(`✅ Registration confirmed for user ${userId} with socket ${socketId}`);
-    });
-
-    // Handle reconnection events
-    socket.current.on('reconnect', (attemptNumber) => {
-      console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
-      setConnectionStatus('connected');
-      // Re-register user after reconnection
-      if (user?.id) {
-        console.log(`📝 Re-registering user ${user.id} after reconnection...`);
-        socket.current?.emit('register', user.id);
+      // Cleanup previous socket if exists
+      if (socket.current) {
+        socket.current.removeAllListeners();
+        socket.current.disconnect();
       }
-    });
 
-    socket.current.on('reconnect_error', (error) => {
-      console.error('❌ Reconnection failed:', error.message);
-      setConnectionStatus('disconnected');
-    });
+      socket.current = io(SERVER_URL, {
+        transports: ['websocket', 'polling'], // Try both transports
+        timeout: 10000, // 10 second timeout
+        reconnection: true,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 2000,
+        forceNew: true,
+        upgrade: true,
+      });
 
-    socket.current.on('reconnect_failed', () => {
-      console.error('❌ All reconnection attempts failed');
-      setConnectionStatus('failed');
-    });
+      socket.current.on('connect', () => {
+        console.log('🟢 Connected to socket server');
+        console.log('Socket ID:', socket.current?.id);
+        console.log('Transport:', socket.current?.io?.engine?.transport?.name);
+        console.log('Server URL:', SERVER_URL);
 
-    socket.current.on('receive_message', ({ from, content, timestamp }) => {
-      console.log('📨 Received message:', { from, content, timestamp });
-      console.log('Expected from userDetails.id:', userDetails?.id);
-      
-      // Convert IDs to string for comparison (in case one is number, one is string)
-      if (String(from) === String(userDetails?.id)) {
-        console.log('✅ Message is from the correct user, adding to chat');
-        addMessage({
-          type: 'received',
-          message: content,
-          time: new Date(timestamp).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          }),
+        if (user?.id) {
+          console.log(`📝 Registering user ${user.id}...`);
+          socket.current?.emit('register', user.id);
+        } else {
+          console.error('❌ No user ID found for registration');
+        }
+      });
+
+      socket.current.on('connect_error', error => {
+        console.error(
+          `❌ Connection attempt ${attempt + 1} failed:`,
+          error.message,
+        );
+
+        // Try next URL after a short delay
+        setTimeout(() => {
+          initializeSocket(attempt + 1);
+        }, 1500);
+      });
+
+      // Handle registration confirmation from server
+      socket.current.on('registration_confirmed', ({ userId, socketId }) => {
+        console.log(
+          `✅ Registration confirmed for user ${userId} with socket ${socketId}`,
+        );
+      });
+
+      // Handle reconnection events
+      socket.current.on('reconnect', attemptNumber => {
+        console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
+
+        // Re-register user after reconnection
+        if (user?.id) {
+          console.log(
+            `📝 Re-registering user ${user.id} after reconnection...`,
+          );
+          socket.current?.emit('register', user.id);
+        }
+      });
+
+      socket.current.on('reconnect_error', error => {
+        console.error('❌ Reconnection failed:', error.message);
+
+      });
+
+      socket.current.on('reconnect_failed', () => {
+        console.error('❌ All reconnection attempts failed');
+
+      });
+
+      socket.current.on('receive_message', ({ from, content, timestamp }) => {
+        console.log('📨 Received message:', { from, content, timestamp });
+        console.log('Expected from userDetails.friendId:', userDetails?.friendId);
+
+        // Convert IDs to string for comparison (in case one is number, one is string)
+        if (String(from) === String(userDetails?.friendId)) {
+          console.log('✅ Message is from the correct user, adding to chat');
+          addMessage({
+            type: 'received',
+            message: content,
+            time: new Date(timestamp).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            }),
+          });
+        } else {
+          console.log('⚠️ Message from unexpected user, ignoring');
+        }
+      });
+
+      socket.current.on('message_sent', ({ to, content, timestamp }) => {
+        console.log('✅ Message sent confirmation:', {
+          to,
+          content,
+          timestamp,
         });
-      } else {
-        console.log('⚠️ Message from unexpected user, ignoring');
-      }
-    });
 
-    socket.current.on('message_sent', ({ to, content, timestamp }) => {
-      console.log('✅ Message sent confirmation:', { to, content, timestamp });
-      
-      setChatData(currentChatData =>
-        currentChatData.map(msg =>
-          msg.message === content && msg.status === 'sending'
-            ? { ...msg, status: 'sent', time: getCurrentTime() }
-            : msg,
-        ),
-      );
-      scrollToBottom(); // Auto-scroll when message status updates
-    });
+        setChatData(currentChatData =>
+          currentChatData.map(msg =>
+            msg.message === content && msg.status === 'sending'
+              ? { ...msg, status: 'sent', time: getCurrentTime() }
+              : msg,
+          ),
+        );
+        scrollToBottom(); // Auto-scroll when message status updates
+      });
 
-    socket.current.on('error_message', (error) => {
-      console.error('❌ Socket Error:', error);
-      
-      // Update any sending messages to failed status
-      setChatData(currentChatData =>
-        currentChatData.map(msg =>
-          msg.status === 'sending'
-            ? { ...msg, status: 'failed', time: 'Failed' }
-            : msg,
-        ),
-      );
-    });
+      socket.current.on('error_message', error => {
+        console.error('❌ Socket Error:', error);
 
-    socket.current.on('disconnect', (reason) => {
-      console.log('🔴 Disconnected from socket server. Reason:', reason);
-      setConnectionStatus('disconnected');
-      
-      if (reason === 'io server disconnect') {
-        // Server disconnected the socket, it will try to reconnect automatically
-        console.log('🔄 Server disconnected, will attempt to reconnect...');
-      }
-    });
+        // Update any sending messages to failed status
+        setChatData(currentChatData =>
+          currentChatData.map(msg =>
+            msg.status === 'sending'
+              ? { ...msg, status: 'failed', time: 'Failed' }
+              : msg,
+          ),
+        );
+      });
 
-    // Handle server pings for connection health
-    socket.current.on('pong', () => {
-      console.log('🏓 Received pong from server');
-    });
+      socket.current.on('disconnect', reason => {
+        console.log('🔴 Disconnected from socket server. Reason:', reason);
 
-    // Send periodic pings to test connection
-    const pingInterval = setInterval(() => {
-      if (socket.current?.connected) {
-        socket.current.emit('ping');
-      }
-    }, 30000); // Ping every 30 seconds
+        if (reason === 'io server disconnect') {
+          // Server disconnected the socket, it will try to reconnect automatically
+          console.log('🔄 Server disconnected, will attempt to reconnect...');
+        }
+      });
 
-    // Store interval reference for cleanup
-    pingIntervalRef.current = pingInterval;
+      // Handle server pings for connection health
+      socket.current.on('pong', () => {
+        console.log('🏓 Received pong from server');
+      });
 
-  }, [user?.id, userDetails?.id, addMessage, scrollToBottom]);
+      // Send periodic pings to test connection
+      const pingInterval = setInterval(() => {
+        if (socket.current?.connected) {
+          socket.current.emit('ping');
+        }
+      }, 30000); // Ping every 30 seconds
+
+      // Store interval reference for cleanup
+      pingIntervalRef.current = pingInterval;
+    },
+    [user?.id, userDetails?.friendId, addMessage, scrollToBottom],
+  );
 
   // Load messages on component mount
   useEffect(() => {
@@ -291,7 +299,8 @@ const ConversationsScreen = () => {
 
   // Auto-scroll when chatData changes
   useEffect(() => {
-    if (chatData.length > 1) { // Skip initial story starter
+    if (chatData.length > 1) {
+      // Skip initial story starter
       scrollToBottom();
     }
   }, [chatData, scrollToBottom]);
@@ -312,14 +321,14 @@ const ConversationsScreen = () => {
       return;
     }
 
-    if (messageText.trim() && user?.id && userDetails?.id) {
+    if (messageText.trim() && user?.id && userDetails?.friendId) {
       const content = messageText.trim();
       console.log('📤 Sending message:', {
         from: user.id,
-        to: userDetails.id,
+        to: userDetails.friendId,
         content,
       });
-      
+
       addMessage({
         type: 'sent',
         message: content,
@@ -329,7 +338,7 @@ const ConversationsScreen = () => {
 
       socket.current?.emit('send_message', {
         from: String(user.id), // Ensure it's a string
-        to: String(userDetails.id), // Ensure it's a string
+        to: String(userDetails.friendId), // Ensure it's a string
         content,
       });
 
@@ -339,7 +348,7 @@ const ConversationsScreen = () => {
       console.error('❌ Cannot send message:', {
         messageEmpty: !messageText.trim(),
         noUserId: !user?.id,
-        noUserDetailsId: !userDetails?.id,
+        noUserDetailsId: !userDetails?.friendId,
         notConnected: !socket.current?.connected,
       });
     }
@@ -357,14 +366,16 @@ const ConversationsScreen = () => {
               />
             </View>
             <View style={[styles.userImageWrapper, styles.overlappingImage]}>
-            <Image
-                source={{ uri: imageUrl + userDetails?.imageUrl }}
+              <Image
+                source={{ uri: imageUrl + userDetails?.image }}
                 style={styles.userImage}
               />
             </View>
           </View>
           <AppText
-            text={`Your story started on\n${item.date}`}
+            text={`Your story started on\n${formatDateShort(
+              userDetails?.friendsSince || '',
+            )}`}
             textStyle={styles.storyStarterText}
           />
         </View>
@@ -374,7 +385,7 @@ const ConversationsScreen = () => {
     if (item.type === 'received') {
       return (
         <View key={item.id} style={styles.messageContainer}>
-          <View style={{ alignSelf: 'flex-end' }}>
+          <View style={styles.timeContainerEnd}>
             <AppText text={item.time} textStyle={styles.timeText} />
           </View>
           <View style={styles.receivedMessageBubble}>
@@ -392,8 +403,17 @@ const ConversationsScreen = () => {
         <View key={item.id} style={styles.messageContainer}>
           <View style={styles.timeContainer}>
             <AppText
-              text={item.status === 'sending' ? 'sending...' : item.status === 'failed' ? 'Failed' : item.time}
-              textStyle={[styles.timeText, item.status === 'failed' && { color: COLORS.red }]}
+              text={
+                item.status === 'sending'
+                  ? 'sending...'
+                  : item.status === 'failed'
+                  ? 'Failed'
+                  : item.time
+              }
+              textStyle={[
+                styles.timeText,
+                item.status === 'failed' && { color: COLORS.red },
+              ]}
             />
           </View>
           <View style={styles.sentMessageBubble}>
@@ -415,12 +435,19 @@ const ConversationsScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-            <ArrowIosBackSvg color={COLORS.black} width={Size25} height={Size25} />
+          <Pressable
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <ArrowIosBackSvg
+              color={COLORS.black}
+              width={Size25}
+              height={Size25}
+            />
           </Pressable>
           <View style={styles.headerCenter}>
             <AppText
-              text={userDetails.firstname + ' ' + userDetails.lastName}
+              text={`${userDetails.firstName} ${userDetails.lastName ?? ''}`}
               textStyle={styles.headerTitle}
             />
             {/* <AppText
@@ -522,7 +549,7 @@ const styles = StyleSheet.create({
   connectionStatus: {
     fontSize: fontSize12,
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
-    marginTop: Size4,
+    paddingTop: Size4,
   },
   headerSpacer: {
     flex: 1,
@@ -571,6 +598,9 @@ const styles = StyleSheet.create({
   },
   timeContainer: {
     alignItems: 'flex-start',
+  },
+  timeContainerEnd: {
+    alignSelf: 'flex-end',
   },
   timeText: {
     fontSize: fontSize12,
@@ -642,6 +672,6 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: COLORS.transparent,
-    marginBottom: Size4,
+    paddingBottom: Size4,
   },
 });

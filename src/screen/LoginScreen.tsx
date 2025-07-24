@@ -8,6 +8,7 @@ import {
   Size8,
   Size10,
   lignHeight72,
+  Size22,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
@@ -93,6 +94,7 @@ const LoginScreen: React.FC = () => {
         <AppButton
           isLoading={loader}
           title="Verify"
+          loaderSize={Size22}
           onPress={handleVerify}
           isButtonDisabled={isButtonDisabled}
           buttonStyle={[

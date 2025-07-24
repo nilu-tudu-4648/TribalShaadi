@@ -35,7 +35,6 @@ import {
   HeightIcon,
   TribeIcon,
   ReligionIcon,
-  HomeIcon2,
 } from '../svg/SvgIcons';
 import { ReportIcon } from '../svg/SvgIcons2';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,6 +54,7 @@ import {
   sendProposalUrl,
 } from '../../constants/functions';
 import FONT_FAMILY from '../../constants/Fonts';
+import NameComponent from '../NameComponent';
 
 interface ProfileBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -65,9 +65,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   bottomSheetRef,
   isButtonVisible = false,
 }) => {
-  const snapPoints = ['55%', '50%'];
-  const { selectedUser, currentMatchedUserGalleryImageList } =
-    useSelector((state: any) => state.entities.userReducer);
+  const snapPoints = ['70%', '80%'];
+  const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
+    (state: any) => state.entities.userReducer,
+  );
   console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
@@ -119,25 +120,17 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               source={{ uri: `${imageUrl + selectedUser?.image}` }}
               style={[styles.profileImage, { justifyContent: 'flex-end' }]}
             >
-              <View style={styles.cardContent}>
-                <AppText
-                  text={`${selectedUser?.firstName} ${selectedUser?.lastName}, ${selectedUser?.age}`}
-                  textStyle={styles.name}
-                />
-                <AppText
-                  text={`${convertCmToReadableHeight(selectedUser?.height)} · ${
-                    selectedUser?.religion
-                  } · ${selectedUser?.community}`}
-                  textStyle={styles.details}
-                />
-                <View style={styles.homeIconContainer}>
-                  <HomeIcon2 color={COLORS.white} />
-                  <AppText
-                    text={`${selectedUser?.districtName}, ${selectedUser?.stateName}`}
-                    textStyle={styles.location}
-                  />
-                </View>
-              </View>
+              <NameComponent
+                name={`${selectedUser?.firstName} ${selectedUser?.lastName ?? ''}`}
+                age={selectedUser?.age}
+                isVerified={selectedUser?.isVerified}
+                isPremium={selectedUser?.isPremium}
+                height={(selectedUser?.height)}
+                religion={selectedUser?.religion}
+                caste={selectedUser?.community}
+                districtName={selectedUser?.districtName}
+                stateName={selectedUser?.stateName}
+              />
             </ImageBackground>
             <View style={styles.bioSection}>
               <AppText text="Bio" textStyle={styles.bioLabel} />
@@ -325,7 +318,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             </View>
             <View style={styles.attributeCard}>
               <SmokingIcon />
-              {/* <SmokingIcon /> */}
               <AppText
                 text={selectedUser?.smoking}
                 textStyle={styles.attributeTitle}
@@ -341,10 +333,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 text={selectedUser?.drinking_habits}
                 textStyle={styles.attributeTitle}
               />
-              <AppText
-                text="Drinking Habits"
-                textStyle={styles.attributeSubtitle}
-              />
+              <AppText text="Kids" textStyle={styles.attributeSubtitle} />
             </View>
           </View>
 
@@ -412,44 +401,6 @@ const styles = StyleSheet.create({
     height: SIZES.height * 0.5,
     borderRadius: SIZES.radius,
     resizeMode: 'cover',
-  },
-  cardContent: {
-    padding: SIZES.padding,
-    gap: SIZES.base / 2,
-    paddingBottom: SIZES.largeTitle,
-  },
-  name: {
-    fontSize: fontSize24,
-    fontWeight: '700',
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
-  },
-  age: {
-    fontWeight: '400',
-  },
-  details: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
-  },
-  homeIconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SIZES.base / 2,
-  },
-  location: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
   },
   handleIndicator: {
     backgroundColor: COLORS.grey, // Style the grabber handle
@@ -610,13 +561,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     color: COLORS.textGrey,
     lineHeight: 20,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: SIZES.padding,
   },
   thinLine: {
     height: 1,

@@ -19,6 +19,13 @@ import MathcingScreen from '../screen/MathcingScreen';
 import SelfieVerifyScreen from '../screen/SelfieVerifyScreen';
 import CameraScreen from '../screen/CameraScreen';
 import PaymentSuccess from '../screen/PaymentSuccess';
+import YourStoryScreen from '../screen/YourStoryScreen';
+import SupportScreen from '../screen/SupportScreen';
+import FAQScreen from '../screen/FAQScreen';
+import TermScreen from '../screen/TermScreen';
+import PrivacyScreen from '../screen/PrivacyScreen';
+import RefundScreen from '../screen/RefundScreen';
+import TipsScreen from '../screen/TipsScreen';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -45,6 +52,14 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.SELFIE_VERIFY} component={SelfieVerifyScreen} />
       <Stack.Screen name={ROUTES.CAMERA} component={CameraScreen} />
       <Stack.Screen name={ROUTES.PAYMENT_SUCCESS} component={PaymentSuccess} />
+      <Stack.Screen name={ROUTES.YOUR_STORY} component={YourStoryScreen} />
+      <Stack.Screen name={ROUTES.SUPPORT} component={SupportScreen} />
+      <Stack.Screen name={ROUTES.FAQ} component={FAQScreen} />
+      <Stack.Screen name={ROUTES.TERMS_AND_CONDITIONS} component={TermScreen} />
+      <Stack.Screen name={ROUTES.PRIVACY_POLICY} component={PrivacyScreen} />
+      <Stack.Screen name={ROUTES.REFUND_POLICY} component={RefundScreen} />
+      <Stack.Screen name={ROUTES.TIPS} component={TipsScreen} />
+
     </Stack.Navigator>
   );
 };

@@ -26,6 +26,7 @@ import {
   getPassedUsersUrl,
   getStatesUrl,
   getGalleryImageListUrl,
+  getPackageByUserIdUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -48,6 +49,7 @@ import {
   getStates,
 } from '../store/reducers/authReducer';
 import AppLoader from '../components/AppLoader';
+import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
 
 const { width } = Dimensions.get('window');
 
@@ -58,6 +60,9 @@ const HomeScreen = () => {
     currentMatchedUser,
     currentMatchedUserGalleryImageList,
   } = useSelector((state: any) => state.entities.userReducer);
+  const { currentUserPackage } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   // Swipe animation values
@@ -85,7 +90,7 @@ const HomeScreen = () => {
     .onUpdate(event => {
       // Don't allow swipe visual feedback if there's only one user
       if (matchedUsers.length <= 1) return;
-      
+
       translateX.value = event.translationX;
 
       // Change opacity based on swipe distance
@@ -136,11 +141,11 @@ const HomeScreen = () => {
     // Ensure proper animation sequence
     translateX.value = entryX.value; // off-screen direction
     opacity.value = 0;
-    
+
     // Animate to center position
     translateX.value = withTiming(0, { duration: 250 });
     opacity.value = withTiming(1, { duration: 250 });
-    
+
     // Reset entryX to 0 after animation to prevent gaps
     setTimeout(() => {
       entryX.value = 0;
@@ -161,7 +166,7 @@ const HomeScreen = () => {
     dispatch(getCommunity(getCommunityUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
     dispatch(getReligion(getReligionUrl));
-    dispatch(getHeight(getHeightUrl));
+    dispatch(getHeight(getHeightUrl)) ;
     dispatch(getDiet(getDietUrl));
     dispatch(getStates(getStatesUrl));
   }, [dispatch]);
@@ -171,6 +176,11 @@ const HomeScreen = () => {
         getCurrentMatchedApi(
           `${baseUrl}/${getUserDetailsUrl}id=${matchedUsers[currentIndex].id}`,
         ),
+      );
+      dispatch(
+        getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
+          userId: matchedUsers[currentIndex].id,
+        }),
       );
       dispatch(
         getCurrentMatchedUserGalleryImageListApi(
@@ -246,8 +256,8 @@ const HomeScreen = () => {
                     <ProfileCard
                       name={
                         currentMatchedUser.firstName +
-                          ' ' +
-                          (currentMatchedUser.lastName ?? '')
+                        ' ' +
+                        (currentMatchedUser.lastName ?? '')
                       }
                       age={currentMatchedUser.age}
                       height={currentMatchedUser.height}
@@ -277,6 +287,8 @@ const HomeScreen = () => {
                       smokingHabits={currentMatchedUser.smoking}
                       kids={currentMatchedUser.kids}
                       interests={currentMatchedUser.intrests}
+                      isVerified={false}
+                      isPremium={currentUserPackage.length > 0}
                     />
                   </Animated.View>
                 </GestureDetector>
@@ -301,37 +313,18 @@ const HomeScreen = () => {
               </View>
             </>
           ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <View style={styles.exhaustedContainer}>
               <Image
                 source={require('../assets/images/ExhaustedImage.png')}
-                style={{
-                  width: SIZES.width * 0.2,
-                  height: SIZES.height * 0.1,
-                  resizeMode: 'contain',
-                }}
+                style={styles.exhaustedImage}
               />
               <AppText
                 text="All matches exhausted"
-                textStyle={{
-                  fontSize: fontSize20,
-                  textAlign: 'center',
-                  fontWeight: '700',
-                }}
+                textStyle={styles.exhaustedTitle}
               />
               <AppText
                 text="Come back and check tomorrow for more matches"
-                textStyle={{
-                  fontSize: fontSize16,
-                  color: COLORS.textInactive,
-                  textAlign: 'center',
-                  fontWeight: '600',
-                }}
+                textStyle={styles.exhaustedSubtitle}
               />
             </View>
           )}
@@ -411,5 +404,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
     left: 0, // Ensure no left offset
+  },
+  exhaustedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  exhaustedImage: {
+    width: SIZES.width * 0.2,
+    height: SIZES.height * 0.1,
+    resizeMode: 'contain',
+  },
+  exhaustedTitle: {
+    fontSize: fontSize20,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
+  exhaustedSubtitle: {
+    fontSize: fontSize16,
+    color: COLORS.textInactive,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });
