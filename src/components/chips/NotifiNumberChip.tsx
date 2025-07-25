@@ -1,4 +1,4 @@
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import React from 'react';
 import { COLORS } from '../../constants/AppColors';
 import AppText from '../AppText';
@@ -14,17 +14,7 @@ const NotifiNumberChip = ({
   return (
     <View
       style={[
-        {
-          position: 'absolute',
-          bottom: 0,
-          left: Size12,
-          backgroundColor: COLORS.violet,
-          borderRadius: fontSize22 / 2,
-          width: fontSize22,
-          height: fontSize22,
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
+        styles.container,
         style,
       ]}
     >
@@ -40,3 +30,17 @@ const NotifiNumberChip = ({
 };
 
 export default NotifiNumberChip;
+
+const styles = StyleSheet.create({
+  container:   {
+    position: 'absolute',
+    bottom: 0,
+    left: Size12,
+    backgroundColor: COLORS.violet,
+    borderRadius: fontSize22 / 2,
+    width: fontSize22,
+    height: fontSize22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});

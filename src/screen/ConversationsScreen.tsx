@@ -28,6 +28,7 @@ import {
   Size10,
   fontSize30,
   Size25,
+  Size14,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
@@ -72,18 +73,96 @@ const ConversationsScreen = () => {
   console.log('user:', user);
   console.log('userDetails:', userDetails);
 
-  // Save chat messages to AsyncStorage
-  const saveChatMessages = useCallback(async (messages: Message[]) => {
-    try {
-      await AsyncStorage.setItem(
-        ASYNC_VARIBLES.CHAT_MESSAGES,
-        JSON.stringify(messages),
-      );
-    } catch (error) {
-      console.error('Error saving chat messages:', error);
-    }
-  }, []);
+  const saveChatMessages = useCallback(
+    async (messagesToSave: Message[]) => {
+      if (!user?.id || !userDetails?.friendId) return;
 
+      try {
+        // Create a consistent key for the chat pair by sorting IDs
+        const chatKey = `${ASYNC_VARIBLES.CHAT_MESSAGES}_${[
+          user.id,
+          userDetails.friendId,
+        ]
+          .sort()
+          .join('_')}`;
+
+        const recordList = messagesToSave
+          .filter(msg => msg.type === 'sent' || msg.type === 'received') // Exclude non-message types
+          .map(msg => {
+            const isSent = msg.type === 'sent';
+            // Ensure consistent chatId by sorting IDs
+            const chatId = [user.id, userDetails.friendId].sort().join('-');
+            return {
+              chatId,
+              senderUserId: isSent ? user.id : userDetails.friendId,
+              receiverUserId: isSent ? userDetails.friendId : user.id,
+              message: msg.message || '',
+              messageType: msg.type,
+              isRead: 0, // Default to 0, assuming it's unread
+              createdDate: new Date(
+                msg.timestamp || Date.now(),
+              ).toISOString(),
+            };
+          });
+
+        const dataToStore = {
+          status: 0,
+          isDisplayMessage: true,
+          message: 'Chat history',
+          recordList,
+          totalRecords: recordList.length,
+          token: '', // No token available in this context
+        };
+
+        await AsyncStorage.setItem(chatKey, JSON.stringify(dataToStore));
+      } catch (error) {
+        console.error('Error saving chat messages:', error);
+      }
+    },
+    [user?.id, userDetails?.friendId],
+  );
+  const loadChatMessages = useCallback(async () => {
+    if (!user?.id || !userDetails?.friendId) return;
+
+    try {
+      const chatKey = `${ASYNC_VARIBLES.CHAT_MESSAGES}_${[
+        user.id,
+        userDetails.friendId,
+      ]
+        .sort()
+        .join('_')}`;
+
+      const storedData = await AsyncStorage.getItem(chatKey);
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData && parsedData.recordList) {
+          const loadedMessages: Message[] = parsedData.recordList.map(
+            (record: any) => {
+              const isSent = String(record.senderUserId) === String(user.id);
+              return {
+                id: new Date(record.createdDate).getTime(),
+                type: isSent ? 'sent' : 'received',
+                message: record.message,
+                time: new Date(record.createdDate).toLocaleTimeString(
+                  'en-US',
+                  {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  },
+                ),
+                timestamp: new Date(record.createdDate).getTime(),
+                status: 'sent', // Assume stored messages are sent
+              };
+            },
+          );
+          setChatData([INITIAL_STORY_STARTER, ...loadedMessages]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chat messages:', error);
+    }
+  }, [user?.id, userDetails?.friendId]);
   // Auto scroll to bottom
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -281,6 +360,9 @@ const ConversationsScreen = () => {
 
   // Load messages on component mount
   useEffect(() => {
+    if (user?.id && userDetails?.friendId) {
+      loadChatMessages();
+    }
     initializeSocket(0);
 
     return () => {
@@ -295,7 +377,7 @@ const ConversationsScreen = () => {
         pingIntervalRef.current = null;
       }
     };
-  }, [initializeSocket]);
+  }, [initializeSocket, loadChatMessages, user?.id, userDetails?.friendId]);
 
   // Auto-scroll when chatData changes
   useEffect(() => {
@@ -412,7 +494,7 @@ const ConversationsScreen = () => {
               }
               textStyle={[
                 styles.timeText,
-                item.status === 'failed' && { color: COLORS.red },
+                item.status === 'failed' && styles.failedMessage,
               ]}
             />
           </View>
@@ -672,6 +754,9 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: COLORS.transparent,
-    paddingBottom: Size4,
+    paddingBottom: Size14,
+  },
+  failedMessage: {
+    color: COLORS.red,
   },
 });

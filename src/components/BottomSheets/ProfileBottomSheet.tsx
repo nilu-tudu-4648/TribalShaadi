@@ -17,9 +17,9 @@ import {
   fontSize16,
   fontSize24,
   Size10,
+  Size5,
   SIZES,
 } from '../../constants/Sizes';
-import AppChip from '../AppChip';
 import AppButton from '../AppButton';
 import {
   UtensilsIcon,
@@ -55,6 +55,7 @@ import {
 } from '../../constants/functions';
 import FONT_FAMILY from '../../constants/Fonts';
 import NameComponent from '../NameComponent';
+import AppChip2 from '../chips/AppChip2';
 
 interface ProfileBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -69,7 +70,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  console.log(selectedUser);
+  // console.log(selectedUser);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -118,14 +119,16 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
           <View>
             <ImageBackground
               source={{ uri: `${imageUrl + selectedUser?.image}` }}
-              style={[styles.profileImage, { justifyContent: 'flex-end' }]}
+              style={styles.profileImage}
             >
               <NameComponent
-                name={`${selectedUser?.firstName} ${selectedUser?.lastName ?? ''}`}
+                name={`${selectedUser?.firstName} ${
+                  selectedUser?.lastName ?? ''
+                }`}
                 age={selectedUser?.age}
                 isVerified={selectedUser?.isVerified}
                 isPremium={selectedUser?.isPremium}
-                height={(selectedUser?.height)}
+                height={selectedUser?.height}
                 religion={selectedUser?.religion}
                 caste={selectedUser?.community}
                 districtName={selectedUser?.districtName}
@@ -226,7 +229,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                   uri:
                     imageUrl + currentMatchedUserGalleryImageList[0]?.imageUrl,
                 }}
-                style={{ width: '100%', height: SIZES.height * 0.6 }}
+                style={styles.galleryImage}
               />
 
               <View style={styles.section}>
@@ -283,7 +286,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                   uri:
                     imageUrl + currentMatchedUserGalleryImageList[1]?.imageUrl,
                 }}
-                style={{ width: '100%', height: SIZES.height * 0.6 }}
+                style={styles.galleryImage}
               />
             </View>
             <AppText text="College/University" textStyle={styles.headerLabel} />
@@ -345,9 +348,8 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             {selectedUser?.intrests && (
               <View style={styles.chipsContainer}>
                 {selectedUser?.intrests.split(',').map((interest: string) => (
-                  <AppChip
+                  <AppChip2
                     key={interest}
-                    style={{ width: '48%' }}
                     title={interest}
                     onPress={() => {}}
                   />
@@ -355,9 +357,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               </View>
             )}
           </View>
-          <View
-            style={{ gap: SIZES.padding * 3, paddingVertical: SIZES.padding }}
-          >
+          <View style={styles.actionsContainer}>
             <TouchableOpacity
               onPress={openReport}
               style={styles.reportButtonContainer}
@@ -401,6 +401,7 @@ const styles = StyleSheet.create({
     height: SIZES.height * 0.5,
     borderRadius: SIZES.radius,
     resizeMode: 'cover',
+    justifyContent: 'flex-end',
   },
   handleIndicator: {
     backgroundColor: COLORS.grey, // Style the grabber handle
@@ -418,6 +419,10 @@ const styles = StyleSheet.create({
     fontSize: SIZES.h4,
     fontWeight: 'bold',
     color: COLORS.black,
+  },
+  actionsContainer: {
+    gap: SIZES.padding * 3,
+    paddingVertical: SIZES.padding,
   },
   attributesContainer: {
     flexDirection: 'row',
@@ -450,6 +455,16 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     fontWeight: 'bold',
     color: COLORS.violet,
+  },
+  interestChip: {
+    width: '48%',
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderRadius: Size5,
+  },
+  interestChipText: {
+    fontSize: fontSize14,
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -566,5 +581,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.borderViolet,
     width: '100%',
+  },
+  galleryImage: {
+    width: '100%',
+    height: SIZES.height * 0.6,
   },
 });

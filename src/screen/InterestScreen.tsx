@@ -4,8 +4,9 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  RefreshControl,
 } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { fontSize14, fontSize16, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -39,6 +40,7 @@ import AppLoader from '../components/AppLoader';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
+  const [refreshing, setRefreshing] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
@@ -47,6 +49,13 @@ const InterestScreen = () => {
   const navigation = useNavigation();
   const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
     useSelector((state: any) => state.entities.userReducer);
+
+  const fetchData = useCallback(() => {
+    dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+    dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
+  }, [dispatch]);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close();
@@ -55,10 +64,20 @@ const InterestScreen = () => {
     return unsubscribe;
   }, [navigation]);
   useEffect(() => {
-    dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
-    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-    dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
-  }, [dispatch]);
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (refreshing && !loader) {
+      setRefreshing(false);
+    }
+  }, [loader, refreshing]);
+
   const handleCardPress = async (id: string) => {
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
@@ -130,43 +149,43 @@ const InterestScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
-      {loader ? (
-        <AppLoader visible={loader} />
-      ) : (
-        <>
-          {selectedTab === 0 &&
-            (proposalsGotByMe.length > 0 ? (
-              <FlatList
-                data={proposalsGotByMe}
-                renderItem={({ item }) => (
-                  <ReceivedCard
-                    item={item}
-                    onDecline={() => handleRejectProposal(item.id)}
-                    onConnect={() => handleAcceptProposal(item)}
-                    onPress={() => {
-                      if (packageByUserId.length > 0) {
-                        handleCardPress(item.senderUserId);
-                      } else {
-                        (navigation as any).navigate(ROUTES.STACK, {
-                          screen: ROUTES.UPGRADE,
-                        });
-                      }
-                    }}
-                    planPurchased={packageByUserId.length > 0}
-                  />
-                )}
-                keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={styles.gridContainer}
-                showsVerticalScrollIndicator={false}
-              />
-            ) : (
-              <View style={styles.emptyStateContainer}>
-                <Image
-                  source={require('../assets/images/lonely.png')}
-                  style={styles.heartImage}
+      {loader && <AppLoader />}
+          {selectedTab === 0 && (
+            <FlatList
+              data={proposalsGotByMe}
+              renderItem={({ item }) => (
+                <ReceivedCard
+                  item={item}
+                  onDecline={() => handleRejectProposal(item.id)}
+                  onConnect={() => handleAcceptProposal(item)}
+                  onPress={() => {
+                    if (packageByUserId.length > 0) {
+                      handleCardPress(item.senderUserId);
+                    } else {
+                      (navigation as any).navigate(ROUTES.STACK, {
+                        screen: ROUTES.UPGRADE,
+                      });
+                    }
+                  }}
+                  planPurchased={packageByUserId.length > 0}
                 />
-              </View>
-            ))}
+              )}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={styles.gridContainer}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyStateContainer}>
+                  <Image
+                    source={require('../assets/images/lonely.png')}
+                    style={styles.heartImage}
+                  />
+                </View>
+              }
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+            />
+          )}
           {selectedTab === 1 && (
             <FlatList
               data={passedUsers}
@@ -181,6 +200,9 @@ const InterestScreen = () => {
               columnWrapperStyle={styles.row}
               contentContainerStyle={styles.gridContainer}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
           )}
           {selectedTab === 2 && (
@@ -197,15 +219,21 @@ const InterestScreen = () => {
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
                 <View style={styles.emptyStateContainer}>
-                  <AppText text="Oops. No interests sent!" textStyle={styles.emptyText} />
-                  <AppText text="We know it’s hard. Be patient. Keep exploring & don’t shy away from sending your interersts" textStyle={styles.emptySubText} />
+                  <AppText
+                    text="Oops. No interests sent!"
+                    textStyle={styles.emptyText}
+                  />
+                  <AppText
+                    text="We know it’s hard. Be patient. Keep exploring & don’t shy away from sending your interersts"
+                    textStyle={styles.emptySubText}
+                  />
                 </View>
+              }
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
             />
           )}
-        </>
-      )}
-
       <ProfileBottomSheet
         bottomSheetRef={bottomSheetRef}
         isButtonVisible={selectedTab === 1}

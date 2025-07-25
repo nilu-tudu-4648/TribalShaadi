@@ -5,7 +5,6 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
-import AppChip from '../AppChip';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -22,6 +21,7 @@ import { SETTLING_DOWN_OPTIONS } from '../../constants/data';
 import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import AppChip2 from '../chips/AppChip2';
 
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -116,7 +116,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
 
         <View style={styles.chipsContainer}>
           {SETTLING_DOWN_OPTIONS.map(option => (
-            <AppChip
+            <AppChip2
               key={option}
               title={option}
               isSelected={localSelected?.includes(option)}

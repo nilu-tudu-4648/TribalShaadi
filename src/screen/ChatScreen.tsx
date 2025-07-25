@@ -1,11 +1,5 @@
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from 'react-native';
-import React, { useEffect } from 'react';
+import { StyleSheet, View, Image, FlatList, Pressable, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -17,9 +11,9 @@ import {
   Size12,
   Size8,
   Size14,
-  Size4,
   Size50,
   Size25,
+  Size10,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
@@ -42,18 +36,25 @@ import {
   friendRequestAcceptApi,
   getAcceptedProposalByIdApi,
 } from '../store/reducers/chatReducer';
+import AppChip2 from '../components/chips/AppChip2';
+import AppLoader from '../components/AppLoader';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const {
-    allChatHistoryByUserId,
-    acceptedProposalById,
-  } = useSelector((state: any) => state.entities.chatReducer);
+  const {loader, allChatHistoryByUserId, acceptedProposalById } = useSelector(
+    (state: any) => state.entities.chatReducer,
+  );
+  const { packageByUserId } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
   const dispatch = useDispatch();
+  const [refreshing, setRefreshing] = useState(false);
+  console.log('packageByUserId', packageByUserId);
   console.log('allChatHistoryByUserId', allChatHistoryByUserId);
   console.log('acceptedProposalById', acceptedProposalById);
-  useEffect(() => {
+
+  const fetchData = useCallback(() => {
     dispatch(
       getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user.id}`),
     );
@@ -69,6 +70,19 @@ const ChatScreen = () => {
       }),
     );
   }, [dispatch, user?.id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, [fetchData]);
+
   const acceptFriendRequest = (item: any) => {
     try {
       dispatch(
@@ -88,9 +102,10 @@ const ChatScreen = () => {
   };
 
   const renderConversationItem = (item: any) => (
-    <TouchableOpacity
+    <Pressable
       key={item.id}
       style={styles.conversationItem}
+      disabled={packageByUserId.length > 0 ? false : true}
       onPress={() => acceptFriendRequest(item)}
     >
       <Image
@@ -105,25 +120,32 @@ const ChatScreen = () => {
         />
         <AppText text={item.message} textStyle={styles.messageText} />
       </View>
-      <View
-        style={{
-          justifyContent: 'space-between',
-          flexDirection: 'column',
-          bottom: Size4,
-          gap: Size4,
-        }}
-      >
-        <AppText
-          text={'10:00'}
-          textStyle={{ color: COLORS.textSecondary, fontSize: fontSize14 }}
+      {true ? (
+        <View style={styles.timeContainer}>
+          <AppText
+            text={
+              item.friendsSince
+                ? new Date(item.friendsSince).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                : ''
+            }
+            textStyle={styles.timeText}
+          />
+          <NotifiNumberChip number={1} style={styles.notificationChip} />
+        </View>
+      ) : (
+        <AppChip2
+          title="New"
+          style={styles.newButton}
+          onPress={() => {}}
+          textStyle={styles.newButtonText}
         />
-        <NotifiNumberChip number={1} style={{ position: 'relative' }} />
-      </View>
-    </TouchableOpacity>
+      )}
+    </Pressable>
   );
 
   return (
     <AppSafeView style={styles.container}>
+      {loader && <AppLoader />}
       {/* Fixed Header */}
       <View style={styles.header}>
         <AppText text="Connections" textStyle={styles.headerTitle} />
@@ -141,11 +163,12 @@ const ChatScreen = () => {
         renderItem={({ item }) => renderConversationItem(item)}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => (
-          <View style={{ height: 1, backgroundColor: COLORS.borderLight4 }} />
-        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.conversationsList}
         style={styles.flatListContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </AppSafeView>
   );
@@ -224,12 +247,35 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
   },
   newButton: {
-    backgroundColor: COLORS.red,
+    backgroundColor: '#F7F3FF',
+    borderRadius: Size25,
+    paddingHorizontal: Size16,
+    paddingVertical: Size8,
+    borderWidth: 1,
+    borderColor: COLORS.violet,
   },
   newButtonText: {
     fontSize: fontSize14,
     color: COLORS.violet,
     fontWeight: '600',
     fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+  },
+  timeContainer: {
+    justifyContent: 'space-between',
+    flexDirection: 'column',
+    bottom: Size10,
+  },
+  timeText: {
+    color: "#A0A0A0",
+    fontSize: fontSize14,
+  },
+  notificationChip: {
+    position: 'absolute',
+    top: Size25,
+    left: Size25,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.borderLight4,
   },
 });

@@ -11,193 +11,205 @@ const TermScreen = () => {
   return (
     <AppSafeView style={styles.container}>
       <AppHeader title="Terms and Conditions" leftButtonStyle={styles.leftButton} />
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.contentWrapper}>
-          <AppText 
+          <AppText
             text="Effective Date: [Date]"
             textStyle={styles.effectiveDate}
           />
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="1. Product Introduction and Platform Agreement"
+            <AppText
+              text="1. Detailed Introduction"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="By downloading or clicking 'Yes' or 'I Agree' read-time bing platform designed for Indian tribal communities. By downloading or using the app, you accept and are bound by these Terms of Service. If you do not agree to these terms, do not use the app."
-              textStyle={styles.sectionContent}
-            />
-            <AppText 
-              text="• You are at least 18 years old.
-• You are legally eligible to enter into binding contracts for matrimonial purposes only"
+            <AppText
+              text={`Tribalshaadi.ai ("we," "our," or "us") is a matrimony platform designed for individuals seeking serious matrimonial connections. Our services are available through our mobile application ("App"). By accessing or using Tribalshaadi.ai, you acknowledge that:
+• You are at least 18 years old.
+• You are legally eligible to marry.
+• You will use the platform for matrimonial purposes only.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
+            <AppText
               text="2. Updates to Term of Service"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="We may update these Terms from time to time to reflect changes in laws, our services, or platform evolutions. The effective version's date will be displayed above. When we make changes, we'll notify you in advance through app notifications or emails. 
-
-if you continue using Tribalshandi.ai after changes to the terms, you acceptance of the changes and updated terms.
-
-We do not commit an account (non-using and inactive) for period between 6-12 months inactive account may terminate without notice."
+            <AppText
+              text={`We may modify these Terms from time to time to reflect changes in laws, our services, or business needs.
+The latest version will always be available in the App.
+If you continue using Tribalshaadi.ai after changes, you accept the updated Terms.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
+            <AppText
               text="3. User Agreement"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="By creating an account and using Tribalshandi.ai, you agree to:
-• Provide accurate and truthful information
-• Use the app for matrimonial purposes only
-• Follow community guidelines and laws
-• You said id there, without our Book without our app or independent user activity.
-• Real time and we, and you from responsible use for online app or independent user content."
+            <AppText
+              text={`By creating an account and using TribalShaadi.ai, you agree to:
+• Comply with these Terms.
+• Provide accurate and truthful information.
+• Not engage in fraudulent, illegal, or abusive activities on the platform.
+Violation of these Terms may lead to account suspension or termination.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
+            <AppText
               text="4. Our Responsibilities"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="We are committed to provide a secure and reliable matchmaking service. However, we do not guarantee success in finding a match.
-• Do not take responsibility for offline meetings or events between users.
-• Do not take responsibility for external sources or events because of our services.
-• We encourage users to exercise caution when meeting in person."
+            <AppText
+              text={`We are committed to providing a secure and reliable matchmaking service. However, we:
+• Do not guarantee successful matchmaking.
+• Do not verify every user's identity or intentions.
+• Do not take responsibility for offline interactions between users.
+While we use AI-based recommendations, we encourage users to exercise caution when connecting with others.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
+            <AppText
               text="5. Prohibited Activities"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="Never post HCT, harassing, or inappropriate content.
-Impersonating or providing false or misleading or incomplete profiles.
-• Sharing other Content other than our platform.
-• using automatic tools or bots to access multiple accounts.
-• creating or distributing malicious software.
-• Engaging in financial transactions others than our official purchases.
-• Violating any other-party related software restrictions.
-• Disputes with other users"
+            <AppText
+              text={`Users must NOT:
+• Provide false, misleading, or incomplete information.
+• Harass, abuse, or send inappropriate content to other users.
+• Use Tribalshaadi.ai for casual dating, friendships, or business promotions.
+• Impersonate another person or create multiple accounts.
+• Engage in fraudulent, scam, or illegal activities.
+• Post explicit, offensive, or discriminatory content.
+Users found engaging in prohibited activities may face permanent account termination.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="6. Rights to Access"
+            <AppText
+              text="6. App, Website, and Content Ownership"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="Tribalshandi.ai reserves the right to restrict or limit access to the platform or services at any time.
-Access restriction includes time-based or app-based services as it must always operate and user who were abusive
-or harass on our policy to reflect our platform eligibility requirement.
-Users must not attempt to hack, disrupt, or harass any person based on users malware.
-Account with that other or attempt to hack, disrupt, or misuse any platform of our platform related sites
-restricted content platform the platform.
-We are not responsible for any such problems.
-We do not responsible for service third party restricted other abuse unless we have otherwise for our discretion."
+            <AppText
+              text={`All content on Tribalshaadi.ai, including logos, text, images, and software, belongs to us.
+• Users retain ownership of the content they post but grant us a license to display it for matchmaking purposes.
+• Unauthorized copying, distribution, or modification of our content is strictly prohibited.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="7. Limitation of Liability, Disclaimers and Indemnification"
+            <AppText
+              text="7. Right to Access"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="• Disclaimer:
-We provide our services 'as is' and 'as available', without any warranties or guarantees.
-We do not verify every user's background, occupation, contact information or age.
-We do not screen users to all or from background information are not be accurate.
-Uses interact with third-party content and your information.
-Users interact with third-party content."
+            <AppText
+              text={`Tribalshaadi.ai reserves the right to restrict or deny access to any user who violates our policies.
+• Users must not attempt to hack, disrupt, or misuse our platform.
+• Access to certain features may be limited to premium members.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="8. Indemnification"
+            <AppText
+              text="8. Our Company's Rights"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="Tribalshaandi.ai, Indemnification: If
-You agree to indemnify and hold harmless
-Tribalshandi.ai from any claims, damages,
-or expense including from:
-• Users or content based third-party
-content and users who are or app from
-• Users interact third-party content and
-your app our users.
-Users interact third-party content and your
-content."
+            <AppText
+              text={`We reserve the right to:
+• Modify, suspend, or discontinue any part of the service without prior notice.
+• Remove or block profiles violating our policies.
+• Refuse service to anyone at our discretion.
+We do not provide refunds for terminated accounts due to policy violations.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="9. Privacy Policy"
+            <AppText
+              text="9. Third-Party Links and Content"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="Your usage is backed with app by agree to our privacy policy which outlines:
-• How we collect, store, and process your data
-
-• Data sharing practices
-
-We use consent personal info required with.
-
-We use consent required with to claim."
+            <AppText
+              text={`Tribalshaadi.ai may contain links to third-party websites or services.
+• We do not control or endorse third-party content and are not responsible for any issues arising from their use.
+• Users interact with third-party content at their own risk.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="10. Governing Law"
+            <AppText
+              text="10. Limitation of Liability, Disclaimers, and Indemnification"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="• These Terms are governed by the laws of
-[jurisdiction].
-• Any disputes will be resolved through
-arbitration and dispute and not
-litigation.
-• Users within the right to claim through this
-within this jurisdiction."
+            <AppText
+              text={`⚠️ Disclaimers:
+• We provide services "as is" and "as available" without guarantees.
+• We do not verify every user's background.
+• We are not liable for losses or damages arising from user interactions.
+
+⚠️ Limitation of Liability:
+• Our liability is limited to the amount paid (if any) for premium services.
+• We are not responsible for any indirect, accidental, or consequential damages.
+
+⚠️ Indemnification:
+Users agree to indemnify Tribalshaadi.ai, its owners, and affiliates from any claims or damages resulting from:
+• Misuse of the platform.
+• Violations of these Terms.
+• Disputes with other users.`}
               textStyle={styles.sectionContent}
             />
           </View>
 
           <View style={styles.sectionWrapper}>
-            <AppText 
-              text="11. Other Agreements"
+            <AppText
+              text="11. Privacy Policy"
               textStyle={styles.sectionTitle}
             />
-            <AppText 
-              text="• These Terms may be subject to additional app-specific and software settings (as at users) same effective from all third our business needs and to continue our communications.
-• If any provision in these terms are invalid, the remaining agreement between you and Tribalshandi.ai"
+            <AppText
+              text={`By using Tribalshaadi.ai, you agree to our Privacy Policy.
+• We collect, store, and process user data securely.
+• We do not sell or share personal data without user consent, except where required by law.`}
+              textStyle={styles.sectionContent}
+            />
+          </View>
+
+          <View style={styles.sectionWrapper}>
+            <AppText
+              text="12. Governing Law"
+              textStyle={styles.sectionTitle}
+            />
+            <AppText
+              text={`These Terms are governed by the laws of Jharkhand, India.
+• Any disputes will be resolved through arbitration in Jharkhand.
+• Users waive the right to class-action lawsuits.`}
+              textStyle={styles.sectionContent}
+            />
+          </View>
+
+          <View style={styles.sectionWrapper}>
+            <AppText
+              text="13. Other Matters"
+              textStyle={styles.sectionTitle}
+            />
+            <AppText
+              text={`• If any part of these Terms is found invalid, the rest remain fully enforceable.
+• Failure to enforce any provision does not waive our rights.
+• These Terms constitute the entire agreement between you and Tribalshaadi.ai.`}
               textStyle={styles.sectionContent}
             />
           </View>
@@ -244,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_REGULAR,
     fontWeight: '400',
-    color: COLORS.textSecondary,
+    color: COLORS.black,
     lineHeight: 20,
   },
   leftButton: {

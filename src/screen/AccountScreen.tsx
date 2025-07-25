@@ -66,29 +66,6 @@ type ActionButton = {
   route?: string;
 };
 
-const badgeData: BadgeData[] = [
-  {
-    key: 'crown',
-    label: 'Crown\nbadge',
-    color: '#FFD600',
-    icon: CrownIcon,
-    route: ROUTES.UPGRADE,
-  },
-  {
-    key: 'selfie',
-    label: 'Selfie\nverified',
-    color: COLORS.primaryBlue,
-    icon: SelfieVerifiedIcon,
-    route: ROUTES.SELFIE_VERIFY,
-  },
-  {
-    key: 'govt',
-    label: 'Govt. ID\nverified',
-    color: COLORS.grey,
-    icon: GovtIdIcon,
-  },
-];
-
 const AccountScreen = () => {
   const navigation = useNavigation<AccountScreenNavigationProp>();
   const { user, loader } = useSelector(
@@ -102,6 +79,28 @@ const AccountScreen = () => {
     (state: any) => state.entities.paymentReducer,
   );
   const dispatch = useDispatch();
+  const badgeData: BadgeData[] = [
+    {
+      key: 'crown',
+      label: 'Crown\nbadge',
+      color: packageByUserId.length > 0 ? '#FFD600' : COLORS.grey,
+      icon: CrownIcon,
+      route: ROUTES.UPGRADE,
+    },
+    {
+      key: 'selfie',
+      label: 'Selfie\nverified',
+      color: COLORS.primaryBlue,
+      icon: SelfieVerifiedIcon,
+      route: ROUTES.SELFIE_VERIFY,
+    },
+    {
+      key: 'govt',
+      label: 'Govt. ID\nverified',
+      color: COLORS.grey,
+      icon: GovtIdIcon,
+    },
+  ];
   const actionButtons: ActionButton[] = [
     {
       key: 'plan',

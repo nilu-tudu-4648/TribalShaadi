@@ -10,9 +10,14 @@ import {
   ABOUT_US_CARDS_SEC_2,
   ABOUT_US_CARDS_SEC_3,
   ABOUT_US_CARDS_SEC_4,
-  ABOUT_US_DATA,
 } from '../constants/data';
-import { fontSize20, fontSize30, Size12, Size16, Size20 } from '../constants/Sizes';
+import {
+  fontSize20,
+  fontSize30,
+  Size12,
+  Size16,
+  SIZES,
+} from '../constants/Sizes';
 import AboutusCard from '../components/Cards/AboutusCard';
 import AboutusCardSec from '../components/Cards/AboutusCardSec';
 import AppText from '../components/AppText';
@@ -20,7 +25,7 @@ import AppText from '../components/AppText';
 const AboutUsScreen = () => {
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="About Us"  />
+      <AppHeader title="About Us" />
       <AppScrollView style={{}}>
         <View style={styles.content}>
           <View style={styles.cards}>
@@ -30,9 +35,7 @@ const AboutUsScreen = () => {
               description={ABOUT_US_CARDS_SEC_1.description}
             />
           </View>
-          {ABOUT_US_DATA.map((item, index) => (
-            <Image source={item} style={styles.image} key={index} />
-          ))}
+          <Image source={require('../assets/images/about1.png')} style={styles.image} />
           <View style={styles.cards}>
             <AboutusCardSec
               style={{ backgroundColor: COLORS.cardBg1 }}
@@ -40,6 +43,12 @@ const AboutUsScreen = () => {
               textStyle={{ color: COLORS.white }}
               title={ABOUT_US_CARDS_SEC_2.title}
               description={ABOUT_US_CARDS_SEC_2.description}
+            />
+          </View>
+          <View style={styles.cards}>
+            <Image
+              source={require('../assets/images/about4.png')}
+              style={[styles.image, { resizeMode: 'stretch', height: SIZES.height*.43}]}
             />
           </View>
           <View style={styles.cards}>
@@ -51,21 +60,31 @@ const AboutUsScreen = () => {
               description={ABOUT_US_CARDS_SEC_3.description}
             />
           </View>
-          <View style={styles.cards}>
             <Image
               source={require('../assets/images/about2.png')}
               style={styles.image}
             />
-          </View>
-          <View style={styles.cards}>
             <Image
               source={require('../assets/images/about3.png')}
               style={styles.image}
             />
-          </View>
-          <View style={{gap:Size12,paddingVertical:Size20}}>
-            <AppText text="Our Values" style={{ fontSize: fontSize30, fontWeight: 'bold',textAlign:'center' }} />
-            <AppText text="They guide how we build, who we serve, and where we’re headed next." style={{ fontSize: fontSize20, color: COLORS.aboutText,textAlign:'center' }} />
+          <View style={{ gap: Size12 }}>
+            <AppText
+              text="Our Values"
+              style={{
+                fontSize: fontSize30,
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            />
+            <AppText
+              text="They guide how we build, who we serve, and where we’re headed next."
+              style={{
+                fontSize: fontSize20,
+                color: COLORS.aboutText,
+                textAlign: 'center',
+              }}
+            />
           </View>
           <View style={styles.cards}>
             {ABOUT_US_CARDS.map((item: any, index: number) => (
@@ -104,7 +123,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 250,
+    height: SIZES.height*.25,
     resizeMode: 'contain',
   },
   cards: {
