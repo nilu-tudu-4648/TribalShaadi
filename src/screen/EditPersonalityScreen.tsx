@@ -34,7 +34,7 @@ import {
 import AppToast from '../components/AppToast';
 import ProfileHeader from '../components/Header/ProfileHeader';
 import { PersonalityIcon } from '../components/svg/SvgIcons';
-import { INTERESTS, VALUES_OPTIONS } from '../constants/data';
+import { INTERESTS, ROUTES, VALUES_OPTIONS } from '../constants/data';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 
@@ -153,7 +153,12 @@ const handleSave = useCallback(async () => {
     <AppSafeView style={styles.container}>
       <ProfileHeader
         title="Personality & Preferences"
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => {
+          handleSave();
+          (navigation as any).navigate(ROUTES.STACK, {
+            screen: ROUTES.ACCOUNT,
+          } as never);
+        }}
         icon={<PersonalityIcon size={Size25} />}
       />
       <ScrollView 

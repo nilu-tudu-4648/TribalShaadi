@@ -8,6 +8,7 @@ const initialState = {
   messages: [],
   friendRequestAccept: [],
   acceptedProposalById: [],
+  insertUserNotifications: [],
 };
 
 const chatReducer = createSlice({
@@ -50,6 +51,11 @@ const chatReducer = createSlice({
       chatReducer.loader = false;
       chatReducer.acceptedProposalById = action.payload.recordList;
     },
+    chatReducerInsertUserNotificationsReceived: (chatReducer, action) => {
+      chatReducer.loader = false;
+      console.log('chatReducerInsertUserNotificationsReceived.payload', action.payload);
+      chatReducer.insertUserNotifications = action.payload;
+    },
   },
 });
 
@@ -65,6 +71,7 @@ const {
   chatReducerMessagesReceived,
   chatReducerFriendRequestAcceptReceived,
   chatReducerAcceptedProposalByIdReceived,
+  chatReducerInsertUserNotificationsReceived,
 } = chatReducer.actions;
 export const getUserChatListApi = (url, data = {}) =>
   apiCallBegan({
@@ -118,6 +125,15 @@ export const getAcceptedProposalByIdApi = (url, data = {}) =>
     data,
     onStart: chatReducerDataRequested.type,
     onSuccess: chatReducerAcceptedProposalByIdReceived.type,
+    onError: chatReducerDataRequestFailed.type,
+  });
+export const insertUserNotificationsApi = (url, data = {}) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: chatReducerDataRequestFailed.type,
+    onSuccess: chatReducerInsertUserNotificationsReceived.type,
     onError: chatReducerDataRequestFailed.type,
   });
 export default chatReducer.reducer;

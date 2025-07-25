@@ -63,13 +63,13 @@ const getfcmToken = async () => {
     return;
   }
 
-  let fcmToken = await AsyncStorage.getItem('fcmToken');
+  let fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
   if (!fcmToken) {
     try {
       const token = await messaging().getToken();
       if (token) {
         console.log('FCM Token:', token);
-        await AsyncStorage.setItem('fcmToken', token);
+        await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
         // Send token to your server
         await sendTokenToServer(token);
         // Subscribe to general topics for all users
@@ -97,20 +97,22 @@ const sendTokenToServer = async token => {
     console.log('userToken', userToken);
     console.log('fcmToken', token);
     // Replace with your actual server endpoint
-    const response = await axios.post(`${baseUrl}/${updateUrl}`, {
-      id: user.id,
-      fcmToken: token,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
+    if (user && user.id) {
+      const response = await axios.post(`${baseUrl}/${updateUrl}`, {
+        id: user.id,
+        fcmToken: token,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        }
+      });
+      console.log('response', response);
+      if (response.status === 200) {
+        console.log('FCM token saved to server successfully');
+      } else {
+        console.log('Failed to send FCM token to server');
       }
-    });
-    console.log('response', response);
-    if (response.status === 200) {
-      console.log('FCM token saved to server successfully');
-    } else {
-      console.log('Failed to send FCM token to server');
     }
   } catch (error) {
     console.log('Error sending FCM token to server:', error);
@@ -128,7 +130,7 @@ export const refreshFCMToken = async () => {
     await messaging().deleteToken();
     const newToken = await messaging().getToken();
     if (newToken) {
-      await AsyncStorage.setItem('fcmToken', newToken);
+      await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, newToken);
       // await sendTokenToServer(newToken);
       // console.log('FCM token refreshed:', newToken);
     }
@@ -191,7 +193,7 @@ export const notificationListner = async () => {
     // Handle token refresh
     messaging().onTokenRefresh(token => {
       console.log('FCM token refreshed:', token);
-      AsyncStorage.setItem('fcmToken', token);
+      AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
       // sendTokenToServer(token);
     });
   } catch (error) {

@@ -1,5 +1,5 @@
-import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
+import { StyleSheet, View, TouchableOpacity, Image,BackHandler } from 'react-native';
+import React, { useEffect, useCallback } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,7 +14,8 @@ import {
   Size25, 
   Size40, 
   screenWidth,
-  screenHeight
+  screenHeight,
+  Size50
 } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { CloseIcon } from '../components/svg/SvgIcons2';
@@ -24,12 +25,20 @@ import { ROUTES } from '../constants/data';
 const PaymentSuccess = () => {
   const navigation = useNavigation();
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Navigate back to the main tabs, specifically to Account screen
     (navigation as any).navigate(ROUTES.MAIN_TABS, {
       screen: ROUTES.ACCOUNT,
     });
-  };
+  }, [navigation]);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleClose();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, [handleClose]);
 
   return (
     <LinearGradient
@@ -102,6 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: Size40,
+    paddingBottom: Size50*2,
   },
   successSection: {
     alignItems: 'center',

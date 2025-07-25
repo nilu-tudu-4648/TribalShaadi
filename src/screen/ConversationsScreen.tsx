@@ -34,10 +34,11 @@ import FONT_FAMILY from '../constants/Fonts';
 import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ASYNC_VARIBLES } from '../constants/data';
-import { useSelector } from 'react-redux';
-import { formatDateShort, imageUrl } from '../constants/functions';
+import { useDispatch, useSelector } from 'react-redux';
+import { baseUrl, formatDateShort, imageUrl, insertUserNotificationsUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
+import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 
 // Message type definitions
 interface Message {
@@ -67,11 +68,11 @@ const ConversationsScreen = () => {
   const socket = useRef<Socket | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
-
+  const dispatch = useDispatch();
   const { messages } = useSelector((state: any) => state.entities.chatReducer);
   console.log('messages', messages);
-  console.log('user:', user);
-  console.log('userDetails:', userDetails);
+  // console.log('user:', user);
+  // console.log('userDetails:', userDetails);
 
   const saveChatMessages = useCallback(
     async (messagesToSave: Message[]) => {
@@ -178,7 +179,10 @@ const ConversationsScreen = () => {
         id: Date.now(), // Use timestamp as unique ID
         timestamp: Date.now(),
       };
-
+      dispatch(insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+        title: 'New Message',
+        message: message.message,
+      }));
       setChatData(currentChatData => {
         const updatedMessages = [...currentChatData, newMessage];
         saveChatMessages(updatedMessages);
@@ -186,7 +190,7 @@ const ConversationsScreen = () => {
         return updatedMessages;
       });
     },
-    [saveChatMessages, scrollToBottom],
+    [saveChatMessages, scrollToBottom, dispatch],
   );
 
   // Initialize socket connection with fallback URLs

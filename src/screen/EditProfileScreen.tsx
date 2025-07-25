@@ -369,6 +369,6 @@ const styles = StyleSheet.create({
     left: -10,
     width: 80,
     height: 70,
-    zIndex: 1000,
+    opacity: 0.8,
   },
 });

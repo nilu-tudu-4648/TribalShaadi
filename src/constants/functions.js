@@ -4,6 +4,7 @@ import {
   setUser,
   logoutFromReducer,
   setLoadingfalse,
+  completeUserProfileV2Updated,
 } from '../store/reducers/authReducer';
 import { getGalleryImageListApi, setReducerCleaned, setUserRegistrationCompleted } from '../store/reducers/userReducer';
 import axios from 'axios';
@@ -80,7 +81,7 @@ export const friendRequestRejectOrBlockUrl = 'app/userChat/friendRequestRejectOr
 export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
 export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
 export const getAcceptedProposalByIdUrl = 'app/proposals/getAcceptedProposalById';
-
+export const insertUserNotificationsUrl = 'app/notifications/insertUserNotifications';
 // Date formatting function
 export const formatDateOfBirth = dateString => {
   if (!dateString) return '';
@@ -163,10 +164,17 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     AppToast('OTP verified successfully');
     if (response.data.status === 200) {
       console.log(response.data.recordList[0], 'verifyOTP');
-      await saveUserToStorage(response.data.recordList[0]);
+      await saveUserToStorage(response.data.recordList[0])
       await getUserDetailsApi(
         `${getUserDetailsUrl}id=${response.data.recordList[0].id}`,
         dispatch,
+      );
+      const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
+      dispatch(
+        completeUserProfileV2Updated(updateUrl, {
+            id: response.data.recordList[0].id,
+            fcmToken: fcmToken,
+        }),
       );
       checkAuth(dispatch);
       return true;
@@ -181,7 +189,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    // console.log(token, 'token');
+    console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,

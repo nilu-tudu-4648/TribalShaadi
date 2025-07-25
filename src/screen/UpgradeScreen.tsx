@@ -97,6 +97,7 @@ const UpgradeScreen = () => {
   const paymentSuccessfull = useCallback(
     async (data: any, selectedPackage: any) => {
       try {
+        (navigation as any).navigate(ROUTES.JUST_PAY);
         dispatch(
           insertPaymentApi(insertPaymentUrl, {
             paymentReference: data.razorpay_payment_id,
@@ -126,7 +127,7 @@ const UpgradeScreen = () => {
         });
       }
     },
-    [dispatch, calculateEndDate, user.id],
+    [dispatch, calculateEndDate, user.id, navigation],
   );
   const openRazorpayCheckout = () => {
     if (!paymentGateways) {

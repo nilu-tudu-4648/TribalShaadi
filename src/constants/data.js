@@ -10,6 +10,7 @@ export const ASYNC_VARIBLES = {
   USER_TOKEN: 'userToken',
   USER: 'user',
   CHAT_MESSAGES: 'chatMessages',
+  FCM_TOKEN: 'fcmToken',
 };
 // Routes
 export const ROUTES = {
@@ -60,6 +61,7 @@ export const ROUTES = {
   PRIVACY_POLICY: 'PrivacyPolicy',
   REFUND_POLICY: 'RefundPolicy',
   TIPS: 'Tips',
+  JUST_PAY: 'JustPay',
 };
 
 // Mother Tongue

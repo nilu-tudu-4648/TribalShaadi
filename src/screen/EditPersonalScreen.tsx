@@ -9,7 +9,7 @@ import AppButton from '../components/AppButton';
 import AppPickerModal from '../components/AppPickerModal';
 import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, Size8, fontSize24 } from '../constants/Sizes';
-import { MOTHER_TONGUE } from '../constants/data';
+import { MOTHER_TONGUE, ROUTES } from '../constants/data';
 import {
   getCommunity,
   completeUserProfileV2Updated,
@@ -268,7 +268,12 @@ const EditPersonalScreen = () => {
   return (
     <AppSafeView style={styles.container}>
       <ProfileHeader
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => {
+          handleSave();
+          (navigation as any).navigate(ROUTES.STACK, {
+            screen: ROUTES.ACCOUNT,
+          } as never);
+        }}
         title="Personal Details"
         icon={<UserProfileIcon />}
       />

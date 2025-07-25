@@ -26,6 +26,7 @@ import { SlidersIcon } from '../components/svg/SvgIcons';
 import ProfileHeader from '../components/Header/ProfileHeader';
 import {
   DRINKING_OPTIONS,
+  ROUTES,
   SETTLING_DOWN_OPTIONS,
   SMOKING_OPTIONS,
 } from '../constants/data';
@@ -241,7 +242,12 @@ const EditLifeScreen = () => {
   return (
     <AppSafeView style={styles.container}>
       <ProfileHeader
-        onBackPress={() => navigation.goBack()}
+           onBackPress={() => {
+            handleSave();
+            (navigation as any).navigate(ROUTES.STACK, {
+              screen: ROUTES.ACCOUNT,
+            } as never);
+          }}
         title="Lifestyle & Hometown"
         icon={<SlidersIcon />}
       />

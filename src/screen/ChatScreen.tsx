@@ -50,7 +50,6 @@ const ChatScreen = () => {
   );
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
-  console.log('packageByUserId', packageByUserId);
   console.log('allChatHistoryByUserId', allChatHistoryByUserId);
   console.log('acceptedProposalById', acceptedProposalById);
 

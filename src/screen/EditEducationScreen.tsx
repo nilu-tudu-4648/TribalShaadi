@@ -9,11 +9,11 @@ import AppPickerModal from '../components/AppPickerModal';
 import AppTextInput from '../components/AppTextInput';
 import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, Size4, Size8, borderWidth } from '../constants/Sizes';
-import { 
+import {
   completeUserProfileV2Updated,
   getEducationTypes,
   getOccupation,
-  getIncome 
+  getIncome,
 } from '../store/reducers/authReducer';
 import {
   updateUrl,
@@ -27,6 +27,7 @@ import {
 import AppToast from '../components/AppToast';
 import ProfileHeader from '../components/Header/ProfileHeader';
 import { EducationIcon } from '../components/svg/SvgIcons';
+import { ROUTES } from '../constants/data';
 
 // Company types - keeping as hardcoded since no specific API exists
 const COMPANY_TYPES = [
@@ -102,7 +103,7 @@ const EditEducationScreen = () => {
         salaryName: user.annualIncome || '',
         annualIncome: user.annualIncome || '',
         annualIncomeId: user.annualIncomeId || '',
-      }); 
+      });
     }
   }, [user]);
 
@@ -150,7 +151,6 @@ const EditEducationScreen = () => {
 
   // Handle form submission
   const handleSave = useCallback(async () => {
-
     try {
       const requestBody = {
         id: user.id,
@@ -180,7 +180,12 @@ const EditEducationScreen = () => {
     <AppSafeView style={styles.container}>
       <ProfileHeader
         title="Education & Career"
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => {
+          handleSave();
+          (navigation as any).navigate(ROUTES.STACK, {
+            screen: ROUTES.ACCOUNT,
+          } as never);
+        }}
         icon={<EducationIcon size={Size25} />}
       />
       <View style={styles.scrollView}>

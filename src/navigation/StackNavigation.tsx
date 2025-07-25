@@ -26,6 +26,7 @@ import TermScreen from '../screen/TermScreen';
 import PrivacyScreen from '../screen/PrivacyScreen';
 import RefundScreen from '../screen/RefundScreen';
 import TipsScreen from '../screen/TipsScreen';
+import JustPayScreen from '../screen/JustPayScreen';
 export type RootStackParamList = {
   [ROUTES.SETTINGS]: undefined;
 };
@@ -59,7 +60,7 @@ const StackNavigation = () => {
       <Stack.Screen name={ROUTES.PRIVACY_POLICY} component={PrivacyScreen} />
       <Stack.Screen name={ROUTES.REFUND_POLICY} component={RefundScreen} />
       <Stack.Screen name={ROUTES.TIPS} component={TipsScreen} />
-
+      <Stack.Screen name={ROUTES.JUST_PAY} component={JustPayScreen} />
     </Stack.Navigator>
   );
 };
