@@ -24,12 +24,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   friendRequestAcceptUrl,
   getAcceptedProposalByIdUrl,
-  getAllChatHistoryByUserIdUrl,
   getUserChatListUrl,
   imageUrl,
 } from '../constants/functions';
 import {
-  getAllChatHistoryByUserIdApi,
   getUserChatListApi,
 } from '../store/reducers/chatReducer';
 import {
@@ -51,7 +49,7 @@ const ChatScreen = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   console.log('allChatHistoryByUserId', allChatHistoryByUserId);
-  console.log('acceptedProposalById', acceptedProposalById);
+  // console.log('acceptedProposalById', acceptedProposalById);
 
   const fetchData = useCallback(() => {
     dispatch(
@@ -61,11 +59,6 @@ const ChatScreen = () => {
       getUserChatListApi(getUserChatListUrl, {
         startIndex: '1',
         fetchRecord: '10',
-      }),
-    );
-    dispatch(
-      getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
-        userId: user.id,
       }),
     );
   }, [dispatch, user?.id]);

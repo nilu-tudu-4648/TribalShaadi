@@ -163,16 +163,17 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     const response = await axios.post(`${baseUrl}/${url}`, data);
     AppToast('OTP verified successfully');
     if (response.data.status === 200) {
-      console.log(response.data.recordList[0], 'verifyOTP');
-      await saveUserToStorage(response.data.recordList[0])
+      const user = response.data.recordList[0];
+      console.log(user, 'verifyOTP');
+      await saveUserToStorage(user)
       await getUserDetailsApi(
-        `${getUserDetailsUrl}id=${response.data.recordList[0].id}`,
+        `${getUserDetailsUrl}id=${user.id}`,
         dispatch,
       );
       const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
       dispatch(
         completeUserProfileV2Updated(updateUrl, {
-            id: response.data.recordList[0].id,
+            id: user.id,
             fcmToken: fcmToken,
         }),
       );

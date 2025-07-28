@@ -24,7 +24,7 @@ const chatReducer = createSlice({
     },
     chatReducerDataRequestFailed: (chatReducer, action) => {
       chatReducer.loader = false;
-      console.log(action.payload, 'reducer Failed');
+      console.log(action.payload, 'chatReducer Failed');
     },
     chatReducerUserChatListReceived: (chatReducer, action) => {
       chatReducer.loader = false;

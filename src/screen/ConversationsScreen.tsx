@@ -35,10 +35,10 @@ import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ASYNC_VARIBLES } from '../constants/data';
 import { useDispatch, useSelector } from 'react-redux';
-import { baseUrl, formatDateShort, imageUrl, insertUserNotificationsUrl } from '../constants/functions';
+import { baseUrl, formatDateShort, getAllChatHistoryByUserIdUrl, imageUrl, insertUserNotificationsUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
-import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
+import { getAllChatHistoryByUserIdApi, insertUserNotificationsApi } from '../store/reducers/chatReducer';
 
 // Message type definitions
 interface Message {
@@ -323,7 +323,7 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('error_message', error => {
-        console.error('❌ Socket Error:', error);
+        console.error('❌ Socket Error:', error.response.data);
 
         // Update any sending messages to failed status
         setChatData(currentChatData =>
@@ -368,7 +368,11 @@ const ConversationsScreen = () => {
       loadChatMessages();
     }
     initializeSocket(0);
-
+    dispatch(
+      getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
+        userId: user.id,
+      }),
+    );
     return () => {
       console.log('🧹 Cleaning up socket connection');
       if (socket.current) {
@@ -381,7 +385,7 @@ const ConversationsScreen = () => {
         pingIntervalRef.current = null;
       }
     };
-  }, [initializeSocket, loadChatMessages, user?.id, userDetails?.friendId]);
+  }, [initializeSocket, loadChatMessages, user?.id, userDetails?.friendId, dispatch]);
 
   // Auto-scroll when chatData changes
   useEffect(() => {
@@ -410,7 +414,7 @@ const ConversationsScreen = () => {
     if (messageText.trim() && user?.id && userDetails?.friendId) {
       const content = messageText.trim();
       console.log('📤 Sending message:', {
-        from: user.id,
+        from: user?.id,
         to: userDetails.friendId,
         content,
       });
@@ -423,7 +427,7 @@ const ConversationsScreen = () => {
       });
 
       socket.current?.emit('send_message', {
-        from: String(user.id), // Ensure it's a string
+        from: String(user?.id), // Ensure it's a string
         to: String(userDetails.friendId), // Ensure it's a string
         content,
       });
@@ -443,7 +447,7 @@ const ConversationsScreen = () => {
   const renderMessage = (item: Message) => {
     if (item.type === 'story_starter') {
       return (
-        <View key={item.id} style={styles.storyStarterContainer}>
+        <View key={item?.id} style={styles.storyStarterContainer}>
           <View style={styles.userImagesContainer}>
             <View style={styles.userImageWrapper}>
               <Image
@@ -470,7 +474,7 @@ const ConversationsScreen = () => {
 
     if (item.type === 'received') {
       return (
-        <View key={item.id} style={styles.messageContainer}>
+        <View key={item?.id} style={styles.messageContainer}>
           <View style={styles.timeContainerEnd}>
             <AppText text={item.time} textStyle={styles.timeText} />
           </View>
@@ -486,7 +490,7 @@ const ConversationsScreen = () => {
 
     if (item.type === 'sent') {
       return (
-        <View key={item.id} style={styles.messageContainer}>
+        <View key={item?.id} style={styles.messageContainer}>
           <View style={styles.timeContainer}>
             <AppText
               text={
@@ -683,10 +687,10 @@ const styles = StyleSheet.create({
     gap: Size5,
   },
   timeContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
   },
   timeContainerEnd: {
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
   },
   timeText: {
     fontSize: fontSize12,
@@ -694,20 +698,6 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
   },
   receivedMessageBubble: {
-    backgroundColor: COLORS.recivedBackground,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    borderRadius: Size10,
-    borderTopRightRadius: Size4 / 2,
-    maxWidth: '80%',
-    alignSelf: 'flex-end',
-  },
-  receivedMessageText: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
-  },
-  sentMessageBubble: {
     backgroundColor: COLORS.white,
     paddingHorizontal: Size16,
     paddingVertical: Size12,
@@ -718,9 +708,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.borderLight3,
   },
-  sentMessageText: {
+  receivedMessageText: {
     fontSize: fontSize14,
     color: COLORS.black,
+    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+  },
+  sentMessageBubble: {
+    backgroundColor: COLORS.recivedBackground,
+    paddingHorizontal: Size16,
+    paddingVertical: Size12,
+    borderRadius: Size10,
+    borderTopRightRadius: Size4 / 2,
+    maxWidth: '80%',
+    alignSelf: 'flex-end',
+  },
+  sentMessageText: {
+    fontSize: fontSize14,
+    color: COLORS.white,
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
     lineHeight: 20,
   },

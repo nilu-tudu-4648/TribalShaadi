@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { apiCallBegan } from '../api';
 const initialState = {
-  loader: true,
+  loader: false,
   connectLoader: false,
   declineLoader: false,
   userRegistrationCompleted: false,

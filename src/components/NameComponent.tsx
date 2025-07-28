@@ -115,9 +115,10 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '70%',
+    width: '100%',
     height: Size25,
     resizeMode: 'contain',
+    right: SIZES.base,
   },
   homeIconContainer: {
     flexDirection: 'row',

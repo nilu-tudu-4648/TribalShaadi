@@ -1,12 +1,6 @@
-import {
-  StyleSheet,
-  View,
-  ImageBackground,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, ImageBackground, Pressable } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import AppText from '../AppText';
 import { COLORS } from '../../constants/AppColors';
 import {
   SIZES,
@@ -19,9 +13,9 @@ import {
   Size20,
   Size25,
 } from '../../constants/Sizes';
-import { convertCmToReadableHeight, imageUrl } from '../../constants/functions';
-import { HomeIcon2 } from '../svg/SvgIcons';
+import { imageUrl } from '../../constants/functions';
 import AppButton from '../AppButton';
+import NameComponent from '../NameComponent';
 
 const ReceivedCard = ({
   item,
@@ -36,7 +30,7 @@ const ReceivedCard = ({
   onPress: () => void;
   planPurchased: boolean;
 }) => {
-
+  console.log(item);
   return (
     <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
@@ -51,26 +45,18 @@ const ReceivedCard = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-          {planPurchased  ? (
-            <View style={styles.cardContent}>
-              <AppText
-                text={`${item.firstName} ${(item.lastName??"")}, ${item.age}`}
-                textStyle={styles.name}
-              />
-              <AppText
-                text={`${convertCmToReadableHeight(item.height)} · ${
-                  item.religion
-                } · ${item.community}`}
-                textStyle={styles.details}
-              />
-              <View style={styles.homeIconContainer}>
-                <HomeIcon2 color={COLORS.white} />
-                <AppText
-                  text={`${item.city ? item.city : ''}, ${item.state}`}
-                  textStyle={styles.location}
-                />
-              </View>
-            </View>
+          {planPurchased ? (
+            <NameComponent
+              name={`${item.firstName} ${item.lastName ?? ''}`}
+              age={item.age}
+              isVerified={item.isVerified}
+              isPremium={item.isPremium}
+              height={item.height}
+              religion={item.religion}
+              caste={item.community}
+              districtName={item.city ?? ''}
+              stateName={item.state ?? ''}
+            />
           ) : (
             <View style={styles.whiteLineContainer}>
               <View style={{ ...styles.whiteLine, width: '60%' }} />

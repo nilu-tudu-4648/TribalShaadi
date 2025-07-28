@@ -4,9 +4,9 @@ import GradientLoader from "./GradientLoader";
 import { Size20, Size40 } from "../constants/Sizes";
 import { COLORS } from "../constants/AppColors";
 
-export default function AppLoader({ visible = true }) {
+export default function AppLoader() {
   return (
-    <Modal visible={visible} transparent={true} animationType="fade">
+    <Modal transparent={true} animationType="fade">
       <View style={styles.container}>
         <View style={styles.loaderContainer}>
           <GradientLoader size={Size40} />

@@ -37,6 +37,7 @@ import {
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import AppLoader from '../components/AppLoader';
+import AppSafeView from '../components/AppSafeView';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
@@ -129,7 +130,8 @@ const InterestScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <AppSafeView style={styles.container}>
+      {loader && <AppLoader />}
       <AppText text="Interests" textStyle={styles.title} />
       <View style={styles.tabsContainer}>
         {INTEREST_TABS.map((tab, idx) => (
@@ -149,7 +151,6 @@ const InterestScreen = () => {
           </TouchableOpacity>
         ))}
       </View>
-      {loader && <AppLoader />}
           {selectedTab === 0 && (
             <FlatList
               data={proposalsGotByMe}
@@ -238,7 +239,7 @@ const InterestScreen = () => {
         bottomSheetRef={bottomSheetRef}
         isButtonVisible={selectedTab === 1}
       />
-    </View>
+    </AppSafeView>
   );
 };
 
@@ -247,7 +248,7 @@ export default InterestScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     paddingTop: SIZES.base * 4, // Approximately 48
     paddingHorizontal: SIZES.padding2,
     gap: SIZES.padding,
