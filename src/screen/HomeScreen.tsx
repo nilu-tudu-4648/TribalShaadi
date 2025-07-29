@@ -66,7 +66,7 @@ const HomeScreen = () => {
           proposalUserId: id,
         }),
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
@@ -84,7 +84,7 @@ const HomeScreen = () => {
           proposalUserId: id,
         }),
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       // Don't increment index here - let the useEffect handle it when matchedUsers updates
@@ -115,7 +115,8 @@ const HomeScreen = () => {
   useEffect(() => {
     if (matchedUsers && matchedUsers.length > currentIndex) {
       const currentUserId = matchedUsers[currentIndex].id;
-      const nextUserId = matchedUsers[(currentIndex + 1) % matchedUsers.length].id;
+      const nextUserId =
+        matchedUsers[(currentIndex + 1) % matchedUsers.length].id;
 
       dispatch(
         getCurrentMatchedApi(
@@ -138,9 +139,7 @@ const HomeScreen = () => {
 
       // Pre-fetch data for the next user
       dispatch(
-        getCurrentMatchedApi(
-          `${baseUrl}/${getUserDetailsUrl}id=${nextUserId}`,
-        ),
+        getCurrentMatchedApi(`${baseUrl}/${getUserDetailsUrl}id=${nextUserId}`),
       );
       dispatch(
         getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
@@ -158,9 +157,9 @@ const HomeScreen = () => {
     }
   }, [dispatch, matchedUsers, currentIndex]);
 
-  const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-  console.log(matchedUsers, 'matchedUsers');
-  console.log(currentUser, 'currentUser');
+  // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
+  // console.log(matchedUsers, 'matchedUsers');
+  // console.log(currentUser, 'currentUser');
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -175,14 +174,17 @@ const HomeScreen = () => {
                 <View style={styles.carouselContainer}>
                   <FlatList
                     data={matchedUsers}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={item => item.id}
                     horizontal
                     pagingEnabled
                     showsHorizontalScrollIndicator={false}
                     snapToAlignment="center"
                     snapToInterval={Dimensions.get('window').width}
-                    onMomentumScrollEnd={(e) => {
-                      const newIndex = Math.round(e.nativeEvent.contentOffset.x / Dimensions.get('window').width);
+                    onMomentumScrollEnd={e => {
+                      const newIndex = Math.round(
+                        e.nativeEvent.contentOffset.x /
+                          Dimensions.get('window').width,
+                      );
                       setCurrentIndex(newIndex);
                     }}
                     renderItem={({ item }) => (
@@ -193,9 +195,7 @@ const HomeScreen = () => {
                         ]}
                       >
                         <ProfileCard
-                          name={
-                            item.firstName + ' ' + (item.lastName ?? '')
-                          }
+                          name={item.firstName + ' ' + (item.lastName ?? '')}
                           age={item.age}
                           height={item.height}
                           religion={item.religion}
@@ -210,22 +210,26 @@ const HomeScreen = () => {
                             []
                           }
                           isLoading={loader}
-                          maritalStatus={item.maritalStatus}
+                          maritalStatus={currentMatchedUser?.maritalStatus}
                           dob={item.birthDate}
-                          motherTongue={item.motherTongue}
-                          annualIncome={item.annualIncome}
-                          partnerExpectation={item.about_lifepartener}
-                          employedIn={item.employedIn}
-                          occupation={item.occupation}
-                          organizationName={item.companyName}
-                          settlingTime={item.planingto_settle}
-                          highestQualification={item.highestQualification}
-                          college={item.college_name}
-                          eatingHabits={item.diet}
-                          drinkingHabits={item.drinking}
-                          smokingHabits={item.smoking}
-                          kids={item.kids}
-                          interests={item.intrests}
+                          motherTongue={currentMatchedUser?.motherTongue}
+                          annualIncome={currentMatchedUser?.annualIncome}
+                          partnerExpectation={
+                            currentMatchedUser?.about_lifepartener
+                          }
+                          employedIn={currentMatchedUser?.employedIn}
+                          occupation={currentMatchedUser?.occupation}
+                          organizationName={currentMatchedUser?.companyName}
+                          settlingTime={currentMatchedUser?.planingto_settle}
+                          highestQualification={
+                            currentMatchedUser?.highestQualification
+                          }
+                          college={currentMatchedUser?.college_name}
+                          eatingHabits={currentMatchedUser?.diet}
+                          drinkingHabits={currentMatchedUser?.drinking}
+                          smokingHabits={currentMatchedUser?.smoking}
+                          kids={currentMatchedUser?.kids}
+                          interests={currentMatchedUser?.intrests}
                           isVerified={false}
                           isPremium={currentUserPackage.length > 0}
                         />

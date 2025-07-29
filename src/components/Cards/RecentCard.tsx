@@ -35,7 +35,7 @@ const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
   );
 };
 
-export default RecentCard;
+export default React.memo(RecentCard);
 
 const styles = StyleSheet.create({
   profileCard: {

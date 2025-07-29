@@ -89,7 +89,7 @@ const ReceivedCard = ({
   );
 };
 
-export default ReceivedCard;
+export default React.memo(ReceivedCard);
 
 const styles = StyleSheet.create({
   card: {

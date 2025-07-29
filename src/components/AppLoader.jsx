@@ -4,7 +4,7 @@ import GradientLoader from "./GradientLoader";
 import { Size20, Size40 } from "../constants/Sizes";
 import { COLORS } from "../constants/AppColors";
 
-export default function AppLoader() {
+export default React.memo(function AppLoader() {
   return (
     <Modal transparent={true} animationType="fade">
       <View style={styles.container}>
@@ -14,7 +14,7 @@ export default function AppLoader() {
       </View>
     </Modal>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

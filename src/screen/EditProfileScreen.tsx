@@ -175,25 +175,24 @@ const EditProfileScreen = () => {
 
         {/* Profile Images Section */}
         <View style={styles.profileImagesContainer}>
-          <View style={styles.profileImageWrapper}>
+          <TouchableOpacity onPress={() => handleImageUpload(0)} style={styles.profileImageWrapper}>
             <View style={styles.profileImage}>
-              <TouchableOpacity
+              <View
                 style={styles.profileImagePlaceholder}
-                onPress={() => handleImageUpload(0)}
               >
                 <Image
                   source={{ uri: imageUrl + user.image }}
                   style={styles.placeholderImage}
                   resizeMode="cover"
                 />
-              </TouchableOpacity>
+              </View>
               <Image
                 source={require('../assets/images/imageBanner.png')}
                 style={styles.bannerOverlay}
                 resizeMode="contain"
               />
             </View>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.profileImage}>
             <View style={styles.profileImagePlaceholder}>

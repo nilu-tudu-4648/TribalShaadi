@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -40,6 +40,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUserDetailsApi, uploadImage } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
+import AlertBottomSheet from '../components/BottomSheets/AlertBottomSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
 
 const UploadImageScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
@@ -50,7 +52,7 @@ const UploadImageScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
-
+  const bottomSheetRef = useRef<BottomSheet>(null);
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
@@ -225,10 +227,14 @@ const UploadImageScreen = () => {
             style={styles.sheidImage}
           />
           <View style={styles.descriptionTextContainer}>
-            <AppText
-              text="Upload a clear photo of your face to enhance profile verification. This may also be needed for AI-powered selfie verification."
-              textStyle={styles.descriptionText}
-            />
+            <AppText useChildren textStyle={styles.descriptionText}>
+              {`Upload a clear photo of your face to enhance profile verification. This may also be needed for AI-powered selfie verification. `}
+              <AppText
+                text="Read Guidelines"
+                onPress={() => bottomSheetRef.current?.snapToIndex(0)}
+                style={{fontWeight: 'bold'}}
+              />
+            </AppText>
           </View>
         </View>
 
@@ -277,6 +283,7 @@ const UploadImageScreen = () => {
           ]}
         />
       </View>
+      <AlertBottomSheet bottomSheetRef={bottomSheetRef} />
     </SafeAreaView>
   );
 };
@@ -397,7 +404,7 @@ const styles = StyleSheet.create({
   descriptionBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightgreen,
+    backgroundColor: '#F1E5FF',
     borderRadius: Size12,
     padding: Size16,
     gap: Size8,
@@ -412,7 +419,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: fontSize12,
-    color: COLORS.black,
+    color: COLORS.violet,
     textAlign: 'left',
     lineHeight: Size16,
   },

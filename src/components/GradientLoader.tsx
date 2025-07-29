@@ -55,4 +55,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GradientLoader; 
+export default React.memo(GradientLoader); 

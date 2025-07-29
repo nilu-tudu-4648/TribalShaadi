@@ -6,7 +6,11 @@ import {
   setLoadingfalse,
   completeUserProfileV2Updated,
 } from '../store/reducers/authReducer';
-import { getGalleryImageListApi, setReducerCleaned, setUserRegistrationCompleted } from '../store/reducers/userReducer';
+import {
+  getGalleryImageListApi,
+  setReducerCleaned,
+  setUserRegistrationCompleted,
+} from '../store/reducers/userReducer';
 import axios from 'axios';
 import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
@@ -77,11 +81,15 @@ export const getUserChatListUrl = 'app/userChat/getUserChatList';
 export const sendMessageUrl = 'app/userChat/sendMessage';
 export const getMessagesUrl = 'app/userChat/getMessages';
 export const friendRequestAcceptUrl = 'app/userChat/friendRequestAccept';
-export const friendRequestRejectOrBlockUrl = 'app/userChat/friendRequestRejectOrBlock';
+export const friendRequestRejectOrBlockUrl =
+  'app/userChat/friendRequestRejectOrBlock';
 export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
-export const getAllChatHistoryByUserIdUrl = 'app/userChat/getAllChatHistoryByUserId';
-export const getAcceptedProposalByIdUrl = 'app/proposals/getAcceptedProposalById';
-export const insertUserNotificationsUrl = 'app/notifications/insertUserNotifications';
+export const getAllChatHistoryByUserIdUrl =
+  'app/userChat/getAllChatHistoryByUserId';
+export const getAcceptedProposalByIdUrl =
+  'app/proposals/getAcceptedProposalById';
+export const insertUserNotificationsUrl =
+  'app/notifications/insertUserNotifications';
 // Date formatting function
 export const formatDateOfBirth = dateString => {
   if (!dateString) return '';
@@ -165,16 +173,13 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     if (response.data.status === 200) {
       const user = response.data.recordList[0];
       console.log(user, 'verifyOTP');
-      await saveUserToStorage(user)
-      await getUserDetailsApi(
-        `${getUserDetailsUrl}id=${user.id}`,
-        dispatch,
-      );
+      await saveUserToStorage(user);
+      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
       dispatch(
         completeUserProfileV2Updated(updateUrl, {
-            id: user.id,
-            fcmToken: fcmToken,
+          id: user.id,
+          fcmToken: fcmToken,
         }),
       );
       dispatch(setLoadingfalse());
@@ -331,11 +336,11 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
     dispatch(setLoadingfalse());
   }
 };
-export const convertCmToReadableHeight = (cm) => {
-  const n = Number(cm);    
+export const convertCmToReadableHeight = cm => {
+  const n = Number(cm);
   const feet = Math.floor(n / 30.48);
   const inches = Math.round((n / 30.48 - feet) * 12);
-  return `${feet}'${String(inches).padStart(2, "0")}"`;
+  return `${feet}'${String(inches).padStart(2, '0')}"`;
 };
 export const getCitiesByStateId = async stateId => {
   try {
@@ -381,7 +386,7 @@ export const resetPreferenceApi = async () => {
     console.log(error, 'resetPreferenceApi');
   }
 };
-export const searchCitiesApi = async (data) => {
+export const searchCitiesApi = async data => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const response = await axios.get(`${baseUrl}/${getAllCitiesUrl}${data}`, {
@@ -412,3 +417,4 @@ export const getCitiesByStateIdV2 = async stateId => {
     return [];
   }
 };
+

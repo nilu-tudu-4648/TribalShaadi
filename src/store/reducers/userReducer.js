@@ -34,16 +34,20 @@ const userReducer = createSlice({
     },
     userReducerDataRequestFailed: (userReducer, action) => {
       userReducer.loader = false;
-      console.log(action.payload, 'reducer Failed');
+      if (action.payload.message === 'No Matches Found') {
+        userReducer.matchedUsers = [];
+      }
     },
     setUserRegistrationCompleted: (userReducer, action) => {
       userReducer.userRegistrationCompleted = action.payload;
     },
     setMatchedUser: (userReducer, action) => {
+      console.log(action.payload, 'reducer setMatchedUser');
       userReducer.matchedUsers = action.payload.recordList;
       userReducer.loader = false;
     },
     sentProposalDataReceived: (userReducer, action) => {
+      console.log(action.payload, 'reducer sentProposalDataReceived');
       userReducer.sentProposal = action.payload.recordList;
       userReducer.loader = false;
     },
@@ -151,7 +155,7 @@ export const getProposalsSendByMeApi = (url, data = {}) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setProposalsSendByMeDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -206,7 +210,7 @@ export const getPassedUsersApi = url =>
   apiCallBegan({
     method: 'get',
     url,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setPassedUsersDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
