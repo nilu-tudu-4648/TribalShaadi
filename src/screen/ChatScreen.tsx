@@ -43,9 +43,6 @@ const ChatScreen = () => {
   const {loader, allChatHistoryByUserId, acceptedProposalById } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
-  const { packageByUserId } = useSelector(
-    (state: any) => state.entities.paymentReducer,
-  );
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   console.log('allChatHistoryByUserId', allChatHistoryByUserId);
@@ -97,7 +94,6 @@ const ChatScreen = () => {
     <Pressable
       key={item.id}
       style={styles.conversationItem}
-      disabled={packageByUserId.length > 0 ? false : true}
       onPress={() => acceptFriendRequest(item)}
     >
       <Image

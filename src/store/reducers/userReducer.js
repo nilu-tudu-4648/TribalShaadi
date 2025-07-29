@@ -105,7 +105,6 @@ const userReducer = createSlice({
 });
 
 export const {
-  setUser,
   setUserRegistrationCompleted,
   setAcceptedUser,
   setHomeTabRefr,
@@ -190,7 +189,7 @@ export const getCurrentMatchedApi = url =>
   apiCallBegan({
     method: 'get',
     url,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setCurrentMatchedDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -199,7 +198,7 @@ export const getCurrentMatchedUserGalleryImageListApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequested.type,
+    onStart: userReducerDataRequestFailed.type,
     onSuccess: setCurrentMatchedUserGalleryImageList.type,
     onError: userReducerDataRequestFailed.type,
   });

@@ -177,6 +177,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
             fcmToken: fcmToken,
         }),
       );
+      dispatch(setLoadingfalse());
       checkAuth(dispatch);
       return true;
     } else {

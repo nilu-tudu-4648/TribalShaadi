@@ -23,13 +23,13 @@ const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
       />
       <View style={styles.profileInfo}>
         <AppText
-          text={item.firstName + ' ' + item.lastName}
+          text={item.firstName + ' ' +  `${item.lastName ?? ''}`}
           textStyle={styles.profileName}
         />
         <AppText
           text={item.district + ', ' + item.state}
           textStyle={styles.profileLocation}
-        />
+      />
       </View>
     </TouchableOpacity>
   );

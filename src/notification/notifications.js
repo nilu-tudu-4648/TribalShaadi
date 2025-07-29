@@ -1,7 +1,7 @@
 /* eslint-disable semi */
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
-import PushNotification from 'react-native-push-notification';
+// import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, updateUrl } from '../constants/functions';
 import { ASYNC_VARIBLES } from '../constants/data';
@@ -21,17 +21,17 @@ const isFirebaseReady = () => {
 };
 
 export const createNotificationChannel = () => {
-  PushNotification.createChannel(
-    {
-      channelId: "tribalShaadi", // (required)
-      channelName: "Tribal Shaadi Channel", // (required)
-      channelDescription: "A channel for Tribal Shaadi notifications", // (optional) default: undefined.
-      soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
-      importance: 4, // (optional) default: 4. Int value of the Android notification importance
-      vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
-    },
-    (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
-  );
+  // PushNotification.createChannel(
+  //   {
+  //     channelId: "tribalShaadi", // (required)
+  //     channelName: "Tribal Shaadi Channel", // (required)
+  //     channelDescription: "A channel for Tribal Shaadi notifications", // (optional) default: undefined.
+  //     soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
+  //     importance: 4, // (optional) default: 4. Int value of the Android notification importance
+  //     vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+  //   },
+  //   (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+  // );
 };
 
 export const requestUserPermission = async () => {
