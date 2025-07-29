@@ -93,9 +93,9 @@ const sendTokenToServer = async token => {
     const userToken = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
     const user = JSON.parse(userDataString);
-    console.log('user', user);
-    console.log('userToken', userToken);
-    console.log('fcmToken', token);
+    // console.log('user', user);
+    // console.log('userToken', userToken);
+    // console.log('fcmToken', token);
     // Replace with your actual server endpoint
     if (user && user.id) {
       const response = await axios.post(`${baseUrl}/${updateUrl}`, {

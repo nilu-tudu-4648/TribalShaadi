@@ -86,9 +86,6 @@ const HomeScreen = () => {
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
-      dispatch(
-        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-      );
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       // Don't increment index here - let the useEffect handle it when matchedUsers updates
     } catch (error) {
