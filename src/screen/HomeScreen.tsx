@@ -1,6 +1,11 @@
-import { StyleSheet, View, Image, Dimensions, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StyleSheet, View, Image, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  GestureHandlerRootView,
+  Gesture,
+  GestureDetector,
+} from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
@@ -21,6 +26,7 @@ import {
   getStatesUrl,
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
+  insertUserNotificationsUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -44,6 +50,7 @@ import {
 } from '../store/reducers/authReducer';
 import AppLoader from '../components/AppLoader';
 import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
+import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -56,11 +63,19 @@ const HomeScreen = () => {
   const { currentUserPackage } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [nameLoading, setNameLoading] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+
+  /* 1️⃣  keep a stable screen-width value */
+  const screenWidth = useRef(Dimensions.get('window').width).current;
 
   const handleSendProposal = async (id: string) => {
     try {
+      setIsLoading(true);
       dispatch(
         sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
           proposalUserId: id,
@@ -71,14 +86,26 @@ const HomeScreen = () => {
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+      dispatch(
+        insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+          title: 'Congrats 🎉 new request received!',
+          message: `${
+            user.firstName + ' ' + (user.lastName ?? '')
+          } wants to connect with you. See if this could be your perfect tribal match!`,
+          receiverUserId: id,
+        }),
+      );
       // Don't increment index here - let the useEffect handle it when matchedUsers updates
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCancelProposal = async (id: string) => {
     try {
+      setIsLoading(true);
       dispatch(
         cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
           proposalUserId: id,
@@ -87,9 +114,10 @@ const HomeScreen = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-      // Don't increment index here - let the useEffect handle it when matchedUsers updates
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,6 +130,28 @@ const HomeScreen = () => {
       setCurrentIndex(0);
     }
   }, [matchedUsers.length, currentIndex]);
+
+  // Handle name loading delay
+  useEffect(() => {
+    if (
+      matchedUsers &&
+      matchedUsers.length > 0 &&
+      currentIndex < matchedUsers.length
+    ) {
+      setNameLoading(true);
+      setDisplayName('');
+
+      const timer = setTimeout(() => {
+        const currentUser = matchedUsers[currentIndex];
+        const fullName =
+          currentUser?.firstName + ' ' + (currentUser?.lastName ?? '');
+        setDisplayName(fullName);
+        setNameLoading(false);
+      }, 1500); // 1.5 second delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [matchedUsers, currentIndex]);
 
   useEffect(() => {
     dispatch(getCommunity(getCommunityUrl));
@@ -117,7 +167,6 @@ const HomeScreen = () => {
       const currentUserId = matchedUsers[currentIndex].id;
       const nextUserId =
         matchedUsers[(currentIndex + 1) % matchedUsers.length].id;
-
       dispatch(
         getCurrentMatchedApi(
           `${baseUrl}/${getUserDetailsUrl}id=${currentUserId}`,
@@ -136,8 +185,8 @@ const HomeScreen = () => {
           },
         ),
       );
-
       // Pre-fetch data for the next user
+
       dispatch(
         getCurrentMatchedApi(`${baseUrl}/${getUserDetailsUrl}id=${nextUserId}`),
       );
@@ -159,7 +208,25 @@ const HomeScreen = () => {
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
   // console.log(matchedUsers, 'matchedUsers');
-  // console.log(currentUser, 'currentUser');
+  // console.log(currentMatchedUser, 'currentMatchedUser');
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10]) // Only activate when horizontal movement is significant
+    .failOffsetY([-5, 5]) // Don't interfere with vertical scrolling
+    .onEnd(event => {
+      'worklet';
+      const threshold = screenWidth * 0.25;
+      const shouldSnapToNext = Math.abs(event.translationX) > threshold;
+
+      if (shouldSnapToNext) {
+        const direction = event.translationX > 0 ? -1 : 1; // Swipe right = previous, swipe left = next
+        const nextIndex = Math.max(
+          0,
+          Math.min(matchedUsers.length - 1, currentIndex + direction),
+        );
+        runOnJS(setCurrentIndex)(nextIndex);
+      }
+    });
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -172,70 +239,50 @@ const HomeScreen = () => {
             {matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
               <>
                 <View style={styles.carouselContainer}>
-                  <FlatList
-                    data={matchedUsers}
-                    keyExtractor={item => item.id}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    snapToAlignment="center"
-                    snapToInterval={Dimensions.get('window').width}
-                    onMomentumScrollEnd={e => {
-                      const newIndex = Math.round(
-                        e.nativeEvent.contentOffset.x /
-                          Dimensions.get('window').width,
-                      );
-                      setCurrentIndex(newIndex);
-                    }}
-                    renderItem={({ item }) => (
-                      <View
-                        style={[
-                          styles.profileCardContainer,
-                          { width: Dimensions.get('window').width },
-                        ]}
-                      >
-                        <ProfileCard
-                          name={item.firstName + ' ' + (item.lastName ?? '')}
-                          age={item.age}
-                          height={item.height}
-                          religion={item.religion}
-                          caste={item.community}
-                          districtName={item.districtName}
-                          stateName={item.stateName}
-                          bio={item.aboutMe}
-                          image={item.imageUrl || ''}
-                          galleryImageList={
-                            currentMatchedUserGalleryImageList ||
-                            item.galleryImageList ||
-                            []
-                          }
-                          isLoading={loader}
-                          maritalStatus={currentMatchedUser?.maritalStatus}
-                          dob={item.birthDate}
-                          motherTongue={currentMatchedUser?.motherTongue}
-                          annualIncome={currentMatchedUser?.annualIncome}
-                          partnerExpectation={
-                            currentMatchedUser?.about_lifepartener
-                          }
-                          employedIn={currentMatchedUser?.employedIn}
-                          occupation={currentMatchedUser?.occupation}
-                          organizationName={currentMatchedUser?.companyName}
-                          settlingTime={currentMatchedUser?.planingto_settle}
-                          highestQualification={
-                            currentMatchedUser?.highestQualification
-                          }
-                          college={currentMatchedUser?.college_name}
-                          eatingHabits={currentMatchedUser?.diet}
-                          drinkingHabits={currentMatchedUser?.drinking}
-                          smokingHabits={currentMatchedUser?.smoking}
-                          kids={currentMatchedUser?.kids}
-                          interests={currentMatchedUser?.intrests}
-                          isVerified={false}
-                          isPremium={currentUserPackage.length > 0}
-                        />
-                      </View>
-                    )}
-                  />
+                  <GestureDetector gesture={panGesture}>
+                    <View style={styles.profileCardContainer}>
+                      <ProfileCard
+                        name={nameLoading ? 'Loading...' : displayName}
+                        isNameLoading={nameLoading}
+                        age={matchedUsers[currentIndex]?.age}
+                        height={currentMatchedUser?.height}
+                        religion={currentMatchedUser?.religion}
+                        caste={currentMatchedUser?.community}
+                        districtName={currentMatchedUser?.districtName}
+                        stateName={currentMatchedUser?.stateName}
+                        bio={matchedUsers[currentIndex]?.aboutMe}
+                        image={matchedUsers[currentIndex]?.imageUrl || ''}
+                        galleryImageList={
+                          currentMatchedUserGalleryImageList ||
+                          matchedUsers[currentIndex]?.galleryImageList ||
+                          []
+                        }
+                        isLoading={loader}
+                        maritalStatus={currentMatchedUser?.maritalStatus}
+                        dob={currentMatchedUser?.birthDate}
+                        motherTongue={currentMatchedUser?.motherTongue}
+                        annualIncome={currentMatchedUser?.annualIncome}
+                        partnerExpectation={
+                          currentMatchedUser?.about_lifepartener
+                        }
+                        employedIn={currentMatchedUser?.employedIn}
+                        occupation={currentMatchedUser?.occupation}
+                        organizationName={currentMatchedUser?.companyName}
+                        settlingTime={currentMatchedUser?.planingto_settle}
+                        highestQualification={
+                          currentMatchedUser?.highestQualification
+                        }
+                        college={currentMatchedUser?.college_name}
+                        eatingHabits={currentMatchedUser?.diet}
+                        drinkingHabits={currentMatchedUser?.drinking}
+                        smokingHabits={currentMatchedUser?.smoking}
+                        kids={currentMatchedUser?.kids}
+                        interests={currentMatchedUser?.intrests}
+                        isVerified={false}
+                        isPremium={currentUserPackage.length > 0}
+                      />
+                    </View>
+                  </GestureDetector>
                 </View>
                 {/* Optional: Keep buttons for users who prefer tapping */}
                 <View style={styles.floatingButtonContainer}>
@@ -246,6 +293,7 @@ const HomeScreen = () => {
                     }
                     buttonStyle={styles.declineButton}
                     textStyle={styles.declineButtonText}
+                    isButtonDisabled={isLoading}
                   />
                   <AppButton
                     title="Connect"
@@ -254,6 +302,7 @@ const HomeScreen = () => {
                     }
                     buttonStyle={styles.connectButton}
                     textStyle={styles.connectButtonText}
+                    isButtonDisabled={isLoading}
                   />
                 </View>
               </>
@@ -280,7 +329,7 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+export default React.memo(HomeScreen);
 
 const styles = StyleSheet.create({
   container: {

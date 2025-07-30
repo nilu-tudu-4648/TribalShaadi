@@ -50,7 +50,7 @@ const ChatScreen = () => {
 
   const fetchData = useCallback(() => {
     dispatch(
-      getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user.id}`),
+      getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
     );
     dispatch(
       getUserChatListApi(getUserChatListUrl, {

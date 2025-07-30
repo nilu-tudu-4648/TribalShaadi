@@ -43,7 +43,7 @@ const AppButton = ({
   );
 };
 
-export default AppButton;
+export default React.memo(AppButton);
 
 const styles = StyleSheet.create({
   button: {

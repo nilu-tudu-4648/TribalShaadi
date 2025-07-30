@@ -61,16 +61,16 @@ function BottomNavigation() {
         },
       })}
     >
-      <Tab.Screen name={ROUTES.HOME_TAB} component={HomeScreen} />
       <Tab.Screen
-        name={ROUTES.INTEREST}
+        name={ROUTES.HOME_TAB}
         listeners={() => ({
           tabPress: () => {
             dispatch(setHomeTabRefr(!homeTabRefr));
           },
         })}
-        component={InterestScreen}
+        component={HomeScreen}
       />
+      <Tab.Screen name={ROUTES.INTEREST} component={InterestScreen} />
       <Tab.Screen name={ROUTES.CHAT} component={ChatScreen} />
       <Tab.Screen name={ROUTES.ACCOUNT_TAB} component={AccountScreen} />
     </Tab.Navigator>

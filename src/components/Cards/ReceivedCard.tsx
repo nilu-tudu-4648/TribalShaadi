@@ -30,7 +30,6 @@ const ReceivedCard = ({
   onPress: () => void;
   planPurchased: boolean;
 }) => {
-  console.log(item);
   return (
     <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
@@ -94,7 +93,6 @@ export default React.memo(ReceivedCard);
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
-    paddingBottom: SIZES.padding,
   },
   imageContainer: {
     width: '100%',

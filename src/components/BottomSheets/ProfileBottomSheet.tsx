@@ -51,50 +51,66 @@ import {
   getPassedUsersUrl,
   getProposalsSendByMeUrl,
   imageUrl,
+  insertUserNotificationsUrl,
   sendProposalUrl,
 } from '../../constants/functions';
 import FONT_FAMILY from '../../constants/Fonts';
 import NameComponent from '../NameComponent';
 import AppChip2 from '../chips/AppChip2';
+import { insertUserNotificationsApi } from '../../store/reducers/chatReducer';
 
 interface ProfileBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   isButtonVisible?: boolean;
+  user: any;
 }
 
 const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   bottomSheetRef,
   isButtonVisible = false,
+  user,
 }) => {
   const snapPoints = ['70%', '80%'];
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  // console.log(selectedUser);
+  console.log(user, 'user');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
   };
   const dispatch = useDispatch();
-  const handleSendProposal = (id: number) => {
+  const handleSendProposal = async (id: number) => {
     try {
       dispatch(
         sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
           proposalUserId: id,
         }),
       );
-      bottomSheetRef.current?.close();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      dispatch(
+        insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+          title: 'Congrats 🎉 new request received!',
+          message: `${
+            user.firstName + ' ' + (user.lastName ?? '')
+          } wants to connect with you. See if this could be your perfect tribal match!`,
+          receiverUserId: id,
+        }),
+      );
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      bottomSheetRef.current?.close();
     }
   };
   const handleClose = () => {
     bottomSheetRef.current?.close();
   };
+  console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet
@@ -389,7 +405,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   );
 };
 
-export default ProfileBottomSheet;
+export default React.memo(ProfileBottomSheet);
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {

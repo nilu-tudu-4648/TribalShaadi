@@ -26,7 +26,9 @@ const MathcingScreen = () => {
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const imageScale = useRef(new Animated.Value(0.8)).current;
   const navigation = useNavigation();
-  const { acceptedUser } = useSelector((state: any) => state.entities.userReducer);
+  const { acceptedUser } = useSelector(
+    (state: any) => state.entities.userReducer,
+  );
   console.log(acceptedUser, 'acceptedUser');
   useEffect(() => {
     // Animation sequence
@@ -143,7 +145,9 @@ const MathcingScreen = () => {
           },
         ]}
         onPress={() => {
-          (navigation as any).navigate(ROUTES.MAIN_TABS);
+          (navigation as any).navigate(ROUTES.MAIN_TABS, {
+            screen: ROUTES.INTEREST,
+          });
         }}
       >
         <CloseIcon width={20} height={20} color={COLORS.black} />

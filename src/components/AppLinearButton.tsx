@@ -53,7 +53,7 @@ const AppLinearButton = ({
   );
 };
 
-export default AppLinearButton;
+export default React.memo(AppLinearButton);
 
 const styles = StyleSheet.create({
   button: {

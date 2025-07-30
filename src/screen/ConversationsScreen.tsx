@@ -35,10 +35,10 @@ import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ASYNC_VARIBLES } from '../constants/data';
 import { useDispatch, useSelector } from 'react-redux';
-import { baseUrl, formatDateShort, getAllChatHistoryByUserIdUrl, imageUrl, insertUserNotificationsUrl } from '../constants/functions';
+import { formatDateShort, getAllChatHistoryByUserIdUrl, imageUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
-import { getAllChatHistoryByUserIdApi, insertUserNotificationsApi } from '../store/reducers/chatReducer';
+import { getAllChatHistoryByUserIdApi } from '../store/reducers/chatReducer';
 
 // Message type definitions
 interface Message {
@@ -179,10 +179,6 @@ const ConversationsScreen = () => {
         id: Date.now(), // Use timestamp as unique ID
         timestamp: Date.now(),
       };
-      dispatch(insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-        title: 'New Message',
-        message: message.message,
-      }));
       setChatData(currentChatData => {
         const updatedMessages = [...currentChatData, newMessage];
         saveChatMessages(updatedMessages);
@@ -190,7 +186,7 @@ const ConversationsScreen = () => {
         return updatedMessages;
       });
     },
-    [saveChatMessages, scrollToBottom, dispatch],
+    [saveChatMessages, scrollToBottom],
   );
 
   // Initialize socket connection with fallback URLs

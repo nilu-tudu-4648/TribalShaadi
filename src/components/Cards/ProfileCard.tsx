@@ -73,6 +73,7 @@ export interface ProfileCardProps {
   galleryImageList: any;
   isVerified: boolean;
   isPremium: boolean;
+  isNameLoading?: boolean;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -104,6 +105,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   galleryImageList,
   isVerified,
   isPremium,
+  isNameLoading = false,
 }) => {
   return (
     <ScrollView
@@ -124,17 +126,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-          <NameComponent
-            name={name}
-            age={age}
-            isVerified={isVerified}
-            isPremium={isPremium}
-            height={height}
-            religion={religion}
-            caste={caste}
-            districtName={districtName}
-            stateName={stateName}
-          />
+
+            <NameComponent
+              name={name}
+              age={age}
+              isVerified={isVerified}
+              isPremium={isPremium}
+              height={height}
+              religion={religion}
+              caste={caste}
+              districtName={districtName}
+              stateName={stateName}
+              isNameLoading={isNameLoading}
+            />
         </ImageBackground>
       </View>
       <View style={styles.bioSection}>

@@ -2,8 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import { apiCallBegan } from '../api';
 const initialState = {
   loader: false,
-  connectLoader: false,
-  declineLoader: false,
   userRegistrationCompleted: false,
   user: null,
   matchedUsers: [],
@@ -42,12 +40,10 @@ const userReducer = createSlice({
       userReducer.userRegistrationCompleted = action.payload;
     },
     setMatchedUser: (userReducer, action) => {
-      console.log(action.payload, 'reducer setMatchedUser');
       userReducer.matchedUsers = action.payload.recordList;
       userReducer.loader = false;
     },
     sentProposalDataReceived: (userReducer, action) => {
-      console.log(action.payload, 'reducer sentProposalDataReceived');
       userReducer.sentProposal = action.payload.recordList;
       userReducer.loader = false;
     },
@@ -210,7 +206,7 @@ export const getPassedUsersApi = url =>
   apiCallBegan({
     method: 'get',
     url,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setPassedUsersDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });

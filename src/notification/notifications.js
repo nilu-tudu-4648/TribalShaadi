@@ -1,7 +1,7 @@
 /* eslint-disable semi */
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
-// import PushNotification from 'react-native-push-notification';
+import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, updateUrl } from '../constants/functions';
 import { ASYNC_VARIBLES } from '../constants/data';
@@ -21,17 +21,17 @@ const isFirebaseReady = () => {
 };
 
 export const createNotificationChannel = () => {
-  // PushNotification.createChannel(
-  //   {
-  //     channelId: "tribalShaadi", // (required)
-  //     channelName: "Tribal Shaadi Channel", // (required)
-  //     channelDescription: "A channel for Tribal Shaadi notifications", // (optional) default: undefined.
-  //     soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
-  //     importance: 4, // (optional) default: 4. Int value of the Android notification importance
-  //     vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
-  //   },
-  //   (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
-  // );
+  PushNotification.createChannel(
+    {
+      channelId: "tribalShaadi", // (required)
+      channelName: "Tribal Shaadi Channel", // (required)
+      channelDescription: "A channel for Tribal Shaadi notifications", // (optional) default: undefined.
+      soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
+      importance: 4, // (optional) default: 4. Int value of the Android notification importance
+      vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+    },
+    (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+  );
 };
 
 export const requestUserPermission = async () => {
@@ -231,27 +231,43 @@ export const schedulePushNotification = async (
   message,
   imageUrl = null,
 ) => {
-  const notificationConfig = {
-    channelId: 'tribalShaadi',
-    title,
-    message,
-    largeIcon: 'ic_launcher',
-    smallIcon: 'ic_notification',
-    color: 'blue',
-    vibrate: true,
-    vibration: 300,
-    playSound: true,
-    soundName: 'default',
-  };
+  try {
+    const notificationConfig = {
+      channelId: 'tribalShaadi',
+      title,
+      message,
+      largeIcon: 'ic_launcher',
+      smallIcon: 'ic_notification',
+      color: 'blue',
+      vibrate: true,
+      vibration: 300,
+      playSound: true,
+      soundName: 'default',
+      autoCancel: true,
+      invokeApp: true,
+    };
 
-  // Add image support if imageUrl is provided
-  if (imageUrl) {
-    notificationConfig.largeIconUrl = imageUrl; // Large icon (circular)
-    notificationConfig.bigPictureUrl = imageUrl; // Big picture style (expandable)
-    notificationConfig.bigLargeIcon = 'ic_launcher'; // Fallback icon when expanded
+    // Add image support if imageUrl is provided
+    if (imageUrl) {
+      notificationConfig.largeIconUrl = imageUrl; // Large icon (circular)
+      notificationConfig.bigPictureUrl = imageUrl; // Big picture style (expandable)
+      notificationConfig.bigLargeIcon = 'ic_launcher'; // Fallback icon when expanded
+    }
+
+    console.log('Showing foreground notification:', title);
+    PushNotification.localNotification(notificationConfig);
+  } catch (error) {
+    console.error('Error showing foreground notification:', error);
   }
+};
 
-  // PushNotification.localNotification(notificationConfig);
+// Test function for foreground notifications
+export const testForegroundNotification = () => {
+  schedulePushNotification(
+    '🔔 Test Notification',
+    'This is a test foreground notification from TribalShaadi!',
+    null
+  );
 };
 
 // Function to send notification from client (for testing purposes)
@@ -327,6 +343,7 @@ export default {
   notificationListner,
   schedulePushNotification,
   sendTestNotification,
+  testForegroundNotification,
   getCurrentFCMToken,
   refreshFCMToken,
 };

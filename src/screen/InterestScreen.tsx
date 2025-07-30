@@ -33,11 +33,13 @@ import {
   getPassedUsersUrl,
   getProposalsGotByMeUrl,
   getSelectedUserUrl,
+  insertUserNotificationsUrl,
 } from '../constants/functions';
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import AppLoader from '../components/AppLoader';
 import AppSafeView from '../components/AppSafeView';
+import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
@@ -45,6 +47,9 @@ const InterestScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
+  );
+  const { user } = useSelector(
+    (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -113,12 +118,15 @@ const InterestScreen = () => {
     try {
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
-          proposalUserId: item.id,
+          proposalUserId: item.senderUserId,
           status: 1,
         }),
       );
-      console.log('item', { proposalUserId: item.id, status: 1 });
-
+      dispatch(insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+        title: "You've Got a Match! 🎉",
+        message: `Great news! ${user.firstName + ' ' + (user.lastName ?? '')} has accepted your interest. It's time to start a conversation and get to know each other better.`,
+        receiverUserId: item.senderUserId,
+      }));
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(setAcceptedUser(item));
       (navigation as any).navigate(ROUTES.STACK, {
@@ -157,7 +165,7 @@ const InterestScreen = () => {
               renderItem={({ item }) => (
                 <ReceivedCard
                   item={item}
-                  onDecline={() => handleRejectProposal(item.id)}
+                  onDecline={() => handleRejectProposal(item.senderUserId)}
                   onConnect={() => handleAcceptProposal(item)}
                   onPress={() => {
                     if (packageByUserId.length > 0) {
@@ -238,6 +246,7 @@ const InterestScreen = () => {
       <ProfileBottomSheet
         bottomSheetRef={bottomSheetRef}
         isButtonVisible={selectedTab === 1}
+        user={user}
       />
     </AppSafeView>
   );
