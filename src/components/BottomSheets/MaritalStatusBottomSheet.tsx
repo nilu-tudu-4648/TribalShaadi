@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
-import AppChip from '../AppChip';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -27,20 +26,17 @@ import {
 } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import AppChip2 from '../chips/AppChip2';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedStatuses: string[];
-  onSelectionChange: (statuses: string[]) => void;
-  onApply: (statuses: string[]) => void;
   maritalOptions: string[] | undefined;
 }
 
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   bottomSheetRef,
   selectedStatuses,
-  onSelectionChange,
-  onApply,
   maritalOptions,
 }) => {
   const snapPoints = ['30%', '30%'];
@@ -56,15 +52,23 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       updatedStatuses = [...localSelectedStatuses, status];
     }
     setLocalSelectedStatuses(updatedStatuses);
-    onSelectionChange(updatedStatuses);
   };
+  useEffect(() => {
+    if (user?.pMaritalStatusId) {
+      setLocalSelectedStatuses(user.pMaritalStatusId);
+    }
+  }, [user]);
 
   const handleApply = async () => {
-    console.log("loading started")
     try {
+      // Clean and filter the marital status IDs
+      const cleanedStatuses = localSelectedStatuses
+        .filter(status => status && status.toString().trim() !== '') // Remove empty/null values
+        .map(status => status.toString().trim()); // Clean whitespace
+      
       const requestBody = {
         id: user.id,
-        pMaritalStatusId: localSelectedStatuses,
+        pMaritalStatusId: cleanedStatuses,
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -75,7 +79,6 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-      onApply(localSelectedStatuses);
       console.log("loading ended")
     }
   };
@@ -85,7 +88,6 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       handleApply();
     }
   };
-
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -115,9 +117,9 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
 
           <View style={styles.optionsContainer}>
             {maritalOptions?.map((option: any) => (
-              <AppChip
+              <AppChip2
                 key={option.id}
-                title={option.name}
+                title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
                 isSelected={localSelectedStatuses.includes(option.id)}
                 onPress={() => handleStatusToggle(option.id)}
                 style={styles.optionChip}
@@ -130,7 +132,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   );
 };
 
-export default MaritalStatusBottomSheet;
+export default React.memo(MaritalStatusBottomSheet);
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {

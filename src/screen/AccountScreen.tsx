@@ -44,7 +44,7 @@ import {
 } from 'react-native-image-picker';
 import AppToast from '../components/AppToast';
 import { setLoadingTrue } from '../store/reducers/authReducer';
-import AppLoader from '../components/AppLoader';
+import Loader from '../components/loader/Loader';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -179,87 +179,92 @@ const AccountScreen = () => {
     });
   };
   return (
-    <View style={styles.container}>
-      {loader && <AppLoader />}
-      {/* Profile Image with Edit Icon */}
-      <View style={styles.profileContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            handleImageUpload(0);
-          }}
-        >
-          <Image
-            source={{ uri: imageUrl + user?.image }}
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate(ROUTES.STACK, {
-              screen: ROUTES.EDIT_PROFILE,
-            } as never);
-          }}
-          style={styles.editIcon}
-        >
-          <EditIcon width={Sizes.fontSize18} height={Sizes.fontSize18} />
-        </TouchableOpacity>
-      </View>
-      {/* Name */}
-      <AppText text={fullName} textStyle={styles.name} />
-      {/* Badges */}
-      <View style={styles.badgesRow}>
-        {badgeData.map(badge => {
-          const IconComponent = badge.icon;
-          return (
-            <Pressable
-              key={badge.key}
-              style={styles.badgeItem}
+    <>
+      {loader ? (
+        <Loader />
+      ) : (
+        <View style={styles.container}>
+          {/* Profile Image with Edit Icon */}
+          <View style={styles.profileContainer}>
+            <TouchableOpacity
               onPress={() => {
-                navigation.navigate(ROUTES.STACK, {
-                  screen: badge.route,
-                } as never);
+                handleImageUpload(0);
               }}
-              disabled={!badge.route}
             >
-              <View
-                style={[styles.badgeIcon, { backgroundColor: badge.color }]}
-              >
-                <IconComponent
-                  width={Sizes.fontSize18}
-                  height={Sizes.fontSize18}
-                />
-              </View>
-              <AppText text={badge.label} textStyle={styles.badgeLabel} />
-            </Pressable>
-          );
-        })}
-      </View>
-      {/* Action Buttons */}
-      <View style={styles.actionsGrid}>
-        {actionButtons.map(btn => {
-          const IconComponent = btn.icon;
-          return (
+              <Image
+                source={{ uri: imageUrl + user?.image }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate(ROUTES.STACK, {
-                  screen: btn.route,
+                  screen: ROUTES.EDIT_PROFILE,
                 } as never);
               }}
-              key={btn.key}
-              style={styles.actionItem}
+              style={styles.editIcon}
             >
-              <View style={styles.actionIconCircle}>
-                <IconComponent
-                  width={Sizes.fontSize24}
-                  height={Sizes.fontSize24}
-                />
-              </View>
-              <AppText text={btn.label} textStyle={styles.actionLabel} />
+              <EditIcon width={Sizes.fontSize18} height={Sizes.fontSize18} />
             </TouchableOpacity>
-          );
-        })}
-      </View>
-    </View>
+          </View>
+          {/* Name */}
+          <AppText text={fullName} textStyle={styles.name} />
+          {/* Badges */}
+          <View style={styles.badgesRow}>
+            {badgeData.map(badge => {
+              const IconComponent = badge.icon;
+              return (
+                <Pressable
+                  key={badge.key}
+                  style={styles.badgeItem}
+                  onPress={() => {
+                    navigation.navigate(ROUTES.STACK, {
+                      screen: badge.route,
+                    } as never);
+                  }}
+                  disabled={!badge.route}
+                >
+                  <View
+                    style={[styles.badgeIcon, { backgroundColor: badge.color }]}
+                  >
+                    <IconComponent
+                      width={Sizes.fontSize18}
+                      height={Sizes.fontSize18}
+                    />
+                  </View>
+                  <AppText text={badge.label} textStyle={styles.badgeLabel} />
+                </Pressable>
+              );
+            })}
+          </View>
+          {/* Action Buttons */}
+          <View style={styles.actionsGrid}>
+            {actionButtons.map(btn => {
+              const IconComponent = btn.icon;
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate(ROUTES.STACK, {
+                      screen: btn.route,
+                    } as never);
+                  }}
+                  key={btn.key}
+                  style={styles.actionItem}
+                >
+                  <View style={styles.actionIconCircle}>
+                    <IconComponent
+                      width={Sizes.fontSize24}
+                      height={Sizes.fontSize24}
+                    />
+                  </View>
+                  <AppText text={btn.label} textStyle={styles.actionLabel} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      )}
+    </>
   );
 };
 

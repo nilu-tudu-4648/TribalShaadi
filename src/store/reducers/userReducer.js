@@ -32,6 +32,7 @@ const userReducer = createSlice({
     },
     userReducerDataRequestFailed: (userReducer, action) => {
       userReducer.loader = false;
+      console.log('userReducerDataRequestFailed', action.payload);
       if (action.payload.message === 'No Matches Found') {
         userReducer.matchedUsers = [];
       }
@@ -65,6 +66,7 @@ const userReducer = createSlice({
     },
     setAcceptRejectProposalDataReceived: (userReducer, action) => {
       userReducer.loader = false;
+      console.log('setAcceptRejectProposalDataReceived', action.payload.recordList);
       userReducer.acceptRejectProposal = action.payload.recordList;
     },
     setCurrentMatchedDataReceived: (userReducer, action) => {

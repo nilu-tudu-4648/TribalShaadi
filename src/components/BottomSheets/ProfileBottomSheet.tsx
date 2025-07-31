@@ -74,7 +74,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  console.log(user, 'user');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -110,7 +109,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const handleClose = () => {
     bottomSheetRef.current?.close();
   };
-  console.log(selectedUser, 'selectedUser');
+  // console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet

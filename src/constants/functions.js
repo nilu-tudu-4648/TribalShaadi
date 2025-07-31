@@ -16,6 +16,7 @@ import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
 import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
+import { ToastAndroid } from 'react-native';
 
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
@@ -306,6 +307,7 @@ export const uploadImage = async (data, dispatch, isProfile = false) => {
     console.log(response, 'response uploadImage');
   } catch (error) {
     console.log(error.response.data, 'uploadImage');
+    ToastAndroid.show(error.response.data.message, ToastAndroid.LONG);
     if (error.response.data.status === 401) {
       logoutUser(dispatch);
     }

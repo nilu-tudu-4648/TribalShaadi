@@ -5,7 +5,6 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
-import AppChip from '../AppChip';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -21,6 +20,7 @@ import Fonts from '../../constants/Fonts';
 import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import AppChip2 from '../chips/AppChip2';
 
 interface JobTypeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -124,7 +124,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
 
         <View style={styles.chipsContainer}>
           {jobTypeOptions.map(option => (
-            <AppChip
+            <AppChip2
               key={option}
               title={option}
               isSelected={localSelected.includes(option)}

@@ -35,7 +35,7 @@ import {
   getAcceptedProposalByIdApi,
 } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
-import AppLoader from '../components/AppLoader';
+import Loader from '../components/loader/Loader';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -132,8 +132,11 @@ const ChatScreen = () => {
   );
 
   return (
-    <AppSafeView style={styles.container}>
-      {loader && <AppLoader />}
+    <>
+      {loader ? (
+        <Loader />
+      ) : (
+        <AppSafeView style={styles.container}>
       {/* Fixed Header */}
       <View style={styles.header}>
         <AppText text="Connections" textStyle={styles.headerTitle} />
@@ -159,6 +162,8 @@ const ChatScreen = () => {
         }
       />
     </AppSafeView>
+      )}
+    </>
   );
 };
 

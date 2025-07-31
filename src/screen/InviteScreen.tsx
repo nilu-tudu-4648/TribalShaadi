@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import Share from 'react-native-share';
 import AppHeader from '../components/AppHeader';
 import AppSafeView from '../components/AppSafeView';
@@ -13,7 +9,6 @@ import AppButton from '../components/AppButton';
 import { COLORS } from '../constants/AppColors';
 
 const InviteScreen = () => {
-
   const handleInvite = async () => {
     try {
       const shareOptions = {
@@ -50,7 +45,11 @@ Download TribalShaadi now and start your journey to love!
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Invite" titleStyle={{ color: COLORS.white }} arrowColor={COLORS.white} />
+      <AppHeader
+        title="Invite"
+        titleStyle={{ color: COLORS.white }}
+        arrowColor={COLORS.white}
+      />
       <View style={{ gap: Size16 }}>
         <AppText
           text="Help Your Friends Find Their Match!"
@@ -68,7 +67,6 @@ Download TribalShaadi now and start your journey to love!
           buttonStyle={styles.inviteButton}
           textStyle={styles.inviteButtonText}
         />
-
       </View>
     </AppSafeView>
   );

@@ -48,9 +48,9 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import AppLoader from '../components/AppLoader';
 import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
 import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
+import Loader from '../components/loader/Loader';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -207,7 +207,7 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-  // console.log(matchedUsers, 'matchedUsers');
+  console.log(matchedUsers, 'matchedUsers');
   // console.log(currentMatchedUser, 'currentMatchedUser');
 
   const panGesture = Gesture.Pan()
@@ -229,103 +229,105 @@ const HomeScreen = () => {
     });
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <AppSafeView style={styles.container}>
-        {loader ? (
-          <AppLoader />
-        ) : (
-          <>
-            {/* Profile Card */}
-            {matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
-              <>
-                <View style={styles.carouselContainer}>
-                  <GestureDetector gesture={panGesture}>
-                    <View style={styles.profileCardContainer}>
-                      <ProfileCard
-                        name={nameLoading ? 'Loading...' : displayName}
-                        isNameLoading={nameLoading}
-                        age={matchedUsers[currentIndex]?.age}
-                        height={currentMatchedUser?.height}
-                        religion={currentMatchedUser?.religion}
-                        caste={currentMatchedUser?.community}
-                        districtName={currentMatchedUser?.districtName}
-                        stateName={currentMatchedUser?.stateName}
-                        bio={matchedUsers[currentIndex]?.aboutMe}
-                        image={matchedUsers[currentIndex]?.imageUrl || ''}
-                        galleryImageList={
-                          currentMatchedUserGalleryImageList ||
-                          matchedUsers[currentIndex]?.galleryImageList ||
-                          []
-                        }
-                        isLoading={loader}
-                        maritalStatus={currentMatchedUser?.maritalStatus}
-                        dob={currentMatchedUser?.birthDate}
-                        motherTongue={currentMatchedUser?.motherTongue}
-                        annualIncome={currentMatchedUser?.annualIncome}
-                        partnerExpectation={
-                          currentMatchedUser?.about_lifepartener
-                        }
-                        employedIn={currentMatchedUser?.employedIn}
-                        occupation={currentMatchedUser?.occupation}
-                        organizationName={currentMatchedUser?.companyName}
-                        settlingTime={currentMatchedUser?.planingto_settle}
-                        highestQualification={
-                          currentMatchedUser?.highestQualification
-                        }
-                        college={currentMatchedUser?.college_name}
-                        eatingHabits={currentMatchedUser?.diet}
-                        drinkingHabits={currentMatchedUser?.drinking}
-                        smokingHabits={currentMatchedUser?.smoking}
-                        kids={currentMatchedUser?.kids}
-                        interests={currentMatchedUser?.intrests}
-                        isVerified={false}
-                        isPremium={currentUserPackage.length > 0}
-                      />
-                    </View>
-                  </GestureDetector>
-                </View>
-                {/* Optional: Keep buttons for users who prefer tapping */}
-                <View style={styles.floatingButtonContainer}>
-                  <AppButton
-                    title="Decline"
-                    onPress={() =>
-                      handleCancelProposal(matchedUsers[currentIndex].id)
-                    }
-                    buttonStyle={styles.declineButton}
-                    textStyle={styles.declineButtonText}
-                    isButtonDisabled={isLoading}
+    <>
+      {loader ? (
+        <Loader />
+      ) : (
+        <GestureHandlerRootView style={styles.container}>
+          <AppSafeView style={styles.container}>
+            <>
+              {/* Profile Card */}
+              {matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
+                <>
+                  <View style={styles.carouselContainer}>
+                    <GestureDetector gesture={panGesture}>
+                      <View style={styles.profileCardContainer}>
+                        <ProfileCard
+                          name={nameLoading ? 'Loading...' : displayName}
+                          isNameLoading={nameLoading}
+                          age={matchedUsers[currentIndex]?.age}
+                          height={currentMatchedUser?.height}
+                          religion={currentMatchedUser?.religion}
+                          caste={currentMatchedUser?.community}
+                          districtName={currentMatchedUser?.districtName}
+                          stateName={currentMatchedUser?.stateName}
+                          bio={matchedUsers[currentIndex]?.aboutMe}
+                          image={matchedUsers[currentIndex]?.imageUrl || ''}
+                          galleryImageList={
+                            currentMatchedUserGalleryImageList ||
+                            matchedUsers[currentIndex]?.galleryImageList ||
+                            []
+                          }
+                          isLoading={loader}
+                          maritalStatus={currentMatchedUser?.maritalStatus}
+                          dob={currentMatchedUser?.birthDate}
+                          motherTongue={currentMatchedUser?.motherTongue}
+                          annualIncome={currentMatchedUser?.annualIncome}
+                          partnerExpectation={
+                            currentMatchedUser?.about_lifepartener
+                          }
+                          employedIn={currentMatchedUser?.employedIn}
+                          occupation={currentMatchedUser?.occupation}
+                          organizationName={currentMatchedUser?.companyName}
+                          settlingTime={currentMatchedUser?.planingto_settle}
+                          highestQualification={
+                            currentMatchedUser?.highestQualification
+                          }
+                          college={currentMatchedUser?.college_name}
+                          eatingHabits={currentMatchedUser?.diet}
+                          drinkingHabits={currentMatchedUser?.drinking}
+                          smokingHabits={currentMatchedUser?.smoking}
+                          kids={currentMatchedUser?.kids}
+                          interests={currentMatchedUser?.intrests}
+                          isVerified={false}
+                          isPremium={currentUserPackage.length > 0}
+                        />
+                      </View>
+                    </GestureDetector>
+                  </View>
+                  {/* Optional: Keep buttons for users who prefer tapping */}
+                  <View style={styles.floatingButtonContainer}>
+                    <AppButton
+                      title="Decline"
+                      onPress={() =>
+                        handleCancelProposal(matchedUsers[currentIndex].id)
+                      }
+                      buttonStyle={styles.declineButton}
+                      textStyle={styles.declineButtonText}
+                      isButtonDisabled={isLoading}
+                    />
+                    <AppButton
+                      title="Connect"
+                      onPress={() =>
+                        handleSendProposal(matchedUsers[currentIndex].id)
+                      }
+                      buttonStyle={styles.connectButton}
+                      textStyle={styles.connectButtonText}
+                      isButtonDisabled={isLoading}
+                    />
+                  </View>
+                </>
+              ) : (
+                <View style={styles.exhaustedContainer}>
+                  <Image
+                    source={require('../assets/images/ExhaustedImage.png')}
+                    style={styles.exhaustedImage}
                   />
-                  <AppButton
-                    title="Connect"
-                    onPress={() =>
-                      handleSendProposal(matchedUsers[currentIndex].id)
-                    }
-                    buttonStyle={styles.connectButton}
-                    textStyle={styles.connectButtonText}
-                    isButtonDisabled={isLoading}
+                  <AppText
+                    text="All matches exhausted"
+                    textStyle={styles.exhaustedTitle}
+                  />
+                  <AppText
+                    text="Come back and check tomorrow for more matches"
+                    textStyle={styles.exhaustedSubtitle}
                   />
                 </View>
-              </>
-            ) : (
-              <View style={styles.exhaustedContainer}>
-                <Image
-                  source={require('../assets/images/ExhaustedImage.png')}
-                  style={styles.exhaustedImage}
-                />
-                <AppText
-                  text="All matches exhausted"
-                  textStyle={styles.exhaustedTitle}
-                />
-                <AppText
-                  text="Come back and check tomorrow for more matches"
-                  textStyle={styles.exhaustedSubtitle}
-                />
-              </View>
-            )}
-          </>
-        )}
-      </AppSafeView>
-    </GestureHandlerRootView>
+              )}
+            </>
+          </AppSafeView>
+        </GestureHandlerRootView>
+      )}
+    </>
   );
 };
 

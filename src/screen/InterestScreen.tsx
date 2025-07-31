@@ -37,9 +37,9 @@ import {
 } from '../constants/functions';
 import { getProposalsSendByMeUrl } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
-import AppLoader from '../components/AppLoader';
 import AppSafeView from '../components/AppSafeView';
 import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
+import Loader from '../components/loader/Loader';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
@@ -48,9 +48,7 @@ const InterestScreen = () => {
   const { packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
-  const { user } = useSelector(
-    (state: any) => state.entities.authReducer,
-  );
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
@@ -101,7 +99,7 @@ const InterestScreen = () => {
       console.log(error, 'error');
     }
   };
-  const handleRejectProposal = (id: string) => {
+  const handleRejectProposal = async (id: string) => {
     try {
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
@@ -109,12 +107,14 @@ const InterestScreen = () => {
           status: 0,
         }),
       );
+      await new Promise(resolve => setTimeout(resolve, 1000));
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     } catch (error) {
       console.log(error);
     }
   };
   const handleAcceptProposal = (item: any) => {
+    console.log('handleAcceptProposal', item.senderUserId);
     try {
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
@@ -122,11 +122,15 @@ const InterestScreen = () => {
           status: 1,
         }),
       );
-      dispatch(insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-        title: "You've Got a Match! 🎉",
-        message: `Great news! ${user.firstName + ' ' + (user.lastName ?? '')} has accepted your interest. It's time to start a conversation and get to know each other better.`,
-        receiverUserId: item.senderUserId,
-      }));
+      dispatch(
+        insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+          title: "You've Got a Match! 🎉",
+          message: `Great news! ${
+            user.firstName + ' ' + (user.lastName ?? '')
+          } has accepted your interest. It's time to start a conversation and get to know each other better.`,
+          receiverUserId: item.senderUserId,
+        }),
+      );
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(setAcceptedUser(item));
       (navigation as any).navigate(ROUTES.STACK, {
@@ -138,27 +142,30 @@ const InterestScreen = () => {
   };
 
   return (
-    <AppSafeView style={styles.container}>
-      {loader && <AppLoader />}
-      <AppText text="Interests" textStyle={styles.title} />
-      <View style={styles.tabsContainer}>
-        {INTEREST_TABS.map((tab, idx) => (
-          <TouchableOpacity
-            key={tab.label}
-            style={[styles.tab, selectedTab === idx && styles.tabSelected]}
-            onPress={() => setSelectedTab(idx)}
-            activeOpacity={0.8}
-          >
-            <AppText
-              text={tab.label}
-              textStyle={[
-                styles.tabText,
-                selectedTab === idx && styles.tabTextSelected,
-              ]}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
+    <>
+      {loader ? (
+        <Loader />
+      ) : (
+        <AppSafeView style={styles.container}>
+          <AppText text="Interests" textStyle={styles.title} />
+          <View style={styles.tabsContainer}>
+            {INTEREST_TABS.map((tab, idx) => (
+              <TouchableOpacity
+                key={tab.label}
+                style={[styles.tab, selectedTab === idx && styles.tabSelected]}
+                onPress={() => setSelectedTab(idx)}
+                activeOpacity={0.8}
+              >
+                <AppText
+                  text={tab.label}
+                  textStyle={[
+                    styles.tabText,
+                    selectedTab === idx && styles.tabTextSelected,
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
           {selectedTab === 0 && (
             <FlatList
               data={proposalsGotByMe}
@@ -243,12 +250,14 @@ const InterestScreen = () => {
               }
             />
           )}
-      <ProfileBottomSheet
-        bottomSheetRef={bottomSheetRef}
-        isButtonVisible={selectedTab === 1}
-        user={user}
-      />
-    </AppSafeView>
+          <ProfileBottomSheet
+            bottomSheetRef={bottomSheetRef}
+            isButtonVisible={selectedTab === 1}
+            user={user}
+          />
+        </AppSafeView>
+      )}
+    </>
   );
 };
 

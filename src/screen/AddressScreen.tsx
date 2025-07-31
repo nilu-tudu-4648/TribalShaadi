@@ -299,7 +299,7 @@ const AddressScreen = () => {
       <AppPickerModal
         visible={showMaritalStatusPicker}
         title="Select Marital Status"
-        items={maritalStatusesList}
+        items={maritalStatusesList.filter((item: any) => item.name !== 'any')}
         selectedValue={selectedMaritalStatus?.name || ''}
         onSelect={handleMaritalStatusSelection}
         onClose={() => setShowMaritalStatusPicker(false)}

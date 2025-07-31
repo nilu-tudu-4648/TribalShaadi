@@ -58,12 +58,14 @@ const PreferenceScreen = () => {
   const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
     'Any',
   ]);
+  console.log(user, 'user');
   useEffect(() => {
-    if (user?.maritalStatus) {
-      setSelectedMaritalStatuses([user.maritalStatus]);
-    }
-    if (user?.religion) {
-      setSelectedReligion(user.religion);
+    setSelectedMaritalStatuses(user.pMaritalStatusId);
+    if (user?.pReligionId) {
+      setSelectedReligion(
+        religion.find((item: any) => item.id === user.pReligionId[0])?.name ||
+          'Any',
+      );
     }
     if (user?.community) {
       // setSelectedTribes([user.community]);
@@ -78,18 +80,24 @@ const PreferenceScreen = () => {
       // setSelectedLocations(Array.isArray(user.preferredLocation) ? user.preferredLocation : [user.preferredLocation]);
     }
     if (user?.preferredJobType) {
-      setSelectedJobTypes(Array.isArray(user.preferredJobType) ? user.preferredJobType : [user.preferredJobType]);
+      setSelectedJobTypes(
+        Array.isArray(user.preferredJobType)
+          ? user.preferredJobType
+          : [user.preferredJobType],
+      );
     }
     if (user?.preferredSettleDown) {
-      setSelectedSettleDown(Array.isArray(user.preferredSettleDown) ? user.preferredSettleDown : [user.preferredSettleDown]);
+      setSelectedSettleDown(
+        Array.isArray(user.preferredSettleDown)
+          ? user.preferredSettleDown
+          : [user.preferredSettleDown],
+      );
     }
   }, [user]);
   const getMaritalStatusValue = () => {
-    if (selectedMaritalStatuses.length === 0) return 'None';
-    if (selectedMaritalStatuses.length === 1) {
-      return selectedMaritalStatuses[0];
-    }
-    return `${selectedMaritalStatuses.length} selected`;
+    const uniqueCount = new Set(user.pMaritalStatusId).size;
+    console.log(uniqueCount, 'unique marital status count');
+    return `${uniqueCount} selected`;
   };
 
   const getAgeRangeValue = () => {
@@ -183,37 +191,12 @@ const PreferenceScreen = () => {
     maritalStatusBottomSheetRef.current?.expand();
   };
 
-  const handleMaritalStatusChange = (_statuses: string[]) => {
-    // Handle real-time selection changes if needed
-  };
-
-  const handleMaritalStatusApply = (statuses: string[]) => {
-    setSelectedMaritalStatuses(statuses);
-  };
-
   const handleAgeRangePress = () => {
     ageRangeBottomSheetRef.current?.expand();
   };
 
-  const handleAgeRangeChange = (_range: { min: number; max: number }) => {
-    // Handle real-time range changes if needed
-  };
-
-  const handleAgeRangeApply = (range: { min: number; max: number }) => {
-    setSelectedAgeRange(range);
-  };
-
   const handleReligionPress = () => {
     religionBottomSheetRef.current?.expand();
-  };
-
-  const handleReligionChange = (_religion: string) => {
-    // Handle real-time selection changes if needed
-  };
-
-  const handleReligionApply = (religion: string) => {
-    setSelectedReligion(religion);
-    setSelectedTribes([]);
   };
 
   const handleHeightRangePress = () => {
@@ -389,24 +372,18 @@ const PreferenceScreen = () => {
       <MaritalStatusBottomSheet
         bottomSheetRef={maritalStatusBottomSheetRef}
         selectedStatuses={selectedMaritalStatuses}
-        onSelectionChange={handleMaritalStatusChange}
-        onApply={handleMaritalStatusApply}
         maritalOptions={maritalStatuses}
       />
 
       <AgeRangeBottomSheet
         bottomSheetRef={ageRangeBottomSheetRef}
         selectedAgeRange={selectedAgeRange}
-        onSelectionChange={handleAgeRangeChange}
-        onApply={handleAgeRangeApply}
       />
 
       <ReligionBottomSheet
         bottomSheetRef={religionBottomSheetRef}
         selectedReligion={selectedReligion}
         religionOptions={religion}
-        onSelectionChange={handleReligionChange}
-        onApply={handleReligionApply}
       />
 
       <HeightRangeBottomSheet

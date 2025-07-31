@@ -5,7 +5,6 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
-import AppChip from '../AppChip';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -29,20 +28,17 @@ import {
   getCommunity,
 } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import AppChip2 from '../chips/AppChip2';
 
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedReligion: string;
-  onSelectionChange: (religion: string) => void;
-  onApply: (religion: string) => void;
   religionOptions: any[];
 }
 
 const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   bottomSheetRef,
   selectedReligion,
-  onSelectionChange,
-  onApply,
   religionOptions,
 }) => {
   const snapPoints = ['30%', '50%'];
@@ -53,9 +49,11 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   >(null);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
+  useEffect(() => {
+    setLocalSelectedReligion(user.pReligionId);
+  }, [user]);
   const handleStatusSelect = (religion: string) => {
     setLocalSelectedReligion(religion);
-    onSelectionChange(religion);
   };
   // Load communities when religion is selected
   useEffect(() => {
@@ -72,7 +70,6 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
         id: user.id,
         pReligionId: localSelectedReligionId,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -81,7 +78,6 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-      onApply(localSelectedReligion);
     }
   };
   const handleSheetChanges = (index: number) => {
@@ -115,16 +111,15 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
             textStyle={styles.headerSubtitle}
           />
         </View>
-
         <View style={styles.optionsContainer}>
           {religionOptions.map(option => (
-            <AppChip
+            <AppChip2
               key={option.id}
-              title={option.name}
-              isSelected={localSelectedReligion === option.name}
+              title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
+              isSelected={localSelectedReligion == option.id}
               onPress={() => {
                 setLocalSelectedReligionId(option.id);
-                handleStatusSelect(option.name);
+                handleStatusSelect(option.id);
               }}
               style={styles.optionChip}
             />

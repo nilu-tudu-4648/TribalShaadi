@@ -52,11 +52,24 @@ const apiMiddleware =
         dispatch({ type: onSuccess, payload: response.data });
       }
     } catch (error) {
-      if(error.response.status===401){
+      // Handle network errors
+      if (error.code === 'NETWORK_ERROR' || !error.response) {
+        const networkErrorMessage = 'Network error. Please check your internet connection and try again.';
+        dispatch(apiCallFailed(networkErrorMessage));
+        
+        if (onError) {
+          dispatch({ type: onError, payload: networkErrorMessage });
+        }
+        return;
+      }
+
+      // Handle 401 unauthorized errors
+      if(error.response?.status === 401){
         AsyncStorage.removeItem(ASYNC_VARIBLES.USER_TOKEN);
         AsyncStorage.removeItem(ASYNC_VARIBLES.USER);
         dispatch(logoutFromReducer());
       }
+      
       const errorMessage = error.response?.data || error.message;
       // Dispatch general error action
       dispatch(apiCallFailed(errorMessage));

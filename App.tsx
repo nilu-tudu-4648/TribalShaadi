@@ -40,6 +40,7 @@ import {
   createNotificationChannel 
 } from './src/notification/notifications';
 import ForegroundHandler from './src/notification/ForegroundHandler';
+import NetworkAlert from './src/components/NetworkAlert';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -133,6 +134,7 @@ const MainApp = () => {
   return (
     <>
       <ForegroundHandler />
+      <NetworkAlert />
       <Stack.Navigator
         initialRouteName={
           userRegistrationCompleted ? ROUTES.MAIN_TABS : ROUTES.WELCOME

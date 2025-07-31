@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -35,20 +35,19 @@ import { useDispatch, useSelector } from 'react-redux';
 interface AgeRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedAgeRange: { min: number; max: number };
-  onSelectionChange: (range: { min: number; max: number }) => void;
-  onApply: (range: { min: number; max: number }) => void;
 }
 
 const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
   bottomSheetRef,
   selectedAgeRange,
-  onSelectionChange,
-  onApply,
 }) => {
   const snapPoints = ['30%', '30%'];
   const [localAgeRange, setLocalAgeRange] = useState(selectedAgeRange);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
+  useEffect(() => {
+    setLocalAgeRange({ min: user.pFromAge, max: user.pToAge });
+  }, [user]);
   const MIN_AGE = 18;
   const MAX_AGE = 65;
   const MIN_RANGE = 5; // Minimum 5 years gap
@@ -73,7 +72,6 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     
     const range = { min: newMin, max: newMax };
     setLocalAgeRange(range);
-    onSelectionChange(range);
   };
 
   const minPanGesture = Gesture.Pan()
@@ -148,7 +146,6 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-      onApply(localAgeRange);
     }
   };
 
