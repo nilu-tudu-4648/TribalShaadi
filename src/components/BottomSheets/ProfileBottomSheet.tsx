@@ -63,17 +63,20 @@ interface ProfileBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   isButtonVisible?: boolean;
   user: any;
+  currentUserPackage: any;
 }
 
 const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   bottomSheetRef,
   isButtonVisible = false,
   user,
+  currentUserPackage,
 }) => {
   const snapPoints = ['70%', '80%'];
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
+  console.log(currentUserPackage, 'currentUserPackage');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -142,7 +145,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 }`}
                 age={selectedUser?.age}
                 isVerified={selectedUser?.isVerified}
-                isPremium={selectedUser?.isPremium}
+                isPremium={currentUserPackage?.length > 0}
                 height={selectedUser?.height}
                 religion={selectedUser?.religion}
                 caste={selectedUser?.community}

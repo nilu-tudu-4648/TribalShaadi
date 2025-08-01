@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import BottomSheet, {
-  BottomSheetView,
   BottomSheetBackdrop,
+  BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
 import { COLORS } from '../../constants/AppColors';
@@ -15,7 +15,6 @@ import {
   Size16,
   Size20,
   Size25,
-  Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import Svg, { Path } from 'react-native-svg';
@@ -38,16 +37,14 @@ const Checkbox = ({
 }) => {
   return (
     <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: COLORS.violet,
-        backgroundColor: isChecked ? COLORS.violet : 'transparent',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+      style={[
+        styles.checkboxContainer,
+        isChecked ? styles.checkboxChecked : styles.checkboxUnchecked,
+        {
+          width: size,
+          height: size,
+        },
+      ]}
     >
       {isChecked && (
         <Svg
@@ -69,46 +66,43 @@ const Checkbox = ({
   );
 };
 
+// Extract backdrop component to avoid defining during render
+const renderBackdrop = (props: any) => (
+  <BottomSheetBackdrop
+    {...props}
+    appearsOnIndex={0}
+    disappearsOnIndex={-1}
+  />
+);
+
 interface TribeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedTribes: string[];
-  onSelectionChange: (tribes: string[]) => void;
-  onApply: (tribes: string[]) => void;
   tribeOptions: any[];
 }
 
 const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   bottomSheetRef,
-  selectedTribes,
-  onSelectionChange,
-  onApply,
   tribeOptions,
 }) => {
-  const snapPoints = ['60%', '85%'];
+  const snapPoints = ['70%', '80%'];
   const [localSelectedTribes, setLocalSelectedTribes] =
-    useState<string[]>(selectedTribes);
+    useState<string[]>();
   const [localSelectedTribeId, setLocalSelectedTribeId] = useState<string[]>(
     [],
   );
-  console.log(tribeOptions, 'tribeOptions');
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalSelectedTribeId(user.pCommunityId);
-  }, [user.pCommunityId]);
-  // Ensure initial tribes are preserved and merged with API values
-  useEffect(() => {
-    // Merge initial selectedTribes with user.pCommunityId from API, avoiding duplicates
     const apiTribes = Array.isArray(user.pCommunityId) ? user.pCommunityId : [];
-    const initialTribes = Array.isArray(selectedTribes) ? selectedTribes : [];
-    // Use Set to avoid duplicates
-    const mergedTribes = Array.from(new Set([...initialTribes, ...apiTribes]));
+    const mergedTribes = Array.from(new Set([...apiTribes]));
     setLocalSelectedTribeId(mergedTribes);
     setLocalSelectedTribes(mergedTribes);
-  }, [user.pCommunityId, selectedTribes]);
+  }, [user.pCommunityId]);
 
   const handleTribeToggle = (tribe: any) => {
-    const tribeIds = Array.isArray(localSelectedTribeId) ? localSelectedTribeId : [];
+    const tribeIds = Array.isArray(localSelectedTribeId)
+      ? localSelectedTribeId
+      : [];
     let updatedTribes: string[];
     if (tribeIds.includes(tribe.id)) {
       updatedTribes = tribeIds.filter(t => t !== tribe.id);
@@ -117,14 +111,17 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
     }
     setLocalSelectedTribeId(updatedTribes);
     setLocalSelectedTribes(updatedTribes);
-    onSelectionChange(updatedTribes);
   };
 
   const handleApply = async () => {
     try {
+      // Remove 'any' (id: 97) from the selected tribes before sending to API
+      const filteredTribes = (localSelectedTribes || []).filter(
+        id => id !== '97' && id !== 'Any',
+      );
       const requestBody = {
         id: user.id,
-        pCommunityId: localSelectedTribes.join(','),
+        pCommunityId: filteredTribes.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -135,7 +132,6 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-      onApply(localSelectedTribes);
     }
   };
 
@@ -164,40 +160,34 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       ref={bottomSheetRef}
       index={-1}
       snapPoints={snapPoints}
-      enablePanDownToClose={true}
+      enablePanDownToClose
       onChange={handleSheetChanges}
-      backdropComponent={props => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-        />
-      )}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       backgroundStyle={styles.bottomSheetBackground}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        <View style={styles.headerContainer}>
-          <AppText text="Tribe" textStyle={styles.headerTitle} />
-          <AppText
-            text="You can select multiple options"
-            textStyle={styles.headerSubtitle}
-          />
-        </View>
-
-        <FlatList
-          data={tribeOptions}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          style={styles.list}
-          showsVerticalScrollIndicator={false}
+      {/* header stays outside the list */}
+      <View style={styles.headerContainer}>
+        <AppText text="Tribe" textStyle={styles.headerTitle} />
+        <AppText
+          text="You can select multiple options"
+          textStyle={styles.headerSubtitle}
         />
-      </BottomSheetView>
+      </View>
+
+      {/* list */}
+      <BottomSheetFlatList
+        data={[{ id: 'Any', name: 'Any' }, ...tribeOptions]}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContentContainer}
+      />
     </BottomSheet>
   );
 };
 
-export default TribeBottomSheet;
+export default React.memo(TribeBottomSheet);
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {
@@ -217,8 +207,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'flex-start',
-    gap: Size8,
-    marginBottom: Size25,
+    paddingHorizontal: Size16,
   },
   headerTitle: {
     fontSize: fontSize20,
@@ -245,5 +234,22 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.OPEN_SANS_REGULAR,
     color: COLORS.textBlack,
     left: Size14,
+  },
+  checkboxContainer: {
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.violet,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.violet,
+  },
+  checkboxUnchecked: {
+    backgroundColor: 'transparent',
+  },
+  listContentContainer: {
+    paddingBottom: 40,
+    paddingHorizontal: Size16,
   },
 });

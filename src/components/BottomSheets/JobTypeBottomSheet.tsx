@@ -30,36 +30,34 @@ import AppChip2 from '../chips/AppChip2';
 
 interface JobTypeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedJobTypes: string[];
-  onApply: (jobTypes: string[]) => void;
 }
 
 const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   bottomSheetRef,
-  selectedJobTypes,
-  onApply,
 }) => {
   const snapPoints = ['50%'];
   const [localSelected, setLocalSelected] =
-    useState<string[]>(selectedJobTypes);
+    useState<string[]>();
   const dispatch = useDispatch();
   const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   // Ensure initial job types are preserved and merged with API values
   useEffect(() => {
     // Merge initial selectedJobTypes with user.pOccupationId from API, avoiding duplicates
-    const apiJobTypes = Array.isArray(user.pOccupationId) ? user.pOccupationId : [];
-    const initialJobTypes = Array.isArray(selectedJobTypes) ? selectedJobTypes : [];
+    const apiJobTypes = Array.isArray(user.pOccupationId)
+      ? user.pOccupationId
+      : [];
     // Use Set to avoid duplicates
-    const mergedJobTypes = Array.from(new Set([...initialJobTypes, ...apiJobTypes]));
+    const mergedJobTypes = Array.from(
+      new Set([...apiJobTypes]),
+    );
     setLocalSelected(mergedJobTypes);
-  }, [user.pOccupationId, selectedJobTypes]);
+  }, [user.pOccupationId]);
   useEffect(() => {
     getEmploymentTypeApi().then(res => {
       setJobTypeOptions(res);
     });
   }, []);
-  console.log(jobTypeOptions, 'jobTypeOptions');
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];
@@ -81,7 +79,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
     try {
       const requestBody = {
         id: user.id,
-        pOccupationId: localSelected.join(','),
+        pOccupationId: localSelected?.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -92,8 +90,6 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-
-      onApply(localSelected);
     }
   };
 
@@ -133,8 +129,11 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
           {jobTypeOptions.map((option: any) => (
             <AppChip2
               key={option.id}
-              title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
-              isSelected={localSelected.includes(option.id)}
+              title={
+                option.name.charAt(0).toUpperCase() +
+                option.name.slice(1).toLowerCase()
+              }
+              isSelected={localSelected?.includes(option.id)}
               onPress={() => handleToggle(option.id)}
             />
           ))}
@@ -144,7 +143,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   );
 };
 
-export default JobTypeBottomSheet;
+export default React.memo(JobTypeBottomSheet);
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {

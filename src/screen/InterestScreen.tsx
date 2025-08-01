@@ -25,11 +25,13 @@ import {
   getSelectedUserApi,
   setAcceptedUser,
   getCurrentMatchedUserGalleryImageListApi,
+  getSelectedUserPackageApi,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
   baseUrl,
   getGalleryImageListUrl,
+  getPackageByUserIdUrl,
   getPassedUsersUrl,
   getProposalsGotByMeUrl,
   getSelectedUserUrl,
@@ -51,7 +53,7 @@ const InterestScreen = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers } =
+  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers, currentUserPackage } =
     useSelector((state: any) => state.entities.userReducer);
 
   const fetchData = useCallback(() => {
@@ -85,6 +87,9 @@ const InterestScreen = () => {
   const handleCardPress = async (id: string) => {
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
+      dispatch(getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
+        userId: id,
+      }));
       dispatch(
         getCurrentMatchedUserGalleryImageListApi(
           `${baseUrl}/${getGalleryImageListUrl}`,
@@ -254,6 +259,7 @@ const InterestScreen = () => {
             bottomSheetRef={bottomSheetRef}
             isButtonVisible={selectedTab === 1}
             user={user}
+            currentUserPackage={currentUserPackage}
           />
         </AppSafeView>
       )}

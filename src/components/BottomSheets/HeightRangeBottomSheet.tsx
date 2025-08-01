@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -35,17 +35,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 interface HeightRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedHeightRange: { min: number; max: number }; // in total inches
-  onSelectionChange: (range: { min: number; max: number }) => void;
-  onApply: (range: { min: number; max: number }) => void;
   heightOptions: any[];
 }
 
 const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   bottomSheetRef,
-  selectedHeightRange,
-  onSelectionChange,
-  onApply,
   heightOptions,
 }) => {
   const formatHeightFromOptions = (heightInInches: number) => {
@@ -59,7 +53,8 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   };
 
   const snapPoints = ['30%', '30%'];
-  const [localHeightRange, setLocalHeightRange] = useState(selectedHeightRange);
+  const [localHeightRange, setLocalHeightRange] = useState({ min: 53, max: 77 });
+
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const MIN_HEIGHT_INCHES = 4 * 12; // 4ft 0in
@@ -67,7 +62,11 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   const MIN_RANGE = 5; // Minimum 5 inches gap
   const SLIDER_WIDTH = Dimensions.get('window').width - 64;
   const THUMB_SIZE = Size25;
-
+  useEffect(() => {
+    if (user.pFromHeight && user.pToHeight) {
+      // setLocalHeightRange({ min: user.pFromHeight, max: user.pToHeight });
+    }
+  }, [user]);
   const minThumbPosition = useSharedValue(
     ((localHeightRange.min - MIN_HEIGHT_INCHES) /
       (MAX_HEIGHT_INCHES - MIN_HEIGHT_INCHES)) *
@@ -90,7 +89,6 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     
     const range = { min: newMin, max: newMax };
     setLocalHeightRange(range);
-    onSelectionChange(range);
   };
 
   const minPanGesture = Gesture.Pan()
@@ -191,7 +189,6 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
       console.error('Error in handleApply:', error);
     } finally {
       bottomSheetRef.current?.close();
-      onApply(localHeightRange);
     }
   };
 

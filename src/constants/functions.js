@@ -367,20 +367,38 @@ export const getCitiesByStateId = async stateId => {
     return [];
   }
 };
-export const resetPreferenceApi = async () => {
+export const resetPreferenceApi = async (dispatch,func) => {
   const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
   const user = JSON.parse(userDataString);
   const data = {
     id: user.id,
-    pReligionId: '',
-    pCommunityId: '',
-    pMaritalStatusId: '',
-    pFromAge: '',
-    pToAge: '',
-    pStateLivingInId: '',
-    pCityLivingInId: '',
-    pOccupationId: '',
-    pSettlingDown: '',
+    pAlcoholAcceptance: null,
+    pAnnualIncomeId: null,
+    pBodyType: null,
+    pCityLivingInId: null,
+    pCommunityId: null,
+    pComplexion: null,
+    pCountryLivingInId: null,
+    pDietId: null,
+    pDisabilityAcceptance: null,
+    pEducationMediumId: null,
+    pEducationTypeId: null,
+    pEmploymentTypeId: null,
+    pFamilyType: null,
+    pFromAge: null,
+    pFromHeight: null,
+    pHoroscopeBelief: null,
+    pManglikMatch: null,
+    pMaritalStatusId: null,
+    pMotherTongue: null,
+    pOccupationId: null,
+    pOtherExpectations: null,
+    pProfileWithChildren: null,
+    pReligionId: null,
+    pSmokingAcceptance: null,
+    pStateLivingInId: null,
+    pToAge: null,
+    pToHeight: null,
   };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -389,9 +407,12 @@ export const resetPreferenceApi = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     console.log(response, 'resetPreferenceApi');
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
+  }finally{
+    func();
   }
 };
 export const searchCitiesApi = async data => {

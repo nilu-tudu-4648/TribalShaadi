@@ -34,19 +34,19 @@ import { useDispatch, useSelector } from 'react-redux';
 
 interface AgeRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedAgeRange: { min: number; max: number };
 }
 
 const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
   bottomSheetRef,
-  selectedAgeRange,
 }) => {
   const snapPoints = ['30%', '30%'];
-  const [localAgeRange, setLocalAgeRange] = useState(selectedAgeRange);
+  const [localAgeRange, setLocalAgeRange] = useState({ min: 20, max: 45 });
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalAgeRange({ min: user.pFromAge, max: user.pToAge });
+    if (user.pFromAge && user.pToAge) {
+      setLocalAgeRange({ min: user.pFromAge, max: user.pToAge });
+    }
   }, [user]);
   const MIN_AGE = 18;
   const MAX_AGE = 65;

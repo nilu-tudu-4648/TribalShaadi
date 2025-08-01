@@ -7,6 +7,7 @@ const initialState = {
   matchedUsers: [],
   currentMatchedUser: null,
   currentMatchedUserGalleryImageList: [],
+  currentUserPackage: null,
   sentProposal: [],
   proposalsSendByMe: [],
   proposalsGotByMe: [],
@@ -96,6 +97,11 @@ const userReducer = createSlice({
         action.payload.recordList;
       userReducer.loader = false;
     },
+    setCurrentUserPackage: (userReducer, action) => {
+      console.log(action.payload, 'setCurrentUserPackage');
+      userReducer.currentUserPackage = action.payload.recordList;
+      userReducer.loader = false;
+    },
     setReducerCleaned: (userReducer, action) => {
       userReducer.loader = false;
       userReducer.matchedUsers = [];
@@ -128,6 +134,7 @@ const {
   setSelectedUserDataReceived,
   setGalleryImageDataReceived,
   setCurrentMatchedUserGalleryImageList,
+  setCurrentUserPackage,
 } = userReducer.actions;
 export const setMatchedUserApi = url =>
   apiCallBegan({
@@ -202,6 +209,15 @@ export const getCurrentMatchedUserGalleryImageListApi = (url, data) =>
     data,
     onStart: userReducerDataRequestFailed.type,
     onSuccess: setCurrentMatchedUserGalleryImageList.type,
+    onError: userReducerDataRequestFailed.type,
+  });
+export const getSelectedUserPackageApi = (url, data) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: userReducerDataRequestFailed.type,
+    onSuccess: setCurrentUserPackage.type,
     onError: userReducerDataRequestFailed.type,
   });
 export const getPassedUsersApi = url =>

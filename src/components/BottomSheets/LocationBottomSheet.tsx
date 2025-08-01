@@ -33,14 +33,10 @@ import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 
 interface LocationBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedLocations: string[];
-  onApply: (locations: string[]) => void;
 }
 
 const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   bottomSheetRef,
-  selectedLocations,
-  onApply,
 }) => {
   const snapPoints = ['30%', '70%'];
   const dispatch = useDispatch();
@@ -48,10 +44,10 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
     (state: any) => state.entities.authReducer,
   );
   const [selectedState, setSelectedState] = useState<any>(
-    selectedLocations[0] || null,
+    null,
   );
   const [selectedCities, setSelectedCities] = useState<any[]>(
-    selectedLocations.slice(1) || [],
+    [],
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -131,18 +127,18 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         pStateLivingInId: selectedState?.id || null,
         pCityLivingInId:
           selectedCities.length > 0
-            ? selectedCities.map(city => city.id)
+            ? selectedCities.map(city => city.id).join(',')
             : null,
       };
+      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      // pass state + cities as array
-      onApply([selectedState, ...selectedCities]);
-      bottomSheetRef.current?.close();
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      bottomSheetRef.current?.close();
     }
   };
 
@@ -315,7 +311,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   selectedLocationsContainer: {
-    flex: 1,
+    flex: 1,  
     gap: Size12,
   },
   scrollContainer: {

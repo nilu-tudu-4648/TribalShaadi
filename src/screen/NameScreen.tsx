@@ -30,7 +30,6 @@ const NameScreen = () => {
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-  console.log(user, 'user');
 
   // Function to validate and filter input to only allow letters and spaces
   const validateAndSetName = (text: string) => {

@@ -242,7 +242,7 @@ const AccountScreen = () => {
             {actionButtons.map(btn => {
               const IconComponent = btn.icon;
               return (
-                <TouchableOpacity
+                <Pressable
                   onPress={() => {
                     navigation.navigate(ROUTES.STACK, {
                       screen: btn.route,
@@ -258,7 +258,7 @@ const AccountScreen = () => {
                     />
                   </View>
                   <AppText text={btn.label} textStyle={styles.actionLabel} />
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </View>

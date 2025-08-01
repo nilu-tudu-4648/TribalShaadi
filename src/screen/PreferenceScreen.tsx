@@ -25,7 +25,7 @@ import {
 } from '../constants/Sizes';
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AppLoader from '../components/AppLoader';
 import {
   formatHeightInFeettoInches,
@@ -33,6 +33,7 @@ import {
 } from '../constants/functions';
 
 const PreferenceScreen = () => {
+  const dispatch = useDispatch();
   const { user, maritalStatuses, religion, community, height, loader } =
     useSelector((state: any) => state.entities.authReducer);
   const maritalStatusBottomSheetRef = useRef<BottomSheet>(null);
@@ -43,25 +44,11 @@ const PreferenceScreen = () => {
   const locationBottomSheetRef = useRef<BottomSheet>(null);
   const jobTypeBottomSheetRef = useRef<BottomSheet>(null);
   const settleDownBottomSheetRef = useRef<BottomSheet>(null);
-  const [selectedMaritalStatuses, setSelectedMaritalStatuses] = useState<
-    string[]
-  >([]);
-  const [selectedAgeRange, setSelectedAgeRange] = useState<{
-    min: number;
-    max: number;
-  }>({ min: 20, max: 45 });
-  const [selectedHeightRange, setSelectedHeightRange] = useState<{
-    min: number;
-    max: number;
-  }>({ min: 5 * 12 + 5, max: 6 * 12 + 5 }); // 5ft 5in to 6ft 5in
-  const [selectedTribes, setSelectedTribes] = useState<string[]>(['Any']);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(['Any']);
   const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
     'Any',
   ]);
+  const [isResetLoading, setIsResetLoading] = useState(false);
   useEffect(() => {
-    setSelectedMaritalStatuses(user.pMaritalStatusId);
     if (user?.preferredSettleDown) {
       setSelectedSettleDown(
         Array.isArray(user.preferredSettleDown)
@@ -114,16 +101,7 @@ const PreferenceScreen = () => {
     return 'Any';
   };
   const getLocationValue = () => {
-    if (selectedLocations.includes('Any')) {
-      return 'Any';
-    }
-    if (selectedLocations.length === 0) {
-      return 'Any';
-    }
-    if (selectedLocations.length === 1) {
-      return selectedLocations[0];
-    }
-    return `${selectedLocations.length} selected`;
+    return 'Any';
   };
   const getJobTypeValue = () => {
     if (!user.pOccupationId || user.pOccupationId === '' || user.pOccupationId === 'Any') {
@@ -191,52 +169,27 @@ const PreferenceScreen = () => {
     heightRangeBottomSheetRef.current?.expand();
   };
 
-  const handleHeightRangeChange = (_range: { min: number; max: number }) => {
-    // Handle real-time range changes if needed
-  };
-
-  const handleHeightRangeApply = (range: { min: number; max: number }) => {
-    setSelectedHeightRange(range);
-  };
-
   const handleTribePress = () => {
     tribeBottomSheetRef.current?.expand();
-  };
-
-  const handleTribeChange = (_tribes: string[]) => {
-    // Handle real-time changes if needed
-  };
-
-  const handleTribeApply = (tribes: string[]) => {
-    setSelectedTribes(tribes);
   };
 
   const handleLocationPress = () => {
     locationBottomSheetRef.current?.expand();
   };
 
-  const handleLocationApply = (locations: string[]) => {
-    setSelectedLocations(locations);
-  };
-
   const handleJobTypePress = () => {
     jobTypeBottomSheetRef.current?.expand();
   };
-
-  const handleJobTypeApply = (jobTypes: string[]) => {
-    setSelectedJobTypes(jobTypes);
-  };
-
   const handleSettleDownPress = () => {
     settleDownBottomSheetRef.current?.expand();
   };
 
-  const handleSettleDownApply = (options: string[]) => {
-    setSelectedSettleDown(options);
-  };
 
   const handleResetPress = () => {
-    resetPreferenceApi();
+    setIsResetLoading(true);
+    resetPreferenceApi(dispatch, () => {
+      setIsResetLoading(false);
+    });
   };
 
   const PreferenceCard = ({
@@ -277,7 +230,7 @@ const PreferenceScreen = () => {
         disabled={!isClickable}
         activeOpacity={isClickable ? 0.7 : 1}
       >
-        <View style={{ width: '80%' }}>
+        <View style={styles.cardContent}>
           <AppText text={title} textStyle={styles.cardTitle} />
           <AppText text={value} textStyle={styles.cardValue} />
         </View>
@@ -289,6 +242,7 @@ const PreferenceScreen = () => {
   return (
     <AppSafeView style={{ padding: 0 }}>
       {loader && <AppLoader />}
+      {isResetLoading && <AppLoader />}
       <View style={styles.header}>
         <AppHeader
           title="Preferences"
@@ -359,13 +313,11 @@ const PreferenceScreen = () => {
 
       <MaritalStatusBottomSheet
         bottomSheetRef={maritalStatusBottomSheetRef}
-        selectedStatuses={selectedMaritalStatuses}
         maritalOptions={maritalStatuses}
       />
 
       <AgeRangeBottomSheet
         bottomSheetRef={ageRangeBottomSheetRef}
-        selectedAgeRange={selectedAgeRange}
       />
 
       <ReligionBottomSheet
@@ -375,36 +327,25 @@ const PreferenceScreen = () => {
 
       <HeightRangeBottomSheet
         bottomSheetRef={heightRangeBottomSheetRef}
-        selectedHeightRange={selectedHeightRange}
-        onSelectionChange={handleHeightRangeChange}
-        onApply={handleHeightRangeApply}
         heightOptions={height}
       />
 
       <TribeBottomSheet
         bottomSheetRef={tribeBottomSheetRef}
-        selectedTribes={selectedTribes}
         tribeOptions={community}
-        onSelectionChange={handleTribeChange}
-        onApply={handleTribeApply}
       />
 
       <LocationBottomSheet
         bottomSheetRef={locationBottomSheetRef}
-        selectedLocations={selectedLocations}
-        onApply={handleLocationApply}
       />
 
       <JobTypeBottomSheet
         bottomSheetRef={jobTypeBottomSheetRef}
-        selectedJobTypes={selectedJobTypes}
-        onApply={handleJobTypeApply}
       />
 
       <SettleDownBottomSheet
         bottomSheetRef={settleDownBottomSheetRef}
         selectedsettleTypes={selectedSettleDown}
-        onApply={handleSettleDownApply}
       />
     </AppSafeView>
   );
@@ -484,5 +425,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     fontFamily: Fonts.OPEN_SANS_BOLD,
     color: COLORS.textBlack,
+  },
+  cardContent: {
+    width: '80%',
+  },
+  noPadding: {
+    padding: 0,
+  },
+  secondaryTextStyle: {
+    color: COLORS.secondaryText,
   },
 });

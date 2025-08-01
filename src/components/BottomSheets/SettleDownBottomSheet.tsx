@@ -26,13 +26,11 @@ import AppChip2 from '../chips/AppChip2';
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   selectedsettleTypes: string[];
-  onApply: (settleTypes: string[]) => void;
 }
 
 const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
   bottomSheetRef,
   selectedsettleTypes,
-  onApply,
 }) => {
   const snapPoints = ['50%'];
   const [localSelected, setLocalSelected] =
@@ -77,8 +75,6 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
       console.log('error', error);
     } finally {
       bottomSheetRef.current?.close();
-
-      onApply(localSelected);
     }
   };
 

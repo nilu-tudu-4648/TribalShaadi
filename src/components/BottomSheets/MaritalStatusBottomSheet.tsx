@@ -30,7 +30,6 @@ import AppChip2 from '../chips/AppChip2';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedStatuses: string[];
   maritalOptions: string[] | undefined;
 }
 
@@ -45,12 +44,11 @@ const renderBackdrop = (props: any) => (
 
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   bottomSheetRef,
-  selectedStatuses,
   maritalOptions,
 }) => {
   const snapPoints = ['30%', '30%'];
   const [localSelectedStatuses, setLocalSelectedStatuses] =
-    useState<string[]>(selectedStatuses || []);
+    useState<string[]>();
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string) => {
