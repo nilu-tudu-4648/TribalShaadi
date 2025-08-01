@@ -17,7 +17,13 @@ import {
   Size8,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
-import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import {
+  getEmploymentTypeApi,
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
@@ -28,15 +34,6 @@ interface JobTypeBottomSheetProps {
   onApply: (jobTypes: string[]) => void;
 }
 
-const jobTypeOptions = [
-  'Government / Public Sector',
-  'Business / Self Employed',
-  'Private Company',
-  'Civil Services',
-  'Defence',
-  'Any',
-];
-
 const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   bottomSheetRef,
   selectedJobTypes,
@@ -46,25 +43,35 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const [localSelected, setLocalSelected] =
     useState<string[]>(selectedJobTypes);
   const dispatch = useDispatch();
+  const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
+  // Ensure initial job types are preserved and merged with API values
   useEffect(() => {
-    setLocalSelected(selectedJobTypes);
-  }, [selectedJobTypes]);
-
+    // Merge initial selectedJobTypes with user.pOccupationId from API, avoiding duplicates
+    const apiJobTypes = Array.isArray(user.pOccupationId) ? user.pOccupationId : [];
+    const initialJobTypes = Array.isArray(selectedJobTypes) ? selectedJobTypes : [];
+    // Use Set to avoid duplicates
+    const mergedJobTypes = Array.from(new Set([...initialJobTypes, ...apiJobTypes]));
+    setLocalSelected(mergedJobTypes);
+  }, [user.pOccupationId, selectedJobTypes]);
+  useEffect(() => {
+    getEmploymentTypeApi().then(res => {
+      setJobTypeOptions(res);
+    });
+  }, []);
+  console.log(jobTypeOptions, 'jobTypeOptions');
   const handleToggle = (jobType: string) => {
+    // Ensure localSelected is always an array
+    const currentSelected = Array.isArray(localSelected) ? localSelected : [];
     let updated: string[];
     if (jobType === 'Any') {
-      updated = localSelected.includes('Any') ? [] : ['Any'];
+      updated = ['Any'];
     } else {
-      const anyIndex = localSelected.indexOf('Any');
-      if (anyIndex > -1) {
-        updated = [jobType];
+      updated = currentSelected.filter(j => j !== 'Any');
+      if (updated.includes(jobType)) {
+        updated = updated.filter(j => j !== jobType);
       } else {
-        if (localSelected.includes(jobType)) {
-          updated = localSelected.filter(j => j !== jobType);
-        } else {
-          updated = [...localSelected, jobType];
-        }
+        updated = [...updated, jobType];
       }
     }
     setLocalSelected(updated);
@@ -74,7 +81,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
     try {
       const requestBody = {
         id: user.id,
-        pOccupationId: localSelected,
+        pOccupationId: localSelected.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -123,12 +130,12 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
         </View>
 
         <View style={styles.chipsContainer}>
-          {jobTypeOptions.map(option => (
+          {jobTypeOptions.map((option: any) => (
             <AppChip2
-              key={option}
-              title={option}
-              isSelected={localSelected.includes(option)}
-              onPress={() => handleToggle(option)}
+              key={option.id}
+              title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
+              isSelected={localSelected.includes(option.id)}
+              onPress={() => handleToggle(option.id)}
             />
           ))}
         </View>

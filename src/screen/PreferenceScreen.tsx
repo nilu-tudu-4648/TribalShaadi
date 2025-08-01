@@ -27,7 +27,10 @@ import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
 import { useSelector } from 'react-redux';
 import AppLoader from '../components/AppLoader';
-import { resetPreferenceApi } from '../constants/functions';
+import {
+  formatHeightInFeettoInches,
+  resetPreferenceApi,
+} from '../constants/functions';
 
 const PreferenceScreen = () => {
   const { user, maritalStatuses, religion, community, height, loader } =
@@ -47,7 +50,6 @@ const PreferenceScreen = () => {
     min: number;
     max: number;
   }>({ min: 20, max: 45 });
-  const [selectedReligion, setSelectedReligion] = useState<string>('Any');
   const [selectedHeightRange, setSelectedHeightRange] = useState<{
     min: number;
     max: number;
@@ -58,34 +60,8 @@ const PreferenceScreen = () => {
   const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
     'Any',
   ]);
-  console.log(user, 'user');
   useEffect(() => {
     setSelectedMaritalStatuses(user.pMaritalStatusId);
-    if (user?.pReligionId) {
-      setSelectedReligion(
-        religion.find((item: any) => item.id === user.pReligionId[0])?.name ||
-          'Any',
-      );
-    }
-    if (user?.community) {
-      // setSelectedTribes([user.community]);
-    }
-    if (user?.pFromAge && user?.pToAge) {
-      setSelectedAgeRange({ min: user.pFromAge, max: user.pToAge });
-    }
-    if (user?.pFromHeight && user?.pToHeight) {
-      setSelectedHeightRange({ min: user.pFromHeight, max: user.pToHeight });
-    }
-    if (user?.preferredLocation) {
-      // setSelectedLocations(Array.isArray(user.preferredLocation) ? user.preferredLocation : [user.preferredLocation]);
-    }
-    if (user?.preferredJobType) {
-      setSelectedJobTypes(
-        Array.isArray(user.preferredJobType)
-          ? user.preferredJobType
-          : [user.preferredJobType],
-      );
-    }
     if (user?.preferredSettleDown) {
       setSelectedSettleDown(
         Array.isArray(user.preferredSettleDown)
@@ -96,40 +72,47 @@ const PreferenceScreen = () => {
   }, [user]);
   const getMaritalStatusValue = () => {
     const uniqueCount = new Set(user.pMaritalStatusId).size;
-    console.log(uniqueCount, 'unique marital status count');
-    return `${uniqueCount} selected`;
-  };
-
-  const getAgeRangeValue = () => {
-    return `${selectedAgeRange.min} - ${selectedAgeRange.max} Years`;
-  };
-
-  const formatHeight = (totalInches: number) => {
-    const feet = Math.floor(totalInches / 12);
-    const inches = totalInches % 12;
-    return `${feet}ft ${inches}in`;
-  };
-
-  const getHeightRangeValue = () => {
-    return `${formatHeight(selectedHeightRange.min)} - ${formatHeight(
-      selectedHeightRange.max,
-    )}`;
-  };
-
-  const getTribeValue = () => {
-    if (selectedTribes.includes('Any')) {
+    if (uniqueCount === 0) {
       return 'Any';
     }
-    if (selectedTribes.length === 0) {
-      return 'None';
-    }
-    // if (selectedTribes.length === 1) {
-    //   return selectedTribes[0];
-    // }
-    console.log(selectedTribes, 'selectedTribes');
-    return `${selectedTribes.length} selected`;
+    return `${uniqueCount} selected`;
   };
-
+  const getAgeRangeValue = () => {
+    if (user.pFromAge && user.pToAge) {
+      return `${user.pFromAge} - ${user.pToAge} Years`;
+    }
+    return 'Any';
+  };
+  const cmToInches = (cm: number) => Math.round(cm / 2.54);
+  const getReligionValue = () => {
+    if (user.pReligionId) {
+      return (
+        religion.find((item: any) => item.id == user.pReligionId[0])?.name ||
+        user.religion
+      );
+    }
+    return user.religion;
+  };
+  const getHeightRangeValue = () => {
+    if (user.pFromHeight && user.pToHeight) {
+      return `${formatHeightInFeettoInches(
+        cmToInches(user.pFromHeight),
+      )} - ${formatHeightInFeettoInches(cmToInches(user.pToHeight))}`;
+    }
+    return 'Any';
+  };
+  const getTribeValue = () => {
+    if (user.pCommunityId && typeof user.pCommunityId === 'string') {
+      const communities = user.pCommunityId
+        .split(',')
+        .filter((id: string) => id.trim() !== '');
+      return communities.length > 0 ? `${communities.length} selected` : 'Any';
+    }
+    if (Array.isArray(user.pCommunityId)) {
+      return user.pCommunityId.length > 0 ? `${user.pCommunityId.length} selected` : 'Any';
+    }
+    return 'Any';
+  };
   const getLocationValue = () => {
     if (selectedLocations.includes('Any')) {
       return 'Any';
@@ -142,18 +125,23 @@ const PreferenceScreen = () => {
     }
     return `${selectedLocations.length} selected`;
   };
-
   const getJobTypeValue = () => {
-    if (selectedJobTypes.includes('Any')) {
+    if (!user.pOccupationId || user.pOccupationId === '' || user.pOccupationId === 'Any') {
       return 'Any';
     }
-    if (selectedJobTypes.length === 0) {
-      return 'None';
+    let ids: string[] = [];
+    if (Array.isArray(user.pOccupationId)) {
+      ids = user.pOccupationId.filter((id: any) => id && id !== 'Any');
+    } else if (typeof user.pOccupationId === 'string') {
+      ids = user.pOccupationId
+        .split(',')
+        .map((id: string) => id.trim())
+        .filter((id: string) => id && id !== 'Any');
     }
-    if (selectedJobTypes.length === 1) {
-      return selectedJobTypes[0];
+    if (ids.length === 0) {
+      return 'Any';
     }
-    return `${selectedJobTypes.length} selected`;
+    return `${ids.length} selected`;
   };
 
   const getSettleDownValue = () => {
@@ -176,7 +164,7 @@ const PreferenceScreen = () => {
       isClickable: true,
     },
     { title: 'Age', value: getAgeRangeValue(), isClickable: true },
-    { title: 'Religion', value: selectedReligion, isClickable: true },
+    { title: 'Religion', value: getReligionValue(), isClickable: true },
     { title: 'Height', value: getHeightRangeValue(), isClickable: true },
   ];
 
@@ -382,7 +370,6 @@ const PreferenceScreen = () => {
 
       <ReligionBottomSheet
         bottomSheetRef={religionBottomSheetRef}
-        selectedReligion={selectedReligion}
         religionOptions={religion}
       />
 

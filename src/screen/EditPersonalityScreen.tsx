@@ -100,7 +100,7 @@ useEffect(() => {
 
 // Update the handleSave function to maintain the same format
 const handleSave = useCallback(async () => {
-  const selectedInterests = selected.map(item => item.split(' ')[1]).join(',');
+  const selectedInterests = selected.map(item => item.split(' ').slice(1).join(' ')).join(',');
   try {
     const requestBody = {
       id: user.id,

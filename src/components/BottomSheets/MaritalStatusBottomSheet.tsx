@@ -34,6 +34,15 @@ interface MaritalStatusBottomSheetProps {
   maritalOptions: string[] | undefined;
 }
 
+// Backdrop component definition outside render
+const renderBackdrop = (props: any) => (
+  <BottomSheetBackdrop
+    {...props}
+    appearsOnIndex={0}
+    disappearsOnIndex={-1}
+  />
+);
+
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   bottomSheetRef,
   selectedStatuses,
@@ -41,28 +50,35 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
 }) => {
   const snapPoints = ['30%', '30%'];
   const [localSelectedStatuses, setLocalSelectedStatuses] =
-    useState<string[]>(selectedStatuses);
+    useState<string[]>(selectedStatuses || []);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string) => {
+    // Ensure localSelectedStatuses is an array
+    const currentStatuses = Array.isArray(localSelectedStatuses) ? localSelectedStatuses : [];
     let updatedStatuses;
-    if (localSelectedStatuses.includes(status)) {
-      updatedStatuses = localSelectedStatuses.filter(s => s !== status);
+    if (currentStatuses.includes(status)) {
+      updatedStatuses = currentStatuses.filter(s => s !== status);
     } else {
-      updatedStatuses = [...localSelectedStatuses, status];
+      updatedStatuses = [...currentStatuses, status];
     }
     setLocalSelectedStatuses(updatedStatuses);
   };
   useEffect(() => {
     if (user?.pMaritalStatusId) {
-      setLocalSelectedStatuses(user.pMaritalStatusId);
+      // Ensure it's always an array
+      const maritalStatuses = Array.isArray(user.pMaritalStatusId) 
+        ? user.pMaritalStatusId 
+        : [user.pMaritalStatusId];
+      setLocalSelectedStatuses(maritalStatuses);
     }
   }, [user]);
 
   const handleApply = async () => {
     try {
       // Clean and filter the marital status IDs
-      const cleanedStatuses = localSelectedStatuses
+      const safeStatuses = Array.isArray(localSelectedStatuses) ? localSelectedStatuses : [];
+      const cleanedStatuses = safeStatuses
         .filter(status => status && status.toString().trim() !== '') // Remove empty/null values
         .map(status => status.toString().trim()); // Clean whitespace
       
@@ -95,13 +111,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       snapPoints={snapPoints}
       enablePanDownToClose={true}
       onChange={handleSheetChanges}
-      backdropComponent={props => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-        />
-      )}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       backgroundStyle={styles.bottomSheetBackground}
     >
@@ -120,7 +130,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
               <AppChip2
                 key={option.id}
                 title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
-                isSelected={localSelectedStatuses.includes(option.id)}
+                isSelected={Array.isArray(localSelectedStatuses) && localSelectedStatuses.includes(option.id)}
                 onPress={() => handleStatusToggle(option.id)}
                 style={styles.optionChip}
               />

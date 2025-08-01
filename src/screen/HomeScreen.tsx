@@ -207,7 +207,7 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-  console.log(matchedUsers, 'matchedUsers');
+  // console.log(matchedUsers, 'matchedUsers');
   // console.log(currentMatchedUser, 'currentMatchedUser');
 
   const panGesture = Gesture.Pan()

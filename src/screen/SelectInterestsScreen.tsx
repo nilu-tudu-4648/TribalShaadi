@@ -47,7 +47,7 @@ const SelectInterestsScreen = () => {
     }
   }, [isInterestsUpdated, navigation]);
   const handleContinue = async () => {
-    const selectedInterests = selected.map(item => item.split(' ')[1]).join(',');
+    const selectedInterests = selected.map(item => item.split(' ').slice(1).join(' ')).join(',');
     try {
       const requestBody = {
         id: user.id,

@@ -19,28 +19,50 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import Svg, { Path } from 'react-native-svg';
-import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Workaround: Defining Checkbox component locally due to issues with SvgIcons.jsx
-const Checkbox = ({ isChecked, size = Size25 }: { isChecked: boolean, size?: number }) => {
+const Checkbox = ({
+  isChecked,
+  size = Size25,
+}: {
+  isChecked: boolean;
+  size?: number;
+}) => {
   return (
-    <View 
-      style={{ 
-        width: size, 
-        height: size, 
-        borderRadius: 4, 
-        borderWidth: 2, 
-        borderColor: COLORS.violet, 
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: COLORS.violet,
         backgroundColor: isChecked ? COLORS.violet : 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
       }}
     >
       {isChecked && (
-        <Svg width={size * 0.6} height={size * 0.6} viewBox="0 0 16 12" fill="none">
-          <Path d="M1 5.5L6.5 10.5L15 1.5" stroke={COLORS.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <Svg
+          width={size * 0.6}
+          height={size * 0.6}
+          viewBox="0 0 16 12"
+          fill="none"
+        >
+          <Path
+            d="M1 5.5L6.5 10.5L15 1.5"
+            stroke={COLORS.white}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </Svg>
       )}
     </View>
@@ -55,7 +77,6 @@ interface TribeBottomSheetProps {
   tribeOptions: any[];
 }
 
-
 const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   bottomSheetRef,
   selectedTribes,
@@ -64,21 +85,35 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   tribeOptions,
 }) => {
   const snapPoints = ['60%', '85%'];
-  const [localSelectedTribes, setLocalSelectedTribes] = useState<string[]>(selectedTribes);
-  const [localSelectedTribeId, setLocalSelectedTribeId] = useState<string[]>([]);   
+  const [localSelectedTribes, setLocalSelectedTribes] =
+    useState<string[]>(selectedTribes);
+  const [localSelectedTribeId, setLocalSelectedTribeId] = useState<string[]>(
+    [],
+  );
+  console.log(tribeOptions, 'tribeOptions');
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalSelectedTribes(selectedTribes);
-  }, [selectedTribes]);
+    setLocalSelectedTribeId(user.pCommunityId);
+  }, [user.pCommunityId]);
+  // Ensure initial tribes are preserved and merged with API values
+  useEffect(() => {
+    // Merge initial selectedTribes with user.pCommunityId from API, avoiding duplicates
+    const apiTribes = Array.isArray(user.pCommunityId) ? user.pCommunityId : [];
+    const initialTribes = Array.isArray(selectedTribes) ? selectedTribes : [];
+    // Use Set to avoid duplicates
+    const mergedTribes = Array.from(new Set([...initialTribes, ...apiTribes]));
+    setLocalSelectedTribeId(mergedTribes);
+    setLocalSelectedTribes(mergedTribes);
+  }, [user.pCommunityId, selectedTribes]);
 
-    const handleTribeToggle = (tribe: any) => {
+  const handleTribeToggle = (tribe: any) => {
+    const tribeIds = Array.isArray(localSelectedTribeId) ? localSelectedTribeId : [];
     let updatedTribes: string[];
-    if (localSelectedTribeId.includes(tribe.id)) {
-      updatedTribes = localSelectedTribeId.filter(t => t !== tribe.id);
-      setLocalSelectedTribeId(updatedTribes);
+    if (tribeIds.includes(tribe.id)) {
+      updatedTribes = tribeIds.filter(t => t !== tribe.id);
     } else {
-      updatedTribes = [...localSelectedTribeId, tribe.id];
+      updatedTribes = [...tribeIds, tribe.id];
     }
     setLocalSelectedTribeId(updatedTribes);
     setLocalSelectedTribes(updatedTribes);
@@ -89,7 +124,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
     try {
       const requestBody = {
         id: user.id,
-        pCommunityId: localSelectedTribes,
+        pCommunityId: localSelectedTribes.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -103,7 +138,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       onApply(localSelectedTribes);
     }
   };
-  
+
   const handleSheetChanges = (index: number) => {
     if (index === -1) {
       handleApply();
@@ -113,7 +148,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   const renderItem = ({ item }: { item: any }) => {
     const isSelected = localSelectedTribeId.includes(item.id);
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.optionRow}
         onPress={() => handleTribeToggle(item)}
         activeOpacity={0.7}
@@ -144,9 +179,9 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.headerContainer}>
           <AppText text="Tribe" textStyle={styles.headerTitle} />
-          <AppText 
-            text="You can select multiple options" 
-            textStyle={styles.headerSubtitle} 
+          <AppText
+            text="You can select multiple options"
+            textStyle={styles.headerSubtitle}
           />
         </View>
 
@@ -179,12 +214,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Size16,
     paddingVertical: Size12,
-    justifyContent: 'space-between',
-    gap: Size25,
   },
   headerContainer: {
     alignItems: 'flex-start',
     gap: Size8,
+    marginBottom: Size25,
   },
   headerTitle: {
     fontSize: fontSize20,
@@ -198,7 +232,9 @@ const styles = StyleSheet.create({
     color: COLORS.textInactive,
     textAlign: 'center',
   },
-  list: {},
+  list: {
+    flex: 1,
+  },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -210,4 +246,4 @@ const styles = StyleSheet.create({
     color: COLORS.textBlack,
     left: Size14,
   },
-}); 
+});

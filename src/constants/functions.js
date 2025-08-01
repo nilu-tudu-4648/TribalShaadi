@@ -45,6 +45,7 @@ export const getMaritalStatusUrl = 'admin/maritalStatus/getMaritalStatus';
 export const getEducationUrl = 'admin/education/getEducation';
 export const getEducationTypeUrl = 'admin/education/getEducationType';
 export const getOccupationUrl = 'admin/occupation/getOccupation';
+export const getEmploymentTypeUrl = 'admin/employmentType/getEmploymentType';
 export const getIncomeUrl = 'admin/annualIncome/getAnnualIncome';
 export const getHeightUrl = 'admin/height/getHeight';
 export const getDietUrl = 'admin/diet/getDiet';
@@ -344,6 +345,11 @@ export const convertCmToReadableHeight = cm => {
   const inches = Math.round((n / 30.48 - feet) * 12);
   return `${feet}'${String(inches).padStart(2, '0')}"`;
 };
+export const formatHeightInFeettoInches = (totalInches) => {
+  const feet = Math.floor(totalInches / 12);
+  const inches = totalInches % 12;
+  return `${feet}ft ${inches}in`;
+};
 export const getCitiesByStateId = async stateId => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -420,3 +426,17 @@ export const getCitiesByStateIdV2 = async stateId => {
   }
 };
 
+export const getEmploymentTypeApi = async dispatch => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.get(`${baseUrl}/${getEmploymentTypeUrl}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.recordList;
+  } catch (error) {
+    console.log(error, 'getEmploymentTypeApi');
+    return [];
+  }
+};

@@ -24,6 +24,7 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import {
+  formatHeightInFeettoInches,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
@@ -40,12 +41,6 @@ interface HeightRangeBottomSheetProps {
   heightOptions: any[];
 }
 
-const formatHeight = (totalInches: number) => {
-  const feet = Math.floor(totalInches / 12);
-  const inches = totalInches % 12;
-  return `${feet}ft ${inches}in`;
-};
-
 const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
   bottomSheetRef,
   selectedHeightRange,
@@ -58,9 +53,9 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
       opt => parseInt(opt.name) === heightInInches,
     );
     if (match) {
-      return formatHeight(parseInt(match.name));
+      return formatHeightInFeettoInches(parseInt(match.name));
     }
-    return formatHeight(heightInInches);
+    return formatHeightInFeettoInches(heightInInches);
   };
 
   const snapPoints = ['30%', '30%'];

@@ -190,7 +190,6 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
             </GestureDetector>
           </View>
         </View>
-
         <View style={styles.ageDisplayContainer}>
           <AppText
             text={`${localAgeRange.min} - ${localAgeRange.max} years`}

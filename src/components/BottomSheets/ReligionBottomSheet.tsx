@@ -32,18 +32,16 @@ import AppChip2 from '../chips/AppChip2';
 
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedReligion: string;
   religionOptions: any[];
 }
 
 const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   bottomSheetRef,
-  selectedReligion,
   religionOptions,
 }) => {
   const snapPoints = ['30%', '50%'];
   const [localSelectedReligion, setLocalSelectedReligion] =
-    useState<string>(selectedReligion);
+    useState<string>();
   const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
     string | null
   >(null);
