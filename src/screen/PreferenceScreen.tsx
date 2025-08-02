@@ -47,6 +47,11 @@ const PreferenceScreen = () => {
   const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
     'Any',
   ]);
+  const [selectedState, setSelectedState] = useState<any>(null);
+
+  const [selectedCities, setSelectedCities] = useState<any[]>(
+    [],
+  );
   const [isResetLoading, setIsResetLoading] = useState(false);
   useEffect(() => {
     if (user?.preferredSettleDown) {
@@ -123,15 +128,6 @@ const PreferenceScreen = () => {
   };
 
   const getSettleDownValue = () => {
-    if (selectedSettleDown.includes('Any')) {
-      return 'Any';
-    }
-    if (selectedSettleDown.length === 0) {
-      return 'None';
-    }
-    if (selectedSettleDown.length === 1) {
-      return selectedSettleDown[0];
-    }
     return `${selectedSettleDown.length} selected`;
   };
 
@@ -187,6 +183,7 @@ const PreferenceScreen = () => {
 
   const handleResetPress = () => {
     setIsResetLoading(true);
+    setSelectedCities([]);
     resetPreferenceApi(dispatch, () => {
       setIsResetLoading(false);
     });
@@ -337,6 +334,10 @@ const PreferenceScreen = () => {
 
       <LocationBottomSheet
         bottomSheetRef={locationBottomSheetRef}
+        selectedCities={selectedCities}
+        setSelectedCities={setSelectedCities}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
       />
 
       <JobTypeBottomSheet
@@ -345,7 +346,6 @@ const PreferenceScreen = () => {
 
       <SettleDownBottomSheet
         bottomSheetRef={settleDownBottomSheetRef}
-        selectedsettleTypes={selectedSettleDown}
       />
     </AppSafeView>
   );

@@ -19,6 +19,7 @@ import AppTextInput from '../components/AppTextInput';
 import { sendOTP } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
+import { validateIndianPhoneNumber } from '../constants/functions';
 type RootStackParamList = {
   Login: undefined;
   OTP: { phoneNumber: string };
@@ -26,6 +27,7 @@ type RootStackParamList = {
 
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneValidation, setPhoneValidation] = useState({ isValid: false, message: '' });
   const { loader, otpSent } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -35,26 +37,32 @@ const LoginScreen: React.FC = () => {
 
     useEffect(() => {
       let mounted = true;
-      if (otpSent && mounted && phoneNumber.length === 10) {
-        navigation.navigate('OTP', { phoneNumber });
+      if (otpSent && mounted && phoneValidation.isValid) {
+        const validation = validateIndianPhoneNumber(phoneNumber);
+        navigation.navigate('OTP', { phoneNumber: validation.cleanedNumber || phoneNumber });
       }
       return () => { mounted = false; };
-    }, [otpSent, navigation, phoneNumber]);
+    }, [otpSent, navigation, phoneValidation, phoneNumber]);
+    
     const handlePhoneNumberChange = ((text: string) => {
       setPhoneNumber(text);
+      const validation = validateIndianPhoneNumber(text);
+      setPhoneValidation(validation);
     });
     
 
 
   const handleVerify = async () => {
-    if (!phoneNumber.trim()) {
-      AppToast('Please enter a phone number');
+    const validation = validateIndianPhoneNumber(phoneNumber);
+    
+    if (!validation.isValid) {
+      AppToast(validation.message);
       return false;
     }
 
     try {
       const requestBody: any = {
-        contactNo: phoneNumber.trim(),
+        contactNo: validation.cleanedNumber,
       };
       dispatch(sendOTP('admin/users/sendLoginOTP', requestBody));
     } catch (error: any) {
@@ -64,7 +72,7 @@ const LoginScreen: React.FC = () => {
     }
   };
 
-  const isButtonDisabled = !phoneNumber.trim() || phoneNumber.length !== 10;
+  const isButtonDisabled = !phoneValidation.isValid;
 
   return (
     <SafeAreaView style={styles.container}>

@@ -180,8 +180,7 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: Size12,
+    gap: Size12,
   },
   optionChip: {
     minWidth: '30%',

@@ -43,21 +43,24 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   // Ensure initial job types are preserved and merged with API values
   useEffect(() => {
-    // Merge initial selectedJobTypes with user.pOccupationId from API, avoiding duplicates
-    const apiJobTypes = Array.isArray(user.pOccupationId)
-      ? user.pOccupationId
-      : [];
-    // Use Set to avoid duplicates
-    const mergedJobTypes = Array.from(
-      new Set([...apiJobTypes]),
-    );
-    setLocalSelected(mergedJobTypes);
-  }, [user.pOccupationId]);
-  useEffect(() => {
     getEmploymentTypeApi().then(res => {
       setJobTypeOptions(res);
     });
   }, []);
+  useEffect(() => {
+    if (user.pOccupationId) {
+      if (Array.isArray(user.pOccupationId)) {
+        setLocalSelected(user.pOccupationId);
+      } else if (typeof user.pOccupationId === 'string') {
+        setLocalSelected(user.pOccupationId.split(','));
+      } else {
+        setLocalSelected([]);
+      }
+    } else {
+      setLocalSelected([]);
+    }
+  }, [user.pOccupationId]);
+  console.log(localSelected, 'localSelected');
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];
@@ -172,7 +175,6 @@ const styles = StyleSheet.create({
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: Size12,
   },
   applyButton: {

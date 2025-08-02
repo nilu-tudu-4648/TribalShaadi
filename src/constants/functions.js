@@ -447,6 +447,55 @@ export const getCitiesByStateIdV2 = async stateId => {
   }
 };
 
+// Phone number validation for Indian mobile numbers
+export const validateIndianPhoneNumber = (phoneNumber) => {
+  if (!phoneNumber) {
+    return {
+      isValid: false,
+      message: 'Please enter a phone number'
+    };
+  }
+
+  // Remove any spaces, dashes, parentheses, or other formatting
+  let cleanedNumber = phoneNumber.replace(/[\s\-()+]/g, '');
+  
+  // Remove country code if present (91 for India)
+  if (cleanedNumber.startsWith('91') && cleanedNumber.length === 12) {
+    cleanedNumber = cleanedNumber.substring(2);
+  }
+  
+  // Check if the number contains only digits
+  if (!/^\d+$/.test(cleanedNumber)) {
+    return {
+      isValid: false,
+      message: 'Phone number should contain only digits'
+    };
+  }
+  
+  // Check if length is exactly 10 digits
+  if (cleanedNumber.length !== 10) {
+    return {
+      isValid: false,
+      message: 'Phone number should be exactly 10 digits'
+    };
+  }
+  
+  // Check if first digit is valid for Indian mobile numbers (6, 7, 8, or 9)
+  const firstDigit = cleanedNumber.charAt(0);
+  if (!['6', '7', '8', '9'].includes(firstDigit)) {
+    return {
+      isValid: false,
+      message: 'Phone number should start with 6, 7, 8, or 9'
+    };
+  }
+  
+  return {
+    isValid: true,
+    message: 'Valid phone number',
+    cleanedNumber: cleanedNumber
+  };
+};
+
 export const getEmploymentTypeApi = async dispatch => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);

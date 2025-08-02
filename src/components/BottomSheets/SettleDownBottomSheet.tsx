@@ -25,21 +25,22 @@ import AppChip2 from '../chips/AppChip2';
 
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  selectedsettleTypes: string[];
 }
 
 const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
   bottomSheetRef,
-  selectedsettleTypes,
 }) => {
   const snapPoints = ['50%'];
-  const [localSelected, setLocalSelected] =
-    useState<string[]>(selectedsettleTypes);
+  const [localSelected, setLocalSelected] = useState<string[]>([]);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalSelected(selectedsettleTypes);
-  }, [selectedsettleTypes]);
+    if (user.psettle_down) {
+      setLocalSelected(user.psettle_down.split(','));
+    } else {
+      setLocalSelected([]);
+    }
+  }, [user.psettle_down]);
 
   const handleToggle = (settleType: string) => {
     let updated: string[];
@@ -64,7 +65,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
     try {
       const requestBody = {
         id: user.id,
-        pSettlingDown: localSelected,
+        psettle_down: localSelected.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: Size12,
   },
   applyButton: {
