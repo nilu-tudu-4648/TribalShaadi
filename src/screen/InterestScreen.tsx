@@ -30,6 +30,7 @@ import {
 import {
   acceptRejectProposalUrl,
   baseUrl,
+  delay,
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   getPassedUsersUrl,
@@ -104,7 +105,7 @@ const InterestScreen = () => {
           },
         ),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       bottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
       console.log(error, 'error');
@@ -118,7 +119,7 @@ const InterestScreen = () => {
           status: 0,
         }),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     } catch (error) {
       console.log(error);

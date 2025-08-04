@@ -22,16 +22,11 @@ import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  friendRequestAcceptUrl,
   getAcceptedProposalByIdUrl,
-  getUserChatListUrl,
   imageUrl,
 } from '../constants/functions';
+
 import {
-  getUserChatListApi,
-} from '../store/reducers/chatReducer';
-import {
-  friendRequestAcceptApi,
   getAcceptedProposalByIdApi,
 } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
@@ -40,23 +35,15 @@ import Loader from '../components/loader/Loader';
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const {loader, allChatHistoryByUserId, acceptedProposalById } = useSelector(
+  const {loader, acceptedProposalById } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
-  console.log('allChatHistoryByUserId', allChatHistoryByUserId);
-  // console.log('acceptedProposalById', acceptedProposalById);
 
   const fetchData = useCallback(() => {
     dispatch(
       getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
-    );
-    dispatch(
-      getUserChatListApi(getUserChatListUrl, {
-        startIndex: '1',
-        fetchRecord: '10',
-      }),
     );
   }, [dispatch, user?.id]);
 
@@ -74,11 +61,6 @@ const ChatScreen = () => {
 
   const acceptFriendRequest = (item: any) => {
     try {
-      dispatch(
-        friendRequestAcceptApi(friendRequestAcceptUrl, {
-          chatId: item.chatId,
-        }),
-      );
       (navigation as any).navigate(ROUTES.STACK, {
         screen: ROUTES.CONVERSATIONS,
         params: {

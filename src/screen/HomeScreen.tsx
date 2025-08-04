@@ -27,6 +27,7 @@ import {
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   insertUserNotificationsUrl,
+  delay,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -81,7 +82,7 @@ const HomeScreen = () => {
           proposalUserId: id,
         }),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       dispatch(
         getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
       );
@@ -111,7 +112,7 @@ const HomeScreen = () => {
           proposalUserId: id,
         }),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     } catch (error) {

@@ -82,7 +82,6 @@ export const getUserChatUrl = 'app/userChat/userChat';
 export const getUserChatListUrl = 'app/userChat/getUserChatList';
 export const sendMessageUrl = 'app/userChat/sendMessage';
 export const getMessagesUrl = 'app/userChat/getMessages';
-export const friendRequestAcceptUrl = 'app/userChat/friendRequestAccept';
 export const friendRequestRejectOrBlockUrl =
   'app/userChat/friendRequestRejectOrBlock';
 export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
@@ -93,23 +92,10 @@ export const getAcceptedProposalByIdUrl =
 export const insertUserNotificationsUrl =
   'app/notifications/insertUserNotifications';
 // Date formatting function
-export const formatDateOfBirth = dateString => {
-  if (!dateString) return '';
 
-  try {
-    const date = new Date(dateString);
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return date.toLocaleDateString('en-US', options);
-  } catch (error) {
-    console.log('Error formatting date:', error);
-    return dateString;
-  }
+export const delay = async (ms = 1000) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
-
 // Alternative shorter format (DD/MM/YYYY)
 export const formatDateShort = dateString => {
   if (!dateString) return '';
@@ -331,7 +317,7 @@ export const deleteUserApi = async (id, dispatch) => {
 };
 export const setReducerLoadingfalse = async (dispatch, func) => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay();
     func();
   } catch (error) {
     console.log(error, 'setReducerLoadingfalse');
@@ -345,7 +331,7 @@ export const convertCmToReadableHeight = cm => {
   const inches = Math.round((n / 30.48 - feet) * 12);
   return `${feet}'${String(inches).padStart(2, '0')}"`;
 };
-export const formatHeightInFeettoInches = (totalInches) => {
+export const formatHeightInFeettoInches = totalInches => {
   const feet = Math.floor(totalInches / 12);
   const inches = totalInches % 12;
   return `${feet}ft ${inches}in`;
@@ -367,7 +353,7 @@ export const getCitiesByStateId = async stateId => {
     return [];
   }
 };
-export const resetPreferenceApi = async (dispatch,func) => {
+export const resetPreferenceApi = async (dispatch, func) => {
   const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
   const user = JSON.parse(userDataString);
   const data = {
@@ -412,7 +398,7 @@ export const resetPreferenceApi = async (dispatch,func) => {
     console.log(response, 'resetPreferenceApi');
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
-  }finally{
+  } finally {
     func();
   }
 };
@@ -449,51 +435,51 @@ export const getCitiesByStateIdV2 = async stateId => {
 };
 
 // Phone number validation for Indian mobile numbers
-export const validateIndianPhoneNumber = (phoneNumber) => {
+export const validateIndianPhoneNumber = phoneNumber => {
   if (!phoneNumber) {
     return {
       isValid: false,
-      message: 'Please enter a phone number'
+      message: 'Please enter a phone number',
     };
   }
 
   // Remove any spaces, dashes, parentheses, or other formatting
   let cleanedNumber = phoneNumber.replace(/[\s\-()+]/g, '');
-  
+
   // Remove country code if present (91 for India)
   if (cleanedNumber.startsWith('91') && cleanedNumber.length === 12) {
     cleanedNumber = cleanedNumber.substring(2);
   }
-  
+
   // Check if the number contains only digits
   if (!/^\d+$/.test(cleanedNumber)) {
     return {
       isValid: false,
-      message: 'Phone number should contain only digits'
+      message: 'Phone number should contain only digits',
     };
   }
-  
+
   // Check if length is exactly 10 digits
   if (cleanedNumber.length !== 10) {
     return {
       isValid: false,
-      message: 'Phone number should be exactly 10 digits'
+      message: 'Phone number should be exactly 10 digits',
     };
   }
-  
+
   // Check if first digit is valid for Indian mobile numbers (6, 7, 8, or 9)
   const firstDigit = cleanedNumber.charAt(0);
   if (!['6', '7', '8', '9'].includes(firstDigit)) {
     return {
       isValid: false,
-      message: 'Phone number should start with 6, 7, 8, or 9'
+      message: 'Phone number should start with 6, 7, 8, or 9',
     };
   }
-  
+
   return {
     isValid: true,
     message: 'Valid phone number',
-    cleanedNumber: cleanedNumber
+    cleanedNumber: cleanedNumber,
   };
 };
 
@@ -508,6 +494,30 @@ export const getEmploymentTypeApi = async dispatch => {
     return response.data.recordList;
   } catch (error) {
     console.log(error, 'getEmploymentTypeApi');
+    return [];
+  }
+};
+export const filterChatByUserId = async (userId, friendId) => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(
+      `${baseUrl}/${getAllChatHistoryByUserIdUrl}`,
+      {
+        userId: userId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = response.data.recordList
+    const filteredChat = data.filter(
+      chat => chat.chatId.split('_')[0] == friendId || chat.chatId.split('_')[1] == friendId,
+    );
+    return filteredChat.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  } catch (error) {
+    console.log(error, 'filterChatByUserId');
     return [];
   }
 };

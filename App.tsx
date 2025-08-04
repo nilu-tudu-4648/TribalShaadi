@@ -24,7 +24,7 @@ import AboutPartnerScreen from './src/screen/AboutPartnerScreen';
 import UploadImageScreen from './src/screen/UploadImageScreen';
 import { store } from './src/store/configureStore';
 import SelectInterestsScreen from './src/screen/SelectInterestsScreen';
-import { checkAuth, checkUserLoggedIn } from './src/constants/functions';
+import { checkAuth, checkUserLoggedIn, delay } from './src/constants/functions';
 import { COLORS } from './src/constants/AppColors';
 import WelcomeHome from './src/screen/WelcomeHome';
 import BottomNavigation from './src/navigation/BottomNavigation';
@@ -100,7 +100,7 @@ const MainApp = () => {
     // Initialize push notification setup with a delay to allow Firebase to auto-initialize
     const setupNotifications = async () => {
       // Wait for Firebase to auto-initialize from config files
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await delay();
       
       try {
         // Create notification channel (Android)

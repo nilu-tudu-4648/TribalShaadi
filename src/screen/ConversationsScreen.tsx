@@ -9,7 +9,6 @@ import {
   Pressable,
 } from 'react-native';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -33,12 +32,10 @@ import {
 import FONT_FAMILY from '../constants/Fonts';
 import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ASYNC_VARIBLES } from '../constants/data';
 import { useDispatch, useSelector } from 'react-redux';
-import { formatDateShort, getAllChatHistoryByUserIdUrl, imageUrl } from '../constants/functions';
+import { delay, filterChatByUserId, formatDateShort, imageUrl } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
-import { getAllChatHistoryByUserIdApi } from '../store/reducers/chatReducer';
 
 // Message type definitions
 interface Message {
@@ -62,103 +59,37 @@ const INITIAL_STORY_STARTER: Message = {
 const ConversationsScreen = () => {
   const navigation = useNavigation();
   const [messageText, setMessageText] = useState('');
+  // const [isLoading, setIsLoading] = useState(false);
   const [chatData, setChatData] = useState<Message[]>([INITIAL_STORY_STARTER]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const { userDetails } = useRoute().params as { userDetails: any };
   const socket = useRef<Socket | null>(null);
-  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const dispatch = useDispatch();
-  const { messages } = useSelector((state: any) => state.entities.chatReducer);
-  console.log('messages', messages);
-  // console.log('user:', user);
-  // console.log('userDetails:', userDetails);
-
-  const saveChatMessages = useCallback(
-    async (messagesToSave: Message[]) => {
-      if (!user?.id || !userDetails?.friendId) return;
-
-      try {
-        // Create a consistent key for the chat pair by sorting IDs
-        const chatKey = `${ASYNC_VARIBLES.CHAT_MESSAGES}_${[
-          user.id,
-          userDetails.friendId,
-        ]
-          .sort()
-          .join('_')}`;
-
-        const recordList = messagesToSave
-          .filter(msg => msg.type === 'sent' || msg.type === 'received') // Exclude non-message types
-          .map(msg => {
-            const isSent = msg.type === 'sent';
-            // Ensure consistent chatId by sorting IDs
-            const chatId = [user.id, userDetails.friendId].sort().join('-');
-            return {
-              chatId,
-              senderUserId: isSent ? user.id : userDetails.friendId,
-              receiverUserId: isSent ? userDetails.friendId : user.id,
-              message: msg.message || '',
-              messageType: msg.type,
-              isRead: 0, // Default to 0, assuming it's unread
-              createdDate: new Date(
-                msg.timestamp || Date.now(),
-              ).toISOString(),
-            };
-          });
-
-        const dataToStore = {
-          status: 0,
-          isDisplayMessage: true,
-          message: 'Chat history',
-          recordList,
-          totalRecords: recordList.length,
-          token: '', // No token available in this context
-        };
-
-        await AsyncStorage.setItem(chatKey, JSON.stringify(dataToStore));
-      } catch (error) {
-        console.error('Error saving chat messages:', error);
-      }
-    },
-    [user?.id, userDetails?.friendId],
-  );
   const loadChatMessages = useCallback(async () => {
     if (!user?.id || !userDetails?.friendId) return;
-
     try {
-      const chatKey = `${ASYNC_VARIBLES.CHAT_MESSAGES}_${[
-        user.id,
-        userDetails.friendId,
-      ]
-        .sort()
-        .join('_')}`;
-
-      const storedData = await AsyncStorage.getItem(chatKey);
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        if (parsedData && parsedData.recordList) {
-          const loadedMessages: Message[] = parsedData.recordList.map(
-            (record: any) => {
-              const isSent = String(record.senderUserId) === String(user.id);
-              return {
-                id: new Date(record.createdDate).getTime(),
-                type: isSent ? 'sent' : 'received',
-                message: record.message,
-                time: new Date(record.createdDate).toLocaleTimeString(
-                  'en-US',
-                  {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true,
-                  },
-                ),
-                timestamp: new Date(record.createdDate).getTime(),
-                status: 'sent', // Assume stored messages are sent
-              };
-            },
-          );
-          setChatData([INITIAL_STORY_STARTER, ...loadedMessages]);
-        }
+      const filteredChat = await filterChatByUserId(user.id, userDetails.friendId);
+      if (Array.isArray(filteredChat) && filteredChat.length > 0) {
+        const loadedMessages: Message[] = filteredChat.map((record: any) => {
+          const isSent = String(record.userId) === String(user.id);
+          return {
+            id: new Date(record.created_at).getTime(),
+            type: isSent ? 'sent' : 'received',
+            message: record.content,
+            time: new Date(record.created_at).toLocaleTimeString(
+              'en-US',
+              {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              },
+            ),
+            timestamp: new Date(record.created_at).getTime(),
+            status: record.status && record.status.toLowerCase() === 'sent' ? 'sent' : 'sending',
+          };
+        });
+        setChatData([INITIAL_STORY_STARTER, ...loadedMessages]);
       }
     } catch (error) {
       console.error('Error loading chat messages:', error);
@@ -173,20 +104,23 @@ const ConversationsScreen = () => {
 
   // Add new message to chat
   const addMessage = useCallback(
-    (message: Omit<Message, 'id' | 'timestamp'>) => {
+    async (message: Omit<Message, 'id' | 'timestamp'>) => {
       const newMessage: Message = {
         ...message,
         id: Date.now(), // Use timestamp as unique ID
         timestamp: Date.now(),
       };
+
       setChatData(currentChatData => {
         const updatedMessages = [...currentChatData, newMessage];
-        saveChatMessages(updatedMessages);
-        scrollToBottom(); // Auto-scroll when new message is added
         return updatedMessages;
       });
+
+      // Move side effects outside of setState
+      await delay();
+      scrollToBottom(); // Auto-scroll when new message is added
     },
-    [saveChatMessages, scrollToBottom],
+    [scrollToBottom],
   );
 
   // Initialize socket connection with fallback URLs
@@ -225,16 +159,8 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('connect', () => {
-        console.log('🟢 Connected to socket server');
-        console.log('Socket ID:', socket.current?.id);
-        console.log('Transport:', socket.current?.io?.engine?.transport?.name);
-        console.log('Server URL:', SERVER_URL);
-
         if (user?.id) {
-          console.log(`📝 Registering user ${user.id}...`);
           socket.current?.emit('register', user.id);
-        } else {
-          console.error('❌ No user ID found for registration');
         }
       });
 
@@ -248,13 +174,6 @@ const ConversationsScreen = () => {
         setTimeout(() => {
           initializeSocket(attempt + 1);
         }, 1500);
-      });
-
-      // Handle registration confirmation from server
-      socket.current.on('registration_confirmed', ({ userId, socketId }) => {
-        console.log(
-          `✅ Registration confirmed for user ${userId} with socket ${socketId}`,
-        );
       });
 
       // Handle reconnection events
@@ -281,8 +200,6 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('receive_message', ({ from, content, timestamp }) => {
-        console.log('📨 Received message:', { from, content, timestamp });
-        console.log('Expected from userDetails.friendId:', userDetails?.friendId);
 
         // Convert IDs to string for comparison (in case one is number, one is string)
         if (String(from) === String(userDetails?.friendId)) {
@@ -316,6 +233,9 @@ const ConversationsScreen = () => {
           ),
         );
         scrollToBottom(); // Auto-scroll when message status updates
+        
+        // Load messages from API after successful send
+        loadChatMessages();
       });
 
       socket.current.on('error_message', error => {
@@ -340,48 +260,30 @@ const ConversationsScreen = () => {
         }
       });
 
-      // Handle server pings for connection health
-      socket.current.on('pong', () => {
-        console.log('🏓 Received pong from server');
-      });
 
-      // Send periodic pings to test connection
-      const pingInterval = setInterval(() => {
-        if (socket.current?.connected) {
-          socket.current.emit('ping');
-        }
-      }, 30000); // Ping every 30 seconds
 
-      // Store interval reference for cleanup
-      pingIntervalRef.current = pingInterval;
     },
-    [user?.id, userDetails?.friendId, addMessage, scrollToBottom],
+    [user?.id, userDetails?.friendId, addMessage, scrollToBottom, loadChatMessages],
   );
 
-  // Load messages on component mount
+  // Load messages when redux state changes
   useEffect(() => {
     if (user?.id && userDetails?.friendId) {
       loadChatMessages();
     }
+  }, [loadChatMessages, user?.id, userDetails?.friendId]);
+
+  // Initialize socket and fetch initial data on component mount
+  useEffect(() => {
     initializeSocket(0);
-    dispatch(
-      getAllChatHistoryByUserIdApi(getAllChatHistoryByUserIdUrl, {
-        userId: user.id,
-      }),
-    );
     return () => {
       console.log('🧹 Cleaning up socket connection');
       if (socket.current) {
         socket.current.removeAllListeners();
         socket.current.disconnect();
       }
-      // Clear ping interval
-      if (pingIntervalRef.current) {
-        clearInterval(pingIntervalRef.current);
-        pingIntervalRef.current = null;
-      }
     };
-  }, [initializeSocket, loadChatMessages, user?.id, userDetails?.friendId, dispatch]);
+  }, [initializeSocket, user?.id, userDetails?.friendId, dispatch]);
 
   // Auto-scroll when chatData changes
   useEffect(() => {

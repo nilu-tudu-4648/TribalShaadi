@@ -30,7 +30,7 @@ import {
   GovtIdIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { baseUrl, imageUrl } from '../constants/functions';
+import { baseUrl, delay, imageUrl } from '../constants/functions';
 import { PreferenceIcon } from '../components/svg/SvgIcons2';
 import Loader from '../components/loader/Loader';
 import ProfileBottomSheet from '../components/BottomSheets/ProfileBottomSheet';
@@ -91,7 +91,7 @@ const AccountScreen = () => {
           },
         ),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       profileBottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
       console.log(error, 'error');

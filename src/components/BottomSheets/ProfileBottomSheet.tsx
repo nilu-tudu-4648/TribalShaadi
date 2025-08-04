@@ -47,6 +47,7 @@ import {
 import {
   baseUrl,
   convertCmToReadableHeight,
+  delay,
   formatDateShort,
   getPassedUsersUrl,
   getProposalsSendByMeUrl,
@@ -91,7 +92,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
           proposalUserId: id,
         }),
       );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await delay();
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
           title: 'Congrats 🎉 new request received!',
