@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import AppHeader from '../components/AppHeader';
 import { COLORS } from '../constants/AppColors';
@@ -26,6 +26,16 @@ const SettingsScreen = () => {
   };
   const navigation = useNavigation();
   const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      accountBottomSheetRef.current?.close();
+      deleteBottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  
   const openDeleteBottomSheet = () => {
     deleteBottomSheetRef?.current?.expand();
   };

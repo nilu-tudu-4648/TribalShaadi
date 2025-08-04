@@ -98,19 +98,19 @@ const EditLifeScreen = () => {
     const initializeFormData = async () => {
       if (user && states && states.length > 0) {
         console.log('Initializing form data. User stateId:', user.stateId);
-        console.log('Available states:', states);
+        // console.log('Available states:', states);
 
         // Find state object from the fetched data
         const userState = states.find(
           (state: any) => String(state.name) === String(user.stateName),
         );
-        console.log('Found user state:', userState);
+        // console.log('Found user state:', userState);
         
         if (userState) {
           setCitiesLoading(true);
           try {
             const cities = await getCitiesByStateIdV2(userState.id);
-            console.log('cities', cities);
+            // console.log('cities', cities);
             setLocalCities(cities);
             
             // Find user's city from the fetched cities
@@ -147,7 +147,7 @@ const EditLifeScreen = () => {
 
   // Handle state selection and reset city when state changes
   const handleStateSelection = useCallback((selectedState: any) => {
-    console.log('Selected state:', selectedState);
+    // console.log('Selected state:', selectedState);
     setFormData(prev => ({
       ...prev,
       selectedState: selectedState,
@@ -169,7 +169,7 @@ const EditLifeScreen = () => {
 
   // Handle diet selection
   const handleDietSelection = useCallback((selectedDiet: any) => {
-    console.log('selectedDiet', selectedDiet);
+    // console.log('selectedDiet', selectedDiet);
     setFormData(prev => ({
       ...prev,
       dietId: selectedDiet.id,

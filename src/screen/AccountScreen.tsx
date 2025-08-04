@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
@@ -30,21 +30,21 @@ import {
   GovtIdIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getUserDetailsApi,
-  getUserDetailsUrl,
-  imageUrl,
-  setReducerLoadingfalse,
-  uploadImage,
-} from '../constants/functions';
+import { baseUrl, imageUrl } from '../constants/functions';
 import { PreferenceIcon } from '../components/svg/SvgIcons2';
-import {
-  launchImageLibrary,
-  ImageLibraryOptions,
-} from 'react-native-image-picker';
-import AppToast from '../components/AppToast';
-import { setLoadingTrue } from '../store/reducers/authReducer';
 import Loader from '../components/loader/Loader';
+import ProfileBottomSheet from '../components/BottomSheets/ProfileBottomSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
+import {
+  getCurrentMatchedUserGalleryImageListApi,
+  getSelectedUserApi,
+  getSelectedUserPackageApi,
+} from '../store/reducers/userReducer';
+import {
+  getGalleryImageListUrl,
+  getPackageByUserIdUrl,
+  getSelectedUserUrl,
+} from '../constants/functions';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -72,13 +72,41 @@ const AccountScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const fullName = `${user?.firstName} ${user?.lastName || ''}`.trim();
-  const [selectedImages, setSelectedImages] = useState<
-    { uri: string; base64: string }[]
-  >([]);
   const { packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
+  const handleCardPress = async (id: string) => {
+    try {
+      dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
+      dispatch(
+        getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
+          userId: id,
+        }),
+      );
+      dispatch(
+        getCurrentMatchedUserGalleryImageListApi(
+          `${baseUrl}/${getGalleryImageListUrl}`,
+          {
+            userId: id,
+          },
+        ),
+      );
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      profileBottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
   const dispatch = useDispatch();
+  const profileBottomSheetRef = useRef<BottomSheet>(null);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      profileBottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   const badgeData: BadgeData[] = [
     {
       key: 'crown',
@@ -124,60 +152,7 @@ const AccountScreen = () => {
       route: ROUTES.SETTINGS,
     },
   ];
-  const handleImageUpload = async (index: number) => {
-    const options: ImageLibraryOptions = {
-      mediaType: 'photo',
-      includeBase64: true,
-      maxHeight: 2000,
-      maxWidth: 2000,
-      quality: 0.8,
-    };
 
-    launchImageLibrary(options, async response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-        AppToast('Failed to select image. Please try again.');
-      } else if (response.assets && response.assets.length > 0) {
-        const asset = response.assets[0];
-        if (asset.uri && asset.base64) {
-          // Update the selected images first
-          const newImages = [...selectedImages];
-          newImages[index] = { uri: asset.uri, base64: asset.base64 };
-          setSelectedImages(newImages);
-          dispatch(setLoadingTrue(true));
-          // Upload the image immediately
-          try {
-            let requestBody;
-
-            if (index === 0) {
-              // First image format
-              requestBody = {
-                id: user.id,
-                image: `data:image/jpeg;base64,${asset.base64}`,
-              };
-              console.log(requestBody, 'requestBody for first image');
-              await uploadImage(requestBody, dispatch, true);
-              setReducerLoadingfalse(dispatch, () => {
-                getUserDetailsApi(
-                  `${getUserDetailsUrl}id=${user.id}`,
-                  dispatch,
-                );
-              });
-            }
-          } catch (error) {
-            console.log('NETWORK ERROR:', error);
-            AppToast('Failed to upload image. Please try again.');
-            // Remove the image from state if upload failed
-            const failedImages = [...selectedImages];
-            failedImages[index] = { uri: '', base64: '' };
-            setSelectedImages(failedImages);
-          }
-        }
-      }
-    });
-  };
   return (
     <>
       {loader ? (
@@ -188,7 +163,7 @@ const AccountScreen = () => {
           <View style={styles.profileContainer}>
             <TouchableOpacity
               onPress={() => {
-                handleImageUpload(0);
+                handleCardPress(user.id);
               }}
             >
               <Image
@@ -264,6 +239,13 @@ const AccountScreen = () => {
           </View>
         </View>
       )}
+      <ProfileBottomSheet
+        bottomSheetRef={profileBottomSheetRef}
+        isButtonVisible={false}
+        user={user}
+        currentUserPackage={packageByUserId}
+        report={false}
+      />
     </>
   );
 };

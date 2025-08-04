@@ -53,9 +53,13 @@ const InterestScreen = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { proposalsSendByMe, proposalsGotByMe, loader, passedUsers, currentUserPackage } =
-    useSelector((state: any) => state.entities.userReducer);
-
+  const {
+    proposalsSendByMe,
+    proposalsGotByMe,
+    loader,
+    passedUsers,
+    currentUserPackage,
+  } = useSelector((state: any) => state.entities.userReducer);
   const fetchData = useCallback(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
@@ -87,9 +91,11 @@ const InterestScreen = () => {
   const handleCardPress = async (id: string) => {
     try {
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
-      dispatch(getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
-        userId: id,
-      }));
+      dispatch(
+        getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
+          userId: id,
+        }),
+      );
       dispatch(
         getCurrentMatchedUserGalleryImageListApi(
           `${baseUrl}/${getGalleryImageListUrl}`,
@@ -148,120 +154,121 @@ const InterestScreen = () => {
 
   return (
     <>
-      {loader ? (
-        <Loader />
-      ) : (
-        <AppSafeView style={styles.container}>
-          <AppText text="Interests" textStyle={styles.title} />
-          <View style={styles.tabsContainer}>
-            {INTEREST_TABS.map((tab, idx) => (
-              <TouchableOpacity
-                key={tab.label}
-                style={[styles.tab, selectedTab === idx && styles.tabSelected]}
-                onPress={() => setSelectedTab(idx)}
-                activeOpacity={0.8}
-              >
-                <AppText
-                  text={tab.label}
-                  textStyle={[
-                    styles.tabText,
-                    selectedTab === idx && styles.tabTextSelected,
-                  ]}
+      <AppSafeView style={styles.container}>
+        <AppText text="Interests" textStyle={styles.title} />
+        <View style={styles.tabsContainer}>
+          {INTEREST_TABS.map((tab, idx) => (
+            <TouchableOpacity
+              key={tab.label}
+              style={[styles.tab, selectedTab === idx && styles.tabSelected]}
+              onPress={() => setSelectedTab(idx)}
+              activeOpacity={0.8}
+            >
+              <AppText
+                text={tab.label}
+                textStyle={[
+                  styles.tabText,
+                  selectedTab === idx && styles.tabTextSelected,
+                ]}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+        {selectedTab === 0 && (
+          <FlatList
+            data={proposalsGotByMe}
+            renderItem={({ item }) => (
+              <ReceivedCard
+                item={item}
+                onDecline={() => handleRejectProposal(item.senderUserId)}
+                onConnect={() => handleAcceptProposal(item)}
+                onPress={() => {
+                  if (packageByUserId.length > 0) {
+                    handleCardPress(item.senderUserId);
+                  } else {
+                    (navigation as any).navigate(ROUTES.STACK, {
+                      screen: ROUTES.UPGRADE,
+                    });
+                  }
+                }}
+                planPurchased={packageByUserId.length > 0}
+              />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyStateContainer}>
+                <Image
+                  source={require('../assets/images/lonely.png')}
+                  style={styles.heartImage}
                 />
-              </TouchableOpacity>
-            ))}
-          </View>
-          {selectedTab === 0 && (
-            <FlatList
-              data={proposalsGotByMe}
-              renderItem={({ item }) => (
-                <ReceivedCard
-                  item={item}
-                  onDecline={() => handleRejectProposal(item.senderUserId)}
-                  onConnect={() => handleAcceptProposal(item)}
-                  onPress={() => {
-                    if (packageByUserId.length > 0) {
-                      handleCardPress(item.senderUserId);
-                    } else {
-                      (navigation as any).navigate(ROUTES.STACK, {
-                        screen: ROUTES.UPGRADE,
-                      });
-                    }
-                  }}
-                  planPurchased={packageByUserId.length > 0}
-                />
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.gridContainer}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyStateContainer}>
-                  <Image
-                    source={require('../assets/images/lonely.png')}
-                    style={styles.heartImage}
-                  />
-                </View>
-              }
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            />
-          )}
-          {selectedTab === 1 && (
-            <FlatList
-              data={passedUsers}
-              renderItem={({ item }) => (
-                <RecentCard
-                  item={item}
-                  onPress={() => handleCardPress(item.id)}
-                />
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              numColumns={2}
-              columnWrapperStyle={styles.row}
-              contentContainerStyle={styles.gridContainer}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            />
-          )}
-          {selectedTab === 2 && (
-            <FlatList
-              data={proposalsSendByMe}
-              renderItem={({ item }) => (
-                <SentCard
-                  item={item}
-                  onPress={() => handleCardPress(item.proposalUserId)}
-                />
-              )}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.gridContainer}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyStateContainer}>
-                  <AppText
-                    text="Oops. No interests sent!"
-                    textStyle={styles.emptyText}
-                  />
-                  <AppText
-                    text="We know it’s hard. Be patient. Keep exploring & don’t shy away from sending your interersts"
-                    textStyle={styles.emptySubText}
-                  />
-                </View>
-              }
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            />
-          )}
-          <ProfileBottomSheet
-            bottomSheetRef={bottomSheetRef}
-            isButtonVisible={selectedTab === 1}
-            user={user}
-            currentUserPackage={currentUserPackage}
+              </View>
+            }
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           />
-        </AppSafeView>
+        )}
+        {selectedTab === 1 && (
+          <FlatList
+            data={passedUsers}
+            renderItem={({ item }) => (
+              <RecentCard
+                item={item}
+                onPress={() => handleCardPress(item.id)}
+              />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          />
+        )}
+        {selectedTab === 2 && (
+          <FlatList
+            data={proposalsSendByMe}
+            renderItem={({ item }) => (
+              <SentCard
+                item={item}
+                onPress={() => handleCardPress(item.proposalUserId)}
+              />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyStateContainer}>
+                <AppText
+                  text="Oops. No interests sent!"
+                  textStyle={styles.emptyText}
+                />
+                <AppText
+                  text="We know it’s hard. Be patient. Keep exploring & don’t shy away from sending your interersts"
+                  textStyle={styles.emptySubText}
+                />
+              </View>
+            }
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          />
+        )}
+        <ProfileBottomSheet
+          bottomSheetRef={bottomSheetRef}
+          isButtonVisible={selectedTab === 1}
+          user={user}
+          currentUserPackage={currentUserPackage}
+        />
+      </AppSafeView>
+      {loader && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
+        </View>
       )}
     </>
   );
@@ -373,5 +380,16 @@ const styles = StyleSheet.create({
     height: SIZES.width * 0.55,
     resizeMode: 'contain',
     alignSelf: 'center',
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });

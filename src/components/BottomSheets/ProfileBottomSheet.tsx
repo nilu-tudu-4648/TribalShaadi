@@ -64,6 +64,7 @@ interface ProfileBottomSheetProps {
   isButtonVisible?: boolean;
   user: any;
   currentUserPackage: any;
+  report?: boolean;
 }
 
 const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
@@ -71,12 +72,13 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   isButtonVisible = false,
   user,
   currentUserPackage,
+  report = true,
 }) => {
   const snapPoints = ['70%', '80%'];
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  console.log(currentUserPackage, 'currentUserPackage');
+  // console.log(currentUserPackage, 'currentUserPackage');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -112,7 +114,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const handleClose = () => {
     bottomSheetRef.current?.close();
   };
-  console.log(selectedUser, 'selectedUser');
+  // console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet
@@ -376,13 +378,16 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             )}
           </View>
           <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              onPress={openReport}
-              style={styles.reportButtonContainer}
-            >
-              <ReportIcon />
-              <AppText text="Report" textStyle={styles.reportButtonText} />
-            </TouchableOpacity>
+       {
+        report &&     ( <TouchableOpacity
+        onPress={openReport}
+        style={styles.reportButtonContainer}
+      >
+        <ReportIcon />
+        <AppText text="Report" textStyle={styles.reportButtonText} />
+      </TouchableOpacity>
+      )
+       }
             {isButtonVisible && (
               <AppButton
                 title="Connect"

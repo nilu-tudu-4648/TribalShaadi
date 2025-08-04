@@ -111,13 +111,18 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
     try {
       // If selecting a state
       if (location?.type === 'state') {
-        // Ensure selectedState is always an array
-        const alreadyExists = selectedState.some(
+        // Ensure selectedState is always an array and not null/undefined
+        const stateArray = Array.isArray(selectedState)
+          ? selectedState
+          : selectedState
+          ? [selectedState]
+          : [];
+        const alreadyExists = stateArray.some(
           (state: any) =>
             (typeof state === 'string' ? state : state.name) ===
             (typeof location === 'string' ? location : location.name),
         );
-        if (!alreadyExists) {   
+        if (!alreadyExists) {
           setSelectedState((prev: any) => {
             const prevArray = Array.isArray(prev) ? prev : prev ? [prev] : [];
             return [...prevArray, location];
@@ -125,13 +130,18 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         }
       } else {
         // Selecting cities/districts
-        const alreadyExists = selectedCities.some(
+        const cityArray = Array.isArray(selectedCities)
+          ? selectedCities
+          : selectedCities
+          ? [selectedCities]
+          : [];
+        const alreadyExists = cityArray.some(
           (city: any) =>
             (typeof city === 'string' ? city : city.name) ===
             (typeof location === 'string' ? location : location.name),
         );
         if (!alreadyExists) {
-          setSelectedCities([...selectedCities, location]);
+          setSelectedCities([...cityArray, location]);
         }
       }
       setSearchQuery('');

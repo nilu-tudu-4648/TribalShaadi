@@ -52,7 +52,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
       if (Array.isArray(user.pOccupationId)) {
         setLocalSelected(user.pOccupationId);
       } else if (typeof user.pOccupationId === 'string') {
-        setLocalSelected(user.pOccupationId.split(','));
+        setLocalSelected(user.pOccupationId.split(',').map(Number));
       } else {
         setLocalSelected([]);
       }

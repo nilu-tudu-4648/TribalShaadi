@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -42,6 +42,7 @@ import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import AlertBottomSheet from '../components/BottomSheets/AlertBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
+import { useNavigation } from '@react-navigation/native';
 
 const UploadImageScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
@@ -52,7 +53,17 @@ const UploadImageScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      bottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',

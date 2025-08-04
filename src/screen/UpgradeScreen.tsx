@@ -56,9 +56,9 @@ import {
   getPackageByUserIdApi,
 } from '../store/reducers/paymentReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import AppLoader from '../components/AppLoader';
 import AppToast from '../components/AppToast';
 import RazorpayCheckout from 'react-native-razorpay';
+import Loader from '../components/loader/Loader';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const {
@@ -263,14 +263,124 @@ const UpgradeScreen = () => {
   }, [dispatch, user.id]);
 
   return (
-    <AppSafeView style={styles.container}>
-      {loader && <AppLoader />}
-      {packageByUserId.length === 0 ? (
-        <>
-          <ImageBackground
-            source={require('../assets/images/update.jpg')}
-            style={styles.backgroundImage}
-          >
+    <>
+      <AppSafeView style={styles.container}>
+        {packageByUserId.length === 0 ? (
+          <>
+            <ImageBackground
+              source={require('../assets/images/update.jpg')}
+              style={styles.backgroundImage}
+            >
+              <Pressable
+                onPress={() =>
+                  (navigation as any).navigate(ROUTES.MAIN_TABS, {
+                    screen: ROUTES.ACCOUNT,
+                  })
+                }
+                style={styles.header}
+              >
+                <View style={styles.backButton}>
+                  <ArrowIosBackSvg color={COLORS.black} />
+                </View>
+                <Image
+                  source={require('../assets/images/premiumLogo.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </Pressable>
+
+              <View style={styles.featuresContainer}>
+                {features.map((feature, index) => (
+                  <View key={index} style={styles.featureItem}>
+                    <View style={styles.featureIconContainer}>
+                      {feature.icon}
+                    </View>
+                    <AppText
+                      text={feature.title}
+                      textStyle={styles.featureTitle}
+                    />
+                  </View>
+                ))}
+              </View>
+            </ImageBackground>
+
+            <View style={styles.bottomContainer}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.pricingContainer}>
+                  {packageList.map((option: any) => (
+                    <TouchableOpacity
+                      key={option.id}
+                      style={[
+                        styles.pricingOption,
+                        selectedPlan === option.id &&
+                          styles.selectedPricingOption,
+                      ]}
+                      onPress={() => handlePlanSelect(option.id)}
+                    >
+                      <View style={styles.pricingLeft}>
+                        <View
+                          style={[
+                            styles.radioButton,
+                            selectedPlan === option.id &&
+                              styles.selectedRadioButton,
+                          ]}
+                        >
+                          {selectedPlan === option.id && (
+                            <View style={styles.radioButtonInner} />
+                          )}
+                        </View>
+                        <View style={styles.pricingTextContainer}>
+                          <AppText
+                            text={`${option.package[0].value} Months`}
+                            textStyle={styles.pricingDuration}
+                          />
+                          {option.badge && (
+                            <View style={styles.badgeContainer}>
+                              <AppText
+                                text={option.badge}
+                                textStyle={styles.badgeText}
+                              />
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                      <View style={styles.pricingRight}>
+                        <AppText
+                          text={`₹${option.package[0].baseAmount}`}
+                          textStyle={styles.pricingPrice}
+                        />
+                        <AppText
+                          text={`₹${Math.floor(
+                            option.package[0].baseAmount /
+                              option.package[0].value,
+                          )} per month`}
+                          textStyle={styles.pricingSubtext}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+              <AppLinearButton
+                title={`Get ${
+                  packageList.find((p: any) => p.id === selectedPlan)
+                    ?.package[0].value
+                } Months for ₹${
+                  packageList.find((p: any) => p.id === selectedPlan)
+                    ?.package[0].baseAmount
+                }`}
+                onPress={openRazorpayCheckout}
+                linearGradientColors={['#21BEFE', '#EE50C1']}
+                textStyle={styles.continueButtonText}
+              />
+              <AppText
+                text="This app can be used without a subscription. With a subscription, you get access to paid features."
+                textStyle={styles.disclaimerText}
+              />
+            </View>
+          </>
+        ) : (
+          <View style={styles.premiumContainer}>
             <Pressable
               onPress={() =>
                 (navigation as any).navigate(ROUTES.MAIN_TABS, {
@@ -288,7 +398,43 @@ const UpgradeScreen = () => {
                 resizeMode="contain"
               />
             </Pressable>
-
+            <View style={styles.offerContainer}>
+              <AppText
+                text="Premium Member"
+                textStyle={styles.offerTitleWhite}
+              />
+              <AppText
+                text={`₹${packageByUserId[0].netAmount}`}
+                textStyle={styles.offerPriceWhite}
+              />
+              <View style={styles.offerBadge}>
+                <AppText
+                  text={`Ends on ${formatDateShort(
+                    packageByUserId[0].endDate,
+                  )}`}
+                  textStyle={styles.offerContainerText}
+                />
+              </View>
+            </View>
+            <View>
+              <AppText
+                text="Get more with Premium"
+                textStyle={styles.offerTitle}
+              />
+              <AppText
+                text="Go Premium and enjoy full control of"
+                textStyle={styles.offerSubTitle}
+              />
+              <AppText
+                text="your Matchmaking"
+                textStyle={styles.offerSubTitle}
+              />
+            </View>
+            <Image
+              source={require('../assets/images/offers.png')}
+              style={styles.offerImage}
+              resizeMode="contain"
+            />
             <View style={styles.featuresContainer}>
               {features.map((feature, index) => (
                 <View key={index} style={styles.featureItem}>
@@ -302,142 +448,15 @@ const UpgradeScreen = () => {
                 </View>
               ))}
             </View>
-          </ImageBackground>
-
-          <View style={styles.bottomContainer}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={styles.pricingContainer}>
-                {packageList.map((option: any) => (
-                  <TouchableOpacity
-                    key={option.id}
-                    style={[
-                      styles.pricingOption,
-                      selectedPlan === option.id &&
-                        styles.selectedPricingOption,
-                    ]}
-                    onPress={() => handlePlanSelect(option.id)}
-                  >
-                    <View style={styles.pricingLeft}>
-                      <View
-                        style={[
-                          styles.radioButton,
-                          selectedPlan === option.id &&
-                            styles.selectedRadioButton,
-                        ]}
-                      >
-                        {selectedPlan === option.id && (
-                          <View style={styles.radioButtonInner} />
-                        )}
-                      </View>
-                      <View style={styles.pricingTextContainer}>
-                        <AppText
-                          text={`${option.package[0].value} Months`}
-                          textStyle={styles.pricingDuration}
-                        />
-                        {option.badge && (
-                          <View style={styles.badgeContainer}>
-                            <AppText
-                              text={option.badge}
-                              textStyle={styles.badgeText}
-                            />
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                    <View style={styles.pricingRight}>
-                      <AppText
-                        text={`₹${option.package[0].baseAmount}`}
-                        textStyle={styles.pricingPrice}
-                      />
-                      <AppText
-                        text={`₹${Math.floor(
-                          option.package[0].baseAmount /
-                            option.package[0].value,
-                        )} per month`}
-                        textStyle={styles.pricingSubtext}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-            <AppLinearButton
-              title={`Get ${
-                packageList.find((p: any) => p.id === selectedPlan)?.package[0]
-                  .value
-              } Months for ₹${
-                packageList.find((p: any) => p.id === selectedPlan)?.package[0]
-                  .baseAmount
-              }`}
-              onPress={openRazorpayCheckout}
-              linearGradientColors={['#21BEFE', '#EE50C1']}
-              textStyle={styles.continueButtonText}
-            />
-            <AppText
-              text="This app can be used without a subscription. With a subscription, you get access to paid features."
-              textStyle={styles.disclaimerText}
-            />
           </View>
-        </>
-      ) : (
-        <View style={styles.premiumContainer}>
-          <Pressable
-            onPress={() =>
-              (navigation as any).navigate(ROUTES.MAIN_TABS, {
-                screen: ROUTES.ACCOUNT,
-              })
-            }
-            style={styles.header}
-          >
-            <View style={styles.backButton}>
-              <ArrowIosBackSvg color={COLORS.black} />
-            </View>
-            <Image
-              source={require('../assets/images/premiumLogo.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </Pressable>
-          <View style={styles.offerContainer}>
-            <AppText text="Premium Member" textStyle={styles.offerTitleWhite} />
-            <AppText
-              text={`₹${packageByUserId[0].netAmount}`}
-              textStyle={styles.offerPriceWhite}
-            />
-            <View style={styles.offerBadge}>
-              <AppText
-                text={`Ends on ${formatDateShort(packageByUserId[0].endDate)}`}
-                textStyle={styles.offerContainerText}
-              />
-            </View>
-          </View>
-          <View>
-            <AppText
-              text="Get more with Premium"
-              textStyle={styles.offerTitle}
-            />
-            <AppText
-              text="Go Premium and enjoy full control of"
-              textStyle={styles.offerSubTitle}
-            />
-            <AppText text="your Matchmaking" textStyle={styles.offerSubTitle} />
-          </View>
-          <Image
-            source={require('../assets/images/offers.png')}
-            style={styles.offerImage}
-            resizeMode="contain"
-          />
-          <View style={styles.featuresContainer}>
-            {features.map((feature, index) => (
-              <View key={index} style={styles.featureItem}>
-                <View style={styles.featureIconContainer}>{feature.icon}</View>
-                <AppText text={feature.title} textStyle={styles.featureTitle} />
-              </View>
-            ))}
-          </View>
+        )}
+      </AppSafeView>
+      {loader && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
         </View>
       )}
-    </AppSafeView>
+    </>
   );
 };
 
@@ -656,5 +675,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Size14,
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });

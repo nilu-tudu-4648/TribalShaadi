@@ -1,5 +1,5 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppScrollView from '../components/AppScrollView';
 import AppText from '../components/AppText';
@@ -26,13 +26,42 @@ import {
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
 import { useDispatch, useSelector } from 'react-redux';
-import AppLoader from '../components/AppLoader';
 import {
   formatHeightInFeettoInches,
   resetPreferenceApi,
 } from '../constants/functions';
+import { useNavigation } from '@react-navigation/native';
+import Loader from '../components/loader/Loader';
+
+const PreferenceCard = ({
+  title,
+  value,
+  isClickable = false,
+  onPress,
+}: {
+  title: string;
+  value: string;
+  isClickable?: boolean;
+  onPress: () => void;
+}) => {
+  return (
+    <TouchableOpacity
+      style={[styles.card, isClickable && styles.clickableCard]}
+      onPress={onPress}
+      disabled={!isClickable}
+      activeOpacity={isClickable ? 0.7 : 1}
+    >
+      <View style={styles.cardContent}>
+        <AppText text={title} textStyle={styles.cardTitle} />
+        <AppText text={value} textStyle={styles.cardValue} />
+      </View>
+      <CheckCircleIcon />
+    </TouchableOpacity>
+  );
+};
 
 const PreferenceScreen = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const { user, maritalStatuses, religion, community, height, loader } =
     useSelector((state: any) => state.entities.authReducer);
@@ -44,26 +73,27 @@ const PreferenceScreen = () => {
   const locationBottomSheetRef = useRef<BottomSheet>(null);
   const jobTypeBottomSheetRef = useRef<BottomSheet>(null);
   const settleDownBottomSheetRef = useRef<BottomSheet>(null);
-  const [selectedSettleDown, setSelectedSettleDown] = useState<string[]>([
-    'Any',
-  ]);
   const [selectedState, setSelectedState] = useState<any>(null);
-
-  const [selectedCities, setSelectedCities] = useState<any[]>(
-    [],
-  );
+  const [selectedCities, setSelectedCities] = useState<any[]>([]);
   const [isResetLoading, setIsResetLoading] = useState(false);
+
   useEffect(() => {
-    if (user?.preferredSettleDown) {
-      setSelectedSettleDown(
-        Array.isArray(user.preferredSettleDown)
-          ? user.preferredSettleDown
-          : [user.preferredSettleDown],
-      );
-    }
-  }, [user]);
+    const unsubscribe = navigation.addListener('blur', () => {
+      maritalStatusBottomSheetRef.current?.close();
+      ageRangeBottomSheetRef.current?.close();
+      religionBottomSheetRef.current?.close();
+      heightRangeBottomSheetRef.current?.close();
+      tribeBottomSheetRef.current?.close();
+      locationBottomSheetRef.current?.close();
+      jobTypeBottomSheetRef.current?.close();
+      settleDownBottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   const getMaritalStatusValue = () => {
-    const uniqueCount = new Set(user.pMaritalStatusId).size;
+    const uniqueCount = new Set(user?.pMaritalStatusId || []).size;
     if (uniqueCount === 0) {
       return 'Any';
     }
@@ -101,15 +131,34 @@ const PreferenceScreen = () => {
       return communities.length > 0 ? `${communities.length} selected` : 'Any';
     }
     if (Array.isArray(user.pCommunityId)) {
-      return user.pCommunityId.length > 0 ? `${user.pCommunityId.length} selected` : 'Any';
+      return user.pCommunityId.length > 0
+        ? `${user.pCommunityId.length} selected`
+        : 'Any';
     }
     return 'Any';
   };
   const getLocationValue = () => {
+    const cities = user.pCityLivingInId ? user.pCityLivingInId.split(',') : [];
+    const states = user.pStateLivingInId
+      ? user.pStateLivingInId.split(',')
+      : [];
+    if (cities.length > 0 && states.length > 0) {
+      return `${cities.length + states.length} selected`;
+    }
+    if (cities.length > 0) {
+      return `${cities.length} cities selected`;
+    }
+    if (states.length > 0) {
+      return `${states.length} states selected`;
+    }
     return 'Any';
   };
   const getJobTypeValue = () => {
-    if (!user.pOccupationId || user.pOccupationId === '' || user.pOccupationId === 'Any') {
+    if (
+      !user.pOccupationId ||
+      user.pOccupationId === '' ||
+      user.pOccupationId === 'Any'
+    ) {
       return 'Any';
     }
     let ids: string[] = [];
@@ -128,7 +177,14 @@ const PreferenceScreen = () => {
   };
 
   const getSettleDownValue = () => {
-    return `${selectedSettleDown.length} selected`;
+    if (
+      user.psettle_down === 'Any' ||
+      user.psettle_down === null ||
+      user.psettle_down === undefined
+    ) {
+      return 'Any';
+    }
+    return `${user.psettle_down.split(',').length} selected`;
   };
 
   const mandatoryPreferences = [
@@ -180,7 +236,6 @@ const PreferenceScreen = () => {
     settleDownBottomSheetRef.current?.expand();
   };
 
-
   const handleResetPress = () => {
     setIsResetLoading(true);
     setSelectedCities([]);
@@ -189,165 +244,138 @@ const PreferenceScreen = () => {
     });
   };
 
-  const PreferenceCard = ({
-    title,
-    value,
-    isClickable = false,
-  }: {
-    title: string;
-    value: string;
-    isClickable?: boolean;
-  }) => {
-    const handlePress = () => {
-      if (isClickable) {
-        if (title === 'Marital Status') {
-          handleMaritalStatusPress();
-        } else if (title === 'Age') {
-          handleAgeRangePress();
-        } else if (title === 'Religion') {
-          handleReligionPress();
-        } else if (title === 'Height') {
-          handleHeightRangePress();
-        } else if (title === 'Tribe') {
-          handleTribePress();
-        } else if (title === 'Location') {
-          handleLocationPress();
-        } else if (title === 'Job type') {
-          handleJobTypePress();
-        } else if (title === 'Settle Down') {
-          handleSettleDownPress();
-        }
-      }
-    };
-
-    return (
-      <TouchableOpacity
-        style={[styles.card, isClickable && styles.clickableCard]}
-        onPress={handlePress}
-        disabled={!isClickable}
-        activeOpacity={isClickable ? 0.7 : 1}
-      >
-        <View style={styles.cardContent}>
-          <AppText text={title} textStyle={styles.cardTitle} />
-          <AppText text={value} textStyle={styles.cardValue} />
-        </View>
-        <CheckCircleIcon />
-      </TouchableOpacity>
-    );
+  const getPreferenceHandler = (title: string) => {
+    if (title === 'Marital Status') return handleMaritalStatusPress;
+    if (title === 'Age') return handleAgeRangePress;
+    if (title === 'Religion') return handleReligionPress;
+    if (title === 'Height') return handleHeightRangePress;
+    if (title === 'Tribe') return handleTribePress;
+    if (title === 'Location') return handleLocationPress;
+    if (title === 'Job type') return handleJobTypePress;
+    if (title === 'Settle Down') return handleSettleDownPress;
+    return () => {};
   };
 
   return (
-    <AppSafeView style={{ padding: 0 }}>
-      {loader && <AppLoader />}
-      {isResetLoading && <AppLoader />}
-      <View style={styles.header}>
-        <AppHeader
-          title="Preferences"
-          rightButton={
-            <TouchableOpacity
-              onPress={handleResetPress}
-              style={styles.resetButton}
-            >
-              <AppText text="Reset" textStyle={styles.resetButtonText} />
-            </TouchableOpacity>
-          }
-        />
-      </View>
-
-      <AppScrollView style={{}}>
-        <View style={styles.container}>
-          <View style={styles.section}>
-            <AppText
-              text="My mandatory preferences"
-              textStyle={styles.sectionTitle}
-            />
-            <AppText useChildren textStyle={styles.sectionDescription}>
-              The matches you'll receive will{' '}
-              <AppText useChildren textStyle={{ color: COLORS.secondaryText }}>
-                exactly
-              </AppText>{' '}
-              meet the{' '}
-              <AppText useChildren textStyle={{ color: COLORS.secondaryText }}>
-                mandatory preferences.
-              </AppText>
-            </AppText>
-
-            <View style={styles.cardContainer}>
-              {mandatoryPreferences.map((item, index) => (
-                <PreferenceCard
-                  key={index}
-                  title={item.title}
-                  value={item.value}
-                  isClickable={item.isClickable}
-                />
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <AppText
-              text="My secondary preferences"
-              textStyle={styles.sectionTitle}
-            />
-            <AppText
-              text="The matches you'll receive might/might not exactly meet the
-              secondary preferences"
-              textStyle={styles.sectionDescription}
-            />
-            <View style={styles.cardContainer}>
-              {secondaryPreferences.map((item, index) => (
-                <PreferenceCard
-                  key={index}
-                  title={item.title}
-                  value={item.value}
-                  isClickable={item.isClickable}
-                />
-              ))}
-            </View>
-          </View>
+    <>
+      <AppSafeView style={{ padding: 0 }}>
+        <View style={styles.header}>
+          <AppHeader
+            title="Preferences"
+            onBackPress={() => navigation.goBack()}
+            rightButton={
+              <TouchableOpacity
+                onPress={handleResetPress}
+                style={styles.resetButton}
+              >
+                <AppText text="Reset" textStyle={styles.resetButtonText} />
+              </TouchableOpacity>
+            }
+          />
         </View>
-      </AppScrollView>
 
-      <MaritalStatusBottomSheet
-        bottomSheetRef={maritalStatusBottomSheetRef}
-        maritalOptions={maritalStatuses}
-      />
+        <AppScrollView style={{}}>
+          <View style={styles.container}>
+            <View style={styles.section}>
+              <AppText
+                text="My mandatory preferences"
+                textStyle={styles.sectionTitle}
+              />
+              <AppText useChildren textStyle={styles.sectionDescription}>
+                The matches you'll receive will{' '}
+                <AppText
+                  useChildren
+                  textStyle={{ color: COLORS.secondaryText }}
+                >
+                  exactly
+                </AppText>{' '}
+                meet the{' '}
+                <AppText
+                  useChildren
+                  textStyle={{ color: COLORS.secondaryText }}
+                >
+                  mandatory preferences.
+                </AppText>
+              </AppText>
 
-      <AgeRangeBottomSheet
-        bottomSheetRef={ageRangeBottomSheetRef}
-      />
+              <View style={styles.cardContainer}>
+                {mandatoryPreferences.map((item, index) => (
+                  <PreferenceCard
+                    key={index}
+                    title={item.title}
+                    value={item.value}
+                    isClickable={item.isClickable}
+                    onPress={getPreferenceHandler(item.title)}
+                  />
+                ))}
+              </View>
+            </View>
 
-      <ReligionBottomSheet
-        bottomSheetRef={religionBottomSheetRef}
-        religionOptions={religion}
-      />
+            <View style={styles.section}>
+              <AppText
+                text="My secondary preferences"
+                textStyle={styles.sectionTitle}
+              />
+              <AppText
+                text="The matches you'll receive might/might not exactly meet the
+              secondary preferences"
+                textStyle={styles.sectionDescription}
+              />
+              <View style={styles.cardContainer}>
+                {secondaryPreferences.map((item, index) => (
+                  <PreferenceCard
+                    key={index}
+                    title={item.title}
+                    value={item.value}
+                    isClickable={item.isClickable}
+                    onPress={getPreferenceHandler(item.title)}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </AppScrollView>
 
-      <HeightRangeBottomSheet
-        bottomSheetRef={heightRangeBottomSheetRef}
-        heightOptions={height}
-      />
+        <MaritalStatusBottomSheet
+          bottomSheetRef={maritalStatusBottomSheetRef}
+          maritalOptions={maritalStatuses}
+        />
 
-      <TribeBottomSheet
-        bottomSheetRef={tribeBottomSheetRef}
-        tribeOptions={community}
-      />
+        <AgeRangeBottomSheet bottomSheetRef={ageRangeBottomSheetRef} />
 
-      <LocationBottomSheet
-        bottomSheetRef={locationBottomSheetRef}
-        selectedCities={selectedCities}
-        setSelectedCities={setSelectedCities}
-        selectedState={selectedState}
-        setSelectedState={setSelectedState}
-      />
+        <ReligionBottomSheet
+          bottomSheetRef={religionBottomSheetRef}
+          religionOptions={religion}
+        />
 
-      <JobTypeBottomSheet
-        bottomSheetRef={jobTypeBottomSheetRef}
-      />
+        <HeightRangeBottomSheet
+          bottomSheetRef={heightRangeBottomSheetRef}
+          heightOptions={height}
+        />
 
-      <SettleDownBottomSheet
-        bottomSheetRef={settleDownBottomSheetRef}
-      />
-    </AppSafeView>
+        <TribeBottomSheet
+          bottomSheetRef={tribeBottomSheetRef}
+          tribeOptions={community}
+        />
+
+        <LocationBottomSheet
+          bottomSheetRef={locationBottomSheetRef}
+          selectedCities={selectedCities}
+          setSelectedCities={setSelectedCities}
+          selectedState={selectedState}
+          setSelectedState={setSelectedState}
+        />
+
+        <JobTypeBottomSheet bottomSheetRef={jobTypeBottomSheetRef} />
+
+        <SettleDownBottomSheet bottomSheetRef={settleDownBottomSheetRef} />
+      </AppSafeView>
+      {(loader || isResetLoading) && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
+        </View>
+      )}
+    </>
   );
 };
 
@@ -434,5 +462,16 @@ const styles = StyleSheet.create({
   },
   secondaryTextStyle: {
     color: COLORS.secondaryText,
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });

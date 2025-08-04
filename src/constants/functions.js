@@ -399,6 +399,7 @@ export const resetPreferenceApi = async (dispatch,func) => {
     pStateLivingInId: null,
     pToAge: null,
     pToHeight: null,
+    psettle_down: null,
   };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
