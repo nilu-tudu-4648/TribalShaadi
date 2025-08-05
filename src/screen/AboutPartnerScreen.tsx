@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
   },
   optionItemSelected: {
     borderColor: COLORS.textBlack,
-    backgroundColor: COLORS.disabledBG,
   },
   radioContainer: {
   },
@@ -200,13 +199,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioOuterSelected: {
-    borderColor: COLORS.textBlack,
+    borderColor: COLORS.violet,
   },
   radioInner: {
     width: Size8,
     height: Size8,
     borderRadius: Size8 / 2,
-    backgroundColor: COLORS.textBlack,
+    backgroundColor: COLORS.violet,
   },
   optionText: {
     fontSize: fontSize16,

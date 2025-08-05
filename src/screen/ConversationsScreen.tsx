@@ -7,6 +7,7 @@ import {
   Platform,
   Image,
   Pressable,
+  BackHandler,  
 } from 'react-native';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import AppSafeView from '../components/AppSafeView';
@@ -33,13 +34,20 @@ import FONT_FAMILY from '../constants/Fonts';
 import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { delay, filterChatByUserId, formatDateShort, imageUrl } from '../constants/functions';
+import {
+  filterChatByUserId,
+  formatDateShort,
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  imageUrl,
+  setReducerLoadingfalse,
+} from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
 
 // Message type definitions
 interface Message {
-  id: number;
+  id: string | number;
   type: 'story_starter' | 'received' | 'sent';
   message?: string;
   time?: string;
@@ -50,7 +58,7 @@ interface Message {
 
 // Initial story starter message
 const INITIAL_STORY_STARTER: Message = {
-  id: 1,
+  id: 'story_starter_1',
   type: 'story_starter',
   date: '11 April 2025',
   timestamp: Date.now(),
@@ -59,42 +67,72 @@ const INITIAL_STORY_STARTER: Message = {
 const ConversationsScreen = () => {
   const navigation = useNavigation();
   const [messageText, setMessageText] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
   const [chatData, setChatData] = useState<Message[]>([INITIAL_STORY_STARTER]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const { userDetails } = useRoute().params as { userDetails: any };
   const socket = useRef<Socket | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const dispatch = useDispatch();
+  const messageIdCounter = useRef<number>(0);
+
+  // Generate unique ID for messages
+  const generateUniqueId = useCallback(() => {
+    messageIdCounter.current += 1;
+    return `${Date.now()}_${messageIdCounter.current}`;
+  }, []);
+
   const loadChatMessages = useCallback(async () => {
-    if (!user?.id || !userDetails?.friendId) return;
+    console.log('loadChatMessages - started');
+    if (!user?.id || !userDetails?.friendId) {
+      console.log('loadChatMessages - missing user ID or friend ID');
+      return;
+    }
+    
     try {
-      const filteredChat = await filterChatByUserId(user.id, userDetails.friendId);
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
+      
+      console.log('loadChatMessages - fetching chat history for:', {
+        userId: user.id,
+        friendId: userDetails.friendId
+      });
+      
+      const filteredChat = await filterChatByUserId(
+        user.id,
+        userDetails.friendId,
+      );
+      
       if (Array.isArray(filteredChat) && filteredChat.length > 0) {
-        const loadedMessages: Message[] = filteredChat.map((record: any) => {
-          const isSent = String(record.userId) === String(user.id);
-          return {
-            id: new Date(record.created_at).getTime(),
-            type: isSent ? 'sent' : 'received',
-            message: record.content,
-            time: new Date(record.created_at).toLocaleTimeString(
-              'en-US',
-              {
+        const loadedMessages: Message[] = filteredChat
+          .filter(record => record?.content?.trim()) // Filter out empty messages
+          .map((record: any) => {
+            const isSent = String(record.userId) === String(user.id);
+            return {
+              id: generateUniqueId(),
+              type: isSent ? 'sent' : 'received',
+              message: record.content,
+              time: new Date(record.created_at).toLocaleTimeString('en-US', {
                 hour: 'numeric',
                 minute: '2-digit',
                 hour12: true,
-              },
-            ),
-            timestamp: new Date(record.created_at).getTime(),
-            status: record.status && record.status.toLowerCase() === 'sent' ? 'sent' : 'sending',
-          };
-        });
+              }),
+              timestamp: new Date(record.created_at).getTime(),
+              status: 'sent', // All loaded messages should be marked as sent
+            };
+          });
+        // console.log('loadChatMessages - loaded messages count:', loadedMessages.length);
         setChatData([INITIAL_STORY_STARTER, ...loadedMessages]);
+      } else {
+        // console.log('loadChatMessages - no messages found, keeping story starter only');
+        setChatData([INITIAL_STORY_STARTER]);
       }
     } catch (error) {
       console.error('Error loading chat messages:', error);
+      // Keep story starter even if loading fails
+      setChatData([INITIAL_STORY_STARTER]);
     }
-  }, [user?.id, userDetails?.friendId]);
+  }, [user?.id, userDetails?.friendId, generateUniqueId, dispatch]);
   // Auto scroll to bottom
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -104,10 +142,10 @@ const ConversationsScreen = () => {
 
   // Add new message to chat
   const addMessage = useCallback(
-    async (message: Omit<Message, 'id' | 'timestamp'>) => {
+    (message: Omit<Message, 'id' | 'timestamp'>) => {
       const newMessage: Message = {
         ...message,
-        id: Date.now(), // Use timestamp as unique ID
+        id: generateUniqueId(), // Use unique ID generator
         timestamp: Date.now(),
       };
 
@@ -116,11 +154,12 @@ const ConversationsScreen = () => {
         return updatedMessages;
       });
 
-      // Move side effects outside of setState
-      await delay();
-      scrollToBottom(); // Auto-scroll when new message is added
+      // Scroll immediately after state update
+      setTimeout(() => {
+        scrollToBottom();
+      }, 50); // Small delay to ensure state update is processed
     },
-    [scrollToBottom],
+    [scrollToBottom, generateUniqueId],
   );
 
   // Initialize socket connection with fallback URLs
@@ -128,9 +167,6 @@ const ConversationsScreen = () => {
     (attempt: number = 0) => {
       const serverUrls = [
         'https://api.tribalshaadi.co.in',
-        'http://api.tribalshaadi.co.in',
-        'https://api.tribalshaadi.co.in:4000',
-        'http://api.tribalshaadi.co.in:4000',
       ];
 
       if (attempt >= serverUrls.length) {
@@ -140,7 +176,6 @@ const ConversationsScreen = () => {
       }
 
       const SERVER_URL = serverUrls[attempt];
-      console.log(`🔄 Connection attempt ${attempt + 1}: ${SERVER_URL}`);
 
       // Cleanup previous socket if exists
       if (socket.current) {
@@ -191,16 +226,13 @@ const ConversationsScreen = () => {
 
       socket.current.on('reconnect_error', error => {
         console.error('❌ Reconnection failed:', error.message);
-
       });
 
       socket.current.on('reconnect_failed', () => {
         console.error('❌ All reconnection attempts failed');
-
       });
 
       socket.current.on('receive_message', ({ from, content, timestamp }) => {
-
         // Convert IDs to string for comparison (in case one is number, one is string)
         if (String(from) === String(userDetails?.friendId)) {
           console.log('✅ Message is from the correct user, adding to chat');
@@ -218,13 +250,8 @@ const ConversationsScreen = () => {
         }
       });
 
-      socket.current.on('message_sent', ({ to, content, timestamp }) => {
-        console.log('✅ Message sent confirmation:', {
-          to,
-          content,
-          timestamp,
-        });
-
+      socket.current.on('message_sent', ({ content }) => {
+        console.log('✅ Message sent confirmation received for:', content);
         setChatData(currentChatData =>
           currentChatData.map(msg =>
             msg.message === content && msg.status === 'sending'
@@ -232,10 +259,8 @@ const ConversationsScreen = () => {
               : msg,
           ),
         );
+
         scrollToBottom(); // Auto-scroll when message status updates
-        
-        // Load messages from API after successful send
-        loadChatMessages();
       });
 
       socket.current.on('error_message', error => {
@@ -259,11 +284,14 @@ const ConversationsScreen = () => {
           console.log('🔄 Server disconnected, will attempt to reconnect...');
         }
       });
-
-
-
     },
-    [user?.id, userDetails?.friendId, addMessage, scrollToBottom, loadChatMessages],
+    [
+      user?.id,
+      userDetails?.friendId,
+      addMessage,
+      scrollToBottom,
+      // loadChatMessages,
+    ],
   );
 
   // Load messages when redux state changes
@@ -277,7 +305,6 @@ const ConversationsScreen = () => {
   useEffect(() => {
     initializeSocket(0);
     return () => {
-      console.log('🧹 Cleaning up socket connection');
       if (socket.current) {
         socket.current.removeAllListeners();
         socket.current.disconnect();
@@ -316,22 +343,18 @@ const ConversationsScreen = () => {
         to: userDetails.friendId,
         content,
       });
-
+      socket.current?.emit('send_message', {
+        from: String(user?.id), // Ensure it's a string
+        to: String(userDetails.friendId), // Ensure it's a string
+        content,
+      });
       addMessage({
         type: 'sent',
         message: content,
         time: 'sending...',
         status: 'sending',
       });
-
-      socket.current?.emit('send_message', {
-        from: String(user?.id), // Ensure it's a string
-        to: String(userDetails.friendId), // Ensure it's a string
-        content,
-      });
-
       setMessageText('');
-      scrollToBottom(); // Auto-scroll immediately after sending
     } else {
       console.error('❌ Cannot send message:', {
         messageEmpty: !messageText.trim(),
@@ -413,7 +436,17 @@ const ConversationsScreen = () => {
 
     return null;
   };
-
+  const handleBack = useCallback(() => {
+    navigation.goBack();
+    loadChatMessages();
+  }, [navigation, loadChatMessages]);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleBack();
+      return true;
+    });
+    return () => backHandler.remove();
+  }, [handleBack]);
   return (
     <AppSafeView style={styles.container}>
       <KeyboardAvoidingView
@@ -425,7 +458,7 @@ const ConversationsScreen = () => {
         <View style={styles.header}>
           <Pressable
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={handleBack}
           >
             <ArrowIosBackSvg
               color={COLORS.black}
@@ -438,18 +471,6 @@ const ConversationsScreen = () => {
               text={`${userDetails.firstName} ${userDetails.lastName ?? ''}`}
               textStyle={styles.headerTitle}
             />
-            {/* <AppText
-              text={
-                connectionStatus === 'connected' ? 'Online' :
-                connectionStatus === 'connecting' ? 'Connecting...' :
-                connectionStatus === 'disconnected' ? 'Reconnecting...' :
-                'Connection failed'
-              }
-              textStyle={[
-                styles.connectionStatus,
-                { color: connectionStatus === 'connected' ? COLORS.violet : COLORS.textSecondary }
-              ]}
-            /> */}
           </View>
           <View style={styles.headerSpacer} />
         </View>

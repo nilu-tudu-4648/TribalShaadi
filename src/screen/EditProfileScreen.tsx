@@ -16,14 +16,13 @@ import {
   Size12,
   Size16,
   Size20,
-  Size25,
   lignHeight20,
   lignHeight32,
   lignHeight38,
   lignHeight53,
   compPadding,
   fontSize20,
-  Size50,
+  SIZES,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppText from '../components/AppText';
@@ -52,10 +51,13 @@ import {
   launchImageLibrary,
   ImageLibraryOptions,
 } from 'react-native-image-picker';
+import Loader from '../components/loader/Loader';
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
+  const [isImageValid, setIsImageValid] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<
     { uri: string; base64: string }[]
   >([]);
@@ -136,7 +138,7 @@ const EditProfileScreen = () => {
           // Upload the image immediately
           try {
             let requestBody;
-
+            setLoading(true);
             if (index === 0) {
               // First image format
               requestBody = {
@@ -144,7 +146,7 @@ const EditProfileScreen = () => {
                 image: `data:image/jpeg;base64,${asset.base64}`,
               };
               console.log(requestBody, 'requestBody for first image');
-              await uploadImage(requestBody, dispatch, true);
+              await uploadImage(requestBody, dispatch, true, setIsImageValid);
               setReducerLoadingfalse(dispatch, () => {
                 getUserDetailsApi(
                   `${getUserDetailsUrl}id=${user.id}`,
@@ -159,102 +161,121 @@ const EditProfileScreen = () => {
             const failedImages = [...selectedImages];
             failedImages[index] = { uri: '', base64: '' };
             setSelectedImages(failedImages);
+          } finally {
+            setLoading(false);
           }
         }
       }
     });
   };
   return (
-    <AppSafeView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Header */}
-        <AppHeader title="Edit Profile" />
+    <>
+      <AppSafeView style={styles.container}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <AppHeader title="Edit Profile" />
 
-        {/* Profile Images Section */}
-        <View style={styles.profileImagesContainer}>
-          <TouchableOpacity onPress={() => handleImageUpload(0)} style={styles.profileImageWrapper}>
-            <View style={styles.profileImage}>
-              <View
-                style={styles.profileImagePlaceholder}
-              >
-                <Image
-                  source={{ uri: imageUrl + user.image }}
-                  style={styles.placeholderImage}
-                  resizeMode="cover"
-                />
-              </View>
-              <Image
-                source={require('../assets/images/imageBanner.png')}
-                style={styles.bannerOverlay}
-                resizeMode="contain"
-              />
-            </View>
-          </TouchableOpacity>
-
-          <View style={styles.profileImage}>
-            <View style={styles.profileImagePlaceholder}>
-              {galleryImageList && galleryImageList[0]?.imageUrl ? (
-                <Image
-                  source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
-                  style={styles.placeholderImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.placeholderImage} />
-              )}
-            </View>
-          </View>
-
-          <View style={styles.profileImage}>
-            <View style={styles.profileImagePlaceholder}>
-              {galleryImageList && galleryImageList[1]?.imageUrl ? (
-                <Image
-                  source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
-                  style={styles.placeholderImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.placeholderImage} />
-              )}
-            </View>
-          </View>
-        </View>
-
-        {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          {menuItems.map(item => (
-            <Pressable
-              onPress={item.onPress}
-              key={item.id}
-              style={styles.menuItem}
+          {/* Profile Images Section */}
+          <View style={styles.profileImagesContainer}>
+            <TouchableOpacity
+              onPress={() => handleImageUpload(0)}
+              style={styles.profileImageWrapper}
             >
-              <View style={styles.menuItemContent}>
-                <View style={styles.iconContainer}>
-                  <item.icon
-                    width={lignHeight32}
-                    height={lignHeight32}
-                    color={COLORS.black}
+              <View style={styles.profileImage}>
+                <View style={styles.profileImagePlaceholder}>
+                  <Image
+                    source={{ uri: imageUrl + user.image }}
+                    style={styles.placeholderImage}
+                    resizeMode="cover"
                   />
                 </View>
-                <View style={styles.menuItemText}>
-                  <AppText text={item.title} textStyle={styles.menuItemTitle} />
-                  <AppText
-                    text={item.description}
-                    textStyle={styles.menuItemDescription}
-                  />
-                </View>
-                <View style={styles.arrowContainer}>
-                  <RightArrowIcon />
-                </View>
+                <Image
+                  source={require('../assets/images/imageBanner.png')}
+                  style={styles.bannerOverlay}
+                  resizeMode="contain"
+                />
               </View>
-            </Pressable>
-          ))}
+            </TouchableOpacity>
+            <View style={styles.profileImage}>
+              <View style={styles.profileImagePlaceholder}>
+                {galleryImageList && galleryImageList[0]?.imageUrl ? (
+                  <Image
+                    source={{ uri: imageUrl + galleryImageList[0].imageUrl }}
+                    style={styles.placeholderImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholderImage} />
+                )}
+              </View>
+            </View>
+
+            <View style={styles.profileImage}>
+              <View style={styles.profileImagePlaceholder}>
+                {galleryImageList && galleryImageList[1]?.imageUrl ? (
+                  <Image
+                    source={{ uri: imageUrl + galleryImageList[1].imageUrl }}
+                    style={styles.placeholderImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholderImage} />
+                )}
+              </View>
+            </View>
+          </View>
+          {!isImageValid ? (
+            <Image
+              source={require('../assets/images/imagevalid2.png')}
+              style={styles.image}
+            />
+          ) : (
+            <View style={styles.image} />
+          )}
+          {/* Menu Items */}
+          <View style={styles.menuContainer}>
+            {menuItems.map(item => (
+              <Pressable
+                onPress={item.onPress}
+                key={item.id}
+                style={styles.menuItem}
+              >
+                <View style={styles.menuItemContent}>
+                  <View style={styles.iconContainer}>
+                    <item.icon
+                      width={lignHeight32}
+                      height={lignHeight32}
+                      color={COLORS.black}
+                    />
+                  </View>
+                  <View style={styles.menuItemText}>
+                    <AppText
+                      text={item.title}
+                      textStyle={styles.menuItemTitle}
+                    />
+                    <AppText
+                      text={item.description}
+                      textStyle={styles.menuItemDescription}
+                    />
+                  </View>
+                  <View style={styles.arrowContainer}>
+                    <RightArrowIcon />
+                  </View>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </AppSafeView>
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
         </View>
-      </ScrollView>
-    </AppSafeView>
+      )}
+    </>
   );
 };
 
@@ -309,9 +330,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   menuContainer: {
+    // backgroundColor: 'red',
     paddingHorizontal: compPadding,
-    paddingTop: Size50,
-    gap: Size25,
+    gap: Size20, //
   },
   menuItem: {
     justifyContent: 'flex-start',
@@ -362,12 +383,29 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'flex-end',
   },
-  
+
   bannerOverlay: {
     position: 'absolute',
     left: -10,
     width: 80,
     height: 70,
     opacity: 0.8,
+  },
+  image: {
+    width: '90%',
+    height: SIZES.height * 0.08,
+    resizeMode: 'contain',
+    left: SIZES.h6,
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });

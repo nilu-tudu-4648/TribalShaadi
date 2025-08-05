@@ -16,7 +16,7 @@ import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
 import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
-import { ToastAndroid } from 'react-native';
+
 
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
@@ -281,7 +281,13 @@ export const logoutUser = async dispatch => {
     console.log(error);
   }
 };
-export const uploadImage = async (data, dispatch, isProfile = false) => {
+export const uploadImage = async (
+  data,
+  dispatch,
+  isProfile = false,
+  func,
+  func2,
+) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const url = isProfile ? uploadProfileImageUrl : addEditGalleryImageListUrl;
@@ -290,13 +296,21 @@ export const uploadImage = async (data, dispatch, isProfile = false) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
+    if (func) {
+      func(true);
+    }
     console.log(response, 'response uploadImage');
   } catch (error) {
+    if (func) {
+      func(false);
+    }
     console.log(error.response.data, 'uploadImage');
-    ToastAndroid.show(error.response.data.message, ToastAndroid.LONG);
     if (error.response.data.status === 401) {
       logoutUser(dispatch);
+    }
+  } finally {
+    if (func2) {
+      func2(false);
     }
   }
 };
@@ -511,13 +525,32 @@ export const filterChatByUserId = async (userId, friendId) => {
         },
       },
     );
-    const data = response.data.recordList
-    const filteredChat = data.filter(
-      chat => chat.chatId.split('_')[0] == friendId || chat.chatId.split('_')[1] == friendId,
+    const data = response.data.recordList;
+    console.log(data, 'filterChatByUserId data');
+    
+    if (!Array.isArray(data)) {
+      console.log('No chat data found or invalid format');
+      return [];
+    }
+
+    const filteredChat = data.filter(chat => {
+      if (!chat.chatId) return false;
+      
+      const chatIdParts = chat.chatId.split('_');
+      const friendIdStr = String(friendId);
+      
+      return (
+        String(chatIdParts[0]) === friendIdStr ||
+        String(chatIdParts[1]) === friendIdStr
+      );
+    });
+    
+    console.log('filtered chat messages:', filteredChat.length);
+    return filteredChat.sort(
+      (a, b) => new Date(a.created_at) - new Date(b.created_at),
     );
-    return filteredChat.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   } catch (error) {
-    console.log(error, 'filterChatByUserId');
+    console.log(error, 'filterChatByUserId error');
     return [];
   }
 };

@@ -20,11 +20,11 @@ import {
   Size40,
   Size18,
   fontSize12,
-  lignHeight43,
   Size14,
   Size10,
   SIZES,
   Size20,
+  lignHeight53,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -49,13 +49,15 @@ const UploadImageScreen = () => {
     { uri: string; base64: string }[]
   >([]);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [isAIViewing, setIsAIViewing] = useState(false);
+  const [isImageValid, setIsImageValid] = useState(true);
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close();
@@ -63,14 +65,14 @@ const UploadImageScreen = () => {
 
     return unsubscribe;
   }, [navigation]);
-  
+
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
       includeBase64: true,
       maxHeight: 2000,
       maxWidth: 2000,
-      quality: 0.8,
+      quality: 1,
     };
 
     launchImageLibrary(options, async response => {
@@ -86,21 +88,25 @@ const UploadImageScreen = () => {
           const newImages = [...selectedImages];
           newImages[index] = { uri: asset.uri, base64: asset.base64 };
           setSelectedImages(newImages);
-          // const resp = await validateImage(asset.base64);
-          // console.log('resp: ', resp);
-          // Upload the image immediately
           try {
             setUploadingIndex(index);
             let requestBody;
 
             if (index === 0) {
+              setIsAIViewing(true);
               // First image format
               requestBody = {
                 id: user.id,
                 image: `data:image/jpeg;base64,${asset.base64}`,
               };
               console.log(requestBody, 'requestBody for first image');
-              await uploadImage(requestBody, dispatch, true);
+              await uploadImage(
+                requestBody,
+                dispatch,
+                true,
+                setIsImageValid,
+                setIsAIViewing,
+              );
             } else {
               // Second and third image format - only call API when both images are selected
               const updatedImages = [...newImages];
@@ -119,10 +125,6 @@ const UploadImageScreen = () => {
                     `data:image/jpeg;base64,${updatedImages[2].base64}`,
                   ],
                 };
-                console.log(
-                  requestBody,
-                  'requestBody for both additional images',
-                );
                 await uploadImage(requestBody, dispatch);
               } else {
                 // Only one image selected, don't make API call yet
@@ -171,11 +173,11 @@ const UploadImageScreen = () => {
   const renderImageSlot = (index: number) => (
     <TouchableOpacity
       key={index}
-      style={{
-        ...styles.imageSlot,
-        borderWidth: selectedImages[index]?.uri ? 0 : 1,
-        opacity: uploadingIndex === index ? 0.5 : 1,
-      }}
+      style={[
+        styles.imageSlot,
+        selectedImages[index]?.uri ? styles.imageSlotWithImage : styles.imageSlotEmpty,
+        uploadingIndex === index && styles.imageSlotUploading,
+      ]}
       onPress={() => handleImageUpload(index)}
       disabled={uploadingIndex === index}
     >
@@ -209,7 +211,7 @@ const UploadImageScreen = () => {
       )}
     </TouchableOpacity>
   );
-
+  const isButtonDisabled = !isImageValid || getValidImageCount() !== 3;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -243,52 +245,46 @@ const UploadImageScreen = () => {
               <AppText
                 text="Read Guidelines"
                 onPress={() => bottomSheetRef.current?.snapToIndex(0)}
-                style={{fontWeight: 'bold'}}
+                textStyle={styles.boldText}
               />
             </AppText>
           </View>
         </View>
-
-        {/* Loading Indicator */}
-        {/* <View style={styles.loaderContainer}>
-          <GradientLoader size={lignHeight53} />
-        </View> */}
-
-        {/* AI Review Section */}
-        {/* <View style={styles.warningContainer}>
-          <Image
-            source={require('../assets/images/shield.png')}
-            style={styles.warningImage}
-          />
-          <View style={styles.warningTextContainer}>
-            <AppText
-              text="Our AI is reviewing your photos..."
-              textStyle={styles.warningText}
+        {isAIViewing && (
+          <>
+            {/* Loading Indicator */}
+            <View style={styles.loaderContainer}>
+              <GradientLoader size={lignHeight53} />
+            </View>
+            <Image
+              source={require('../assets/images/aireview.png')}
+              style={styles.warningImage}
             />
-            <AppText
-              text="Please wait while we ensure your profile meets our guidelines"
-              textStyle={styles.warningSubText}
-            />
-          </View>
-        </View> */}
+          </>
+        )}
         {/* Spacer */}
         <View style={styles.spacer} />
-
+        {!isImageValid && (
+          <Image
+            source={require('../assets/images/imagevalid.png')}
+            style={styles.image}
+          />
+        )}
         {/* Continue Button */}
         <AppButton
           title="Continue"
           onPress={handleContinue}
           isLoading={loader}
-          isButtonDisabled={getValidImageCount() < 3}
+          isButtonDisabled={isButtonDisabled}
           buttonStyle={[
             styles.continueButton,
-            getValidImageCount() < 3
+            isButtonDisabled
               ? styles.continueButtonDisabled
               : styles.continueButtonActive,
           ]}
           textStyle={[
             styles.continueButtonText,
-            getValidImageCount() < 3
+            isButtonDisabled
               ? styles.continueButtonTextDisabled
               : styles.continueButtonTextActive,
           ]}
@@ -341,6 +337,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGreyBackground,
     overflow: 'hidden',
   },
+  imageSlotWithImage: {
+    borderWidth: 0,
+  },
+  imageSlotEmpty: {
+    borderWidth: 1,
+  },
+  imageSlotUploading: {
+    opacity: 0.5,
+  },
   uploadedImage: {
     width: '100%',
     height: '100%',
@@ -353,8 +358,8 @@ const styles = StyleSheet.create({
     top: 4,
     right: 4,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 12,
-    padding: 4,
+    borderRadius: 18,
+    padding: 2,
   },
   cameraIcon: {
     width: Size40,
@@ -440,8 +445,8 @@ const styles = StyleSheet.create({
     paddingVertical: Size10,
   },
   warningImage: {
-    width: lignHeight43,
-    height: lignHeight43,
+    width: '100%',
+    height: SIZES.height * 0.07,
     resizeMode: 'contain',
   },
   loader: {
@@ -456,6 +461,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: SIZES.height * 0.14,
+    resizeMode: 'contain',
+  },
+  boldText: {
+    fontWeight: '600',
+    color: COLORS.violet,
   },
 });
 
