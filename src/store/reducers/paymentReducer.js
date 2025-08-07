@@ -10,6 +10,7 @@ const initialState = {
   savePremiumAccount: [],
   packageByUserId: [],
   currentUserPackage: [],
+  selfieVerify: true,
 };
 
 const paymentReducer = createSlice({
@@ -57,10 +58,16 @@ const paymentReducer = createSlice({
       paymentReducer.loader = false;
       paymentReducer.currentUserPackage = action.payload.recordList;
     },
+    setLoaderPayment: (paymentReducer, action) => {
+      paymentReducer.loader = action.payload;
+    },
+    setSelfieVerify: (paymentReducer, action) => {
+      paymentReducer.selfieVerify = action.payload;
+    },
   },
 });
 
-// export const {  } = paymentReducer.actions;
+export const { setLoaderPayment, setSelfieVerify } = paymentReducer.actions;
 
 const {
   paymentReducerDataRequestFailed,

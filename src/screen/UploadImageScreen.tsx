@@ -10,7 +10,6 @@ import {
 import {
   fontSize16,
   fontSize24,
-  fontSize14,
   lignHeight24,
   lignHeight72,
   lignHeight20,
@@ -20,7 +19,6 @@ import {
   Size40,
   Size18,
   fontSize12,
-  Size14,
   Size10,
   SIZES,
   Size20,
@@ -106,7 +104,7 @@ const UploadImageScreen = () => {
                 true,
                 setIsImageValid,
                 setIsAIViewing,
-                handleRemoveImage
+                handleRemoveImage,
               );
             } else {
               // Second and third image format - only call API when both images are selected
@@ -177,33 +175,54 @@ const UploadImageScreen = () => {
       key={index}
       style={[
         styles.imageSlot,
-        selectedImages[index]?.uri ? styles.imageSlotWithImage : styles.imageSlotEmpty,
+        selectedImages[index]?.uri
+          ? styles.imageSlotWithImage
+          : styles.imageSlotEmpty,
         uploadingIndex === index && styles.imageSlotUploading,
       ]}
       onPress={() => handleImageUpload(index)}
       disabled={uploadingIndex === index}
     >
       {selectedImages[index]?.uri ? (
-        <ImageBackground
-          source={{ uri: selectedImages[index].uri }}
-          style={styles.uploadedImage}
-          resizeMode="cover"
-        >
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => handleRemoveImage(index)}
+        <>
+          <ImageBackground
+            source={{ uri: selectedImages[index].uri }}
+            style={styles.uploadedImage}
+            resizeMode="cover"
           >
-            <CloseIcon />
-          </TouchableOpacity>
-          {uploadingIndex === index && (
-            <View style={styles.uploadingOverlay}>
-              <GradientLoader size={20} />
-            </View>
-          )}
-        </ImageBackground>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => handleRemoveImage(index)}
+            >
+              <CloseIcon />
+            </TouchableOpacity>
+            {uploadingIndex === index && (
+              <View style={styles.uploadingOverlay}>
+                <GradientLoader size={20} />
+              </View>
+            )}
+          </ImageBackground>
+          {/* {index === 0 && (
+            <Image
+              source={require('../assets/images/imageBanner.png')}
+              style={styles.bannerOverlay}
+              resizeMode="contain"
+            />
+          )} */}
+        </>
       ) : (
         <View style={styles.cameraIcon}>
-          <AppText text="📷" textStyle={styles.cameraIconText} />
+          <Image
+            source={require('../assets/images/camera.png')}
+            style={styles.cameraIconImage}
+          />
+          {/* {index === 0 && (
+            <Image
+              source={require('../assets/images/imageBanner.png')}
+              style={styles.bannerOverlay}
+              resizeMode="contain"
+            />
+          )} */}
           {uploadingIndex === index && (
             <View style={styles.uploadingOverlay}>
               <GradientLoader size={20} />
@@ -337,7 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.lightGreyBackground,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   imageSlotWithImage: {
     borderWidth: 0,
@@ -369,32 +388,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cameraIconText: {
-    fontSize: fontSize24,
-    opacity: 0.6,
-  },
-  warningContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: Size16,
-    paddingVertical: Size12 * 3,
-    borderRadius: Size8,
-    gap: Size12,
-    alignItems: 'center',
-  },
-  warningTextContainer: {
-    width: '85%',
-  },
-  warningText: {
-    fontSize: fontSize14,
-    color: COLORS.textBlack,
-    lineHeight: lignHeight20,
-    fontWeight: '600',
-  },
-  warningSubText: {
-    fontSize: fontSize12,
-    color: COLORS.grey,
-    lineHeight: Size14,
-  },
+
   spacer: {
     flex: 1,
   },
@@ -451,9 +445,6 @@ const styles = StyleSheet.create({
     height: SIZES.height * 0.07,
     resizeMode: 'contain',
   },
-  loader: {
-    fontSize: fontSize16 * 5,
-  },
   uploadingOverlay: {
     position: 'absolute',
     top: 0,
@@ -472,6 +463,19 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: '600',
     color: COLORS.violet,
+  },
+  cameraIconImage: {
+    width: Size18 * 2,
+    height: Size18 * 2,
+    resizeMode: 'contain',
+  },
+  bannerOverlay: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    width: 50,
+    height: 20,
+    opacity: 0.9,
   },
 });
 

@@ -577,7 +577,14 @@ const ConversationsScreen = () => {
               placeholder="Type a message"
               placeholderTextColor={COLORS.placeholderText}
               value={messageText}
-              onChangeText={setMessageText}
+              onChangeText={text => {
+                // Prevent input if the text is only numbers
+                if (/^\d+$/.test(text)) {
+                  // Do not update the messageText if only numbers
+                  return;
+                }
+                setMessageText(text);
+              }}
               multiline
               maxLength={500}
               keyboardType="default"

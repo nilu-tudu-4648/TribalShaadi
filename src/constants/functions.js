@@ -15,7 +15,7 @@ import axios from 'axios';
 import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
-import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
+import { getPackageByUserIdApi, setLoaderPayment, setSelfieVerify } from '../store/reducers/paymentReducer';
 
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
@@ -65,6 +65,7 @@ export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
 export const getSelectedUserUrl = 'app/users/viewUserDetail';
 export const getGalleryImageListUrl = 'app/users/getGalleryImageList';
 export const resetPartnerPreferencesUrl = 'app/users/resetPartnerPreferences';
+export const verifySelfieUrl = 'app/verify-selfie';
 //payment
 export const getPackageListUrl = 'admin/package/getpackage';
 export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
@@ -109,20 +110,32 @@ export const formatDateShort = dateString => {
 };
 
 // WhatsApp-style date formatting for chat headers
-export const formatChatDateHeader = (timestamp) => {
+export const formatChatDateHeader = timestamp => {
   if (!timestamp) return '';
-  
+
   try {
     const messageDate = new Date(timestamp);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-    
+
     // Reset hours to compare only dates
-    const messageDateOnly = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
-    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-    
+    const messageDateOnly = new Date(
+      messageDate.getFullYear(),
+      messageDate.getMonth(),
+      messageDate.getDate(),
+    );
+    const todayOnly = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+    const yesterdayOnly = new Date(
+      yesterday.getFullYear(),
+      yesterday.getMonth(),
+      yesterday.getDate(),
+    );
+
     if (messageDateOnly.getTime() === todayOnly.getTime()) {
       return 'Today';
     } else if (messageDateOnly.getTime() === yesterdayOnly.getTime()) {
@@ -143,11 +156,11 @@ export const formatChatDateHeader = (timestamp) => {
 // Helper function to check if two timestamps are on different days
 export const isDifferentDay = (timestamp1, timestamp2) => {
   if (!timestamp1 || !timestamp2) return false;
-  
+
   try {
     const date1 = new Date(timestamp1);
     const date2 = new Date(timestamp2);
-    
+
     return (
       date1.getDate() !== date2.getDate() ||
       date1.getMonth() !== date2.getMonth() ||
@@ -200,14 +213,16 @@ export const saveUserToStorage = async user => {
     console.log(error);
   }
 };
-export const verifyOTPForLogin = async (url, data) => {
+export const sendOTPForLogin = async (url, data, setLoading) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
-    console.log(response, 'response verifyOTPForLogin');
-    AppToast('OTP verified successfully');
+    AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
+    console.log(error.response.data, 'sendOTPForLogin');
     return false;
+  } finally {
+    setLoading(false);
   }
 };
 export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
@@ -435,11 +450,15 @@ export const resetPreferenceApi = async (dispatch, func) => {
   };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    const response = await axios.post(`${baseUrl}/${resetPartnerPreferencesUrl}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.post(
+      `${baseUrl}/${resetPartnerPreferencesUrl}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     console.log(response.data, 'resetPreferenceApi');
     await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
   } catch (error) {
@@ -540,22 +559,26 @@ export const getEmploymentTypeApi = async dispatch => {
     return [];
   }
 };
-export const getChatHistoryByUserId = async (userId) => {
+export const getChatHistoryByUserId = async userId => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    const response = await axios.post(`${baseUrl}/${getAllChatHistoryByUserIdUrl}`, {
-      userId: userId,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.post(
+      `${baseUrl}/${getAllChatHistoryByUserIdUrl}`,
+      {
+        userId: userId,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
     return response.data.recordList;
   } catch (error) {
     console.log(error, 'getChatHistoryByUserId');
     return [];
   }
-}
+};
 export const filterChatByUserId = async (userId, friendId) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -627,5 +650,24 @@ export const updateChatIsReadApi = async (url, data) => {
   } catch (error) {
     console.log(error.response.data, 'updateChatIsReadApi');
     return [];
+  }
+};
+export const verifySelfieApi = async (data, dispatch) => {
+  try {
+    await delay(3000);
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(`${baseUrl}/${verifySelfieUrl}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(response, 'response verifySelfieApi');
+    return response.data;
+  } catch (error) {
+    console.log(error.response.data, 'verifySelfieApi');
+    dispatch(setSelfieVerify(false));
+    return [];
+  } finally {
+    dispatch(setLoaderPayment(false));
   }
 };

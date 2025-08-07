@@ -41,10 +41,12 @@ import {
 } from './src/notification/notifications';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
+import RegisterScreen from './src/screen/RegisterScreen';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
   [ROUTES.LOGIN]: undefined;
+  [ROUTES.REGISTER]: undefined;
   [ROUTES.OTP]: { phoneNumber: string | number };
   [ROUTES.GENDER]: undefined;
   [ROUTES.NAME]: undefined;
@@ -149,6 +151,7 @@ const MainApp = () => {
         ) : (
           <>
             <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
+            <Stack.Screen name={ROUTES.REGISTER} component={RegisterScreen} />
             <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
             <Stack.Screen name={ROUTES.OTP} component={OTPScreen} />
             <Stack.Screen

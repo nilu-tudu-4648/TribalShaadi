@@ -20,9 +20,8 @@ import {
 } from '../constants/Sizes';
 import { RootStackParamList } from '../../App';
 import HeaderBack from '../components/HeaderBack';
-import { sendOTP } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { verifyOTP } from '../constants/functions';
+import { sendOTPForLogin, verifyOTP } from '../constants/functions';
 
 const OTPScreen = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -31,7 +30,8 @@ const OTPScreen = () => {
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const route = useRoute<RouteProp<RootStackParamList, 'OTP'>>();
-  const { phoneNumber } = (route.params as { phoneNumber: string | number }) || {};
+  const { phoneNumber } =
+    (route.params as { phoneNumber: string | number }) || {};
   const { loader } = useSelector((state: any) => state.entities.authReducer);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -43,16 +43,15 @@ const OTPScreen = () => {
     }
   }, [timer]);
 
-
   const handleInputChange = (text: string, index: number) => {
     setError(null);
     const newOtp = [...otp];
-    
+
     // Handle single digit input
     if (text.length <= 1) {
       newOtp[index] = text;
       setOtp(newOtp);
-      
+
       // Auto-focus next field if text is entered
       if (text && index < 3) {
         inputRefs.current[index + 1]?.focus();
@@ -64,7 +63,7 @@ const OTPScreen = () => {
     if (key === 'Backspace') {
       setError(null);
       const newOtp = [...otp];
-      
+
       if (otp[index]) {
         // Clear current field if it has content
         newOtp[index] = '';
@@ -84,19 +83,22 @@ const OTPScreen = () => {
     inputRefs.current[0]?.focus();
   };
 
-  const handleVerifyOTP = useCallback(async (otpString: string) => {
-    if (otpString.length < 4) {
-      setError('Incorrect OTP, please enter the valid OTP you received');
-      return;
-    }
-    verifyOTP(
-      'admin/users/loginWithOTP',
-      { otp: otpString },
-      dispatch,
-      navigation,
-      setError,
-    );
-  }, [dispatch, navigation]);
+  const handleVerifyOTP = useCallback(
+    async (otpString: string) => {
+      if (otpString.length < 4) {
+        setError('Incorrect OTP, please enter the valid OTP you received');
+        return;
+      }
+      verifyOTP(
+        'admin/users/loginWithOTP',
+        { otp: otpString },
+        dispatch,
+        navigation,
+        setError,
+      );
+    },
+    [dispatch, navigation],
+  );
 
   useEffect(() => {
     const enteredOtp = otp.join('');
@@ -105,11 +107,13 @@ const OTPScreen = () => {
     }
   }, [otp, handleVerifyOTP]);
 
-  const handleResend = () => {
+  const handleResend = async () => {
     try {
       setTimer(30);
       clearOTP();
-      dispatch(sendOTP('admin/users/sendLoginOTP', { contactNo: phoneNumber }));
+      await sendOTPForLogin('admin/users/sendLoginOTP', {
+        contactNo: phoneNumber,
+      });
     } catch (error) {
       console.log(error, 'error');
     }
@@ -128,10 +132,12 @@ const OTPScreen = () => {
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              value={digit}  
-              autoFocus={index === 0}      
+              value={digit}
+              autoFocus={index === 0}
               onChangeText={text => handleInputChange(text, index)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+              onKeyPress={({ nativeEvent }) =>
+                handleKeyPress(nativeEvent.key, index)
+              }
               keyboardType="numeric"
               maxLength={1}
               style={{

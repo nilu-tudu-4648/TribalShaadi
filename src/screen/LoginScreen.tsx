@@ -9,35 +9,34 @@ import {
   Size10,
   lignHeight72,
   Size22,
+  Size20,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
-import { useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import { validateIndianPhoneNumber, verifyOTPForLogin } from '../constants/functions';
+import {
+  sendOTPForLogin,
+  validateIndianPhoneNumber,
+} from '../constants/functions';
+
 type RootStackParamList = {
   Login: undefined;
+  Register: undefined;
   OTP: { phoneNumber: string };
 };
 
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
   const [phoneValidation, setPhoneValidation] = useState({
     isValid: false,
     message: '',
   });
-  const { loader } = useSelector(
-    (state: any) => state.entities.authReducer,
-  );
-  const { register } = useRoute().params as { register?: boolean };
-  // const phone = '9546230774';
-  const url = register
-    ? 'admin/users/sendLoginOTP'
-    : 'admin/users/sendOTPForLogin';
+  const url =  'admin/users/sendOTPForLogin';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -55,11 +54,13 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
+      setLoading(true);
       const requestBody: any = {
-        // contactNo: '+91' + phone,
         contactNo: '+91' + validation.cleanedNumber,
       };
-      const response = await verifyOTPForLogin(url, requestBody);
+      console.log('requestBody', requestBody);
+      const response = await sendOTPForLogin(url, requestBody,setLoading);
+      console.log('response', response);
       if (response) {
         navigation.navigate('OTP', {
           phoneNumber: validation.cleanedNumber || phoneNumber,
@@ -80,7 +81,7 @@ const LoginScreen: React.FC = () => {
         <View style={styles.headerSection}>
           <AppText text="Phone number" textStyle={styles.title} />
           <AppText
-            text="Enter your mobile number"
+            text="Enter Mobile Number"
             textStyle={styles.subtitle}
           />
         </View>
@@ -97,7 +98,7 @@ const LoginScreen: React.FC = () => {
           autoFocus={true}
         />
         <AppButton
-          isLoading={loader}
+          isLoading={loading}
           title="Verify"
           loaderSize={Size22}
           onPress={handleVerify}
@@ -113,10 +114,8 @@ const LoginScreen: React.FC = () => {
               : styles.buttonTextEnabled,
           ]}
         />
-    
         {/* Spacer */}
         <View style={styles.spacer} />
-
         {/* Info */}
         <View style={styles.infoContainer}>
           <AppText
@@ -165,5 +164,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  alreadyExistsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  crossIcon: {
+    width: Size20 * 2,
+    height: Size20 * 2,
   },
 });

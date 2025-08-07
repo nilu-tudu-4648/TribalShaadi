@@ -18,6 +18,7 @@ export const ROUTES = {
   SETTINGS: 'SettingsScreen',
   WELCOME: 'WelcomeScreen',
   LOGIN: 'Login',
+  REGISTER:'Register',
   OTP: 'OTP',
   GENDER: 'Gender',
   NAME: 'Name',

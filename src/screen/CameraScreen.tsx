@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,23 +17,28 @@ import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
+import { verifySelfieApi } from '../constants/functions';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoaderPayment } from '../store/reducers/paymentReducer';
 
 const CameraScreen = () => {
   const navigation = useNavigation();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-
+  const base64Image = useRef<string | null>(null);  // Store base64 image
+  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const dispatch = useDispatch();
   useEffect(() => {
     // Auto launch camera when component mounts
     const options: ImageLibraryOptions = {
       mediaType: 'photo' as MediaType,
-      includeBase64: false,
+      includeBase64: true,
       maxHeight: 2000,
       maxWidth: 2000,
       quality: 0.8,
     };
 
-    launchCamera(options, response => {
+    launchCamera(options, async response => {
       if (response.didCancel) {
         console.log('User cancelled camera');
         navigation.goBack();
@@ -45,23 +50,17 @@ const CameraScreen = () => {
         const asset = response.assets[0];
         if (asset.uri) {
           setCapturedImage(asset.uri);
+          base64Image.current = asset.base64 || null;
           setShowConfirmation(true);
-          // You can handle the captured image here
-          console.log('Photo captured:', asset.uri);
-          
-          // Navigate back after a brief preview
-          // setTimeout(() => {
-          //   navigation.goBack();
-          // }, 2000);
         }
       }
     });
-  }, [navigation]);
+  }, [navigation, user.id]);
 
   const handleRetake = () => {
     setCapturedImage(null);
     setShowConfirmation(false);
-    
+
     // Launch camera again
     const options: ImageLibraryOptions = {
       mediaType: 'photo' as MediaType,
@@ -89,11 +88,19 @@ const CameraScreen = () => {
     });
   };
 
-  const handleSubmit = () => {
-    // Handle photo submission logic here
-    console.log('Photo submitted:', capturedImage);
-    // You can pass the image back to the previous screen or handle upload
+  const handleSubmit = async () => {
+    dispatch(setLoaderPayment(true));
     navigation.goBack();
+    try {
+      const requestBody = {
+        userId: user.id,
+        selfieBase64: `${base64Image.current}`,
+      };
+      console.log(requestBody, 'requestBody');
+      await verifySelfieApi(requestBody, dispatch);
+    } catch (error) {
+      console.log(error, 'error handleSubmit');
+    } 
   };
 
   if (showConfirmation && capturedImage) {
@@ -108,13 +115,13 @@ const CameraScreen = () => {
 
         {/* Confirmation Content */}
         <View style={styles.confirmationContent}>
-          <AppText 
-            text="Happy with your photo?" 
-            textStyle={styles.confirmationTitle} 
+          <AppText
+            text="Happy with your photo?"
+            textStyle={styles.confirmationTitle}
           />
-          <AppText 
-            text="Remember, to verify yourself successfully, Your face must be clearly visible" 
-            textStyle={styles.confirmationSubtitle} 
+          <AppText
+            text="Remember, to verify yourself successfully, Your face must be clearly visible"
+            textStyle={styles.confirmationSubtitle}
           />
 
           {/* Buttons */}
@@ -125,16 +132,13 @@ const CameraScreen = () => {
               buttonStyle={styles.submitButton}
               textStyle={styles.submitButtonText}
             />
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               onPress={handleRetake}
               style={styles.retakeButton}
               activeOpacity={0.8}
             >
-              <AppText 
-                text="Retake" 
-                textStyle={styles.retakeButtonText} 
-              />
+              <AppText text="Retake" textStyle={styles.retakeButtonText} />
             </TouchableOpacity>
           </View>
         </View>

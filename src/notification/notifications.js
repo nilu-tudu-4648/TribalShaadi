@@ -79,11 +79,7 @@ const getfcmToken = async () => {
       console.log('Error getting FCM token:', error);
     }
   } else {
-    // console.log('FCM Token from storage:', fcmToken);
-    // Verify token is still valid and send to server
     await sendTokenToServer(fcmToken);
-    // Ensure user is subscribed to general topics
-    // await subscribeToAllUsersTopics();
   }
 };
 
@@ -93,10 +89,6 @@ const sendTokenToServer = async token => {
     const userToken = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
     const user = JSON.parse(userDataString);
-    // console.log('user', user);
-    // console.log('userToken', userToken);
-    // console.log('fcmToken', token);
-    // Replace with your actual server endpoint
     if (user && user.id) {
       const response = await axios.post(`${baseUrl}/${updateUrl}`, {
         id: user.id,
@@ -131,8 +123,6 @@ export const refreshFCMToken = async () => {
     const newToken = await messaging().getToken();
     if (newToken) {
       await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, newToken);
-      // await sendTokenToServer(newToken);
-      // console.log('FCM token refreshed:', newToken);
     }
   } catch (error) {
     console.log('Error refreshing FCM token:', error);
@@ -175,13 +165,6 @@ export const notificationListner = async () => {
     // Handle background messages
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
-
-      // Important: Firebase automatically displays notifications when app is in background/quit state
-      // if the message contains a 'notification' property. We should NOT create additional local notifications here
-      // as it would cause duplicates. This handler is primarily for:
-      // 1. Processing data-only messages
-      // 2. Updating app state/storage
-      // 3. Custom logic that doesn't involve showing notifications
 
       // Process any data-only logic here if needed
       if (remoteMessage.data) {
@@ -229,7 +212,6 @@ const handleNotificationAction = remoteMessage => {
 export const schedulePushNotification = async (
   title,
   message,
-  imageUrl = null,
 ) => {
   try {
     const notificationConfig = {
@@ -248,63 +230,16 @@ export const schedulePushNotification = async (
     };
 
     // Add image support if imageUrl is provided
-    if (imageUrl) {
-      notificationConfig.largeIconUrl = imageUrl; // Large icon (circular)
-      notificationConfig.bigPictureUrl = imageUrl; // Big picture style (expandable)
-      notificationConfig.bigLargeIcon = 'ic_launcher'; // Fallback icon when expanded
-    }
+    // if (imageUrl) {
+    //   notificationConfig.largeIconUrl = imageUrl; // Large icon (circular)
+    //   notificationConfig.bigPictureUrl = imageUrl; // Big picture style (expandable)
+    //   notificationConfig.bigLargeIcon = 'ic_launcher'; // Fallback icon when expanded
+    // }
 
     console.log('Showing foreground notification:', title);
     PushNotification.localNotification(notificationConfig);
   } catch (error) {
     console.error('Error showing foreground notification:', error);
-  }
-};
-
-// Test function for foreground notifications
-export const testForegroundNotification = () => {
-  schedulePushNotification(
-    '🔔 Test Notification',
-    'This is a test foreground notification from TribalShaadi!',
-    null
-  );
-};
-
-// Function to send notification from client (for testing purposes)
-export const sendTestNotification = async () => {
-  try {
-    const token = await AsyncStorage.getItem('fcmToken');
-    if (!token) {
-      console.log('No FCM token found');
-      return;
-    }
-
-    // This is just for testing - in production, notifications should be sent from your server
-    const notificationData = {
-      token: token,
-      notification: {
-        title: '🏆 Test Notification',
-        body: 'This is a test notification with image support',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/desktime-e2f82.firebasestorage.app/o/profileImages%2F3XxW6kBEIGbZ5zvzgfyn26UivuR2?alt=media&token=f5d4d3db-7eaa-4f6a-a64a-8247f54ab4e0',
-      },
-      data: {
-        type: 'test',
-        screen: 'home',
-      },
-    };
-
-    console.log('Sending test notification:', notificationData);
-    // You would send this to your server endpoint that handles Firebase admin notifications
-
-    // For immediate testing, schedule a local notification with image
-    await schedulePushNotification(
-      notificationData.notification.title,
-      notificationData.notification.body,
-      notificationData.notification.image,
-    );
-  } catch (error) {
-    console.log('Error sending test notification:', error);
   }
 };
 
@@ -330,7 +265,6 @@ const subscribeToAllUsersTopics = async () => {
     // Subscribe to topic for all users - this allows sending notifications to everyone
     await messaging().subscribeToTopic('all_users');
     await messaging().subscribeToTopic('general_updates');
-    await messaging().subscribeToTopic('contest_updates');
 
     // console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
   } catch (error) {
@@ -342,8 +276,6 @@ export default {
   requestUserPermission,
   notificationListner,
   schedulePushNotification,
-  sendTestNotification,
-  testForegroundNotification,
   getCurrentFCMToken,
   refreshFCMToken,
 };
