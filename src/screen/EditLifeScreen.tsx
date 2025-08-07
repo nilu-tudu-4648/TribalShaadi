@@ -104,19 +104,20 @@ const EditLifeScreen = () => {
         const userState = states.find(
           (state: any) => String(state.name) === String(user.stateName),
         );
-        // console.log('Found user state:', userState);
+        console.log('Found user state:', userState);
         
         if (userState) {
           setCitiesLoading(true);
           try {
             const cities = await getCitiesByStateIdV2(userState.id);
-            // console.log('cities', cities);
+            console.log('cities', cities);
             setLocalCities(cities);
             
             // Find user's city from the fetched cities
             const userCity = cities.find(
               (city: any) => String(city.id) === String(user.cityId),
             );
+            console.log('userCity', userCity);
             
             setFormData(prev => ({
               ...prev,
@@ -272,7 +273,7 @@ const EditLifeScreen = () => {
         {/* City Dropdown */}
         <AppDropdown
           label=""
-          selectedValue={formData.selectedCity?.name || user.districtName}
+          selectedValue={formData.selectedCity?.name}
           placeholder={citiesLoading ? 'Loading cities...' : 'Select City'}
           onPress={() => !citiesLoading && localCities.length > 0 && setShowCityPicker(true)}
           disabled={citiesLoading || !formData.selectedState || localCities.length === 0}

@@ -128,7 +128,8 @@ const OTPScreen = () => {
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              value={digit}
+              value={digit}  
+              autoFocus={index === 0}      
               onChangeText={text => handleInputChange(text, index)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
               keyboardType="numeric"

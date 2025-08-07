@@ -18,7 +18,6 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import {
-  getEmploymentTypeApi,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
@@ -30,23 +29,18 @@ import AppChip2 from '../chips/AppChip2';
 
 interface JobTypeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
+  jobTypeOptions: any[];
 }
 
 const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   bottomSheetRef,
+  jobTypeOptions,
 }) => {
   const snapPoints = ['50%'];
   const [localSelected, setLocalSelected] =
     useState<string[]>();
   const dispatch = useDispatch();
-  const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  // Ensure initial job types are preserved and merged with API values
-  useEffect(() => {
-    getEmploymentTypeApi().then(res => {
-      setJobTypeOptions(res);
-    });
-  }, []);
   useEffect(() => {
     if (user.pOccupationId) {
       if (Array.isArray(user.pOccupationId)) {
@@ -60,7 +54,6 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
       setLocalSelected([]);
     }
   }, [user.pOccupationId]);
-  console.log(localSelected, 'localSelected');
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];

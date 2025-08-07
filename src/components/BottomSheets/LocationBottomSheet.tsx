@@ -155,11 +155,11 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
       const requestBody = {
         id: user.id,
         pStateLivingInId:
-          selectedState.length > 0
+          selectedState && selectedState.length > 0
             ? selectedState.map((st: any) => st.name || st).join(',')
             : null,
         pCityLivingInId:
-          selectedCities.length > 0
+          selectedCities && selectedCities.length > 0
             ? selectedCities.map(city => city.name || city).join(',')
             : null,
       };

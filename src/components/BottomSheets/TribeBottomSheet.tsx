@@ -142,7 +142,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isSelected = localSelectedTribeId.includes(item.id);
+    const isSelected = localSelectedTribeId?.includes(item.id) || false;
     return (
       <TouchableOpacity
         style={styles.optionRow}

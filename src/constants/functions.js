@@ -17,7 +17,6 @@ import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
 import { getPackageByUserIdApi } from '../store/reducers/paymentReducer';
 
-
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
   { field: 'gender', screen: ROUTES.GENDER },
@@ -65,6 +64,7 @@ export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
 export const getSelectedUserUrl = 'app/users/viewUserDetail';
 export const getGalleryImageListUrl = 'app/users/getGalleryImageList';
+export const resetPartnerPreferencesUrl = 'app/users/resetPartnerPreferences';
 //payment
 export const getPackageListUrl = 'admin/package/getpackage';
 export const getTimeDurationUrl = 'admin/timeDuration/getTimeDuration';
@@ -78,19 +78,15 @@ export const savePremiumAccountUrl = 'app/package/savePremiumAccount';
 export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
 
 //chatUrl
-export const getUserChatUrl = 'app/userChat/userChat';
-export const getUserChatListUrl = 'app/userChat/getUserChatList';
-export const sendMessageUrl = 'app/userChat/sendMessage';
-export const getMessagesUrl = 'app/userChat/getMessages';
-export const friendRequestRejectOrBlockUrl =
-  'app/userChat/friendRequestRejectOrBlock';
-export const getFriendsByUserIdUrl = 'app/userChat/getFriendsByUserId';
 export const getAllChatHistoryByUserIdUrl =
   'app/userChat/getAllChatHistoryByUserId';
 export const getAcceptedProposalByIdUrl =
   'app/proposals/getAcceptedProposalById';
 export const insertUserNotificationsUrl =
   'app/notifications/insertUserNotifications';
+export const updateProposalIsNewUrl = 'app/proposals/updateProposalIsNew';
+export const updateChatIsReadUrl = 'app/userChat/updateChatIsRead';
+
 // Date formatting function
 
 export const delay = async (ms = 1000) => {
@@ -112,6 +108,56 @@ export const formatDateShort = dateString => {
   }
 };
 
+// WhatsApp-style date formatting for chat headers
+export const formatChatDateHeader = (timestamp) => {
+  if (!timestamp) return '';
+  
+  try {
+    const messageDate = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    // Reset hours to compare only dates
+    const messageDateOnly = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+    
+    if (messageDateOnly.getTime() === todayOnly.getTime()) {
+      return 'Today';
+    } else if (messageDateOnly.getTime() === yesterdayOnly.getTime()) {
+      return 'Yesterday';
+    } else {
+      // Format as DD/MM/YYYY for older dates
+      const day = messageDate.getDate().toString().padStart(2, '0');
+      const month = (messageDate.getMonth() + 1).toString().padStart(2, '0');
+      const year = messageDate.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+  } catch (error) {
+    console.log('Error formatting chat date header:', error);
+    return '';
+  }
+};
+
+// Helper function to check if two timestamps are on different days
+export const isDifferentDay = (timestamp1, timestamp2) => {
+  if (!timestamp1 || !timestamp2) return false;
+  
+  try {
+    const date1 = new Date(timestamp1);
+    const date2 = new Date(timestamp2);
+    
+    return (
+      date1.getDate() !== date2.getDate() ||
+      date1.getMonth() !== date2.getMonth() ||
+      date1.getFullYear() !== date2.getFullYear()
+    );
+  } catch (error) {
+    console.log('Error comparing dates:', error);
+    return false;
+  }
+};
 export const checkUserLoggedIn = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
@@ -152,6 +198,16 @@ export const saveUserToStorage = async user => {
     await AsyncStorage.setItem(ASYNC_VARIBLES.USER_TOKEN, user.token);
   } catch (error) {
     console.log(error);
+  }
+};
+export const verifyOTPForLogin = async (url, data) => {
+  try {
+    const response = await axios.post(`${baseUrl}/${url}`, data);
+    console.log(response, 'response verifyOTPForLogin');
+    AppToast('OTP verified successfully');
+    return true;
+  } catch (error) {
+    return false;
   }
 };
 export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
@@ -287,6 +343,7 @@ export const uploadImage = async (
   isProfile = false,
   func,
   func2,
+  handleRemoveImage,
 ) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -303,6 +360,9 @@ export const uploadImage = async (
   } catch (error) {
     if (func) {
       func(false);
+      if (handleRemoveImage) {
+        handleRemoveImage(0);
+      }
     }
     console.log(error.response.data, 'uploadImage');
     if (error.response.data.status === 401) {
@@ -371,45 +431,17 @@ export const resetPreferenceApi = async (dispatch, func) => {
   const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
   const user = JSON.parse(userDataString);
   const data = {
-    id: user.id,
-    pAlcoholAcceptance: null,
-    pAnnualIncomeId: null,
-    pBodyType: null,
-    pCityLivingInId: null,
-    pCommunityId: null,
-    pComplexion: null,
-    pCountryLivingInId: null,
-    pDietId: null,
-    pDisabilityAcceptance: null,
-    pEducationMediumId: null,
-    pEducationTypeId: null,
-    pEmploymentTypeId: null,
-    pFamilyType: null,
-    pFromAge: null,
-    pFromHeight: null,
-    pHoroscopeBelief: null,
-    pManglikMatch: null,
-    pMaritalStatusId: null,
-    pMotherTongue: null,
-    pOccupationId: null,
-    pOtherExpectations: null,
-    pProfileWithChildren: null,
-    pReligionId: null,
-    pSmokingAcceptance: null,
-    pStateLivingInId: null,
-    pToAge: null,
-    pToHeight: null,
-    psettle_down: null,
+    userId: user.id,
   };
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    const response = await axios.post(`${baseUrl}/${updateUrl}`, data, {
+    const response = await axios.post(`${baseUrl}/${resetPartnerPreferencesUrl}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(response.data, 'resetPreferenceApi');
     await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-    console.log(response, 'resetPreferenceApi');
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
   } finally {
@@ -447,8 +479,6 @@ export const getCitiesByStateIdV2 = async stateId => {
     return [];
   }
 };
-
-// Phone number validation for Indian mobile numbers
 export const validateIndianPhoneNumber = phoneNumber => {
   if (!phoneNumber) {
     return {
@@ -496,7 +526,6 @@ export const validateIndianPhoneNumber = phoneNumber => {
     cleanedNumber: cleanedNumber,
   };
 };
-
 export const getEmploymentTypeApi = async dispatch => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -511,6 +540,22 @@ export const getEmploymentTypeApi = async dispatch => {
     return [];
   }
 };
+export const getChatHistoryByUserId = async (userId) => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(`${baseUrl}/${getAllChatHistoryByUserIdUrl}`, {
+      userId: userId,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.recordList;
+  } catch (error) {
+    console.log(error, 'getChatHistoryByUserId');
+    return [];
+  }
+}
 export const filterChatByUserId = async (userId, friendId) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -526,8 +571,6 @@ export const filterChatByUserId = async (userId, friendId) => {
       },
     );
     const data = response.data.recordList;
-    console.log(data, 'filterChatByUserId data');
-    
     if (!Array.isArray(data)) {
       console.log('No chat data found or invalid format');
       return [];
@@ -535,22 +578,54 @@ export const filterChatByUserId = async (userId, friendId) => {
 
     const filteredChat = data.filter(chat => {
       if (!chat.chatId) return false;
-      
+
       const chatIdParts = chat.chatId.split('_');
       const friendIdStr = String(friendId);
-      
+
       return (
         String(chatIdParts[0]) === friendIdStr ||
         String(chatIdParts[1]) === friendIdStr
       );
     });
-    
+
     console.log('filtered chat messages:', filteredChat.length);
     return filteredChat.sort(
       (a, b) => new Date(a.created_at) - new Date(b.created_at),
     );
   } catch (error) {
     console.log(error, 'filterChatByUserId error');
+    return [];
+  }
+};
+export const updateProposalIsNewApi = async (url, data) => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(`${baseUrl}/${url}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(response, 'response updateProposalIsNewApi');
+    return response.data;
+  } catch (error) {
+    console.log(error.response.data, 'updateProposalIsNewApi');
+    return [];
+  }
+};
+export const updateChatIsReadApi = async (url, data) => {
+  console.log(data, 'data updateChatIsReadApi');
+  console.log(`${baseUrl}/${url}`, 'url');
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(`${baseUrl}/${url}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(response, 'response updateChatIsReadApi');
+    return response.data;
+  } catch (error) {
+    console.log(error.response.data, 'updateChatIsReadApi');
     return [];
   }
 };

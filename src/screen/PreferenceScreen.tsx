@@ -21,6 +21,7 @@ import {
   fontSize22,
   Size12,
   Size14,
+  Size4,
   Size8,
 } from '../constants/Sizes';
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
@@ -28,6 +29,7 @@ import AppHeader from '../components/AppHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   formatHeightInFeettoInches,
+  getEmploymentTypeApi,
   resetPreferenceApi,
 } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
@@ -76,7 +78,12 @@ const PreferenceScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCities, setSelectedCities] = useState<any[]>([]);
   const [isResetLoading, setIsResetLoading] = useState(false);
-
+  const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
+  useEffect(() => {
+    getEmploymentTypeApi().then(res => {
+      setJobTypeOptions(res);
+    });
+  }, []);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       maritalStatusBottomSheetRef.current?.close();
@@ -93,11 +100,14 @@ const PreferenceScreen = () => {
   }, [navigation]);
 
   const getMaritalStatusValue = () => {
-    const uniqueCount = new Set(user?.pMaritalStatusId || []).size;
-    if (uniqueCount === 0) {
-      return 'Any';
-    }
-    return `${uniqueCount} selected`;
+    const maritalStatusIds = user.pMaritalStatusId || [];
+    const statusList = Array.isArray(maritalStatuses) ? maritalStatuses : [];
+    const selectedStatuses = statusList
+      .filter((item: any) => maritalStatusIds.includes(item.id))
+      .map((item: any) => item.name);
+    if (selectedStatuses.length === 0) return 'Any';
+    if (selectedStatuses.length <= 1) return selectedStatuses.join(', ');
+    return `${selectedStatuses.slice(0, 1).join(', ').charAt(0).toUpperCase() + selectedStatuses.slice(0, 1).join(', ').slice(1)}...`;
   };
   const getAgeRangeValue = () => {
     if (user.pFromAge && user.pToAge) {
@@ -109,7 +119,7 @@ const PreferenceScreen = () => {
   const getReligionValue = () => {
     if (user.pReligionId) {
       return (
-        religion.find((item: any) => item.id == user.pReligionId[0])?.name ||
+        religion.find((item: any) => item.id === user.pReligionId[0])?.name ||
         user.religion
       );
     }
@@ -124,67 +134,38 @@ const PreferenceScreen = () => {
     return 'Any';
   };
   const getTribeValue = () => {
-    if (user.pCommunityId && typeof user.pCommunityId === 'string') {
-      const communities = user.pCommunityId
-        .split(',')
-        .filter((id: string) => id.trim() !== '');
-      return communities.length > 0 ? `${communities.length} selected` : 'Any';
-    }
-    if (Array.isArray(user.pCommunityId)) {
-      return user.pCommunityId.length > 0
-        ? `${user.pCommunityId.length} selected`
-        : 'Any';
-    }
-    return 'Any';
+    const communityIds = user.pCommunityId || [];
+    const communities = community
+      .filter((item: any) => communityIds.includes(item.id))
+      .map((item: any) => item.name);
+    if (communities.length === 0) return 'Any';
+    if (communities.length <= 1) return communities.join(', ');
+    return `${communities.slice(0, 1).join(', ')}...`;
   };
   const getLocationValue = () => {
     const cities = user.pCityLivingInId ? user.pCityLivingInId.split(',') : [];
     const states = user.pStateLivingInId
       ? user.pStateLivingInId.split(',')
       : [];
-    if (cities.length > 0 && states.length > 0) {
-      return `${cities.length + states.length} selected`;
-    }
-    if (cities.length > 0) {
-      return `${cities.length} cities selected`;
-    }
-    if (states.length > 0) {
-      return `${states.length} states selected`;
-    }
-    return 'Any';
+    const selectedValues = [...cities, ...states];
+    if (selectedValues.length === 0) return 'Any';
+    if (selectedValues.length <= 1) return selectedValues.join(', ');
+    return `${selectedValues.slice(0, 1).join(', ')}...`;
   };
   const getJobTypeValue = () => {
-    if (
-      !user.pOccupationId ||
-      user.pOccupationId === '' ||
-      user.pOccupationId === 'Any'
-    ) {
-      return 'Any';
-    }
-    let ids: string[] = [];
-    if (Array.isArray(user.pOccupationId)) {
-      ids = user.pOccupationId.filter((id: any) => id && id !== 'Any');
-    } else if (typeof user.pOccupationId === 'string') {
-      ids = user.pOccupationId
-        .split(',')
-        .map((id: string) => id.trim())
-        .filter((id: string) => id && id !== 'Any');
-    }
-    if (ids.length === 0) {
-      return 'Any';
-    }
-    return `${ids.length} selected`;
+    const jobTypeIds = user.pOccupationId || [];
+    const jobTypes = jobTypeOptions
+      .filter((item: any) => jobTypeIds.includes(item.id))
+      .map((item: any) => item.name);
+    if (jobTypes.length === 0) return 'Any';
+    if (jobTypes.length <= 1) return jobTypes.join(', ');
+    return `${jobTypes.slice(0, 1).join(', ')}...`;
   };
-
   const getSettleDownValue = () => {
-    if (
-      user.psettle_down === 'Any' ||
-      user.psettle_down === null ||
-      user.psettle_down === undefined
-    ) {
-      return 'Any';
+    if (user.psettle_down) {
+      return `${user.psettle_down?.split(',')[0]}...`;
     }
-    return `${user.psettle_down.split(',').length} selected`;
+    return 'Any';
   };
 
   const mandatoryPreferences = [
@@ -239,6 +220,7 @@ const PreferenceScreen = () => {
   const handleResetPress = () => {
     setIsResetLoading(true);
     setSelectedCities([]);
+    setSelectedState([]);
     resetPreferenceApi(dispatch, () => {
       setIsResetLoading(false);
     });
@@ -258,7 +240,7 @@ const PreferenceScreen = () => {
 
   return (
     <>
-      <AppSafeView style={{ padding: 0 }}>
+      <AppSafeView style={styles.appSafeViewContainer}>
         <View style={styles.header}>
           <AppHeader
             title="Preferences"
@@ -366,7 +348,10 @@ const PreferenceScreen = () => {
           setSelectedState={setSelectedState}
         />
 
-        <JobTypeBottomSheet bottomSheetRef={jobTypeBottomSheetRef} />
+        <JobTypeBottomSheet
+          bottomSheetRef={jobTypeBottomSheetRef}
+          jobTypeOptions={jobTypeOptions}
+        />
 
         <SettleDownBottomSheet bottomSheetRef={settleDownBottomSheetRef} />
       </AppSafeView>
@@ -430,7 +415,8 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: Size12,
-    padding: Size12,
+    paddingVertical: Size14,
+    paddingHorizontal: Size12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
@@ -448,6 +434,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
     color: COLORS.textInactive,
+    marginBottom: Size4,
   },
   cardValue: {
     fontSize: fontSize14,
@@ -457,11 +444,11 @@ const styles = StyleSheet.create({
   cardContent: {
     width: '80%',
   },
-  noPadding: {
-    padding: 0,
-  },
   secondaryTextStyle: {
     color: COLORS.secondaryText,
+  },
+  appSafeViewContainer: {
+    padding: 0,
   },
   loaderOverlay: {
     position: 'absolute',

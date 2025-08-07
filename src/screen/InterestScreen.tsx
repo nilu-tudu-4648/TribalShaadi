@@ -63,7 +63,6 @@ const InterestScreen = () => {
   } = useSelector((state: any) => state.entities.userReducer);
   const fetchData = useCallback(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
-    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
   }, [dispatch]);
 

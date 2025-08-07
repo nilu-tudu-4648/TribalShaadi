@@ -29,7 +29,7 @@ const MathcingScreen = () => {
   const { acceptedUser } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  console.log(acceptedUser, 'acceptedUser');
+  // console.log(acceptedUser, 'acceptedUser');
   useEffect(() => {
     // Animation sequence
     const animateSequence = () => {

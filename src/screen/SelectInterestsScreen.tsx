@@ -52,6 +52,7 @@ const SelectInterestsScreen = () => {
       const requestBody = {
         id: user.id,
         intrests: selectedInterests,
+        isProfileCompleted: 1,
       };
       dispatch(completeUserProfileV2Interests(updateUrl, requestBody));
     } catch (error) {

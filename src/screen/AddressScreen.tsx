@@ -125,7 +125,7 @@ const AddressScreen = () => {
           districtId: selectedCity.id,
         },
         planingto_settle: selectedSettlingDown,
-        // kids: selectedKids,
+        kids: selectedKids,
       };
       console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -140,6 +140,7 @@ const AddressScreen = () => {
     selectedCity,
     selectedMaritalStatus,
     selectedSettlingDown,
+    selectedKids,
     user,
     dispatch,
   ]);

@@ -4,6 +4,7 @@ const initialState = {
   loader: false,
   acceptedProposalById: [],
   insertUserNotifications: [],
+  unreadChatHistory: [],
 };
 
 const chatReducer = createSlice({
@@ -27,13 +28,15 @@ const chatReducer = createSlice({
     },
     chatReducerInsertUserNotificationsReceived: (chatReducer, action) => {
       chatReducer.loader = false;
-      console.log('chatReducerInsertUserNotificationsReceived.payload', action.payload);
       chatReducer.insertUserNotifications = action.payload;
+    },
+    setUnreadChatHistory: (chatReducer, action) => {
+      chatReducer.unreadChatHistory = action.payload;
     },
   },
 });
 
-// export const {  } = paymentReducer.actions;
+export const { setUnreadChatHistory } = chatReducer.actions;
 
 const {
   chatReducerDataRequestFailed,

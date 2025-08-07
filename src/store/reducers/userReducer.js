@@ -33,7 +33,7 @@ const userReducer = createSlice({
     },
     userReducerDataRequestFailed: (userReducer, action) => {
       userReducer.loader = false;
-      console.log('userReducerDataRequestFailed', action.payload);
+      // console.log('userReducerDataRequestFailed', action.payload);
       if (action.payload.message === 'No Matches Found') {
         userReducer.matchedUsers = [];
       }

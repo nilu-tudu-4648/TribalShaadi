@@ -56,7 +56,7 @@ const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
-  const [isImageValid, setIsImageValid] = useState(false);
+  const [isImageValid, setIsImageValid] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<
     { uri: string; base64: string }[]

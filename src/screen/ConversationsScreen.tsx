@@ -37,23 +37,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   filterChatByUserId,
   formatDateShort,
+  formatChatDateHeader,
+  isDifferentDay,
+  getChatHistoryByUserId,
   getUserDetailsApi,
   getUserDetailsUrl,
   imageUrl,
   setReducerLoadingfalse,
+  updateChatIsReadApi,
+  updateChatIsReadUrl,
 } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
+import { setUnreadChatHistory } from '../store/reducers/chatReducer';
 
 // Message type definitions
 interface Message {
   id: string | number;
-  type: 'story_starter' | 'received' | 'sent';
+  type: 'story_starter' | 'received' | 'sent' | 'date_header';
   message?: string;
   time?: string;
   date?: string;
   timestamp?: number;
   status?: 'sent' | 'sending' | 'failed';
+  dateHeader?: string; // For date header messages
 }
 
 // Initial story starter message
@@ -74,17 +81,63 @@ const ConversationsScreen = () => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const dispatch = useDispatch();
   const messageIdCounter = useRef<number>(0);
-
+  console.log(chatData, 'chatData');
   // Generate unique ID for messages
   const generateUniqueId = useCallback(() => {
     messageIdCounter.current += 1;
     return `${Date.now()}_${messageIdCounter.current}`;
   }, []);
 
+  // Helper function to group messages with date headers
+  const groupMessagesWithDateHeaders = useCallback((messages: Message[]) => {
+    if (!messages.length) return [INITIAL_STORY_STARTER];
+    
+    const groupedMessages: Message[] = [INITIAL_STORY_STARTER];
+    let lastDateHeader = '';
+    
+    messages.forEach((message, _index) => {
+      const messageTimestamp = message.timestamp || Date.now();
+      const currentDateHeader = formatChatDateHeader(messageTimestamp);
+      
+      // Add date header if this is a new day
+      if (currentDateHeader !== lastDateHeader) {
+        groupedMessages.push({
+          id: `date_header_${messageTimestamp}`,
+          type: 'date_header',
+          dateHeader: currentDateHeader,
+          timestamp: messageTimestamp,
+        });
+        lastDateHeader = currentDateHeader;
+      }
+      
+      groupedMessages.push(message);
+    });
+    
+    return groupedMessages;
+  }, []);
+  const filterReceivedMessages = useCallback(async (messages: any[]) => {
+    const receivedMessages = messages.filter(
+      (message: any) => message.userId !== user.id && message.isRead === 0,
+    );
+
+    if (receivedMessages.length > 0 && receivedMessages[0].chatId) {
+      await updateChatIsReadApi(`${updateChatIsReadUrl}`, {
+        chatId: receivedMessages[0].chatId,
+        isRead: true,
+      });
+    }
+
+    const chatHistory = await getChatHistoryByUserId(user.id);
+    const filteredChat = chatHistory.filter(
+      (chat: any) => chat.userId !== user.id && chat.isRead === 0,
+    );
+    dispatch(setUnreadChatHistory(filteredChat));
+
+    return receivedMessages;
+  }, [user.id, dispatch]);
+
   const loadChatMessages = useCallback(async () => {
-    console.log('loadChatMessages - started');
     if (!user?.id || !userDetails?.friendId) {
-      console.log('loadChatMessages - missing user ID or friend ID');
       return;
     }
     
@@ -92,17 +145,12 @@ const ConversationsScreen = () => {
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      
-      console.log('loadChatMessages - fetching chat history for:', {
-        userId: user.id,
-        friendId: userDetails.friendId
-      });
-      
+
       const filteredChat = await filterChatByUserId(
         user.id,
         userDetails.friendId,
       );
-      
+      filterReceivedMessages(filteredChat);
       if (Array.isArray(filteredChat) && filteredChat.length > 0) {
         const loadedMessages: Message[] = filteredChat
           .filter(record => record?.content?.trim()) // Filter out empty messages
@@ -122,7 +170,8 @@ const ConversationsScreen = () => {
             };
           });
         // console.log('loadChatMessages - loaded messages count:', loadedMessages.length);
-        setChatData([INITIAL_STORY_STARTER, ...loadedMessages]);
+        const groupedMessages = groupMessagesWithDateHeaders(loadedMessages);
+        setChatData(groupedMessages);
       } else {
         // console.log('loadChatMessages - no messages found, keeping story starter only');
         setChatData([INITIAL_STORY_STARTER]);
@@ -132,7 +181,7 @@ const ConversationsScreen = () => {
       // Keep story starter even if loading fails
       setChatData([INITIAL_STORY_STARTER]);
     }
-  }, [user?.id, userDetails?.friendId, generateUniqueId, dispatch]);
+  }, [user?.id, userDetails?.friendId, generateUniqueId, dispatch, filterReceivedMessages, groupMessagesWithDateHeaders]);
   // Auto scroll to bottom
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -150,7 +199,29 @@ const ConversationsScreen = () => {
       };
 
       setChatData(currentChatData => {
-        const updatedMessages = [...currentChatData, newMessage];
+        const lastMessage = currentChatData[currentChatData.length - 1];
+        const newMessageTimestamp = newMessage.timestamp || Date.now();
+        const currentDateHeader = formatChatDateHeader(newMessageTimestamp);
+        
+        let updatedMessages = [...currentChatData];
+        
+        // Check if we need to add a date header before the new message
+        const needsDateHeader = 
+          !lastMessage || 
+          lastMessage.type === 'story_starter' || 
+          (lastMessage.timestamp && isDifferentDay(lastMessage.timestamp, newMessageTimestamp));
+        
+        if (needsDateHeader) {
+          const dateHeaderMessage: Message = {
+            id: `date_header_${newMessageTimestamp}`,
+            type: 'date_header',
+            dateHeader: currentDateHeader,
+            timestamp: newMessageTimestamp,
+          };
+          updatedMessages.push(dateHeaderMessage);
+        }
+        
+        updatedMessages.push(newMessage);
         return updatedMessages;
       });
 
@@ -293,7 +364,6 @@ const ConversationsScreen = () => {
       // loadChatMessages,
     ],
   );
-
   // Load messages when redux state changes
   useEffect(() => {
     if (user?.id && userDetails?.friendId) {
@@ -389,6 +459,19 @@ const ConversationsScreen = () => {
             )}`}
             textStyle={styles.storyStarterText}
           />
+        </View>
+      );
+    }
+
+    if (item.type === 'date_header') {
+      return (
+        <View key={item?.id} style={styles.dateHeaderContainer}>
+          <View style={styles.dateHeaderBubble}>
+            <AppText
+              text={item.dateHeader || ''}
+              textStyle={styles.dateHeaderText}
+            />
+          </View>
         </View>
       );
     }
@@ -685,5 +768,23 @@ const styles = StyleSheet.create({
   },
   failedMessage: {
     color: COLORS.red,
+  },
+  dateHeaderContainer: {
+    alignItems: 'center',
+    marginVertical: Size12,
+  },
+  dateHeaderBubble: {
+    backgroundColor: COLORS.lightgrey,
+    paddingHorizontal: Size12,
+    paddingVertical: Size8,
+    borderRadius: Size10,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight3,
+  },
+  dateHeaderText: {
+    fontSize: fontSize12,
+    color: COLORS.textSecondary,
+    fontFamily: FONT_FAMILY.OPEN_SANS_MEDIUM,
+    textAlign: 'center',
   },
 });

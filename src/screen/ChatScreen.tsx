@@ -1,4 +1,11 @@
-import { StyleSheet, View, Image, FlatList, Pressable, RefreshControl } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  FlatList,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
@@ -14,6 +21,7 @@ import {
   Size50,
   Size25,
   Size10,
+  Size4,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
@@ -23,11 +31,15 @@ import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getAcceptedProposalByIdUrl,
+  getChatHistoryByUserId,
   imageUrl,
+  updateProposalIsNewApi,
+  updateProposalIsNewUrl,
 } from '../constants/functions';
 
 import {
   getAcceptedProposalByIdApi,
+  setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
 import Loader from '../components/loader/Loader';
@@ -35,16 +47,24 @@ import Loader from '../components/loader/Loader';
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const {loader, acceptedProposalById } = useSelector(
+  const { loader, acceptedProposalById, unreadChatHistory } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
-
-  const fetchData = useCallback(() => {
-    dispatch(
-      getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
-    );
+  const fetchData = useCallback(async () => {
+    try {
+      dispatch(
+        getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
+      );
+      const chatHistory = await getChatHistoryByUserId(user.id);
+      const filteredChat = chatHistory.filter((chat: any) => {
+        return chat.userId !== user.id && chat.isRead === 0;
+      });
+      dispatch(setUnreadChatHistory(filteredChat));
+    } catch (error) {
+      console.log('error', error);
+    }
   }, [dispatch, user?.id]);
 
   useEffect(() => {
@@ -59,8 +79,19 @@ const ChatScreen = () => {
     }, 1000);
   }, [fetchData]);
 
-  const acceptFriendRequest = (item: any) => {
+  const acceptFriendRequest = async (item: any) => {
     try {
+      if (item.isNewStatus === 1) {
+        await updateProposalIsNewApi(updateProposalIsNewUrl, {
+          proposalId: item.friendId,
+          isNew: false,
+        });
+        dispatch(
+          getAcceptedProposalByIdApi(
+            `${getAcceptedProposalByIdUrl}/${user?.id}`,
+          ),
+        );
+      }
       (navigation as any).navigate(ROUTES.STACK, {
         screen: ROUTES.CONVERSATIONS,
         params: {
@@ -72,46 +103,68 @@ const ChatScreen = () => {
     }
   };
 
-  const renderConversationItem = (item: any) => (
-    <Pressable
-      key={item.id}
-      style={styles.conversationItem}
-      onPress={() => acceptFriendRequest(item)}
-    >
-      <Image
-        source={{ uri: imageUrl + item.image }}
-        style={styles.profileImage}
-        resizeMode="cover"
-      />
-      <View style={styles.conversationContent}>
-        <AppText
-          text={item.firstName + ' ' + `${item.lastName ?? ''}`}
-          textStyle={styles.userName}
+  const renderConversationItem = (item: any) => {
+    // Memoize filtered unread chats for this friendId
+    const unreadChatsForFriend = unreadChatHistory.filter(
+      (chat: any) => chat.userId === item.friendId && chat.isRead === 0,
+    );
+    const unreadCount = unreadChatsForFriend.length;
+    const latestUnreadChat = unreadChatsForFriend[0];
+
+    // Determine the time to display
+    const displayTime = latestUnreadChat?.created_at
+      ? new Date(latestUnreadChat.created_at)
+      : new Date(item.friendsSince);
+
+    return (
+      <Pressable
+        key={item.id}
+        style={styles.conversationItem}
+        onPress={() => acceptFriendRequest(item)}
+      >
+        <Image
+          source={{ uri: imageUrl + item.image }}
+          style={styles.profileImage}
+          resizeMode="cover"
         />
-        <AppText text={item.message} textStyle={styles.messageText} />
-      </View>
-      {true ? (
-        <View style={styles.timeContainer}>
+        <View style={styles.conversationContent}>
           <AppText
-            text={
-              item.friendsSince
-                ? new Date(item.friendsSince).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                : ''
-            }
-            textStyle={styles.timeText}
+            text={`${item.firstName} ${item.lastName ?? ''}`}
+            textStyle={styles.userName}
           />
-          <NotifiNumberChip number={1} style={styles.notificationChip} />
+          <AppText
+            text={item.isNewStatus !== 1 ? item.message : 'Send a message'}
+            textStyle={styles.messageText}
+          />
         </View>
-      ) : (
-        <AppChip2
-          title="New"
-          style={styles.newButton}
-          onPress={() => {}}
-          textStyle={styles.newButtonText}
-        />
-      )}
-    </Pressable>
-  );
+        {item.isNewStatus !== 1 ? (
+          <View style={styles.timeContainer}>
+            <AppText
+              text={displayTime.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })}
+              textStyle={styles.timeText}
+            />
+            {unreadCount > 0 && (
+              <NotifiNumberChip
+                number={unreadCount}
+                style={styles.notificationChip}
+              />
+            )}
+          </View>
+        ) : (
+          <AppChip2
+            title="New"
+            style={styles.newButton}
+            onPress={() => {}}
+            textStyle={styles.newButtonText}
+          />
+        )}
+      </Pressable>
+    );
+  };
 
   return (
     <>
@@ -119,31 +172,31 @@ const ChatScreen = () => {
         <Loader />
       ) : (
         <AppSafeView style={styles.container}>
-      {/* Fixed Header */}
-      <View style={styles.header}>
-        <AppText text="Connections" textStyle={styles.headerTitle} />
-      </View>
+          {/* Fixed Header */}
+          <View style={styles.header}>
+            <AppText text="Connections" textStyle={styles.headerTitle} />
+          </View>
 
-      {/* Fixed Conversations Section Header */}
-      <View style={styles.conversationHeader}>
-        <ConversationIcon width={24} height={24} color={COLORS.black} />
-        <AppText text="Conversations" textStyle={styles.sectionTitle} />
-      </View>
+          {/* Fixed Conversations Section Header */}
+          <View style={styles.conversationHeader}>
+            <ConversationIcon width={24} height={24} color={COLORS.black} />
+            <AppText text="Conversations" textStyle={styles.sectionTitle} />
+          </View>
 
-      {/* Scrollable Conversations List */}
-      <FlatList
-        data={acceptedProposalById}
-        renderItem={({ item }) => renderConversationItem(item)}
-        keyExtractor={(item, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        contentContainerStyle={styles.conversationsList}
-        style={styles.flatListContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
-    </AppSafeView>
+          {/* Scrollable Conversations List */}
+          <FlatList
+            data={acceptedProposalById}
+            renderItem={({ item }) => renderConversationItem(item)}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            contentContainerStyle={styles.conversationsList}
+            style={styles.flatListContainer}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          />
+        </AppSafeView>
       )}
     </>
   );
@@ -209,6 +262,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     left: Size12,
+    gap: Size4,
   },
   userName: {
     fontSize: fontSize16,
@@ -218,7 +272,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: fontSize14,
-    color: COLORS.textGrey,
+    color: COLORS.black,
     fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
   },
   newButton: {
@@ -241,7 +295,7 @@ const styles = StyleSheet.create({
     bottom: Size10,
   },
   timeText: {
-    color: "#A0A0A0",
+    color: '#A0A0A0',
     fontSize: fontSize14,
   },
   notificationChip: {

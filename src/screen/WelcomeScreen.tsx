@@ -25,11 +25,11 @@ import {
 } from '../constants/Sizes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
-import { ROUTES } from '../constants/data';
+
 import SwipeButton from '../components/SwipeButton';
 
 type RootStackParamList = {
-  Login: undefined;
+  Login: { from?: string; register?: boolean };
   OTP: { phoneNumber: string };
 };
 
@@ -84,11 +84,15 @@ const WelcomeScreen = () => {
             <View style={{ alignItems: 'center' }}>
               <SwipeButton
                 ref={swipeButtonRef}
-                onToggle={() => navigation.navigate(ROUTES.LOGIN as never)}
+                onToggle={() => navigation.navigate('Login', {
+                  register: true,
+                })}
               />
             </View>
             <TouchableOpacity
-              onPress={() => navigation.navigate(ROUTES.LOGIN as never)}
+              onPress={() => navigation.navigate('Login', {
+                register: false,
+              })}
             >
               <AppText
                 text="Already have an account? Log in"

@@ -106,6 +106,7 @@ const UploadImageScreen = () => {
                 true,
                 setIsImageValid,
                 setIsAIViewing,
+                handleRemoveImage
               );
             } else {
               // Second and third image format - only call API when both images are selected
@@ -149,6 +150,7 @@ const UploadImageScreen = () => {
   };
 
   const handleRemoveImage = (index: number) => {
+    console.log(index, 'index');
     const newImages = [...selectedImages];
     newImages[index] = { uri: '', base64: '' };
     setSelectedImages(newImages);

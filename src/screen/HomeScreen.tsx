@@ -28,6 +28,8 @@ import {
   getPackageByUserIdUrl,
   insertUserNotificationsUrl,
   delay,
+  getProposalsGotByMeUrl,
+  getChatHistoryByUserId,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -36,6 +38,7 @@ import {
   getCurrentMatchedApi,
   getCurrentMatchedUserGalleryImageListApi,
   getPassedUsersApi,
+  getProposalsGotByMeApi,
   getProposalsSendByMeApi,
   sentProposalApi,
   setMatchedUserApi,
@@ -50,7 +53,7 @@ import {
   getStates,
 } from '../store/reducers/authReducer';
 import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
-import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
+import { insertUserNotificationsApi, setUnreadChatHistory } from '../store/reducers/chatReducer';
 import Loader from '../components/loader/Loader';
 
 const { width } = Dimensions.get('window');
@@ -162,6 +165,16 @@ const HomeScreen = () => {
     dispatch(getDiet(getDietUrl));
     dispatch(getStates(getStatesUrl));
   }, [dispatch]);
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      const chatHistory = await getChatHistoryByUserId(user.id);
+      const filteredChat = chatHistory.filter((chat: any) => {
+        return chat.userId !== user.id && chat.isRead === 0;
+      });
+      dispatch(setUnreadChatHistory(filteredChat));
+    };
+    fetchChatHistory();
+  }, [user?.id, dispatch]);
 
   useEffect(() => {
     if (matchedUsers && matchedUsers.length > currentIndex) {
@@ -173,11 +186,13 @@ const HomeScreen = () => {
           `${baseUrl}/${getUserDetailsUrl}id=${currentUserId}`,
         ),
       );
+      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(
         getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
           userId: currentUserId,
         }),
       );
+
       dispatch(
         getCurrentMatchedUserGalleryImageListApi(
           `${baseUrl}/${getGalleryImageListUrl}`,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, StyleSheet } from 'react-native';
 import {
   fontSize14,
@@ -11,15 +11,14 @@ import {
   Size22,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
-import { sendOTP } from '../store/reducers/authReducer';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import { validateIndianPhoneNumber } from '../constants/functions';
+import { validateIndianPhoneNumber, verifyOTPForLogin } from '../constants/functions';
 type RootStackParamList = {
   Login: undefined;
   OTP: { phoneNumber: string };
@@ -27,34 +26,29 @@ type RootStackParamList = {
 
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [phoneValidation, setPhoneValidation] = useState({ isValid: false, message: '' });
-  const { loader, otpSent } = useSelector(
+  const [phoneValidation, setPhoneValidation] = useState({
+    isValid: false,
+    message: '',
+  });
+  const { loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-  const dispatch = useDispatch();
+  const { register } = useRoute().params as { register?: boolean };
+  // const phone = '9546230774';
+  const url = register
+    ? 'admin/users/sendLoginOTP'
+    : 'admin/users/sendOTPForLogin';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-    useEffect(() => {
-      let mounted = true;
-      if (otpSent && mounted && phoneValidation.isValid) {
-        const validation = validateIndianPhoneNumber(phoneNumber);
-        navigation.navigate('OTP', { phoneNumber: validation.cleanedNumber || phoneNumber });
-      }
-      return () => { mounted = false; };
-    }, [otpSent, navigation, phoneValidation, phoneNumber]);
-    
-    const handlePhoneNumberChange = ((text: string) => {
-      setPhoneNumber(text);
-      const validation = validateIndianPhoneNumber(text);
-      setPhoneValidation(validation);
-    });
-    
-
+  const handlePhoneNumberChange = (text: string) => {
+    setPhoneNumber(text);
+    const validation = validateIndianPhoneNumber(text);
+    setPhoneValidation(validation);
+  };
 
   const handleVerify = async () => {
     const validation = validateIndianPhoneNumber(phoneNumber);
-    
     if (!validation.isValid) {
       AppToast(validation.message);
       return false;
@@ -62,9 +56,15 @@ const LoginScreen: React.FC = () => {
 
     try {
       const requestBody: any = {
-        contactNo: validation.cleanedNumber,
+        // contactNo: '+91' + phone,
+        contactNo: '+91' + validation.cleanedNumber,
       };
-      dispatch(sendOTP('admin/users/sendLoginOTP', requestBody));
+      const response = await verifyOTPForLogin(url, requestBody);
+      if (response) {
+        navigation.navigate('OTP', {
+          phoneNumber: validation.cleanedNumber || phoneNumber,
+        });
+      }
     } catch (error: any) {
       console.error(error?.response?.data || error.message);
       AppToast(error?.response?.data?.message || 'Failed to send OTP');
@@ -76,10 +76,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} /> */}
-
       <View style={styles.content}>
-        {/* Header */}
         <View style={styles.headerSection}>
           <AppText text="Phone number" textStyle={styles.title} />
           <AppText
@@ -116,16 +113,7 @@ const LoginScreen: React.FC = () => {
               : styles.buttonTextEnabled,
           ]}
         />
-
-        {/* Referral Code Input (Optional) */}
-        {/* <AppTextInput
-            value={referralCode}
-            onChangeText={setReferralCode}
-            placeholder="Referral code (optional)"
-            placeholderTextColor={COLORS.placeholder}
-            keyboardType="numeric"
-          /> */}
-
+    
         {/* Spacer */}
         <View style={styles.spacer} />
 

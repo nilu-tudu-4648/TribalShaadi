@@ -35,7 +35,7 @@ const authReducer = createSlice({
     },
     authReducerDataRequestFailed: (authReducer, action) => {
       authReducer.loader = false;
-      console.log(action.payload, 'reducer Failed');
+      console.log(action.payload, 'authreducer Failed');
       if (action.payload.response.status === 401) {
         authReducer.loader = false;
         authReducer.tokenExpired = true;

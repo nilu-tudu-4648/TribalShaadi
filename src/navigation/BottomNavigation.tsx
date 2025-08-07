@@ -19,18 +19,32 @@ import { setHomeTabRefr } from '../store/reducers/userReducer';
 
 const Tab = createBottomTabNavigator();
 
-const getTabBarIcon = (route: any, focused: boolean) => {
+const getTabBarIcon = (
+  route: any,
+  focused: boolean,
+  proposalsGotByMe: number,
+  unreadChatHistory: number,
+) => {
   const iconColor = focused ? COLORS.white : COLORS.navBarInactive;
   switch (route.name) {
     case ROUTES.HOME_TAB:
       return <HomeIcon color={iconColor} width={Size25} height={Size25} />;
     case ROUTES.INTEREST:
-      return <HeartIcon color={iconColor} width={Size25} height={Size20} />;
+      return (
+        <View>
+          <HeartIcon color={iconColor} width={Size25} height={Size20} />
+          {proposalsGotByMe > 0 && (
+            <NotifiNumberChip number={proposalsGotByMe} />
+          )}
+        </View>
+      );
     case ROUTES.CHAT:
       return (
         <View>
           <ChatIcon color={iconColor} width={Size20} height={Size20} />
-          <NotifiNumberChip number={1} />
+          {unreadChatHistory > 0 && (
+            <NotifiNumberChip number={unreadChatHistory} />
+          )}
         </View>
       );
     case ROUTES.ACCOUNT_TAB:
@@ -41,15 +55,17 @@ const getTabBarIcon = (route: any, focused: boolean) => {
 };
 
 function BottomNavigation() {
-  const { homeTabRefr } = useSelector(
+  const { proposalsGotByMe, homeTabRefr } = useSelector(
     (state: any) => state.entities.userReducer,
   );
+  const { unreadChatHistory } = useSelector((state: any) => state.entities.chatReducer);
+  console.log(unreadChatHistory, 'unreadChatHistory');
   const dispatch = useDispatch();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color: _color, size: _size }) =>
-          getTabBarIcon(route, focused),
+          getTabBarIcon(route, focused, proposalsGotByMe.length, unreadChatHistory.length),
         tabBarActiveTintColor: COLORS.white,
         tabBarInactiveTintColor: COLORS.navBarInactive,
         headerShown: false,
