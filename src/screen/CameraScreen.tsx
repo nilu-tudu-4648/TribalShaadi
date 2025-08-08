@@ -19,13 +19,15 @@ import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
 import { verifySelfieApi } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoaderPayment } from '../store/reducers/paymentReducer';
+import { setLoaderPayment, setSelfieVerify } from '../store/reducers/paymentReducer';
+import { ROUTES } from '../constants/data';
+import AppToast from '../components/AppToast';
 
 const CameraScreen = () => {
   const navigation = useNavigation();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const base64Image = useRef<string | null>(null);  // Store base64 image
+  const base64Image = useRef<string | null>(null); // Store base64 image
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -96,11 +98,17 @@ const CameraScreen = () => {
         userId: user.id,
         selfieBase64: `${base64Image.current}`,
       };
-      console.log(requestBody, 'requestBody');
-      await verifySelfieApi(requestBody, dispatch);
+      const response = await verifySelfieApi(requestBody, dispatch);
+      if (response.verified) {
+        AppToast('Selfie verified successfully');
+        (navigation.navigate as any)(ROUTES.MAIN_TABS, {
+          screen: ROUTES.ACCOUNT_TAB,
+        });
+        dispatch(setSelfieVerify(response.verified));
+      }
     } catch (error) {
       console.log(error, 'error handleSubmit');
-    } 
+    }
   };
 
   if (showConfirmation && capturedImage) {

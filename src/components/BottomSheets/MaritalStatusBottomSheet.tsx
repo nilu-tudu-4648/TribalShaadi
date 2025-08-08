@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -31,6 +31,8 @@ import AppChip2 from '../chips/AppChip2';
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   maritalOptions: string[] | undefined;
+  localSelectedStatuses: string[] | undefined;
+  setLocalSelectedStatuses: (statuses: string[]) => void;
 }
 
 // Backdrop component definition outside render
@@ -45,10 +47,11 @@ const renderBackdrop = (props: any) => (
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   bottomSheetRef,
   maritalOptions,
+  localSelectedStatuses,
+  setLocalSelectedStatuses,
 }) => {
   const snapPoints = ['30%', '30%'];
-  const [localSelectedStatuses, setLocalSelectedStatuses] =
-    useState<string[]>();
+
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string) => {
@@ -70,7 +73,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
         : [user.pMaritalStatusId];
       setLocalSelectedStatuses(maritalStatuses);
     }
-  }, [user]);
+  }, [user, setLocalSelectedStatuses]);
 
   const handleApply = async () => {
     try {

@@ -77,8 +77,15 @@ const PreferenceScreen = () => {
   const settleDownBottomSheetRef = useRef<BottomSheet>(null);
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCities, setSelectedCities] = useState<any[]>([]);
+  const [localSelectedStatuses, setLocalSelectedStatuses] =
+  useState<string[]>();
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
+  const [localSelectedReligion, setLocalSelectedReligion] =
+  useState<string | null>(null);
+const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
+  string | null
+>(null);
   useEffect(() => {
     getEmploymentTypeApi().then(res => {
       setJobTypeOptions(res);
@@ -221,6 +228,9 @@ const PreferenceScreen = () => {
     setIsResetLoading(true);
     setSelectedCities([]);
     setSelectedState([]);
+    setLocalSelectedReligion(null);
+    setLocalSelectedReligionId(null);
+    setLocalSelectedStatuses([]);
     resetPreferenceApi(dispatch, () => {
       setIsResetLoading(false);
     });
@@ -321,6 +331,8 @@ const PreferenceScreen = () => {
         <MaritalStatusBottomSheet
           bottomSheetRef={maritalStatusBottomSheetRef}
           maritalOptions={maritalStatuses}
+          localSelectedStatuses={localSelectedStatuses}
+          setLocalSelectedStatuses={setLocalSelectedStatuses}
         />
 
         <AgeRangeBottomSheet bottomSheetRef={ageRangeBottomSheetRef} />
@@ -328,6 +340,10 @@ const PreferenceScreen = () => {
         <ReligionBottomSheet
           bottomSheetRef={religionBottomSheetRef}
           religionOptions={religion}
+          localSelectedReligion={localSelectedReligion}
+          setLocalSelectedReligion={setLocalSelectedReligion}
+          localSelectedReligionId={localSelectedReligionId}
+          setLocalSelectedReligionId={setLocalSelectedReligionId}
         />
 
         <HeightRangeBottomSheet

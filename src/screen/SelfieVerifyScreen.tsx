@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
@@ -19,15 +25,18 @@ import {
   SIZES,
 } from '../constants/Sizes';
 import { ROUTES } from '../constants/data';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import GradientLoader from '../components/GradientLoader';
 import AppButton from '../components/AppButton';
+import { setSelfieVerify } from '../store/reducers/paymentReducer';
+import { delay } from '../constants/functions';
 
 const SelfieVerifyScreen = () => {
   const navigation = useNavigation();
   const { loader, selfieVerify } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
+  const dispatch = useDispatch();
   const handleTakePhoto = () => {
     (navigation as any).navigate(ROUTES.STACK, {
       screen: ROUTES.CAMERA,
@@ -37,6 +46,9 @@ const SelfieVerifyScreen = () => {
   const handleMaybeLater = () => {
     (navigation.navigate as any)(ROUTES.MAIN_TABS, {
       screen: ROUTES.ACCOUNT_TAB,
+    });
+    delay(1000).then(() => {
+      dispatch(setSelfieVerify(true));
     });
   };
   return (
@@ -68,28 +80,37 @@ const SelfieVerifyScreen = () => {
                 },
               ]}
             >
-              <View style={{ gap: Size20 * 3,alignItems: 'center' }}>
+              <View style={{ gap: Size20 * 3, alignItems: 'center' }}>
                 <Image
                   source={require('../assets/images/unverify.png')}
-                  style={[styles.verifyImage,{height: '20%'}]}
+                  style={[styles.verifyImage, { height: '20%' }]}
                 />
                 <Image
                   source={require('../assets/images/notyou.png')}
                   style={styles.verifyImage}
                 />
                 <View
-                  style={{ justifyContent: 'center', alignItems: 'center',width: '100%' }}
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                  }}
                 >
                   <AppButton
                     title="Retry"
                     onPress={handleTakePhoto}
-                    buttonStyle={styles.takePhotoButton}
+                    buttonStyle={[
+                      styles.takePhotoButton,
+                      { marginBottom: Size20 },
+                    ]}
                     textStyle={styles.takePhotoButtonText}
                   />
-                  <AppText
-                    text="Maybe Later "
-                    textStyle={styles.maybeLaterText}
-                  />
+                  <Pressable onPress={handleMaybeLater}>
+                    <AppText
+                      text="Maybe Later "
+                      textStyle={styles.maybeLaterText}
+                    />
+                  </Pressable>
                 </View>
               </View>
               <Image
@@ -220,7 +241,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: fontSize16,
-    color: COLORS.textGrey,
+    color: COLORS.black,
     lineHeight: lignHeight20,
     textAlign: 'left',
   },
@@ -265,9 +286,8 @@ const styles = StyleSheet.create({
   },
   maybeLaterText: {
     fontSize: fontSize16,
-    color: COLORS.textGrey,
+    color: COLORS.black,
     textAlign: 'center',
-    top: Size20/2,
   },
   verifyImage: {
     width: '95%',

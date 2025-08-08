@@ -219,6 +219,7 @@ export const sendOTPForLogin = async (url, data, setLoading) => {
     AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
+    AppToast(error.response.data.message);
     console.log(error.response.data, 'sendOTPForLogin');
     return false;
   } finally {
@@ -654,14 +655,14 @@ export const updateChatIsReadApi = async (url, data) => {
 };
 export const verifySelfieApi = async (data, dispatch) => {
   try {
-    await delay(3000);
+    await delay(2000);
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const response = await axios.post(`${baseUrl}/${verifySelfieUrl}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response, 'response verifySelfieApi');
+    console.log(response.data, 'response verifySelfieApi');
     return response.data;
   } catch (error) {
     console.log(error.response.data, 'verifySelfieApi');

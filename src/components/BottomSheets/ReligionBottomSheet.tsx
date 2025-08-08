@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import BottomSheet, {
   BottomSheetView,
@@ -33,23 +33,29 @@ import AppChip2 from '../chips/AppChip2';
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   religionOptions: any[];
+  localSelectedReligion: string | null;
+  setLocalSelectedReligion: (religion: string | null) => void;
+  localSelectedReligionId: string | null;
+  setLocalSelectedReligionId: (religionId: string | null) => void;
 }
 
 const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   bottomSheetRef,
   religionOptions,
+  localSelectedReligion,
+  setLocalSelectedReligion,
+  localSelectedReligionId,
+  setLocalSelectedReligionId,
 }) => {
   const snapPoints = ['30%', '50%'];
-  const [localSelectedReligion, setLocalSelectedReligion] =
-    useState<string>();
-  const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
-    string | null
-  >(null);
+
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    setLocalSelectedReligion(user.pReligionId);
-  }, [user]);
+    if (user.pReligionId) {
+      setLocalSelectedReligion(user.pReligionId);
+    }
+  }, [user, setLocalSelectedReligion]);
   const handleStatusSelect = (religion: string) => {
     setLocalSelectedReligion(religion);
   };
