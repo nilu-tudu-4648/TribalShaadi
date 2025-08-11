@@ -256,7 +256,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token');
+    // console.log(token, 'token');
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,

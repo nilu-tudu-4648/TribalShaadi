@@ -30,7 +30,7 @@ export const createNotificationChannel = () => {
       importance: 4, // (optional) default: 4. Int value of the Android notification importance
       vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
     },
-    (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+    // (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
   );
 };
 
@@ -99,9 +99,9 @@ const sendTokenToServer = async token => {
           Authorization: `Bearer ${userToken}`,
         }
       });
-      console.log('response', response);
+      // console.log('response', response);
       if (response.status === 200) {
-        console.log('FCM token saved to server successfully');
+        // console.log('FCM token saved to server successfully');
       } else {
         console.log('Failed to send FCM token to server');
       }

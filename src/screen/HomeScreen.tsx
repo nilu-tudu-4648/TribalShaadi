@@ -1,11 +1,12 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  GestureHandlerRootView,
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
@@ -53,7 +54,10 @@ import {
   getStates,
 } from '../store/reducers/authReducer';
 import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
-import { insertUserNotificationsApi, setUnreadChatHistory } from '../store/reducers/chatReducer';
+import {
+  insertUserNotificationsApi,
+  setUnreadChatHistory,
+} from '../store/reducers/chatReducer';
 import Loader from '../components/loader/Loader';
 
 const { width } = Dimensions.get('window');
@@ -74,8 +78,27 @@ const HomeScreen = () => {
   const [nameLoading, setNameLoading] = useState(false);
   const [displayName, setDisplayName] = useState('');
 
+  const translateX = useSharedValue(0);
+
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
   /* 1️⃣  keep a stable screen-width value */
   const screenWidth = useRef(Dimensions.get('window').width).current;
+
+  const animateToNext = (direction: 'left' | 'right', callback: () => void) => {
+    // Slide current card out
+    translateX.value = withTiming(direction === 'left' ? -screenWidth : screenWidth, { duration: 300 }, () => {
+      runOnJS(callback)();
+  
+      // Immediately position next card off-screen (opposite direction)
+      translateX.value = direction === 'left' ? screenWidth : -screenWidth;
+  
+      // Animate it into view
+      translateX.value = withTiming(0, { duration: 300 });
+    });
+  };
+  
 
   const handleSendProposal = async (id: string) => {
     try {
@@ -93,15 +116,18 @@ const HomeScreen = () => {
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
           title: 'Congrats 🎉 new request received!',
-          message: `${
-            user.firstName + ' ' + (user.lastName ?? '')
-          } wants to connect with you. See if this could be your perfect tribal match!`,
+          message: `${user.firstName} ${
+            user.lastName ?? ''
+          } wants to connect with you.`,
           receiverUserId: id,
         }),
       );
-      // Don't increment index here - let the useEffect handle it when matchedUsers updates
+
+      animateToNext('right', () => {
+        setCurrentIndex(prev => Math.min(prev + 1, matchedUsers.length - 1));
+      });
     } catch (error) {
-      console.log(error, 'error');
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -118,8 +144,12 @@ const HomeScreen = () => {
       await delay();
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+
+      animateToNext('left', () => {
+        setCurrentIndex(prev => Math.min(prev + 1, matchedUsers.length - 1));
+      });
     } catch (error) {
-      console.log(error, 'error');
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -226,24 +256,6 @@ const HomeScreen = () => {
   // console.log(matchedUsers, 'matchedUsers');
   // console.log(currentMatchedUser, 'currentMatchedUser');
 
-  const panGesture = Gesture.Pan()
-    .activeOffsetX([-10, 10]) // Only activate when horizontal movement is significant
-    .failOffsetY([-5, 5]) // Don't interfere with vertical scrolling
-    .onEnd(event => {
-      'worklet';
-      const threshold = screenWidth * 0.25;
-      const shouldSnapToNext = Math.abs(event.translationX) > threshold;
-
-      if (shouldSnapToNext) {
-        const direction = event.translationX > 0 ? -1 : 1; // Swipe right = previous, swipe left = next
-        const nextIndex = Math.max(
-          0,
-          Math.min(matchedUsers.length - 1, currentIndex + direction),
-        );
-        runOnJS(setCurrentIndex)(nextIndex);
-      }
-    });
-
   return (
     <>
       {loader ? (
@@ -256,50 +268,50 @@ const HomeScreen = () => {
               {matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
                 <>
                   <View style={styles.carouselContainer}>
-                    <GestureDetector gesture={panGesture}>
-                      <View style={styles.profileCardContainer}>
-                        <ProfileCard
-                          name={nameLoading ? 'Loading...' : displayName}
-                          isNameLoading={nameLoading}
-                          age={matchedUsers[currentIndex]?.age}
-                          height={currentMatchedUser?.height}
-                          religion={currentMatchedUser?.religion}
-                          caste={currentMatchedUser?.community}
-                          districtName={currentMatchedUser?.districtName}
-                          stateName={currentMatchedUser?.stateName}
-                          bio={matchedUsers[currentIndex]?.aboutMe}
-                          image={matchedUsers[currentIndex]?.imageUrl || ''}
-                          galleryImageList={
-                            currentMatchedUserGalleryImageList ||
-                            matchedUsers[currentIndex]?.galleryImageList ||
-                            []
-                          }
-                          isLoading={loader}
-                          maritalStatus={currentMatchedUser?.maritalStatus}
-                          dob={currentMatchedUser?.birthDate}
-                          motherTongue={currentMatchedUser?.motherTongue}
-                          annualIncome={currentMatchedUser?.annualIncome}
-                          partnerExpectation={
-                            currentMatchedUser?.about_lifepartener
-                          }
-                          employedIn={currentMatchedUser?.employedIn}
-                          occupation={currentMatchedUser?.occupation}
-                          organizationName={currentMatchedUser?.companyName}
-                          settlingTime={currentMatchedUser?.planingto_settle}
-                          highestQualification={
-                            currentMatchedUser?.highestQualification
-                          }
-                          college={currentMatchedUser?.college_name}
-                          eatingHabits={currentMatchedUser?.diet}
-                          drinkingHabits={currentMatchedUser?.drinking}
-                          smokingHabits={currentMatchedUser?.smoking}
-                          kids={currentMatchedUser?.kids}
-                          interests={currentMatchedUser?.intrests}
-                          isVerified={false}
-                          isPremium={currentUserPackage.length > 0}
-                        />
-                      </View>
-                    </GestureDetector>
+                    <Animated.View
+                      style={[styles.profileCardContainer, animatedCardStyle]}
+                    >
+                      <ProfileCard
+                        name={nameLoading ? 'Loading...' : displayName}
+                        isNameLoading={nameLoading}
+                        age={matchedUsers[currentIndex]?.age}
+                        height={currentMatchedUser?.height}
+                        religion={currentMatchedUser?.religion}
+                        caste={currentMatchedUser?.community}
+                        districtName={currentMatchedUser?.districtName}
+                        stateName={currentMatchedUser?.stateName}
+                        bio={matchedUsers[currentIndex]?.aboutMe}
+                        image={matchedUsers[currentIndex]?.imageUrl || ''}
+                        galleryImageList={
+                          currentMatchedUserGalleryImageList ||
+                          matchedUsers[currentIndex]?.galleryImageList ||
+                          []
+                        }
+                        isLoading={loader}
+                        maritalStatus={currentMatchedUser?.maritalStatus}
+                        dob={currentMatchedUser?.birthDate}
+                        motherTongue={currentMatchedUser?.motherTongue}
+                        annualIncome={currentMatchedUser?.annualIncome}
+                        partnerExpectation={
+                          currentMatchedUser?.about_lifepartener
+                        }
+                        employedIn={currentMatchedUser?.employedIn}
+                        occupation={currentMatchedUser?.occupation}
+                        organizationName={currentMatchedUser?.companyName}
+                        settlingTime={currentMatchedUser?.planingto_settle}
+                        highestQualification={
+                          currentMatchedUser?.highestQualification
+                        }
+                        college={currentMatchedUser?.college_name}
+                        eatingHabits={currentMatchedUser?.diet}
+                        drinkingHabits={currentMatchedUser?.drinking}
+                        smokingHabits={currentMatchedUser?.smoking}
+                        kids={currentMatchedUser?.kids}
+                        interests={currentMatchedUser?.intrests}
+                        isVerified={false}
+                        isPremium={currentUserPackage.length > 0}
+                      />
+                    </Animated.View>
                   </View>
                   {/* Optional: Keep buttons for users who prefer tapping */}
                   <View style={styles.floatingButtonContainer}>
