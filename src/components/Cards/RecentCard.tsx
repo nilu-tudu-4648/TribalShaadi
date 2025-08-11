@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Image, Pressable } from 'react-native';
 import React from 'react';
 import {
   fontSize14,
@@ -13,7 +13,7 @@ import { imageUrl } from '../../constants/functions';
 
 const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.profileCard}>
+    <Pressable onPress={onPress} style={styles.profileCard}>
       <Image source={{uri: imageUrl + item.image}} style={styles.profileImage} />
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
@@ -31,7 +31,7 @@ const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
           textStyle={styles.profileLocation}
       />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

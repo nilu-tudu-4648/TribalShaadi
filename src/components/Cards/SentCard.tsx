@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Image, Pressable } from 'react-native';
 import React from 'react';
 import { COLORS } from '../../constants/AppColors';
 import { fontSize14, fontSize16, Size4, Size8, Size12, Size16, fontSize12 } from '../../constants/Sizes';
@@ -23,7 +23,7 @@ interface SentCardProps {
 const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
   // console.log(item, 'item');
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <Pressable style={styles.card} onPress={onPress}>
       <Image  source={{ uri: `${imageUrl + item.image}` }} style={styles.profileImage} />
       <View style={styles.infoContainer}>
         <AppText
@@ -44,7 +44,7 @@ const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
           />
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

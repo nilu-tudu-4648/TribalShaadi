@@ -1,29 +1,37 @@
-
-import React from 'react'
-import { StyleSheet } from 'react-native'
+import React, { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
-import AppHeader from '../components/AppHeader'
-import AppSafeView from '../components/AppSafeView'
-import { COLORS } from '../constants/AppColors'
+import AppHeader from '../components/AppHeader';
+import AppSafeView from '../components/AppSafeView';
+import { COLORS } from '../constants/AppColors';
+import Loader from '../components/loader/Loader';
 
 const SupportScreen = () => {
+  const [loading, setLoading] = useState(false);
   return (
-    <AppSafeView style={styles.container}>
-      <AppHeader title="Support" />
-      <WebView
-        source={{
-          uri: 'https://docs.google.com/forms/d/e/1FAIpQLScJIRI94k3xfSFVId79151eL2XQ2G6doKKzSemziONACjljdA/viewform?usp=header',
-        }}
-      />
-    </AppSafeView>
-  )
-}
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <AppSafeView style={styles.container}>
+          <AppHeader title="Support" />
+          <WebView
+            source={{
+              uri: 'https://docs.google.com/forms/d/e/1FAIpQLScJIRI94k3xfSFVId79151eL2XQ2G6doKKzSemziONACjljdA/viewform?usp=header',
+            }}
+            onLoadEnd={() => setLoading(false)}
+          />
+        </AppSafeView>
+      )}
+    </>
+  );
+};
 
-export default SupportScreen
+export default SupportScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
-})
+});

@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   runOnJS,
+  Easing,
 } from 'react-native-reanimated';
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
@@ -58,7 +59,6 @@ import {
   insertUserNotificationsApi,
   setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
-import Loader from '../components/loader/Loader';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -80,24 +80,38 @@ const HomeScreen = () => {
 
   const translateX = useSharedValue(0);
 
-  const animatedCardStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
   /* 1️⃣  keep a stable screen-width value */
   const screenWidth = useRef(Dimensions.get('window').width).current;
 
+  const opacity = useSharedValue(1);
+
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+    opacity: opacity.value,
+  }));
+  
   const animateToNext = (direction: 'left' | 'right', callback: () => void) => {
-    // Slide current card out
-    translateX.value = withTiming(direction === 'left' ? -screenWidth : screenWidth, { duration: 300 }, () => {
+    // Slide + fade out
+    translateX.value = withTiming(direction === 'left' ? -screenWidth : screenWidth, {
+      duration: 350,
+      easing: Easing.out(Easing.cubic),
+    });
+    opacity.value = withTiming(0, { duration: 300 }, () => {
       runOnJS(callback)();
   
-      // Immediately position next card off-screen (opposite direction)
+      // Prepare new card off-screen and hidden
       translateX.value = direction === 'left' ? screenWidth : -screenWidth;
+      opacity.value = 0;
   
-      // Animate it into view
-      translateX.value = withTiming(0, { duration: 300 });
+      // Slide + fade in new card
+      translateX.value = withTiming(0, {
+        duration: 350,
+        easing: Easing.out(Easing.cubic),
+      });
+      opacity.value = withTiming(1, { duration: 300 });
     });
   };
+  
   
 
   const handleSendProposal = async (id: string) => {
@@ -257,10 +271,6 @@ const HomeScreen = () => {
   // console.log(currentMatchedUser, 'currentMatchedUser');
 
   return (
-    <>
-      {loader ? (
-        <Loader />
-      ) : (
         <GestureHandlerRootView style={styles.container}>
           <AppSafeView style={styles.container}>
             <>
@@ -308,7 +318,7 @@ const HomeScreen = () => {
                         smokingHabits={currentMatchedUser?.smoking}
                         kids={currentMatchedUser?.kids}
                         interests={currentMatchedUser?.intrests}
-                        isVerified={false}
+                        isVerified={currentMatchedUser?.isVerified}
                         isPremium={currentUserPackage.length > 0}
                       />
                     </Animated.View>
@@ -354,8 +364,6 @@ const HomeScreen = () => {
             </>
           </AppSafeView>
         </GestureHandlerRootView>
-      )}
-    </>
   );
 };
 

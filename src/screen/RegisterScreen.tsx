@@ -71,7 +71,7 @@ const RegisterScreen: React.FC = () => {
       }
     } catch (error: any) {
       console.error(error?.response?.data || error.message);
-      AppToast(error?.response?.data?.message || 'Failed to send OTP');
+      // AppToast(error?.response?.data?.message || 'Failed to send OTP');
       return false;
     }
   };

@@ -7,7 +7,7 @@ import { COLORS } from '../constants/AppColors';
 import Loader from '../components/loader/Loader';
 
 const YourStoryScreen = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   return (
     <>

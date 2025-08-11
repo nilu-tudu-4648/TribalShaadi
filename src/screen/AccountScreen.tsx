@@ -118,9 +118,9 @@ const AccountScreen = () => {
     {
       key: 'selfie',
       label: 'Selfie\nverified',
-      color: COLORS.primaryBlue,
+      color: user.isVerified ? COLORS.primaryBlue : COLORS.grey,
       icon: SelfieVerifiedIcon,
-      route: ROUTES.SELFIE_VERIFY,
+      route: !user.isVerified ? ROUTES.SELFIE_VERIFY : undefined,
     },
     {
       key: 'govt',

@@ -124,9 +124,7 @@ const SelfieVerifyScreen = () => {
               <View style={styles.imageContainer}>
                 <View style={styles.imageWrapper}>
                   <Image
-                    source={{
-                      uri: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80',
-                    }}
+                    source={require('../assets/images/selfieImage.png')}
                     style={styles.selfieImage}
                     resizeMode="cover"
                   />

@@ -63,7 +63,9 @@ const NameComponent: React.FC<NameComponentProps> = ({
             )}
           </View>
           <AppText
-            text={`${convertCmToReadableHeight(height)} · ${religion} · ${caste}`}
+            text={`${convertCmToReadableHeight(
+              height,
+            )} · ${religion} · ${caste}`}
             textStyle={styles.details}
           />
           <View style={styles.homeIconContainer}>
@@ -73,14 +75,12 @@ const NameComponent: React.FC<NameComponentProps> = ({
               textStyle={styles.location}
             />
           </View>
-          <View>
-            {isVerified && (
-              <Image
-                source={require('./../assets/images/aiverified.png')}
-                style={styles.aiVerifiedIcon}
-              />
-            )}
-          </View>
+          {isVerified && (
+            <Image
+              source={require('./../assets/images/aiverified.png')}
+              style={styles.aiVerifiedIcon}
+            />
+          )}
         </>
       )}
     </View>
@@ -136,10 +136,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '100%',
-    height: Size25,
+    width: '50%',
+    height: Size25 * 1.2,
     resizeMode: 'contain',
-    right: SIZES.base,
   },
   homeIconContainer: {
     flexDirection: 'row',
@@ -148,7 +147,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     gap: SIZES.base / 2,
-    // paddingBottom: SIZES.mediumTitle,
   },
   nameLoadingContainer: {
     flexDirection: 'row',

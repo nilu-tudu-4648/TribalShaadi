@@ -64,6 +64,7 @@ const EditProfileScreen = () => {
   const { galleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
+  console.log(galleryImageList, 'galleryImageList');
   const menuItems = [
     {
       id: 1,
