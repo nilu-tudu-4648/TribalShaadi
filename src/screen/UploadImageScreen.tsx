@@ -118,7 +118,6 @@ const UploadImageScreen = () => {
                 // Both images are selected, make the API call
                 requestBody = {
                   userId: user.id,
-                  id: user.id,
                   images: [
                     `data:image/jpeg;base64,${updatedImages[1].base64}`,
                     `data:image/jpeg;base64,${updatedImages[2].base64}`,

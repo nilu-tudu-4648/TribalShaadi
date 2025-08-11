@@ -50,7 +50,7 @@ const RegisterScreen: React.FC = () => {
   const handleVerify = async () => {
     const validation = validateIndianPhoneNumber(phoneNumber);
     if (!validation.isValid) {
-      AppToast(validation.message);
+      // AppToast(validation.message);
       return false;
     }
 
@@ -71,7 +71,6 @@ const RegisterScreen: React.FC = () => {
       }
     } catch (error: any) {
       console.error(error?.response?.data || error.message);
-      // AppToast(error?.response?.data?.message || 'Failed to send OTP');
       return false;
     }
   };

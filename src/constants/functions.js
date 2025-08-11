@@ -219,7 +219,6 @@ export const sendOTPForLogin = async (url, data, setLoading) => {
     AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
-    AppToast(error.response.data.message);
     console.log(error.response.data, 'sendOTPForLogin');
     return false;
   } finally {
