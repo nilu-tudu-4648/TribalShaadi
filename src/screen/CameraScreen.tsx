@@ -17,7 +17,7 @@ import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
-import { verifySelfieApi } from '../constants/functions';
+import { getUserDetailsApi, getUserDetailsUrl, verifySelfieApi } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoaderPayment, setSelfieVerify } from '../store/reducers/paymentReducer';
 import { ROUTES } from '../constants/data';
@@ -100,6 +100,7 @@ const CameraScreen = () => {
       };
       const response = await verifySelfieApi(requestBody, dispatch);
       if (response.verified) {
+        await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
         AppToast('Selfie verified successfully');
         (navigation.navigate as any)(ROUTES.MAIN_TABS, {
           screen: ROUTES.ACCOUNT_TAB,

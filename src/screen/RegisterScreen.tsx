@@ -17,7 +17,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
-import AppToast from '../components/AppToast';
 import {
   sendOTPForLogin,
   validateIndianPhoneNumber,
