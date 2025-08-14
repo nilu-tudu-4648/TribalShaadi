@@ -41,6 +41,9 @@ const SelfieVerifyScreen = () => {
     (navigation as any).navigate(ROUTES.STACK, {
       screen: ROUTES.CAMERA,
     });
+    delay(1000).then(() => {
+      dispatch(setSelfieVerify(true));
+    });
   };
 
   const handleMaybeLater = () => {

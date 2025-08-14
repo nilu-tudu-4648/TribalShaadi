@@ -62,7 +62,8 @@ const authReducer = createSlice({
       reducer.tokenExpired = false;
       reducer.loader = false;
       reducer.otpSent = false;
-      reducer.userProfileGenderUpdated=false;
+      reducer.userProfileGenderUpdated = false;
+      reducer.isInterestsUpdated = false;
     },
     getReligionDataReceived: (reducer, action) => {
       reducer.loader = false;

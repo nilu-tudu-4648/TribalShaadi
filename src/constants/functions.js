@@ -662,9 +662,12 @@ export const verifySelfieApi = async (data, dispatch) => {
       },
     });
     console.log(response.data, 'response verifySelfieApi');
+    if (response.data.verified === false) {
+      dispatch(setSelfieVerify(false));
+    }
     return response.data;
   } catch (error) {
-    console.log(error.response.data, 'verifySelfieApi');
+    console.log(error.response.data, 'verifySelfieApi Error');
     dispatch(setSelfieVerify(false));
     return [];
   } finally {

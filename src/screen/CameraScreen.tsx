@@ -100,11 +100,11 @@ const CameraScreen = () => {
       };
       const response = await verifySelfieApi(requestBody, dispatch);
       if (response.verified) {
-        await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-        AppToast('Selfie verified successfully');
         (navigation.navigate as any)(ROUTES.MAIN_TABS, {
           screen: ROUTES.ACCOUNT_TAB,
         });
+        await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+        AppToast('Selfie verified successfully');
         dispatch(setSelfieVerify(response.verified));
       }
     } catch (error) {
