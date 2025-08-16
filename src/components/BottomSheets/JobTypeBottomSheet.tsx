@@ -22,10 +22,13 @@ import {
   getUserDetailsUrl,
   setReducerLoadingfalse,
   updateUrl,
+  baseUrl,
+  getMatchedUsersUrl,
 } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface JobTypeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -85,6 +88,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
     }
   };

@@ -88,22 +88,46 @@ const sendTokenToServer = async token => {
   try {
     const userToken = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
-    const user = JSON.parse(userDataString);
-    if (user && user.id) {
-      const response = await axios.post(`${baseUrl}/${updateUrl}`, {
-        id: user.id,
-        fcmToken: token,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
+
+    // Prevent crash if userDataString is null or not valid JSON
+    let user = null;
+    if (userDataString) {
+      try {
+        user = JSON.parse(userDataString);
+      } catch (parseError) {
+        console.log('Error parsing user data:', parseError);
+        user = null;
+      }
+    }
+
+    if (user && user.id && userToken) {
+      const response = await axios.post(
+        `${baseUrl}/${updateUrl}`,
+        {
+          id: user.id,
+          fcmToken: token,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
       // console.log('response', response);
       if (response.status === 200) {
         // console.log('FCM token saved to server successfully');
       } else {
         console.log('Failed to send FCM token to server');
+      }
+    } else {
+      // Log why we are not sending the token
+      if (!userDataString) {
+        console.log('User data not found in AsyncStorage');
+      } else if (!user || !user.id) {
+        console.log('User data is invalid or missing id');
+      } else if (!userToken) {
+        console.log('User token not found in AsyncStorage');
       }
     }
   } catch (error) {

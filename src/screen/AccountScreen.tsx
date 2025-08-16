@@ -111,16 +111,16 @@ const AccountScreen = () => {
     {
       key: 'crown',
       label: 'Crown\nbadge',
-      color: packageByUserId.length > 0 ? '#FFD600' : COLORS.grey,
+      color: packageByUserId && packageByUserId.length > 0 ? '#FFD600' : COLORS.grey,
       icon: CrownIcon,
       route: ROUTES.UPGRADE,
     },
     {
       key: 'selfie',
       label: 'Selfie\nverified',
-      color: user.isVerified ? COLORS.primaryBlue : COLORS.grey,
+      color: user && user.isVerified ? COLORS.primaryBlue : COLORS.grey,
       icon: SelfieVerifiedIcon,
-      route: !user.isVerified ? ROUTES.SELFIE_VERIFY : undefined,
+      route: user && !user.isVerified ? ROUTES.SELFIE_VERIFY : undefined,
     },
     {
       key: 'govt',

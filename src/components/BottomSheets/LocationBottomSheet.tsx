@@ -25,10 +25,13 @@ import {
   setReducerLoadingfalse,
   updateUrl,
   searchCitiesApi,
+  baseUrl,
+  getMatchedUsersUrl,
 } from '../../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { SearchIcon, InfoIcon, ChipCloseIcon } from '../svg/SvgIcons2';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface LocationBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -171,7 +174,8 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
     } catch (error) {
       console.log(error, 'error');
     } finally {
-      bottomSheetRef.current?.close();
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+        bottomSheetRef.current?.close();
     }
   };
 

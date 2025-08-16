@@ -19,6 +19,8 @@ import {
 import Fonts from '../../constants/Fonts';
 import Svg, { Path } from 'react-native-svg';
 import {
+  baseUrl,
+  getMatchedUsersUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
@@ -26,6 +28,7 @@ import {
 } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 // Workaround: Defining Checkbox component locally due to issues with SvgIcons.jsx
 const Checkbox = ({
@@ -93,22 +96,48 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    const apiTribes = Array.isArray(user.pCommunityId) ? user.pCommunityId : [];
-    const mergedTribes = Array.from(new Set([...apiTribes]));
+    let normalizedIds: string[] = [];
+    if (Array.isArray(user.pCommunityId)) {
+      normalizedIds = user.pCommunityId.map((id: any) => String(id).trim());
+    } else if (typeof user.pCommunityId === 'string') {
+      normalizedIds = user.pCommunityId
+        .split(',')
+        .map((id: string) => id.trim())
+        .filter(Boolean);
+    } else if (user.pCommunityId != null) {
+      normalizedIds = [String(user.pCommunityId).trim()];
+    }
+
+    const mergedTribes = Array.from(new Set(normalizedIds));
     setLocalSelectedTribeId(mergedTribes);
     setLocalSelectedTribes(mergedTribes);
   }, [user.pCommunityId]);
 
   const handleTribeToggle = (tribe: any) => {
-    const tribeIds = Array.isArray(localSelectedTribeId)
-      ? localSelectedTribeId
+    const tappedId = String(tribe.id);
+    const currentIds = Array.isArray(localSelectedTribeId)
+      ? [...localSelectedTribeId]
       : [];
-    let updatedTribes: string[];
-    if (tribeIds.includes(tribe.id)) {
-      updatedTribes = tribeIds.filter(t => t !== tribe.id);
+
+    let updatedTribes: string[] = currentIds;
+
+    if (tappedId === 'Any') {
+      // Toggle 'Any' and clear all others when selecting it
+      if (currentIds.includes('Any')) {
+        updatedTribes = [];
+      } else {
+        updatedTribes = ['Any'];
+      }
     } else {
-      updatedTribes = [...tribeIds, tribe.id];
+      // Remove 'Any' if present when selecting specific options
+      updatedTribes = currentIds.filter(id => id !== 'Any');
+      if (updatedTribes.includes(tappedId)) {
+        updatedTribes = updatedTribes.filter(id => id !== tappedId);
+      } else {
+        updatedTribes = [...updatedTribes, tappedId];
+      }
     }
+
     setLocalSelectedTribeId(updatedTribes);
     setLocalSelectedTribes(updatedTribes);
   };
@@ -131,6 +160,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
     }
   };
@@ -142,7 +172,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isSelected = localSelectedTribeId?.includes(item.id) || false;
+    const isSelected = localSelectedTribeId?.includes(String(item.id)) || false;
     return (
       <TouchableOpacity
         style={styles.optionRow}
@@ -178,7 +208,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       {/* list */}
       <BottomSheetFlatList
         data={[{ id: 'Any', name: 'Any' }, ...tribeOptions]}
-        keyExtractor={item => item.id}
+        keyExtractor={item => String(item.id)}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContentContainer}

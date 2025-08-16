@@ -25,12 +25,15 @@ import {
 import Fonts from '../../constants/Fonts';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import {
+  baseUrl,
+  getMatchedUsersUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   updateUrl,
 } from '../../constants/functions';
 import { setReducerLoadingfalse } from '../../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface AgeRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -145,6 +148,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));  
       bottomSheetRef.current?.close();
     }
   };

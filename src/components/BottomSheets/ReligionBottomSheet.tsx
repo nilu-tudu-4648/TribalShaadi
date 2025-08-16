@@ -22,6 +22,8 @@ import {
   getUserDetailsApi,
   setReducerLoadingfalse,
   getUserDetailsUrl,
+  baseUrl,
+  getMatchedUsersUrl,
 } from '../../constants/functions';
 import {
   completeUserProfileV2Updated,
@@ -29,6 +31,7 @@ import {
 } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -81,6 +84,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
     }
   };

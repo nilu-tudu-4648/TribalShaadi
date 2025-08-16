@@ -18,10 +18,11 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import { SETTLING_DOWN_OPTIONS } from '../../constants/data';
-import { getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
+import { baseUrl, getMatchedUsersUrl, getUserDetailsApi, getUserDetailsUrl, setReducerLoadingfalse, updateUrl } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -75,6 +76,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
     }
   };

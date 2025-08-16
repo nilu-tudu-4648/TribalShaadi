@@ -26,6 +26,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
 import SwipeButton from '../components/SwipeButton';
+import axios from 'axios';
 
 type RootStackParamList = {
   Login: undefined;
@@ -38,6 +39,67 @@ type SwipeButtonHandle = {
 };
 
 const WelcomeScreen = () => {
+  const fetchAdvancedCourses = async () => {
+    console.log('fetching advanced courses started');
+    try {
+      // Quick connectivity probe to compare general reachability vs target domain
+      try {
+        await axios.get('https://www.google.com/generate_204', { timeout: 5000 });
+      } catch (probeErr) {
+        console.warn('Connectivity probe failed, device may be offline or DNS blocked');
+      }
+
+      const requestStartedAt = Date.now();
+      const response = await axios.get(
+        'https://seekojitech.in/api/v1/advanced-courses/all',
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: 10000,
+          transitional: {
+            clarifyTimeoutError: true,
+          },
+          validateStatus: status => status >= 200 && status < 300,
+        },
+      );
+      const requestDurationMs = Date.now() - requestStartedAt;
+      console.log(`advanced courses fetched in ${requestDurationMs} ms`);
+      if (!response.data) {
+        throw new Error('Failed to fetch advanced courses');
+      }
+      const data = await response.data;
+      // You can handle the data as needed, e.g., set state or log
+      console.log('Advanced Courses:', data);
+      return data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching advanced courses:',
+          JSON.stringify(
+            {
+              message: error.message,
+              code: error.code,
+              status: error.response?.status,
+              url: error.config?.url,
+              timeout: error.config?.timeout,
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.error('Error fetching advanced courses:', error);
+      }
+      return null;
+    } finally {
+      console.log('fetching advanced courses ended');
+    }
+  };
+
+  React.useEffect(() => {
+    fetchAdvancedCourses();
+  }, []);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const swipeButtonRef = React.useRef<SwipeButtonHandle>(null);

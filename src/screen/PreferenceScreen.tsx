@@ -126,7 +126,7 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
   const getReligionValue = () => {
     if (user.pReligionId) {
       return (
-        religion.find((item: any) => item.id === user.pReligionId[0])?.name ||
+        religion.find((item: any) => item.id == user.pReligionId[0])?.name ||
         user.religion
       );
     }
@@ -141,9 +141,21 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
     return 'Any';
   };
   const getTribeValue = () => {
-    const communityIds = user.pCommunityId || [];
+    let communityIds: string[] = [];
+    const rawCommunity = user.pCommunityId;
+    if (Array.isArray(rawCommunity)) {
+      communityIds = rawCommunity.map((id: any) => String(id).trim());
+    } else if (typeof rawCommunity === 'string') {
+      communityIds = rawCommunity
+        .split(',')
+        .map((id: string) => id.trim())
+        .filter(Boolean);
+    } else if (rawCommunity != null) {
+      communityIds = [String(rawCommunity).trim()];
+    }
+
     const communities = community
-      .filter((item: any) => communityIds.includes(item.id))
+      .filter((item: any) => communityIds.includes(String(item.id)))
       .map((item: any) => item.name);
     if (communities.length === 0) return 'Any';
     if (communities.length <= 1) return communities.join(', ');

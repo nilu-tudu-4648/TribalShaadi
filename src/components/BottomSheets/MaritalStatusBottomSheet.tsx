@@ -19,6 +19,8 @@ import {
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
 import {
+  baseUrl,
+  getMatchedUsersUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
@@ -27,6 +29,7 @@ import {
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -54,23 +57,34 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
 
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const handleStatusToggle = (status: string) => {
-    // Ensure localSelectedStatuses is an array
-    const currentStatuses = Array.isArray(localSelectedStatuses) ? localSelectedStatuses : [];
+  const handleStatusToggle = (status: string | number) => {
+    const statusId = String(status);
+    const currentStatuses = Array.isArray(localSelectedStatuses)
+      ? localSelectedStatuses.map(s => String(s))
+      : [];
     let updatedStatuses;
-    if (currentStatuses.includes(status)) {
-      updatedStatuses = currentStatuses.filter(s => s !== status);
+    if (currentStatuses.includes(statusId)) {
+      updatedStatuses = currentStatuses.filter(s => s !== statusId);
     } else {
-      updatedStatuses = [...currentStatuses, status];
+      updatedStatuses = [...currentStatuses, statusId];
     }
     setLocalSelectedStatuses(updatedStatuses);
   };
   useEffect(() => {
     if (user?.pMaritalStatusId) {
-      // Ensure it's always an array
-      const maritalStatuses = Array.isArray(user.pMaritalStatusId) 
-        ? user.pMaritalStatusId 
-        : [user.pMaritalStatusId];
+      let maritalStatuses: string[] = [];
+      if (Array.isArray(user.pMaritalStatusId)) {
+        maritalStatuses = user.pMaritalStatusId.map((id: any) => String(id));
+      } else if (typeof user.pMaritalStatusId === 'string') {
+        // Handles formats like "7,6,5" or with spaces
+        maritalStatuses = user.pMaritalStatusId
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+          .map((s: string) => String(s));
+      } else if (typeof user.pMaritalStatusId === 'number') {
+        maritalStatuses = [user.pMaritalStatusId.toString()];
+      }
       setLocalSelectedStatuses(maritalStatuses);
     }
   }, [user, setLocalSelectedStatuses]);
@@ -80,12 +94,12 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       // Clean and filter the marital status IDs
       const safeStatuses = Array.isArray(localSelectedStatuses) ? localSelectedStatuses : [];
       const cleanedStatuses = safeStatuses
-        .filter(status => status && status.toString().trim() !== '') // Remove empty/null values
-        .map(status => status.toString().trim()); // Clean whitespace
-      
+        .filter(status => status && status.toString().trim() !== ''); // Remove empty/null values
+
+      const pMaritalStatusIdString = cleanedStatuses.join(',');
       const requestBody = {
         id: user.id,
-        pMaritalStatusId: cleanedStatuses,
+        pMaritalStatusId: pMaritalStatusIdString,
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -95,6 +109,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
       console.log("loading ended")
     }
@@ -131,7 +146,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
               <AppChip2
                 key={option.id}
                 title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
-                isSelected={Array.isArray(localSelectedStatuses) && localSelectedStatuses.includes(option.id)}
+                isSelected={Array.isArray(localSelectedStatuses) && localSelectedStatuses.includes(String(option.id))}
                 onPress={() => handleStatusToggle(option.id)}
                 style={styles.optionChip}
               />

@@ -25,6 +25,8 @@ import {
 import Fonts from '../../constants/Fonts';
 import {
   formatHeightInFeettoInches,
+  baseUrl,
+  getMatchedUsersUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
@@ -32,6 +34,7 @@ import {
 } from '../../constants/functions';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
+import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface HeightRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -188,7 +191,8 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     } catch (error) {
       console.error('Error in handleApply:', error);
     } finally {
-      bottomSheetRef.current?.close();
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+        bottomSheetRef.current?.close();
     }
   };
 
