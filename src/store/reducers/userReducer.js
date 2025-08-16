@@ -33,7 +33,6 @@ const userReducer = createSlice({
     },
     userReducerDataRequestFailed: (userReducer, action) => {
       userReducer.loader = false;
-      // console.log('userReducerDataRequestFailed', action.payload);
       if (action.payload.message === 'No Matches Found') {
         userReducer.matchedUsers = [];
       }
@@ -42,7 +41,11 @@ const userReducer = createSlice({
       userReducer.userRegistrationCompleted = action.payload;
     },
     setMatchedUser: (userReducer, action) => {
-      userReducer.matchedUsers = action.payload.recordList;
+      if (action.payload.message === 'No matches found') {
+        userReducer.matchedUsers = [];
+      } else {
+        userReducer.matchedUsers = action.payload.recordList;
+      }
       userReducer.loader = false;
     },
     sentProposalDataReceived: (userReducer, action) => {
@@ -67,7 +70,10 @@ const userReducer = createSlice({
     },
     setAcceptRejectProposalDataReceived: (userReducer, action) => {
       userReducer.loader = false;
-      console.log('setAcceptRejectProposalDataReceived', action.payload.recordList);
+      console.log(
+        'setAcceptRejectProposalDataReceived',
+        action.payload.recordList,
+      );
       userReducer.acceptRejectProposal = action.payload.recordList;
     },
     setCurrentMatchedDataReceived: (userReducer, action) => {
@@ -117,7 +123,7 @@ export const {
   setAcceptedUser,
   setHomeTabRefr,
   setSelectedUser,
-  setReducerCleaned
+  setReducerCleaned,
 } = userReducer.actions;
 
 const {

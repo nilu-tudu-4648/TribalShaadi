@@ -354,7 +354,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             <View style={styles.attributeCard}>
               <WineGlassIcon />
               <AppText
-                text={selectedUser?.drinking_habits}
+                text={selectedUser?.kids}
                 textStyle={styles.attributeTitle}
               />
               <AppText text="Kids" textStyle={styles.attributeSubtitle} />
@@ -379,16 +379,15 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             )}
           </View>
           <View style={styles.actionsContainer}>
-       {
-        report &&     ( <TouchableOpacity
-        onPress={openReport}
-        style={styles.reportButtonContainer}
-      >
-        <ReportIcon />
-        <AppText text="Report" textStyle={styles.reportButtonText} />
-      </TouchableOpacity>
-      )
-       }
+            {report && (
+              <TouchableOpacity
+                onPress={openReport}
+                style={styles.reportButtonContainer}
+              >
+                <ReportIcon />
+                <AppText text="Report" textStyle={styles.reportButtonText} />
+              </TouchableOpacity>
+            )}
             {isButtonVisible && (
               <AppButton
                 title="Connect"

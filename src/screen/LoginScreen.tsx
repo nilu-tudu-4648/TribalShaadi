@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Image } from 'react-native';
 import {
   fontSize14,
   fontSize16,
@@ -32,6 +32,7 @@ type RootStackParamList = {
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [phoneValidation, setPhoneValidation] = useState({
     isValid: false,
     message: '',
@@ -65,6 +66,8 @@ const LoginScreen: React.FC = () => {
         navigation.navigate('OTP', {
           phoneNumber: validation.cleanedNumber || phoneNumber,
         });
+      }else{
+        setAlreadyExists(true);
       }
     } catch (error: any) {
       console.error(error?.response?.data || error.message);
@@ -116,6 +119,29 @@ const LoginScreen: React.FC = () => {
         />
         {/* Spacer */}
         <View style={styles.spacer} />
+        {alreadyExists && (
+          <View style={styles.alreadyExistsContainer}>
+            <Image
+              source={require('../assets/images/crossred.png')}
+              style={styles.crossIcon}
+            />
+            <AppText text='User not found. Please register first.'/>
+            <AppButton
+              title="Register"
+              loaderSize={Size22}
+              onPress={()=>navigation.navigate('Register')}
+              isButtonDisabled={isButtonDisabled}
+              buttonStyle={[
+                styles.button,
+                { width: '25%', backgroundColor: '#FFDCE4' },
+              ]}
+              textStyle={[
+                styles.buttonText,
+                { color: '#FF507A', fontSize: fontSize14 },
+              ]}
+            />
+          </View>
+        )}
         {/* Info */}
         <View style={styles.infoContainer}>
           <AppText

@@ -267,7 +267,7 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-  console.log(matchedUsers.length, 'matchedUsers');
+  // console.log(matchedUsers, 'matchedUsers');
   // console.log(currentMatchedUser, 'currentMatchedUser');
 
   return (
