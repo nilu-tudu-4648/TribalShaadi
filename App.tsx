@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar, View, Image, StyleSheet } from 'react-native';
-import {
-  NavigationContainer,
-  NavigationProp,
-  useNavigation,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,19 +25,20 @@ import { COLORS } from './src/constants/AppColors';
 import WelcomeHome from './src/screen/WelcomeHome';
 import BottomNavigation from './src/navigation/BottomNavigation';
 import { logoutFromReducer } from './src/store/reducers/authReducer';
-import { navigationRef, setIsReady } from './src/navigation/NavigationRef';
+import { navigationRef, setIsReady, navigate } from './src/navigation/NavigationRef';
 import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
 } from './src/navigation/StackNavigation';
-import { 
-  requestUserPermission, 
-  notificationListner, 
-  createNotificationChannel 
+import {
+  requestUserPermission,
+  notificationListner,
+  createNotificationChannel,
 } from './src/notification/notifications';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
+import { PostHogProvider } from 'posthog-react-native';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -78,7 +75,6 @@ const SplashScreen = () => (
 
 const MainApp = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { user, tokenExpired } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -88,32 +84,31 @@ const MainApp = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     checkUserLoggedIn(dispatch);
-  }, [navigation, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (tokenExpired) {
       dispatch(logoutFromReducer());
-      navigation.navigate(ROUTES.LOGIN, undefined);
+      navigate(ROUTES.LOGIN, undefined);
     }
     checkAuth(dispatch);
-  }, [user, navigation, dispatch, tokenExpired]);
+  }, [user, dispatch, tokenExpired]);
 
   useEffect(() => {
     // Initialize push notification setup with a delay to allow Firebase to auto-initialize
     const setupNotifications = async () => {
       // Wait for Firebase to auto-initialize from config files
       await delay();
-      
+
       try {
         // Create notification channel (Android)
         createNotificationChannel();
-        
+
         // Request permission and get FCM token
         await requestUserPermission();
-        
+
         // Set up notification listeners
         await notificationListner();
-        
       } catch (error) {
         console.error('Error initializing push notifications:', error);
       }
@@ -145,7 +140,10 @@ const MainApp = () => {
       >
         {userRegistrationCompleted ? (
           <>
-            <Stack.Screen name={ROUTES.MAIN_TABS} component={BottomNavigation} />
+            <Stack.Screen
+              name={ROUTES.MAIN_TABS}
+              component={BottomNavigation}
+            />
             <Stack.Screen name={ROUTES.STACK} component={StackNavigation} />
           </>
         ) : (
@@ -159,7 +157,10 @@ const MainApp = () => {
               component={GenderSelectionScreen}
             />
             <Stack.Screen name={ROUTES.NAME} component={NameScreen} />
-            <Stack.Screen name={ROUTES.BIRTH_DATE} component={BirthDateScreen} />
+            <Stack.Screen
+              name={ROUTES.BIRTH_DATE}
+              component={BirthDateScreen}
+            />
             <Stack.Screen name={ROUTES.RELIGION} component={ReligionScreen} />
             <Stack.Screen name={ROUTES.ADDRESS} component={AddressScreen} />
             <Stack.Screen
@@ -201,8 +202,21 @@ export default function App() {
             backgroundColor={COLORS.white}
             translucent={false}
           />
-          <NavigationContainer ref={navigationRef} onReady={() => setIsReady()}>
-            <MainApp />
+          <NavigationContainer
+            ref={navigationRef}
+            onReady={() => {
+              setIsReady();
+            }}
+          >
+            <PostHogProvider
+              apiKey="phc_FZlVdA1quicCaena9xRegG6Xd7s6sEIC8jLLZ1LqmBy"
+              autocapture={false}
+              options={{ 
+                host: 'https://us.i.posthog.com'
+              }}
+            >
+              <MainApp />
+            </PostHogProvider>
           </NavigationContainer>
         </SafeAreaProvider>
       </GestureHandlerRootView>

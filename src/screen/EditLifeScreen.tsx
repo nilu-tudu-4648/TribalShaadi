@@ -115,9 +115,8 @@ const EditLifeScreen = () => {
             
             // Find user's city from the fetched cities
             const userCity = cities.find(
-              (city: any) => String(city.id) === String(user.cityId),
+              (city: any) => String(city.name) === String(user.districtName),
             );
-            console.log('userCity', userCity);
             
             setFormData(prev => ({
               ...prev,
