@@ -173,9 +173,13 @@ export const isDifferentDay = (timestamp1, timestamp2) => {
 };
 export const checkUserLoggedIn = async dispatch => {
   try {
+    // Add a small delay to prevent race conditions with other AsyncStorage operations
+    await delay(100);
+    
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
 
-    if (!userDataString) {
+    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
+      console.log('No valid user data found in storage');
       navigate(ROUTES.WELCOME);
       return;
     }
@@ -188,13 +192,23 @@ export const checkUserLoggedIn = async dispatch => {
         'Error parsing user data in checkUserLoggedIn:',
         parseError,
       );
-      await AsyncStorage.removeItem(ASYNC_VARIBLES.USER);
+      // Clear corrupted data
+      try {
+        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+      } catch (clearError) {
+        console.error('Error clearing corrupted data:', clearError);
+      }
       navigate(ROUTES.WELCOME);
       return;
     }
 
-    if (!user) {
-      console.log('User object is null - checkUserLoggedIn');
+    if (!user || typeof user !== 'object' || !user.id) {
+      console.log('User object is invalid - checkUserLoggedIn');
+      try {
+        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+      } catch (clearError) {
+        console.error('Error clearing invalid user data:', clearError);
+      }
       navigate(ROUTES.WELCOME);
       return;
     }
@@ -202,7 +216,12 @@ export const checkUserLoggedIn = async dispatch => {
     await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
   } catch (error) {
     console.error('Error in checkUserLoggedIn:', error);
-    navigate(ROUTES.WELCOME);
+    // Ensure we don't crash the app - navigate to welcome as fallback
+    try {
+      navigate(ROUTES.WELCOME);
+    } catch (navError) {
+      console.error('Error navigating to welcome:', navError);
+    }
   }
 };
 export const saveUserToStorage = async user => {
@@ -255,46 +274,89 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    // console.log(token, 'token');
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      console.error('No valid token found for getUserDetailsApi');
+      logoutUser(dispatch);
+      return;
+    }
+    
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      timeout: 10000, // Add timeout to prevent hanging requests
     });
-    await AsyncStorage.setItem(
-      ASYNC_VARIBLES.USER,
-      JSON.stringify(response.data.recordList[0]),
-    );
-    dispatch(setUser({ ...response.data.recordList[0], token: token }));
-    dispatch(
-      getPackageByUserIdApi(getPackageByUserIdUrl, {
-        userId: response.data.recordList[0].id,
-      }),
-    );
-    dispatch(
-      getGalleryImageListApi(getGalleryImageListUrl, {
-        userId: response.data.recordList[0].id,
-      }),
-    );
+    
+    // Validate response structure
+    if (!response.data || !response.data.recordList || !response.data.recordList[0]) {
+      console.error('Invalid response structure from getUserDetailsApi');
+      return;
+    }
+    
+    const userData = response.data.recordList[0];
+    
+    // Safely save to AsyncStorage
+    try {
+      await AsyncStorage.setItem(ASYNC_VARIBLES.USER, JSON.stringify(userData));
+    } catch (storageError) {
+      console.error('Error saving user data to storage:', storageError);
+    }
+    
+    // Safe dispatch
+    try {
+      if (typeof dispatch === 'function') {
+        dispatch(setUser({ ...userData, token: token }));
+        
+        // Safe additional API calls
+        if (userData.id) {
+          dispatch(
+            getPackageByUserIdApi(getPackageByUserIdUrl, {
+              userId: userData.id,
+            }),
+          );
+          dispatch(
+            getGalleryImageListApi(getGalleryImageListUrl, {
+              userId: userData.id,
+            }),
+          );
+        }
+      }
+    } catch (dispatchError) {
+      console.error('Error dispatching user data:', dispatchError);
+    }
   } catch (error) {
+    console.error('Error in getUserDetailsApi:', error);
+    
+    // Handle different error types safely
     if (error.response && error.response.data) {
       if (
         error.response.data.status === 401 ||
         error.response.data.status === 400
       ) {
-        logoutUser(dispatch);
+        try {
+          logoutUser(dispatch);
+        } catch (logoutError) {
+          console.error('Error during logout:', logoutError);
+        }
       }
+    } else if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout in getUserDetailsApi');
+    } else if (error.message === 'Network Error') {
+      console.error('Network error in getUserDetailsApi');
     } else {
-      console.log(error, 'getUserDetailsApi');
+      console.error('Unexpected error in getUserDetailsApi:', error.message);
     }
   }
 };
 export const checkAuth = async dispatch => {
   try {
-    // Get user from Redux store instead of AsyncStorage to avoid race conditions
+    // Add delay to prevent race conditions
+    await delay(200);
+    
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
     // If no user data, let checkUserLoggedIn handle it
-    if (!userDataString) {
+    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
       console.log('No user data found in storage - checkAuth (skipping)');
       return false;
     }
@@ -303,38 +365,60 @@ export const checkAuth = async dispatch => {
     try {
       user = JSON.parse(userDataString);
     } catch (parseError) {
-      console.error('Error parsing user data:', parseError);
+      console.error('Error parsing user data in checkAuth:', parseError);
       // Clear corrupted data and let checkUserLoggedIn handle navigation
-      await AsyncStorage.removeItem(ASYNC_VARIBLES.USER);
+      try {
+        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+      } catch (clearError) {
+        console.error('Error clearing corrupted data in checkAuth:', clearError);
+      }
       return false;
     }
 
     // If no user object, let checkUserLoggedIn handle it
-    if (!user) {
-      console.log('User object is null or undefined - checkAuth (skipping)');
+    if (!user || typeof user !== 'object' || !user.id) {
+      console.log('User object is invalid - checkAuth (skipping)');
       return false;
     }
-    if (user.intrests) {
-      if (typeof dispatch === 'function') {
-        dispatch(setUserRegistrationCompleted(true));
+    
+    // Safe check for interests
+    try {
+      if (user.intrests && Array.isArray(user.intrests) && user.intrests.length > 0) {
+        if (typeof dispatch === 'function') {
+          dispatch(setUserRegistrationCompleted(true));
+        }
       }
+    } catch (interestError) {
+      console.error('Error checking user interests:', interestError);
     }
+    
     console.log('checkAuth - User profile check:', user);
 
-    // Check profile completion steps in order
-    for (const step of PROFILE_COMPLETION_STEPS) {
-      const fieldValue = user[step.field];
+    // Check profile completion steps in order with safe navigation
+    try {
+      for (const step of PROFILE_COMPLETION_STEPS) {
+        const fieldValue = user[step.field];
 
-      // Check if field is missing, null, undefined, or empty string
-      if (
-        !fieldValue ||
-        (typeof fieldValue === 'string' && fieldValue.trim() === '')
-      ) {
-        console.log(`Redirecting to ${step.screen} - missing ${step.field}`);
-        navigate(step.screen);
-        return;
+        // Check if field is missing, null, undefined, or empty string
+        if (
+          !fieldValue ||
+          (typeof fieldValue === 'string' && fieldValue.trim() === '') ||
+          (Array.isArray(fieldValue) && fieldValue.length === 0)
+        ) {
+          console.log(`Redirecting to ${step.screen} - missing ${step.field}`);
+          try {
+            navigate(step.screen);
+          } catch (navError) {
+            console.error('Error navigating in checkAuth:', navError);
+          }
+          return false;
+        }
       }
+    } catch (profileCheckError) {
+      console.error('Error in profile completion check:', profileCheckError);
+      return false;
     }
+    
     return true;
   } catch (error) {
     console.error('Error in checkAuth:', error);

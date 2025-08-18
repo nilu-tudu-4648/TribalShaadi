@@ -5,6 +5,7 @@ import {
   Text,
   TextStyle,
   TextProps,
+  Platform,
 } from 'react-native';
 import { fontSize16 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
@@ -18,9 +19,22 @@ interface AppTextProps extends TextProps {
 }
 
 const AppText = ({ text, children, textStyle, useChildren = false, ...rest }: AppTextProps) => {
+  // Safe text rendering with fallbacks
+  const renderText = () => {
+    try {
+      if (useChildren) {
+        return children;
+      }
+      return text || '';
+    } catch (error) {
+      console.error('Error rendering text:', error);
+      return text || children || '';
+    }
+  };
+
   return (
     <Text style={[styles.text, textStyle]} {...rest}>
-      {useChildren ? children : text}
+      {renderText()}
     </Text>
   );
 };
@@ -31,7 +45,10 @@ const styles = StyleSheet.create({
   text: {
     fontSize: fontSize16,
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
+    // Use system fonts as fallback for production safety
+    fontFamily: Platform.OS === 'ios' 
+      ? FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD || 'System' 
+      : FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD || 'sans-serif',
     fontWeight: '600',
     letterSpacing: 0.6,
   },

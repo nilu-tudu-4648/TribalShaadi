@@ -39,6 +39,7 @@ import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
 import { PostHogProvider } from 'posthog-react-native';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -75,32 +76,54 @@ const SplashScreen = () => (
 
 const MainApp = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Safe selectors with fallback values to prevent crashes
   const { user, tokenExpired } = useSelector(
-    (state: any) => state.entities.authReducer,
+    (state: any) => state?.entities?.authReducer || { user: null, tokenExpired: false },
   );
   const { userRegistrationCompleted } = useSelector(
-    (state: any) => state.entities.userReducer,
+    (state: any) => state?.entities?.userReducer || { userRegistrationCompleted: false },
   );
   const dispatch = useDispatch();
+  // Initialize app with error handling
   useEffect(() => {
-    checkUserLoggedIn(dispatch);
+    const initializeApp = async () => {
+      try {
+        await checkUserLoggedIn(dispatch);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error during app initialization:', error);
+        setIsInitialized(true); // Continue with app flow even if initialization fails
+      }
+    };
+    
+    initializeApp();
   }, [dispatch]);
 
   useEffect(() => {
-    if (tokenExpired) {
-      dispatch(logoutFromReducer());
-      navigate(ROUTES.LOGIN, undefined);
+    if (!isInitialized) return; // Wait for initialization
+    
+    try {
+      if (tokenExpired) {
+        dispatch(logoutFromReducer());
+        navigate(ROUTES.LOGIN, undefined);
+      }
+      checkAuth(dispatch);
+    } catch (error) {
+      console.error('Error in auth check:', error);
     }
-    checkAuth(dispatch);
-  }, [user, dispatch, tokenExpired]);
+  }, [user, dispatch, tokenExpired, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return; // Wait for app initialization
+    
     // Initialize push notification setup with a delay to allow Firebase to auto-initialize
     const setupNotifications = async () => {
-      // Wait for Firebase to auto-initialize from config files
-      await delay();
-
       try {
+        // Wait for Firebase to auto-initialize from config files
+        await delay();
+
         // Create notification channel (Android)
         createNotificationChannel();
 
@@ -111,11 +134,12 @@ const MainApp = () => {
         await notificationListner();
       } catch (error) {
         console.error('Error initializing push notifications:', error);
+        // Continue app flow even if notifications fail
       }
     };
 
     setupNotifications();
-  }, []);
+  }, [isInitialized]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -124,21 +148,29 @@ const MainApp = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (showSplash) {
+  if (showSplash || !isInitialized) {
     return <SplashScreen />;
   }
+
+  // Safely determine initial route with fallback
+  const getInitialRoute = () => {
+    try {
+      return userRegistrationCompleted === true ? ROUTES.MAIN_TABS : ROUTES.WELCOME;
+    } catch (error) {
+      console.error('Error determining initial route:', error);
+      return ROUTES.WELCOME; // Safe fallback
+    }
+  };
 
   return (
     <>
       <ForegroundHandler />
       <NetworkAlert />
       <Stack.Navigator
-        initialRouteName={
-          userRegistrationCompleted ? ROUTES.MAIN_TABS : ROUTES.WELCOME
-        }
+        initialRouteName={getInitialRoute()}
         screenOptions={{ headerShown: false }}
       >
-        {userRegistrationCompleted ? (
+        {userRegistrationCompleted === true ? (
           <>
             <Stack.Screen
               name={ROUTES.MAIN_TABS}
@@ -194,33 +226,37 @@ const MainApp = () => {
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider style={{ flex: 1 }}>
-          <StatusBar
-            barStyle="dark-content"
-            backgroundColor={COLORS.white}
-            translucent={false}
-          />
-          <NavigationContainer
-            ref={navigationRef}
-            onReady={() => {
-              setIsReady();
-            }}
-          >
-            <PostHogProvider
-              apiKey="phc_FZlVdA1quicCaena9xRegG6Xd7s6sEIC8jLLZ1LqmBy"
-              autocapture={false}
-              options={{ 
-                host: 'https://us.i.posthog.com'
+    <ErrorBoundary>
+      <Provider store={store}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider style={{ flex: 1 }}>
+            <StatusBar
+              barStyle="dark-content"
+              backgroundColor={COLORS.white}
+              translucent={false}
+            />
+            <NavigationContainer
+              ref={navigationRef}
+              onReady={() => {
+                setIsReady();
               }}
             >
-              <MainApp />
-            </PostHogProvider>
-          </NavigationContainer>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </Provider>
+              <PostHogProvider
+                apiKey="phc_FZlVdA1quicCaena9xRegG6Xd7s6sEIC8jLLZ1LqmBy"
+                autocapture={false}
+                options={{ 
+                  host: 'https://us.i.posthog.com'
+                }}
+              >
+                <ErrorBoundary>
+                  <MainApp />
+                </ErrorBoundary>
+              </PostHogProvider>
+            </NavigationContainer>
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </Provider>
+    </ErrorBoundary>
   );
 }
 

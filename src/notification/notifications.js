@@ -63,75 +63,106 @@ const getfcmToken = async () => {
     return;
   }
 
-  let fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
-  if (!fcmToken) {
-    try {
-      const token = await messaging().getToken();
-      if (token) {
-        console.log('FCM Token:', token);
-        await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
-        // Send token to your server
-        await sendTokenToServer(token);
-        // Subscribe to general topics for all users
-        await subscribeToAllUsersTopics();
+  try {
+    let fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
+    
+    if (!fcmToken || fcmToken === 'null' || fcmToken === 'undefined') {
+      try {
+        const token = await messaging().getToken();
+        if (token && typeof token === 'string') {
+          console.log('FCM Token received:', token.substring(0, 20) + '...');
+          
+          try {
+            await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
+          } catch (storageError) {
+            console.error('Error saving FCM token to storage:', storageError);
+          }
+          
+          // Send token to your server
+          await sendTokenToServer(token);
+          
+          // Subscribe to general topics for all users
+          await subscribeToAllUsersTopics();
+        } else {
+          console.warn('Invalid or empty FCM token received');
+        }
+      } catch (tokenError) {
+        console.error('Error getting FCM token:', tokenError);
       }
-    } catch (error) {
-      console.log('Error getting FCM token:', error);
+    } else {
+      // Token exists, send to server
+      await sendTokenToServer(fcmToken);
     }
-  } else {
-    await sendTokenToServer(fcmToken);
+  } catch (error) {
+    console.error('Error in getfcmToken:', error);
   }
 };
 
 // Function to send FCM token to your server
 const sendTokenToServer = async token => {
   try {
+    if (!token || typeof token !== 'string') {
+      console.log('Invalid FCM token provided');
+      return;
+    }
+
     const userToken = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
 
     // Prevent crash if userDataString is null or not valid JSON
     let user = null;
-    if (userDataString) {
+    if (userDataString && userDataString !== 'null' && userDataString !== 'undefined') {
       try {
         user = JSON.parse(userDataString);
+        // Validate user object structure
+        if (!user || typeof user !== 'object' || !user.id) {
+          user = null;
+        }
       } catch (parseError) {
-        console.log('Error parsing user data:', parseError);
+        console.log('Error parsing user data in sendTokenToServer:', parseError);
         user = null;
       }
     }
 
-    if (user && user.id && userToken) {
-      const response = await axios.post(
-        `${baseUrl}/${updateUrl}`,
-        {
-          id: user.id,
-          fcmToken: token,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`,
+    if (user && user.id && userToken && userToken !== 'null' && userToken !== 'undefined') {
+      try {
+        const response = await axios.post(
+          `${baseUrl}/${updateUrl}`,
+          {
+            id: user.id,
+            fcmToken: token,
           },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${userToken}`,
+            },
+            timeout: 8000, // Add timeout to prevent hanging
+          }
+        );
+        
+        if (response && response.status === 200) {
+          console.log('FCM token saved to server successfully');
+        } else {
+          console.log('Failed to send FCM token to server - unexpected response');
         }
-      );
-      // console.log('response', response);
-      if (response.status === 200) {
-        // console.log('FCM token saved to server successfully');
-      } else {
-        console.log('Failed to send FCM token to server');
+      } catch (apiError) {
+        console.error('API error when sending FCM token:', apiError.message);
+        // Don't throw - just log and continue
       }
     } else {
       // Log why we are not sending the token
-      if (!userDataString) {
+      if (!userDataString || userDataString === 'null') {
         console.log('User data not found in AsyncStorage');
       } else if (!user || !user.id) {
         console.log('User data is invalid or missing id');
-      } else if (!userToken) {
+      } else if (!userToken || userToken === 'null') {
         console.log('User token not found in AsyncStorage');
       }
     }
   } catch (error) {
-    console.log('Error sending FCM token to server:', error);
+    console.error('Error sending FCM token to server:', error);
+    // Don't re-throw to prevent app crashes
   }
 };
 
@@ -287,12 +318,19 @@ const subscribeToAllUsersTopics = async () => {
 
   try {
     // Subscribe to topic for all users - this allows sending notifications to everyone
-    await messaging().subscribeToTopic('all_users');
-    await messaging().subscribeToTopic('general_updates');
-
-    // console.log('Subscribed to general topics: all_users, general_updates, contest_updates');
+    const topics = ['all_users', 'general_updates'];
+    
+    for (const topic of topics) {
+      try {
+        await messaging().subscribeToTopic(topic);
+        console.log(`Successfully subscribed to topic: ${topic}`);
+      } catch (topicError) {
+        console.error(`Error subscribing to topic ${topic}:`, topicError);
+        // Continue with other topics even if one fails
+      }
+    }
   } catch (error) {
-    console.log('Error subscribing to general topics:', error);
+    console.error('Error in subscribeToAllUsersTopics:', error);
   }
 };
 

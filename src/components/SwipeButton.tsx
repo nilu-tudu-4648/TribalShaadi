@@ -37,48 +37,79 @@ const SwipeButton = React.forwardRef<
 
   React.useImperativeHandle(ref, () => ({
     reset: () => {
-      X.value = withSpring(0);
+      try {
+        X.value = withSpring(0);
+      } catch (error) {
+        console.error('Error resetting swipe button animation:', error);
+      }
     },
   }));
 
   const handleComplete = (isToggled: boolean) => {
-    if (isToggled) {
-      onToggle();
+    try {
+      if (isToggled && typeof onToggle === 'function') {
+        onToggle();
+      }
+    } catch (error) {
+      console.error('Error in swipe button completion:', error);
     }
   };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
       // Store initial position for gesture
+      try {
+        // No additional logic needed for start
+      } catch (error) {
+        console.error('Error in gesture start:', error);
+      }
     })
     .onUpdate((e) => {
-      const newValue = e.translationX;
-      X.value = Math.max(0, Math.min(newValue, H_SWIPE_RANGE));
+      try {
+        const newValue = e.translationX;
+        X.value = Math.max(0, Math.min(newValue, H_SWIPE_RANGE));
+      } catch (error) {
+        console.error('Error in gesture update:', error);
+      }
     })
     .onEnd(() => {
-      if (X.value < H_SWIPE_RANGE) {
-        X.value = withSpring(0);
-      } else {
-        X.value = withSpring(H_SWIPE_RANGE);
-        runOnJS(handleComplete)(true);
+      try {
+        if (X.value < H_SWIPE_RANGE) {
+          X.value = withSpring(0);
+        } else {
+          X.value = withSpring(H_SWIPE_RANGE);
+          runOnJS(handleComplete)(true);
+        }
+      } catch (error) {
+        console.error('Error in gesture end:', error);
       }
     });
 
   const AnimatedStyles = {
     swipeable: useAnimatedStyle(() => {
-      return {
-        transform: [{ translateX: X.value }],
-      };
+      try {
+        return {
+          transform: [{ translateX: X.value }],
+        };
+      } catch (error) {
+        console.error('Error in swipeable animation:', error);
+        return { transform: [{ translateX: 0 }] };
+      }
     }),
     swipeText: useAnimatedStyle(() => {
-      return {
-        opacity: interpolate(
-          X.value,
-          [0, H_SWIPE_RANGE / 2],
-          [1, 0],
-          Extrapolate.CLAMP,
-        ),
-      };
+      try {
+        return {
+          opacity: interpolate(
+            X.value,
+            [0, H_SWIPE_RANGE / 2],
+            [1, 0],
+            Extrapolate.CLAMP,
+          ),
+        };
+      } catch (error) {
+        console.error('Error in text animation:', error);
+        return { opacity: 1 };
+      }
     }),
   };
 
@@ -86,7 +117,19 @@ const SwipeButton = React.forwardRef<
     <View style={styles.swipeCont}>
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.swipeable, AnimatedStyles.swipeable]}>
-          <PhoneSvg  />
+          {/* Safe SVG rendering with fallback */}
+          {React.createElement(() => {
+            try {
+              return <PhoneSvg />;
+            } catch (error) {
+              console.error('Error rendering PhoneSvg:', error);
+              return (
+                <View style={styles.svgFallback}>
+                  <Animated.Text style={styles.fallbackIcon}>📞</Animated.Text>
+                </View>
+              );
+            }
+          })}
         </Animated.View>
       </GestureDetector>
       <Animated.Text style={[styles.swipeText, AnimatedStyles.swipeText]}>
@@ -126,6 +169,16 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     zIndex: 2,
     color: COLORS.white,
+  },
+  svgFallback: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  fallbackIcon: {
+    fontSize: 20,
+    textAlign: 'center',
   },
 });
 

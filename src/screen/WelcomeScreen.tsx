@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Image,
@@ -26,7 +26,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
 import SwipeButton from '../components/SwipeButton';
-import axios from 'axios';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 type RootStackParamList = {
   Login: undefined;
@@ -39,126 +39,119 @@ type SwipeButtonHandle = {
 };
 
 const WelcomeScreen = () => {
-  const fetchAdvancedCourses = async () => {
-    console.log('fetching advanced courses started');
-    try {
-      // Quick connectivity probe to compare general reachability vs target domain
-      try {
-        await axios.get('https://www.google.com/generate_204', { timeout: 5000 });
-      } catch (probeErr) {
-        console.warn('Connectivity probe failed, device may be offline or DNS blocked');
-      }
+  const [imageError, setImageError] = useState(false);
 
-      const requestStartedAt = Date.now();
-      const response = await axios.get(
-        'https://seekojitech.in/api/v1/advanced-courses/all',
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-          timeout: 10000,
-          transitional: {
-            clarifyTimeoutError: true,
-          },
-          validateStatus: status => status >= 200 && status < 300,
-        },
-      );
-      const requestDurationMs = Date.now() - requestStartedAt;
-      console.log(`advanced courses fetched in ${requestDurationMs} ms`);
-      if (!response.data) {
-        throw new Error('Failed to fetch advanced courses');
-      }
-      const data = await response.data;
-      // You can handle the data as needed, e.g., set state or log
-      console.log('Advanced Courses:', data);
-      return data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          'Error fetching advanced courses:',
-          JSON.stringify(
-            {
-              message: error.message,
-              code: error.code,
-              status: error.response?.status,
-              url: error.config?.url,
-              timeout: error.config?.timeout,
-            },
-            null,
-            2,
-          ),
-        );
-      } else {
-        console.error('Error fetching advanced courses:', error);
-      }
-      return null;
-    } finally {
-      console.log('fetching advanced courses ended');
-    }
-  };
-
-  React.useEffect(() => {
-    fetchAdvancedCourses();
-  }, []);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const swipeButtonRef = React.useRef<SwipeButtonHandle>(null);
+
+  React.useEffect(() => {
+    // Initialize welcome screen and preload critical resources
+    console.log('WelcomeScreen mounted successfully');
+  }, []);
+
   useFocusEffect(
     React.useCallback(() => {
-      if (swipeButtonRef.current) {
-        swipeButtonRef.current.reset();
+      try {
+        if (swipeButtonRef.current) {
+          swipeButtonRef.current.reset();
+        }
+      } catch (error) {
+        console.error('Error resetting swipe button:', error);
       }
     }, []),
   );
 
+  const handleNavigation = (route: 'Login' | 'Register') => {
+    try {
+      navigation.navigate(route);
+    } catch (error) {
+      console.error(`Error navigating to ${route}:`, error);
+    }
+  };
+
+  const handleImageError = () => {
+    console.warn('Error loading welcome screen images');
+    setImageError(true);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
-        <View style={styles.header}>
-          <AppText
-            text="Made with ❤️ in Jharkhand"
-            textStyle={styles.headerText}
-          />
-        </View>
-
-        {/* Profile Circle Section */}
-        <Image
-          source={require('../assets/images/SplashImage.png')}
-          style={styles.profileSection}
-        />
-
-        {/* CTA Section */}
-        <View style={styles.ctaSection}>
-          <View style={styles.brandContainer}>
-            {/* Logo placeholder - you can replace this with your actual logo */}
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={styles.logoPlaceholder}
+    <ErrorBoundary>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* Header */}
+          <View style={styles.header}>
+            <AppText
+              text="Made with ❤️ in Jharkhand"
+              textStyle={styles.headerText}
             />
-            <AppText text="Tribalshaadi.ai" textStyle={styles.brandText} />
           </View>
-          <View>
-            <AppText text="AI - powered" textStyle={styles.aiText} />
-            <AppText text="Tribal Matchmaking" textStyle={styles.titleText} />
-          </View>
-          <View style={{ gap: Size12 }}>
-            <View style={{ alignItems: 'center' }}>
-              <SwipeButton
-                ref={swipeButtonRef}
-                onToggle={() => navigation.navigate('Register')}
-              />
+
+          {/* Profile Circle Section */}
+          {!imageError ? (
+            <Image
+              source={require('../assets/images/SplashImage.png')}
+              style={styles.profileSection}
+              onError={handleImageError}
+              defaultSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/59/AwYDAQEA' }}
+            />
+          ) : (
+            <View style={[styles.profileSection, styles.imagePlaceholder]}>
+              <AppText text="📱" textStyle={styles.placeholderEmoji} />
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <AppText
-                text="Already have an account? Log in"
-                textStyle={styles.loginText}
-              />
-            </TouchableOpacity>
+          )}
+
+          {/* CTA Section */}
+          <View style={styles.ctaSection}>
+            <View style={styles.brandContainer}>
+              {/* Logo with fallback */}
+              {!imageError ? (
+                <Image
+                  source={require('../assets/images/logo.png')}
+                  style={styles.logoPlaceholder}
+                  onError={handleImageError}
+                />
+              ) : (
+                <View style={[styles.logoPlaceholder, styles.logoFallback]} />
+              )}
+              <AppText text="Tribalshaadi.ai" textStyle={styles.brandText} />
+            </View>
+            <View>
+              <AppText text="AI - powered" textStyle={styles.aiText} />
+              <AppText text="Tribal Matchmaking" textStyle={styles.titleText} />
+            </View>
+            <View style={styles.actionContainer}>
+              <View style={styles.swipeButtonContainer}>
+                <ErrorBoundary
+                  fallback={
+                    <TouchableOpacity 
+                      style={styles.fallbackButton}
+                      onPress={() => handleNavigation('Register')}
+                    >
+                      <AppText 
+                        text="Register with phone" 
+                        textStyle={styles.fallbackButtonText} 
+                      />
+                    </TouchableOpacity>
+                  }
+                >
+                  <SwipeButton
+                    ref={swipeButtonRef}
+                    onToggle={() => handleNavigation('Register')}
+                  />
+                </ErrorBoundary>
+              </View>
+              <TouchableOpacity onPress={() => handleNavigation('Login')}>
+                <AppText
+                  text="Already have an account? Log in"
+                  textStyle={styles.loginText}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </ErrorBoundary>
   );
 };
 
@@ -244,6 +237,38 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     textDecorationLine: 'underline',
+  },
+  // Fallback styles for error states
+  imagePlaceholder: {
+    backgroundColor: COLORS.lightgrey,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderEmoji: {
+    fontSize: fontSize36 * 2,
+    textAlign: 'center',
+  },
+  logoFallback: {
+    backgroundColor: COLORS.violet,
+  },
+  fallbackButton: {
+    backgroundColor: COLORS.black,
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 25,
+    width: screenWidth('85%'),
+    alignItems: 'center',
+  },
+  fallbackButtonText: {
+    color: COLORS.white,
+    fontSize: fontSize18,
+    fontWeight: '600',
+  },
+  actionContainer: {
+    gap: Size12,
+  },
+  swipeButtonContainer: {
+    alignItems: 'center',
   },
 });
 
