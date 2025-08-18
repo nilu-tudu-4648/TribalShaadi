@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, SafeAreaView, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import HeaderBack from '../components/HeaderBack';
 import AppTextInput from '../components/AppTextInput';
 import {
@@ -13,6 +13,7 @@ import {
   Size12,
   borderWidth,
   Size18,
+  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppButton from '../components/AppButton';
@@ -92,53 +93,60 @@ const NameScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <HeaderBack />
-        <AppText text="Name & Email" textStyle={styles.title} />
-        {/* Text Input */}
-        <AppTextInput
-          placeholder="Full Name"
-          placeholderTextColor={COLORS.placeholderText}
-          value={fullName}
-          onChangeText={validateAndSetName}
-          keyboardType="default"
-          textInputStyle={styles.textInput}
-          style={styles.inputContainer}
-        />
-        <AppTextInput
-          placeholder="Email"
-          placeholderTextColor={COLORS.placeholderText}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="default"
-          textInputStyle={styles.textInput}
-          style={styles.inputContainer}
-        />
-        {!isValidEmail && (
-          <AppText
-            text="Please enter a valid email address"
-            textStyle={styles.errorText}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <HeaderBack />
+          <AppText text="Name & Email" textStyle={styles.title} />
+          {/* Text Input */}
+          <AppTextInput
+            placeholder="Full Name"
+            placeholderTextColor={COLORS.placeholderText}
+            value={fullName}
+            onChangeText={validateAndSetName}
+            keyboardType="default"
+            textInputStyle={styles.textInput}
+            style={styles.inputContainer}
           />
-        )}
-        <AppButton
-          title="Confirm"
-          onPress={handleConfirm}
-          isLoading={loader}
-          isButtonDisabled={!fullName.trim() || loader}
-          buttonStyle={[
-            styles.button,
-            !fullName.trim() || !isValidEmail || loader
-              ? styles.buttonDisabled
-              : styles.buttonEnabled,
-          ]}
-          textStyle={[
-            styles.buttonText,
-            !fullName.trim() || !isValidEmail || loader
-              ? styles.buttonTextDisabled
-              : styles.buttonTextEnabled,
-          ]}
-        />
-      </View>
+          <AppTextInput
+            placeholder="Email"
+            placeholderTextColor={COLORS.placeholderText}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="default"
+            textInputStyle={styles.textInput}
+            style={styles.inputContainer}
+          />
+          {!isValidEmail && (
+            <AppText
+              text="Please enter a valid email address"
+              textStyle={styles.errorText}
+            />
+          )}
+          <AppButton
+            title="Confirm"
+            onPress={handleConfirm}
+            isLoading={loader}
+            isButtonDisabled={!fullName.trim() || loader}
+            buttonStyle={[
+              styles.button,
+              !fullName.trim() || !isValidEmail || loader
+                ? styles.buttonDisabled
+                : styles.buttonEnabled,
+            ]}
+            textStyle={[
+              styles.buttonText,
+              !fullName.trim() || !isValidEmail || loader
+                ? styles.buttonTextDisabled
+                : styles.buttonTextEnabled,
+            ]}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -147,6 +155,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: screenHeight(2),
   },
   content: {
     flex: 1,

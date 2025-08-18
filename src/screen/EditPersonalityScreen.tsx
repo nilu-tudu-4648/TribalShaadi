@@ -165,6 +165,7 @@ const handleSave = useCallback(async () => {
         style={styles.mainScrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Bio Text Area */}
         <View style={styles.bioContainer}>

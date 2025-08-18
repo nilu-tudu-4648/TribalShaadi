@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { View, SafeAreaView, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
   fontSize24,
@@ -8,7 +8,7 @@ import {
   Size16,
   Size40,
   Size8,
-  lignHeight72,
+  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -188,72 +188,77 @@ const AddressScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <HeaderBack />
-
-        {/* State Dropdown */}
-        <AppDropdown
-          label=""
-          selectedValue={selectedState?.name || ''}
-          placeholder="Home State/UT"
-          onPress={() => setShowStatePicker(true)}
-        />
-
-        {/* City Dropdown */}
-        <AppDropdown
-          label=""
-          selectedValue={selectedCity?.name || ''}
-          placeholder={citiesLoading ? 'Loading cities...' : 'Home City'}
-          onPress={() => !citiesLoading && setShowCityPicker(true)}
-          disabled={citiesLoading || !selectedState}
-        />
-        <View style={{ height: Size16 }} />
-        {/* Marital Status Dropdown */}
-        <AppDropdown
-          label="Marital Status"
-          selectedValue={selectedMaritalStatus?.name || ''}
-          placeholder="Select your marital status"
-          onPress={() => setShowMaritalStatusPicker(true)}
-        />
-        <View style={{ height: Size16 }} />
-        {/* Planning to settle down Chips */}
-        <View style={styles.chipSection}>
-          <AppText
-            text="Planning to settle down"
-            textStyle={styles.chipSectionTitle}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+         <HeaderBack />
+          {/* State Dropdown */}
+          <AppDropdown
+            label=""
+            selectedValue={selectedState?.name || ''}
+            placeholder="Home State/UT"
+            onPress={() => setShowStatePicker(true)}
           />
-          <View style={styles.chipContainer}>
-            {settlingDownOptions.map((option, index) => (
-              <AppChip
-                key={index}
-                title={option}
-                onPress={() => handleSettlingDownSelection(option)}
-                isSelected={selectedSettlingDown === option}
-              />
-            ))}
+
+          {/* City Dropdown */}
+          <AppDropdown
+            label=""
+            selectedValue={selectedCity?.name || ''}
+            placeholder={citiesLoading ? 'Loading cities...' : 'Home City'}
+            onPress={() => !citiesLoading && setShowCityPicker(true)}
+            disabled={citiesLoading || !selectedState}
+          />
+          <View style={{ height: Size16 }} />
+          {/* Marital Status Dropdown */}
+          <AppDropdown
+            label="Marital Status"
+            selectedValue={selectedMaritalStatus?.name || ''}
+            placeholder="Select your marital status"
+            onPress={() => setShowMaritalStatusPicker(true)}
+          />
+          <View style={{ height: Size16 }} />
+          {/* Planning to settle down Chips */}
+          <View style={styles.chipSection}>
+            <AppText
+              text="Planning to settle down"
+              textStyle={styles.chipSectionTitle}
+            />
+            <View style={styles.chipContainer}>
+              {settlingDownOptions.map((option, index) => (
+                <AppChip
+                  key={index}
+                  title={option}
+                  onPress={() => handleSettlingDownSelection(option)}
+                  isSelected={selectedSettlingDown === option}
+                />
+              ))}
+            </View>
+          </View>
+          <View style={styles.chipSection}>
+            <AppText
+              text="Kids"
+              textStyle={styles.chipSectionTitle}
+            />
+            <View style={styles.chipContainer}>
+              {kidsOptions.map((option, index) => (
+                <AppChip
+                  key={index}
+                  title={option}
+                  onPress={() => handleKidsSelection(option)}
+                  isSelected={selectedKids === option}
+                />
+              ))}
+            </View>
           </View>
         </View>
-        <View style={styles.chipSection}>
-          <AppText
-            text="Kids"
-            textStyle={styles.chipSectionTitle}
-          />
-          <View style={styles.chipContainer}>
-            {kidsOptions.map((option, index) => (
-              <AppChip
-                key={index}
-                title={option}
-                onPress={() => handleKidsSelection(option)}
-                isSelected={selectedKids === option}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Spacer */}
-        <View style={styles.spacer} />
-
-        {/* Continue Button */}
+      </ScrollView>
+      
+      {/* Continue Button - Fixed at bottom */}
+      <View style={styles.buttonContainer}>
         <AppButton
           title="Continue"
           onPress={handleContinue}
@@ -315,12 +320,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: screenHeight(2), // Small bottom padding for scrollview
+  },
+  content: {
     paddingHorizontal: lignHeight24,
-    paddingVertical: lignHeight24,
+    paddingVertical: screenHeight(2), // Responsive vertical padding
     gap: lignHeight24,
-    paddingTop: lignHeight72,
+    paddingTop: screenHeight(3), // Much smaller top padding, responsive to screen height
   },
   backButton: {
     width: Size40,
@@ -350,13 +361,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Size12,
   },
-  spacer: {
-    flex: 1,
+  buttonContainer: {
+    paddingHorizontal: lignHeight24,
+    paddingVertical: screenHeight(2), // Responsive padding
+    paddingBottom: screenHeight(3), // Extra bottom padding for safe area
+    backgroundColor: COLORS.white,
+    borderTopWidth: 0.5,
+    borderTopColor: COLORS.borderLight,
   },
   continueButton: {
     borderRadius: Size8,
     alignItems: 'center',
     justifyContent: 'center',
+    height: screenHeight(6), // Responsive button height
   },
   continueButtonActive: {
     backgroundColor: COLORS.textBlack,

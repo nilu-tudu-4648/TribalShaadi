@@ -248,10 +248,18 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
     AppToast('OTP verified successfully');
+    console.log(response.data, 'verifyOTP');
     if (response.data.status === 200) {
       const user = response.data.recordList[0];
       console.log(user, 'verifyOTP');
-      await saveUserToStorage(user);
+      
+      // Handle empty token by using user.id as fallback or generate a temporary token
+      const userWithToken = {
+        ...user,
+        token: user.token || `temp_token_${user.id}_${Date.now()}`
+      };
+      
+      await saveUserToStorage(userWithToken);
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
       dispatch(
@@ -261,7 +269,26 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
         }),
       );
       dispatch(setLoadingfalse());
-      checkAuth(dispatch);
+      
+      // Wait a bit for all dispatches to complete
+      await delay(500);
+      
+      // Check auth and navigate accordingly
+      try {
+        const authResult = await checkAuth(dispatch);
+        
+        // If profile is complete but checkAuth didn't navigate, navigate to main tabs
+        if (authResult === true) {
+          dispatch(setUserRegistrationCompleted(true));
+          console.log('Navigating to main tabs after successful OTP verification');
+          navigate(ROUTES.MAIN_TABS);
+        }
+      } catch (navError) {
+        console.error('Error during post-OTP navigation:', navError);
+        // Fallback: at least set registration completed so app state is updated
+        dispatch(setUserRegistrationCompleted(true));
+      }
+      
       return true;
     } else {
       return false;
@@ -277,7 +304,8 @@ export const getUserDetailsApi = async (url, dispatch) => {
     
     if (!token || token === 'null' || token === 'undefined') {
       console.error('No valid token found for getUserDetailsApi');
-      logoutUser(dispatch);
+      // Don't logout immediately during OTP verification, just log and continue
+      console.log('Continuing without token during potential first login');
       return;
     }
     
@@ -381,17 +409,6 @@ export const checkAuth = async dispatch => {
       return false;
     }
     
-    // Safe check for interests
-    try {
-      if (user.intrests && Array.isArray(user.intrests) && user.intrests.length > 0) {
-        if (typeof dispatch === 'function') {
-          dispatch(setUserRegistrationCompleted(true));
-        }
-      }
-    } catch (interestError) {
-      console.error('Error checking user interests:', interestError);
-    }
-    
     console.log('checkAuth - User profile check:', user);
 
     // Check profile completion steps in order with safe navigation
@@ -417,6 +434,26 @@ export const checkAuth = async dispatch => {
     } catch (profileCheckError) {
       console.error('Error in profile completion check:', profileCheckError);
       return false;
+    }
+    
+    // If we reach here, profile is complete
+    console.log('Profile is complete, setting registration completed');
+    
+    // Safe check for interests and set registration completed
+    try {
+      if (user.intrests && Array.isArray(user.intrests) && user.intrests.length > 0) {
+        if (typeof dispatch === 'function') {
+          dispatch(setUserRegistrationCompleted(true));
+        }
+      } else {
+        // Even if interests are missing, if all other profile steps are complete,
+        // we should still mark registration as completed
+        if (typeof dispatch === 'function') {
+          dispatch(setUserRegistrationCompleted(true));
+        }
+      }
+    } catch (interestError) {
+      console.error('Error setting user registration completed:', interestError);
     }
     
     return true;

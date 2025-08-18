@@ -6,9 +6,9 @@ import {
   fontSize24,
   lignHeight24,
   Size8,
-  lignHeight72,
   lignHeight20,
   Size16,
+  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -111,80 +111,84 @@ const QualificationScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-      <View style={styles.content}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
         <HeaderBack />
+          {/* Title */}
+          <AppText text="Your highest qualification" textStyle={styles.title} />
 
-        {/* Title */}
-        <AppText text="Your highest qualification" textStyle={styles.title} />
-
-        {/* Highest Qualification Dropdown */}
-        <AppDropdown
-          label=""
-          selectedValue={selectedQualification?.name || ''}
-          placeholder="Select highest degree"
-          onPress={() => setShowQualificationPicker(true)}
-        />
-
-        {/* College/University/School Text Input */}
-        <View style={styles.textInputContainer}>
-          <AppTextInput
-            placeholder="College/University/School"
-            value={collegeName}
-            onChangeText={setCollegeName}
-            keyboardType="default"
-            placeholderTextColor={COLORS.placeholderText}
-            style={styles.textInputStyle}
+          {/* Highest Qualification Dropdown */}
+          <AppDropdown
+            label=""
+            selectedValue={selectedQualification?.name || ''}
+            placeholder="Select highest degree"
+            onPress={() => setShowQualificationPicker(true)}
           />
-        </View>
 
-        {/* Work Experience Section */}
-        <AppText text="Work Experience" textStyle={styles.sectionTitle} />
-
-        {/* Work Experience Dropdown */}
-        <AppDropdown
-          label=""
-          selectedValue={selectedWorkExperience?.name || ''}
-          placeholder="Are you working?"
-          onPress={() => setShowWorkExperiencePicker(true)}
-        />
-
-        {/* Occupation Dropdown */}
-        <AppDropdown
-          label=""
-          selectedValue={selectedOccupation?.name || ''}
-          placeholder="Occupation"
-          onPress={() => setShowOccupationPicker(true)}
-        />
-
-        {/* Organization Name Text Input */}
-        {selectedWorkExperience?.id === 1 && (
+          {/* College/University/School Text Input */}
           <View style={styles.textInputContainer}>
             <AppTextInput
-              placeholder="Organization name"
-              value={organizationName}
-              onChangeText={setOrganizationName}
+              placeholder="College/University/School"
+              value={collegeName}
+              onChangeText={setCollegeName}
               keyboardType="default"
               placeholderTextColor={COLORS.placeholderText}
               style={styles.textInputStyle}
             />
           </View>
-        )}
 
-        {/* Income Dropdown */}
-        {selectedWorkExperience?.id === 1 && (
+          {/* Work Experience Section */}
+          <AppText text="Work Experience" textStyle={styles.sectionTitle} />
+
+          {/* Work Experience Dropdown */}
           <AppDropdown
             label=""
-            selectedValue={selectedIncome?.value || ''}
-            placeholder="Income"
-            onPress={() => setShowIncomePicker(true)}
+            selectedValue={selectedWorkExperience?.name || ''}
+            placeholder="Are you working?"
+            onPress={() => setShowWorkExperiencePicker(true)}
           />
-        )}
-        {/* Spacer */}
-        <View style={styles.spacer} />
-        <View style={styles.spacer} />
-        <View style={styles.spacer} />
-        {/* Continue Button */}
+
+          {/* Occupation Dropdown */}
+          <AppDropdown
+            label=""
+            selectedValue={selectedOccupation?.name || ''}
+            placeholder="Occupation"
+            onPress={() => setShowOccupationPicker(true)}
+          />
+
+          {/* Organization Name Text Input */}
+          {selectedWorkExperience?.id === 1 && (
+            <View style={styles.textInputContainer}>
+              <AppTextInput
+                placeholder="Organization name"
+                value={organizationName}
+                onChangeText={setOrganizationName}
+                keyboardType="default"
+                placeholderTextColor={COLORS.placeholderText}
+                style={styles.textInputStyle}
+              />
+            </View>
+          )}
+
+          {/* Income Dropdown */}
+          {selectedWorkExperience?.id === 1 && (
+            <AppDropdown
+              label=""
+              selectedValue={selectedIncome?.value || ''}
+              placeholder="Income"
+              onPress={() => setShowIncomePicker(true)}
+            />
+          )}
+        </View>
+      </ScrollView>
+      
+      {/* Continue Button - Fixed at bottom */}
+      <View style={styles.buttonContainer}>
         <AppButton
           title="Continue"
           onPress={handleContinue}
@@ -203,8 +207,7 @@ const QualificationScreen = () => {
               : styles.continueButtonTextInactive,
             ]}
           />
-        </View>
-      </ScrollView>
+      </View>
 
       {/* Qualification Picker Modal */}
       <AppPickerModal
@@ -271,12 +274,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: screenHeight(2), // Small bottom padding for scrollview
+  },
+  content: {
     paddingHorizontal: lignHeight24,
-    paddingVertical: lignHeight24,
-    paddingTop: lignHeight72,
+    paddingVertical: screenHeight(2), // Responsive vertical padding
     gap: lignHeight20,
+    paddingTop: screenHeight(1.5), // Responsive top padding
   },
   title: {
     fontSize: fontSize24,
@@ -295,13 +304,19 @@ const styles = StyleSheet.create({
   textInputStyle: {
     // Text input styling
   },
-  spacer: {
-    flex: 1,
+  buttonContainer: {
+    paddingHorizontal: lignHeight24,
+    paddingVertical: screenHeight(2), // Responsive padding
+    paddingBottom: screenHeight(3), // Extra bottom padding for safe area
+    backgroundColor: COLORS.white,
+    borderTopWidth: 0.5,
+    borderTopColor: COLORS.borderLight,
   },
   continueButton: {
     borderRadius: Size8,
     alignItems: 'center',
     justifyContent: 'center',
+    height: screenHeight(6), // Responsive button height
   },
   continueButtonActive: {
     backgroundColor: COLORS.black,

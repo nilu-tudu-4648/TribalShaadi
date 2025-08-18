@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
   fontSize24,
@@ -11,6 +11,7 @@ import {
   Size4,
   SIZES,
   borderWidth,
+  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -71,61 +72,68 @@ const AboutScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <HeaderBack />
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <HeaderBack />
 
-        {/* Title */}
-        <AppText text="About Yourself" textStyle={styles.title} />
+          {/* Title */}
+          <AppText text="About Yourself" textStyle={styles.title} />
 
-        {/* Text Input Area */}
-        <View style={styles.textInputContainer}>
-          <AppTextInput
-            placeholder="Write about yourself in 35 words"
-            placeholderTextColor={COLORS.grey}
-            value={aboutText}
-            onChangeText={setAboutText}
-            keyboardType="default"
-            style={styles.textInputWrapper}
-            textInputStyle={styles.textInput}
-            multiline={true}
-            textAlignVertical="top"
-          />
-        </View>
+          {/* Text Input Area */}
+          <View style={styles.textInputContainer}>
+            <AppTextInput
+              placeholder="Write about yourself in 35 words"
+              placeholderTextColor={COLORS.grey}
+              value={aboutText}
+              onChangeText={setAboutText}
+              keyboardType="default"
+              style={styles.textInputWrapper}
+              textInputStyle={styles.textInput}
+              multiline={true}
+              textAlignVertical="top"
+            />
+          </View>
 
-        {/* Word Counter */}
-        <View style={styles.counterContainer}>
-          <AppText
-            text={`${wordCount}/${MAX_WORDS} words`}
+          {/* Word Counter */}
+          <View style={styles.counterContainer}>
+            <AppText
+              text={`${wordCount}/${MAX_WORDS} words`}
+              textStyle={[
+                styles.counterText,
+                wordCount > MAX_WORDS && styles.counterTextError,
+              ]}
+            />
+          </View>
+
+          {/* Spacer */}
+          <View style={styles.spacer} />
+
+          {/* Continue Button */}
+          <AppButton
+            title="Continue"
+            onPress={handleContinue}
+            isLoading={loader}
+            isButtonDisabled={!isFormValid || loader}
+            buttonStyle={[
+              styles.continueButton,
+              isFormValid
+                ? styles.continueButtonActive
+                : styles.continueButtonInactive,
+            ]}
             textStyle={[
-              styles.counterText,
-              wordCount > MAX_WORDS && styles.counterTextError,
+              styles.continueButtonText,
+              isFormValid
+                ? styles.continueButtonTextActive
+                : styles.continueButtonTextInactive,
             ]}
           />
         </View>
-
-        {/* Spacer */}
-        <View style={styles.spacer} />
-
-        {/* Continue Button */}
-        <AppButton
-          title="Continue"
-          onPress={handleContinue}
-          isLoading={loader}
-          isButtonDisabled={!isFormValid || loader}
-          buttonStyle={[
-            styles.continueButton,
-            isFormValid
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
-          ]}
-          textStyle={[
-            styles.continueButtonText,
-            isFormValid
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
-          ]}
-        />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -134,6 +142,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: screenHeight(2),
   },
   content: {
     flex: 1,
