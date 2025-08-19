@@ -221,6 +221,7 @@ const HomeScreen = () => {
   }, [user?.id, dispatch]);
 
   useEffect(() => {
+    dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     if (matchedUsers && matchedUsers.length > currentIndex) {
       const currentUserId = matchedUsers[currentIndex].id;
       const nextUserId =
@@ -230,7 +231,6 @@ const HomeScreen = () => {
           `${baseUrl}/${getUserDetailsUrl}id=${currentUserId}`,
         ),
       );
-      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(
         getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
           userId: currentUserId,

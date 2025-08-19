@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import HeaderBack from '../components/HeaderBack';
 import { COLORS } from '../constants/AppColors';
 import {
@@ -21,8 +27,6 @@ import { updateUrl } from '../constants/functions';
 import { completeUserProfileV2Interests } from '../store/reducers/authReducer';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES, INTERESTS } from '../constants/data';
-
-
 
 const SelectInterestsScreen = () => {
   const [selected, setSelected] = useState<string[]>([]);
@@ -47,12 +51,19 @@ const SelectInterestsScreen = () => {
     }
   }, [isInterestsUpdated, navigation]);
   const handleContinue = async () => {
-    const selectedInterests = selected.map(item => item.split(' ').slice(1).join(' ')).join(',');
+    const selectedInterests = selected
+      .map(item => item.split(' ').slice(1).join(' '))
+      .join(',');
     try {
       const requestBody = {
         id: user.id,
         intrests: selectedInterests,
         isProfileCompleted: 1,
+        pMaritalStatusId: 'any',
+        pReligionId: 'any',
+        pCommunityId: 'any',
+        pOccupationId: 'any',
+        psettle_down: 'any',
       };
       dispatch(completeUserProfileV2Interests(updateUrl, requestBody));
     } catch (error) {
@@ -60,7 +71,7 @@ const SelectInterestsScreen = () => {
     }
   };
 
-    return (
+  return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
@@ -68,12 +79,15 @@ const SelectInterestsScreen = () => {
 
         <View style={styles.headerRow}>
           <AppText text="Select interests" textStyle={styles.title} />
-          <AppText text={`(${selected.length}/${maxSelect})`} textStyle={styles.counter} />
+          <AppText
+            text={`(${selected.length}/${maxSelect})`}
+            textStyle={styles.counter}
+          />
         </View>
 
         {/* Interests */}
-        <ScrollView 
-          contentContainerStyle={styles.interestsContainer} 
+        <ScrollView
+          contentContainerStyle={styles.interestsContainer}
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
         >
@@ -85,13 +99,20 @@ const SelectInterestsScreen = () => {
                 onPress={() => toggleInterest(item)}
                 style={[
                   styles.interestChip,
-                  isSelected ? styles.interestChipSelected : styles.interestChipUnselected
+                  isSelected
+                    ? styles.interestChipSelected
+                    : styles.interestChipUnselected,
                 ]}
               >
-                <AppText text={item} textStyle={[
-                  styles.interestText,
-                  isSelected ? styles.interestTextSelected : styles.interestTextUnselected
-                ]} />
+                <AppText
+                  text={item}
+                  textStyle={[
+                    styles.interestText,
+                    isSelected
+                      ? styles.interestTextSelected
+                      : styles.interestTextUnselected,
+                  ]}
+                />
               </TouchableOpacity>
             );
           })}
@@ -105,7 +126,9 @@ const SelectInterestsScreen = () => {
           isButtonDisabled={selected.length < 1}
           buttonStyle={[
             styles.continueButton,
-            selected.length !== 0 ? styles.continueButtonActive : styles.continueButtonInactive,
+            selected.length !== 0
+              ? styles.continueButtonActive
+              : styles.continueButtonInactive,
           ]}
           textStyle={[
             styles.continueButtonText,

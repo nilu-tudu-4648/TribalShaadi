@@ -30,17 +30,44 @@ const ForegroundHandler = (params) => {
                 
                 // Use the default messaging instance
                 unsubscribe = messaging().onMessage(async remoteMessage => {
-                   console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
-                   
-                   // Only show local notification if app is in foreground
-                   // Firebase automatically handles notifications when app is in background/quit
-                   if (AppState.currentState === 'active') {
-                       const { title, body } = remoteMessage.notification || {};
-                       const image = remoteMessage.notification?.android?.imageUrl;
+                   try {
+                       console.log('A new FCM message arrived!');
                        
-                       if (title && body) {
-                           await schedulePushNotification(title, body, image);
+                       // Only show local notification if app is in foreground
+                       // Firebase automatically handles notifications when app is in background/quit
+                       if (AppState.currentState === 'active') {
+                           // Add comprehensive null safety checks
+                           if (!remoteMessage) {
+                               console.log('Remote message is null or undefined');
+                               return;
+                           }
+                           
+                           const notification = remoteMessage.notification;
+                           if (!notification) {
+                               console.log('No notification data found in message');
+                               return;
+                           }
+                           
+                           const title = notification.title;
+                           const body = notification.body;
+                           
+                           // Validate title and body exist and are strings
+                           if (!title || !body) {
+                               console.log('Missing title or body in notification');
+                               return;
+                           }
+                           
+                           if (typeof title !== 'string' || typeof body !== 'string') {
+                               console.log('Title or body is not a string');
+                               return;
+                           }
+                           
+                           // Call with only title and body parameters
+                           schedulePushNotification(title, body);
                        }
+                   } catch (error) {
+                       console.error('Error handling foreground notification:', error);
+                       // Don't re-throw to prevent app crash
                    }
                 });
             } catch (error) {

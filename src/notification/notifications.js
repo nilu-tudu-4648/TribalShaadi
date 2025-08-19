@@ -195,44 +195,105 @@ export const notificationListner = async () => {
   try {
     // Handle notification when app is opened from background
     messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log(
-        'Notification caused app to open from background state:',
-        remoteMessage.notification,
-      );
-      // Handle notification action here
-      handleNotificationAction(remoteMessage);
+      try {
+        console.log('Notification caused app to open from background state');
+        
+        // Add null safety checks
+        if (!remoteMessage) {
+          console.log('Background notification: remoteMessage is null or undefined');
+          return;
+        }
+
+        console.log('Background notification data:', remoteMessage.notification);
+        
+        // Handle notification action here with error handling
+        handleNotificationAction(remoteMessage);
+      } catch (error) {
+        console.error('Error handling background notification tap:', error);
+        // Don't re-throw to prevent crashes
+      }
     });
 
     // Handle notification when app is opened from quit state
     messaging()
       .getInitialNotification()
       .then(async remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            'Notification caused app to open from quit state:',
-            remoteMessage.notification,
-          );
-          // Handle notification action here
-          handleNotificationAction(remoteMessage);
+        try {
+          if (remoteMessage) {
+            console.log('Notification caused app to open from quit state');
+            console.log('Quit state notification data:', remoteMessage.notification);
+            
+            // Handle notification action here with error handling
+            handleNotificationAction(remoteMessage);
+          } else {
+            console.log('No initial notification found');
+          }
+        } catch (error) {
+          console.error('Error handling quit state notification:', error);
+          // Don't re-throw to prevent crashes
         }
+      })
+      .catch(error => {
+        console.error('Error getting initial notification:', error);
+        // Continue app flow even if initial notification check fails
       });
 
     // Handle background messages
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
+      try {
+        console.log('Message handled in the background!');
 
-      // Process any data-only logic here if needed
-      if (remoteMessage.data) {
-        console.log('Processing background data:', remoteMessage.data);
-        // Handle data processing, storage updates, etc.
+        // Add null safety checks
+        if (!remoteMessage) {
+          console.log('Background message: remoteMessage is null or undefined');
+          return;
+        }
+
+        // Process any data-only logic here if needed
+        const data = remoteMessage.data;
+        if (data && typeof data === 'object') {
+          console.log('Processing background data:', data);
+          // Handle data processing, storage updates, etc.
+          // Add any specific background processing logic here
+        } else {
+          console.log('Background message: No valid data found');
+        }
+      } catch (error) {
+        console.error('Error handling background message:', error);
+        // Don't re-throw to prevent crashes
       }
     });
 
     // Handle token refresh
-    messaging().onTokenRefresh(token => {
-      console.log('FCM token refreshed:', token);
-      AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
-      // sendTokenToServer(token);
+    messaging().onTokenRefresh(async token => {
+      try {
+        console.log('FCM token refreshed:', token);
+        
+        // Add validation for token
+        if (!token || typeof token !== 'string') {
+          console.error('Invalid FCM token received in refresh:', token);
+          return;
+        }
+
+        // Store token with error handling
+        try {
+          await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
+          console.log('New FCM token stored successfully');
+        } catch (storageError) {
+          console.error('Error storing refreshed FCM token:', storageError);
+        }
+
+        // Optionally send token to server
+        try {
+          await sendTokenToServer(token);
+        } catch (serverError) {
+          console.error('Error sending refreshed token to server:', serverError);
+          // Continue even if server update fails
+        }
+      } catch (error) {
+        console.error('Error handling token refresh:', error);
+        // Don't re-throw to prevent crashes
+      }
     });
   } catch (error) {
     console.error('Error setting up notification listeners:', error);
@@ -241,8 +302,26 @@ export const notificationListner = async () => {
 
 // Handle notification actions (navigation, etc.)
 const handleNotificationAction = remoteMessage => {
-  if (remoteMessage?.data) {
-    const { type, screen, params } = remoteMessage.data;
+  try {
+    // Add comprehensive null safety checks
+    if (!remoteMessage) {
+      console.log('handleNotificationAction: remoteMessage is null or undefined');
+      return;
+    }
+
+    const data = remoteMessage.data;
+    if (!data || typeof data !== 'object') {
+      console.log('handleNotificationAction: No valid data found in notification');
+      return;
+    }
+
+    const { type, params } = data;
+
+    // Validate type exists and is string
+    if (!type || typeof type !== 'string') {
+      console.log('handleNotificationAction: Invalid or missing notification type');
+      return;
+    }
 
     // You can add navigation logic here based on notification data
     switch (type) {
@@ -261,40 +340,60 @@ const handleNotificationAction = remoteMessage => {
       default:
         console.log('Unknown notification type:', type);
     }
+  } catch (error) {
+    console.error('Error handling notification action:', error);
+    // Don't re-throw to prevent app crashes
   }
 };
 
 export const schedulePushNotification = async (
   title,
-  message,
+  message
 ) => {
   try {
+    // Add validation for required parameters
+    if (!title || !message) {
+      console.error('Title and message are required for notification');
+      return;
+    }
+
+    // Ensure title and message are strings
+    if (typeof title !== 'string' || typeof message !== 'string') {
+      console.error('Title and message must be strings');
+      return;
+    }
+
+    // Use minimal configuration to prevent crashes
     const notificationConfig = {
       channelId: 'tribalShaadi',
-      title,
-      message,
-      largeIcon: 'ic_launcher',
-      smallIcon: 'ic_notification',
-      color: 'blue',
-      vibrate: true,
-      vibration: 300,
+      title: title.trim(),
+      message: message.trim(),
       playSound: true,
       soundName: 'default',
       autoCancel: true,
       invokeApp: true,
     };
 
-    // Add image support if imageUrl is provided
-    // if (imageUrl) {
-    //   notificationConfig.largeIconUrl = imageUrl; // Large icon (circular)
-    //   notificationConfig.bigPictureUrl = imageUrl; // Big picture style (expandable)
-    //   notificationConfig.bigLargeIcon = 'ic_launcher'; // Fallback icon when expanded
-    // }
-
     console.log('Showing foreground notification:', title);
-    PushNotification.localNotification(notificationConfig);
+    
+    // Wrap PushNotification call in try-catch to prevent crashes
+    try {
+      PushNotification.localNotification(notificationConfig);
+    } catch (notificationError) {
+      console.error('Error calling PushNotification.localNotification:', notificationError);
+      // Try with even more minimal configuration
+      try {
+        PushNotification.localNotification({
+          title: title.trim(),
+          message: message.trim(),
+        });
+      } catch (fallbackError) {
+        console.error('Even minimal notification failed:', fallbackError);
+      }
+    }
   } catch (error) {
     console.error('Error showing foreground notification:', error);
+    // Don't re-throw to prevent app crashes
   }
 };
 
