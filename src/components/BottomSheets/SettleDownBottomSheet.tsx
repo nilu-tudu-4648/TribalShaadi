@@ -46,17 +46,15 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
   const handleToggle = (settleType: string) => {
     let updated: string[];
     if (settleType === 'Any') {
+      // If Any is clicked, either select only Any (deselect all others) or deselect Any
       updated = localSelected.includes('Any') ? [] : ['Any'];
     } else {
-      const anyIndex = localSelected.indexOf('Any');
-      if (anyIndex > -1) {
-        updated = [settleType];
+      // If any other option is clicked, remove 'Any' if it exists and toggle the option
+      const filteredWithoutAny = localSelected.filter(item => item !== 'Any');
+      if (filteredWithoutAny.includes(settleType)) {
+        updated = filteredWithoutAny.filter(item => item !== settleType);
       } else {
-        if (localSelected.includes(settleType)) {
-          updated = localSelected.filter(j => j !== settleType);
-        } else {
-          updated = [...localSelected, settleType];
-        }
+        updated = [...filteredWithoutAny, settleType];
       }
     }
     setLocalSelected(updated);
@@ -64,9 +62,11 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
 
   const handleApply = async () => {
     try {
+      // Convert "Any" to "any" in the request body
+      const formattedSelection = localSelected.map(item => item === 'Any' ? 'any' : item);
       const requestBody = {
         id: user.id,
-        psettle_down: localSelected.join(','),
+        psettle_down: formattedSelection.join(','),
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));

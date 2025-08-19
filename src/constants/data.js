@@ -96,6 +96,7 @@ export const DRINKING_OPTIONS = [
 export const SMOKING_OPTIONS = ['No', 'Yes'];
 
 export const SETTLING_DOWN_OPTIONS = [
+  'Any',
   'Within 6 months',
   'Within a year',
   'Within 2 year',

@@ -214,6 +214,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
             style={styles.searchInput}
             placeholder="Add multiple cities/states"
             value={searchQuery}
+            placeholderTextColor={COLORS.textGrey}
             onFocus={() => setActive(true)}
             onBlur={() => setActive(false)}
             onChangeText={setSearchQuery}
@@ -314,7 +315,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
                 {selectedState === null && selectedCities.length === 0 && (
                   <View style={styles.emptySelectionContainer}>
                     <AppText
-                      text="No locations selected yet. Search above to add locations."
+                      text="Open to all cities/states"
                       textStyle={styles.emptyText}
                     />
                   </View>
@@ -390,15 +391,16 @@ const styles = StyleSheet.create({
     gap: Size8,
     paddingBottom: Size16,
   },
-  emptySelectionContainer: {
+    emptySelectionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Size20,
+    paddingVertical: Size20*4,
+    width: '90%',
   },
   emptyText: {
-    fontSize: fontSize14,
+    fontSize: fontSize16,
     fontFamily: Fonts.OPEN_SANS_REGULAR,
-    color: COLORS.textGrey,
+    color: "#1B222B",
     textAlign: 'center',
   },
   chip: {

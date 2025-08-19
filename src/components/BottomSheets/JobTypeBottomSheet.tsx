@@ -35,6 +35,15 @@ interface JobTypeBottomSheetProps {
   jobTypeOptions: any[];
 }
 
+// Backdrop component definition outside render
+const renderBackdrop = (props: any) => (
+  <BottomSheetBackdrop
+    {...props}
+    appearsOnIndex={0}
+    disappearsOnIndex={-1}
+  />
+);
+
 const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   bottomSheetRef,
   jobTypeOptions,
@@ -47,9 +56,9 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   useEffect(() => {
     if (user.pOccupationId) {
       if (Array.isArray(user.pOccupationId)) {
-        setLocalSelected(user.pOccupationId);
+        setLocalSelected(user.pOccupationId.map(String));
       } else if (typeof user.pOccupationId === 'string') {
-        setLocalSelected(user.pOccupationId.split(',').map(Number));
+        setLocalSelected(user.pOccupationId.split(',').map(String));
       } else {
         setLocalSelected([]);
       }
@@ -60,15 +69,29 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];
+    
+    // Find the "Any" option
+    const anyOption = jobTypeOptions?.find(option => 
+      option.name.toLowerCase() === 'any'
+    );
+    const anyOptionId = anyOption ? String(anyOption.id) : null;
+    
     let updated: string[];
-    if (jobType === 'Any') {
-      updated = ['Any'];
+    
+    if (currentSelected.includes(jobType)) {
+      // If clicking on already selected item, remove it
+      updated = currentSelected.filter(j => j !== jobType);
     } else {
-      updated = currentSelected.filter(j => j !== 'Any');
-      if (updated.includes(jobType)) {
-        updated = updated.filter(j => j !== jobType);
+      // If selecting "Any", clear all other selections and only keep "Any"
+      if (anyOptionId && jobType === anyOptionId) {
+        updated = [jobType];
       } else {
-        updated = [...updated, jobType];
+        // If selecting any other option while "Any" is selected, remove "Any"
+        let newSelected = [...currentSelected];
+        if (anyOptionId && currentSelected.includes(anyOptionId)) {
+          newSelected = newSelected.filter(j => j !== anyOptionId);
+        }
+        updated = [...newSelected, jobType];
       }
     }
     setLocalSelected(updated);
@@ -76,9 +99,23 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
 
   const handleApply = async () => {
     try {
+      // Find the "Any" option
+      const anyOption = jobTypeOptions?.find(option => 
+        option.name.toLowerCase() === 'any'
+      );
+      const anyOptionId = anyOption ? String(anyOption.id) : null;
+      
+      // Check if "Any" is selected and convert it to "any" string
+      let pOccupationIdString;
+      if (anyOptionId && localSelected?.includes(anyOptionId)) {
+        pOccupationIdString = 'any';
+      } else {
+        pOccupationIdString = localSelected?.join(',');
+      }
+
       const requestBody = {
         id: user.id,
-        pOccupationId: localSelected?.join(','),
+        pOccupationId: pOccupationIdString,
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -106,13 +143,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
       snapPoints={snapPoints}
       enablePanDownToClose={true}
       onChange={handleSheetChanges}
-      backdropComponent={props => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-        />
-      )}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       backgroundStyle={styles.bottomSheetBackground}
     >
@@ -120,7 +151,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
         <View style={styles.headerContainer}>
           <AppText text="Job type" textStyle={styles.headerTitle} />
           <AppText
-            text="You can select mutiple options"
+            text="You can select multiple options"
             textStyle={styles.headerSubtitle}
           />
         </View>
@@ -133,8 +164,8 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
                 option.name.charAt(0).toUpperCase() +
                 option.name.slice(1).toLowerCase()
               }
-              isSelected={localSelected?.includes(option.id)}
-              onPress={() => handleToggle(option.id)}
+              isSelected={localSelected?.includes(String(option.id))}
+              onPress={() => handleToggle(String(option.id))}
             />
           ))}
         </View>

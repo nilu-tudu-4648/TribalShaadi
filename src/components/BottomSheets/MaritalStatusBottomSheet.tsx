@@ -33,7 +33,7 @@ import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  maritalOptions: string[] | undefined;
+  maritalOptions: Array<{id: string | number; name: string}> | undefined;
   localSelectedStatuses: string[] | undefined;
   setLocalSelectedStatuses: (statuses: string[]) => void;
 }
@@ -62,11 +62,35 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
     const currentStatuses = Array.isArray(localSelectedStatuses)
       ? localSelectedStatuses.map(s => String(s))
       : [];
+    
+    // Find the "Any" option
+    const anyOption = maritalOptions?.find(option => 
+      option.name.toLowerCase() === 'any'
+    );
+    const anyOptionId = anyOption ? String(anyOption.id) : null;
+    
     let updatedStatuses;
+    
     if (currentStatuses.includes(statusId)) {
+      // If clicking on already selected item, remove it
       updatedStatuses = currentStatuses.filter(s => s !== statusId);
+      
+      // If no options are selected after removal, automatically select "Any"
+      if (updatedStatuses.length === 0 && anyOptionId) {
+        updatedStatuses = [anyOptionId];
+      }
     } else {
-      updatedStatuses = [...currentStatuses, statusId];
+      // If selecting "Any", clear all other selections and only keep "Any"
+      if (anyOptionId && statusId === anyOptionId) {
+        updatedStatuses = [statusId];
+      } else {
+        // If selecting any other option while "Any" is selected, remove "Any"
+        let newStatuses = [...currentStatuses];
+        if (anyOptionId && currentStatuses.includes(anyOptionId)) {
+          newStatuses = newStatuses.filter(s => s !== anyOptionId);
+        }
+        updatedStatuses = [...newStatuses, statusId];
+      }
     }
     setLocalSelectedStatuses(updatedStatuses);
   };
@@ -88,7 +112,6 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       setLocalSelectedStatuses(maritalStatuses);
     }
   }, [user, setLocalSelectedStatuses]);
-
   const handleApply = async () => {
     try {
       // Clean and filter the marital status IDs
@@ -96,7 +119,20 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       const cleanedStatuses = safeStatuses
         .filter(status => status && status.toString().trim() !== ''); // Remove empty/null values
 
-      const pMaritalStatusIdString = cleanedStatuses.join(',');
+      // Find the "Any" option
+      const anyOption = maritalOptions?.find(option => 
+        option.name.toLowerCase() === 'any'
+      );
+      const anyOptionId = anyOption ? String(anyOption.id) : null;
+      
+      // Check if "Any" is selected and convert it to "any" string
+      let pMaritalStatusIdString;
+      if (anyOptionId && cleanedStatuses.includes(anyOptionId)) {
+        pMaritalStatusIdString = 'any';
+      } else {
+        pMaritalStatusIdString = cleanedStatuses.join(',');
+      }
+
       const requestBody = {
         id: user.id,
         pMaritalStatusId: pMaritalStatusIdString,

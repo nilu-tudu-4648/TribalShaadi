@@ -90,7 +90,8 @@ const MainApp = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await checkUserLoggedIn(dispatch);
+        // Pass true for isInitialLoad to handle 401 errors gracefully
+        await checkUserLoggedIn(dispatch, true);
         setIsInitialized(true);
       } catch (error) {
         console.error('Error during app initialization:', error);

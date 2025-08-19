@@ -33,6 +33,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
+// Backdrop component definition outside render
+const renderBackdrop = (props: any) => (
+  <BottomSheetBackdrop
+    {...props}
+    appearsOnIndex={0}
+    disappearsOnIndex={-1}
+  />
+);
+
 interface ReligionBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
   religionOptions: any[];
@@ -73,10 +82,35 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
 
   const handleApply = async () => {
     try {
+      // Debug: Log the religionOptions array
+      console.log('religionOptions:', religionOptions);
+      
+      // Find the "Any" option
+      const anyOption = religionOptions?.find(option => 
+        option.name.toLowerCase() === 'any'
+      );
+      console.log('anyOption found:', anyOption);
+      
+      const anyOptionId = anyOption ? String(anyOption.id) : null;
+      console.log('anyOptionId:', anyOptionId);
+      console.log('localSelectedReligionId:', localSelectedReligionId);
+      console.log('Comparison result:', anyOptionId && String(localSelectedReligionId) === anyOptionId);
+      
+      // Check if "Any" is selected and convert it to "any" string
+      let pReligionIdValue;
+      if (anyOptionId && String(localSelectedReligionId) === anyOptionId) {
+        pReligionIdValue = 'any';
+        console.log('Setting pReligionIdValue to "any"');
+      } else {
+        pReligionIdValue = localSelectedReligionId;
+        console.log('Setting pReligionIdValue to localSelectedReligionId:', localSelectedReligionId);
+      }
+
       const requestBody = {
         id: user.id,
-        pReligionId: localSelectedReligionId,
+        pReligionId: pReligionIdValue,
       };
+      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -101,13 +135,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
       snapPoints={snapPoints}
       enablePanDownToClose={true}
       onChange={handleSheetChanges}
-      backdropComponent={props => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-        />
-      )}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={styles.handleIndicator}
       backgroundStyle={styles.bottomSheetBackground}
     >

@@ -182,7 +182,8 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
   };
   const getSettleDownValue = () => {
     if (user.psettle_down) {
-      return `${user.psettle_down?.split(',')[0]}...`;
+      const first = user.psettle_down.split(',')[0];
+      return `${first.charAt(0).toUpperCase()}${first.slice(1)}...`;
     }
     return 'Any';
   };

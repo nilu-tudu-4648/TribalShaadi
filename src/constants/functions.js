@@ -171,7 +171,7 @@ export const isDifferentDay = (timestamp1, timestamp2) => {
     return false;
   }
 };
-export const checkUserLoggedIn = async dispatch => {
+export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
   try {
     // Add a small delay to prevent race conditions with other AsyncStorage operations
     await delay(100);
@@ -213,7 +213,8 @@ export const checkUserLoggedIn = async dispatch => {
       return;
     }
 
-    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+    // Pass isInitialLoad flag to getUserDetailsApi to handle 401 errors appropriately
+    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, isInitialLoad);
   } catch (error) {
     console.error('Error in checkUserLoggedIn:', error);
     // Ensure we don't crash the app - navigate to welcome as fallback
@@ -260,7 +261,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
       };
       
       await saveUserToStorage(userWithToken);
-      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, false);
       const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
       dispatch(
         completeUserProfileV2Updated(updateUrl, {
@@ -298,15 +299,22 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     console.log(error);
   }
 };
-export const getUserDetailsApi = async (url, dispatch) => {
+export const getUserDetailsApi = async (url, dispatch, isInitialLoad = false) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     
     if (!token || token === 'null' || token === 'undefined') {
-      console.error('No valid token found for getUserDetailsApi');
-      // Don't logout immediately during OTP verification, just log and continue
-      console.log('Continuing without token during potential first login');
-      return;
+      console.log('No valid token found for getUserDetailsApi');
+      
+      // During initial load, navigate to welcome instead of crashing
+      if (isInitialLoad) {
+        console.log('Initial load without token - navigating to welcome');
+        navigate(ROUTES.WELCOME);
+        return null;
+      }
+      
+      console.log('No token available - skipping API call');
+      return null;
     }
     
     const response = await axios.get(`${baseUrl}/${url}`, {
@@ -319,7 +327,7 @@ export const getUserDetailsApi = async (url, dispatch) => {
     // Validate response structure
     if (!response.data || !response.data.recordList || !response.data.recordList[0]) {
       console.error('Invalid response structure from getUserDetailsApi');
-      return;
+      return null;
     }
     
     const userData = response.data.recordList[0];
@@ -353,28 +361,61 @@ export const getUserDetailsApi = async (url, dispatch) => {
     } catch (dispatchError) {
       console.error('Error dispatching user data:', dispatchError);
     }
+    
+    return userData;
   } catch (error) {
     console.error('Error in getUserDetailsApi:', error);
     
     // Handle different error types safely
     if (error.response && error.response.data) {
-      if (
-        error.response.data.status === 401 ||
-        error.response.data.status === 400
-      ) {
-        try {
-          logoutUser(dispatch);
-        } catch (logoutError) {
-          console.error('Error during logout:', logoutError);
+      const status = error.response.data.status;
+      
+      if (status === 401) {
+        console.log('Authentication error (401) - token expired or invalid');
+        
+        // During initial load, don't logout aggressively - just navigate to welcome
+        if (isInitialLoad) {
+          console.log('Initial load with invalid token - clearing storage and navigating to welcome');
+          try {
+            await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+            navigate(ROUTES.WELCOME);
+          } catch (clearError) {
+            console.error('Error clearing storage on 401:', clearError);
+            navigate(ROUTES.WELCOME);
+          }
+        } else {
+          // For subsequent calls, do normal logout
+          try {
+            await logoutUser(dispatch);
+          } catch (logoutError) {
+            console.error('Error during logout:', logoutError);
+            // Fallback navigation
+            navigate(ROUTES.WELCOME);
+          }
         }
+      } else if (status === 400) {
+        console.log('Bad request error (400)');
+        if (isInitialLoad) {
+          navigate(ROUTES.WELCOME);
+        } else {
+          try {
+            await logoutUser(dispatch);
+          } catch (logoutError) {
+            console.error('Error during logout:', logoutError);
+          }
+        }
+      } else {
+        console.error(`API error with status ${status}`);
       }
     } else if (error.code === 'ECONNABORTED') {
       console.error('Request timeout in getUserDetailsApi');
     } else if (error.message === 'Network Error') {
-      console.error('Network error in getUserDetailsApi');
+      console.error('Network error in getUserDetailsApi - continuing without crash');
     } else {
       console.error('Unexpected error in getUserDetailsApi:', error.message);
     }
+    
+    return null;
   }
 };
 export const checkAuth = async dispatch => {
@@ -581,7 +622,7 @@ export const resetPreferenceApi = async (dispatch, func) => {
       },
     );
     console.log(response.data, 'resetPreferenceApi');
-    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, false);
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
   } finally {

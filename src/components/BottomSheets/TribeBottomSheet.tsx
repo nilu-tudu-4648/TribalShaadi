@@ -144,13 +144,22 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
 
   const handleApply = async () => {
     try {
-      // Remove 'any' (id: 97) from the selected tribes before sending to API
-      const filteredTribes = (localSelectedTribes || []).filter(
-        id => id !== '97' && id !== 'Any',
-      );
+      let pCommunityIdValue: string;
+      
+      // Check if 'Any' is selected
+      if ((localSelectedTribes || []).includes('Any')) {
+        pCommunityIdValue = 'any';
+      } else {
+        // Remove 'any' (id: 97) from the selected tribes before sending to API
+        const filteredTribes = (localSelectedTribes || []).filter(
+          id => id !== '97',
+        );
+        pCommunityIdValue = filteredTribes.join(',');
+      }
+      
       const requestBody = {
         id: user.id,
-        pCommunityId: filteredTribes.join(','),
+        pCommunityId: pCommunityIdValue,
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));

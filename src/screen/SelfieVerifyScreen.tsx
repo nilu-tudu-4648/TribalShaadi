@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   Pressable,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
@@ -57,14 +58,7 @@ const SelfieVerifyScreen = () => {
   return (
     <>
       {loader ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: SIZES.padding,
-          }}
-        >
+        <View style={styles.loaderContainer}>
           <GradientLoader size={SIZES.h1} />
           <Image
             source={require('../assets/images/verifytext.png')}
@@ -74,38 +68,21 @@ const SelfieVerifyScreen = () => {
       ) : (
         <AppSafeView style={styles.container}>
           {!selfieVerify ? (
-            <View
-              style={[
-                styles.content,
-                {
-                  justifyContent: 'space-between',
-                  paddingVertical: lignHeight72,
-                },
-              ]}
-            >
-              <View style={{ gap: Size20 * 3, alignItems: 'center' }}>
+            <View style={[styles.content, styles.unverifiedContent]}>
+              <View style={styles.unverifiedImageContainer}>
                 <Image
                   source={require('../assets/images/unverify.png')}
-                  style={[styles.verifyImage, { height: '20%' }]}
+                  style={[styles.verifyImage, styles.unverifiedImageHeight]}
                 />
                 <Image
                   source={require('../assets/images/notyou.png')}
                   style={styles.verifyImage}
                 />
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                  }}
-                >
+                <View style={styles.buttonContainer}>
                   <AppButton
                     title="Retry"
                     onPress={handleTakePhoto}
-                    buttonStyle={[
-                      styles.takePhotoButton,
-                      { marginBottom: Size20 },
-                    ]}
+                    buttonStyle={[styles.takePhotoButton, styles.retryButton]}
                     textStyle={styles.takePhotoButtonText}
                   />
                   <Pressable onPress={handleMaybeLater}>
@@ -122,7 +99,11 @@ const SelfieVerifyScreen = () => {
               />
             </View>
           ) : (
-            <View style={styles.content}>
+            <ScrollView 
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
               {/* Selfie Image */}
               <View style={styles.imageContainer}>
                 <View style={styles.imageWrapper}>
@@ -170,8 +151,8 @@ const SelfieVerifyScreen = () => {
                 </View>
               </View>
 
-              {/* Spacer */}
-              <View style={styles.spacer} />
+              {/* Spacer for flexible spacing */}
+              <View style={styles.flexSpacer} />
 
               {/* Take Photo Button */}
               <AppButton
@@ -191,7 +172,7 @@ const SelfieVerifyScreen = () => {
                   textStyle={styles.maybeLaterText}
                 />
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           )}
         </AppSafeView>
       )}
@@ -213,12 +194,22 @@ const styles = StyleSheet.create({
     paddingTop: lignHeight72,
     gap: Size20,
   },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: lignHeight24,
+    paddingTop: lignHeight24,
+    gap: Size20,
+  },
   imageContainer: {
     alignItems: 'center',
   },
   imageWrapper: {
-    width: screenWidth('60%'),
-    height: screenWidth('75%'),
+    width: screenWidth('55%'),
+    height: screenWidth('65%'),
+    maxHeight: 300,
     borderRadius: Size20,
     overflow: 'hidden',
     shadowColor: COLORS.black,
@@ -271,11 +262,16 @@ const styles = StyleSheet.create({
   spacer: {
     // flex: 1,
   },
+  flexSpacer: {
+    minHeight: Size20 * 2,
+  },
   takePhotoButton: {
     borderRadius: Size20 * 5,
-    width: '50%',
+    width: '70%',
+    maxWidth: 280,
     alignSelf: 'center',
     backgroundColor: COLORS.violet,
+    // marginTop: Size12,
   },
   takePhotoButtonText: {
     fontSize: fontSize16,
@@ -284,6 +280,7 @@ const styles = StyleSheet.create({
   },
   maybeLaterContainer: {
     alignItems: 'center',
+    paddingVertical: Size12,
   },
   maybeLaterText: {
     fontSize: fontSize16,
@@ -294,5 +291,30 @@ const styles = StyleSheet.create({
     width: '95%',
     height: 100,
     resizeMode: 'contain',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SIZES.padding,
+  },
+  unverifiedContent: {
+    justifyContent: 'space-between',
+    paddingVertical: lignHeight72,
+  },
+  unverifiedImageContainer: {
+    gap: Size20 * 3,
+    alignItems: 'center',
+  },
+  unverifiedImageHeight: {
+    height: '20%',
+  },
+  buttonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  retryButton: {
+    marginBottom: Size20,
   },
 });
