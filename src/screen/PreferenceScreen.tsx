@@ -78,19 +78,20 @@ const PreferenceScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCities, setSelectedCities] = useState<any[]>([]);
   const [localSelectedStatuses, setLocalSelectedStatuses] =
-  useState<string[]>();
+    useState<string[]>();
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
-  const [localSelectedReligion, setLocalSelectedReligion] =
-  useState<string | null>(null);
-const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
-  string | null
->(null);
+  const [localSelectedReligion, setLocalSelectedReligion] = useState<
+    string | null
+  >(null);
+  const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
+    string | null
+  >(null);
   useEffect(() => {
     getEmploymentTypeApi().then(res => {
       setJobTypeOptions(res);
     });
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       maritalStatusBottomSheetRef.current?.close();
@@ -114,10 +115,13 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
       .map((item: any) => item.name);
     if (selectedStatuses.length === 0) return 'Any';
     if (selectedStatuses.length <= 1) return selectedStatuses.join(', ');
-    return `${selectedStatuses.slice(0, 1).join(', ').charAt(0).toUpperCase() + selectedStatuses.slice(0, 1).join(', ').slice(1)}...`;
+    return `${
+      selectedStatuses.slice(0, 1).join(', ').charAt(0).toUpperCase() +
+      selectedStatuses.slice(0, 1).join(', ').slice(1)
+    }...`;
   };
   const getAgeRangeValue = () => {
-    if (user.pFromAge && user.pToAge) {
+    if (user.pFromAge !== "any" && user.pToAge !== "any" && user.pFromAge !== null && user.pToAge !== null) {
       return `${user.pFromAge} - ${user.pToAge} Years`;
     }
     return 'Any';
@@ -133,7 +137,7 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
     return user.religion;
   };
   const getHeightRangeValue = () => {
-    if (user.pFromHeight && user.pToHeight) {
+    if (user.pFromHeight !== "any" && user.pToHeight !== "any" && user.pFromHeight !== null && user.pToHeight !== null) {
       return `${formatHeightInFeettoInches(
         cmToInches(user.pFromHeight),
       )} - ${formatHeightInFeettoInches(cmToInches(user.pToHeight))}`;
@@ -181,7 +185,7 @@ const [localSelectedReligionId, setLocalSelectedReligionId] = useState<
     return `${jobTypes.slice(0, 1).join(', ')}...`;
   };
   const getSettleDownValue = () => {
-    if (user.psettle_down) {
+    if (user?.psettle_down !== "any" && user?.psettle_down !== null) {
       const first = user.psettle_down.split(',')[0];
       return `${first.charAt(0).toUpperCase()}${first.slice(1)}...`;
     }

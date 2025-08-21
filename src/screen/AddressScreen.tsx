@@ -220,7 +220,7 @@ const AddressScreen = () => {
             placeholder="Select your marital status"
             onPress={() => setShowMaritalStatusPicker(true)}
           />
-          <View style={{ height: Size16 }} />
+          <View style={{ height: Size16/2 }} />
           {/* Planning to settle down Chips */}
           <View style={styles.chipSection}>
             <AppText
@@ -325,13 +325,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: screenHeight(2), // Small bottom padding for scrollview
+    paddingBottom: screenHeight(2),
   },
   content: {
     paddingHorizontal: lignHeight24,
-    paddingVertical: screenHeight(2), // Responsive vertical padding
+    paddingVertical: screenHeight(2),
     gap: lignHeight24,
-    paddingTop: screenHeight(3), // Much smaller top padding, responsive to screen height
+    paddingTop: screenHeight(4),
   },
   backButton: {
     width: Size40,

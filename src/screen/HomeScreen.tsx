@@ -168,10 +168,11 @@ const HomeScreen = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-  }, [dispatch]);
+      const id = user.pReligionId !== "any" && user.pReligionId?.[0] ? user.pReligionId?.[0] : user.religionId;
+      dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
+  }, [dispatch, user?.pReligionId, user?.religionId]);
 
   useEffect(() => {
     if (matchedUsers.length > 0 && currentIndex >= matchedUsers.length) {
@@ -202,7 +203,6 @@ const HomeScreen = () => {
   }, [matchedUsers, currentIndex]);
 
   useEffect(() => {
-    dispatch(getCommunity(getCommunityUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
     dispatch(getReligion(getReligionUrl));
     dispatch(getHeight(getHeightUrl));
