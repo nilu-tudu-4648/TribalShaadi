@@ -170,7 +170,7 @@ const ReligionScreen = () => {
       <AppPickerModal
         visible={showReligionPicker}
         title="Select Religion"
-        items={religions}
+        items={religions.filter((religion: any) => religion.name !== 'any')}
         selectedValue={selectedReligion}
         onSelect={handleReligionSelection}
         onClose={() => setShowReligionPicker(false)}

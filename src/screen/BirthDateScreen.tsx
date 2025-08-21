@@ -120,7 +120,11 @@ const BirthDateScreen = () => {
           activeOpacity={0.8}
         >
           <AppText
-            text={dateOfBirth.toLocaleDateString()}
+            text={dateOfBirth.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
             textStyle={styles.dateInput}
           />
           <View style={styles.calendarIcon}>

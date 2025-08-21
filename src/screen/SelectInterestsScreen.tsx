@@ -64,6 +64,10 @@ const SelectInterestsScreen = () => {
         pCommunityId: 'any',
         pOccupationId: 'any',
         psettle_down: 'any',
+        pFromHeight: 'any',
+        pToHeight: 'any',
+        pFromAge: 'any',
+        pToAge: 'any',
       };
       dispatch(completeUserProfileV2Interests(updateUrl, requestBody));
     } catch (error) {
