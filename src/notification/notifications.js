@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, updateUrl } from '../constants/functions';
 import { ASYNC_VARIBLES } from '../constants/data';
 import axios from 'axios';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -20,20 +21,33 @@ const isFirebaseReady = () => {
   }
 };
 
+// notifications.js
 export const createNotificationChannel = () => {
   PushNotification.createChannel(
     {
-      channelId: "tribalShaadi", // (required)
-      channelName: "Tribal Shaadi Channel", // (required)
-      channelDescription: "A channel for Tribal Shaadi notifications", // (optional) default: undefined.
-      soundName: "default", // (optional) See `soundName` parameter of `localNotification` function
-      importance: 4, // (optional) default: 4. Int value of the Android notification importance
-      vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
+      channelId: 'tribalshaadi', // LOWERCASE for Android safety
+      channelName: 'Tribal Shaadi Notifications',
+      channelDescription: 'Notifications for Tribal Shaadi app',
+      soundName: 'default',
+      importance: 4,
+      vibrate: true,
     },
-    // (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
+    (created) => console.log(`Notification channel created: ${created}`),
   );
 };
 
+export const requestAndroidNotificationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      console.log('Android 13+ notification permission:', granted);
+    } catch (err) {
+      console.warn('Failed to request notification permission', err);
+    }
+  }
+};
 export const requestUserPermission = async () => {
   if (!isFirebaseReady()) {
     console.warn(
@@ -163,24 +177,6 @@ const sendTokenToServer = async token => {
   } catch (error) {
     console.error('Error sending FCM token to server:', error);
     // Don't re-throw to prevent app crashes
-  }
-};
-
-// Function to refresh FCM token
-export const refreshFCMToken = async () => {
-  if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping FCM token refresh.');
-    return;
-  }
-
-  try {
-    await messaging().deleteToken();
-    const newToken = await messaging().getToken();
-    if (newToken) {
-      await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, newToken);
-    }
-  } catch (error) {
-    console.log('Error refreshing FCM token:', error);
   }
 };
 
@@ -346,67 +342,46 @@ const handleNotificationAction = remoteMessage => {
   }
 };
 
-export const schedulePushNotification = async (
-  title,
-  message
-) => {
+const ensureChannelReady = async (channelId = 'tribalshaadi') => {
+  return new Promise((resolve) => {
+    if (Platform.OS !== 'android') return resolve(true);
+    try {
+      PushNotification.channelExists(channelId, (exists) => resolve(exists));
+    } catch {
+      resolve(false);
+    }
+  });
+};
+
+export const schedulePushNotification = async (title, message) => {
+  if (Platform.OS !== 'android') return; // fix: don't touch iOS
+
   try {
-    // Add validation for required parameters
-    if (!title || !message) {
-      console.error('Title and message are required for notification');
+    if (!title || !message) return;
+    if (typeof title !== 'string' || typeof message !== 'string') return;
+    if (!title.trim().length || !message.trim().length) return;
+
+    const hasChannel = await ensureChannelReady('tribalshaadi');
+    if (!hasChannel) {
+      console.log('Notification channel not ready — skipping notification');
       return;
     }
 
-    // Ensure title and message are strings
-    if (typeof title !== 'string' || typeof message !== 'string') {
-      console.error('Title and message must be strings');
-      return;
-    }
-
-    // Use minimal configuration to prevent crashes
-    const notificationConfig = {
-      channelId: 'tribalShaadi',
+    PushNotification.localNotification({
+      channelId: 'tribalshaadi',
       title: title.trim(),
       message: message.trim(),
       playSound: true,
       soundName: 'default',
       autoCancel: true,
-      invokeApp: true,
-    };
-
-    console.log('Showing foreground notification:', title);
-    
-    // Wrap PushNotification call in try-catch to prevent crashes
-    try {
-      PushNotification.localNotification(notificationConfig);
-    } catch (notificationError) {
-      console.error('Error calling PushNotification.localNotification:', notificationError);
-      // Try with even more minimal configuration
-      try {
-        PushNotification.localNotification({
-          title: title.trim(),
-          message: message.trim(),
-        });
-      } catch (fallbackError) {
-        console.error('Even minimal notification failed:', fallbackError);
-      }
-    }
-  } catch (error) {
-    console.error('Error showing foreground notification:', error);
-    // Don't re-throw to prevent app crashes
+      priority: 'high',
+      importance: 'high',
+    });
+  } catch (err) {
+    console.log('Foreground notification failed:', err);
   }
 };
 
-// Get current FCM token
-export const getCurrentFCMToken = async () => {
-  try {
-    const token = await AsyncStorage.getItem('fcmToken');
-    return token;
-  } catch (error) {
-    console.log('Error getting current FCM token:', error);
-    return null;
-  }
-};
 
 // Subscribe all users to general topics
 const subscribeToAllUsersTopics = async () => {
@@ -437,6 +412,4 @@ export default {
   requestUserPermission,
   notificationListner,
   schedulePushNotification,
-  getCurrentFCMToken,
-  refreshFCMToken,
 };

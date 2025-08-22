@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
 import { schedulePushNotification } from "./notifications";
@@ -28,48 +28,21 @@ const ForegroundHandler = (params) => {
                     return;
                 }
                 
-                // Use the default messaging instance
-                unsubscribe = messaging().onMessage(async remoteMessage => {
-                   try {
-                       console.log('A new FCM message arrived!');
-                       
-                       // Only show local notification if app is in foreground
-                       // Firebase automatically handles notifications when app is in background/quit
-                       if (AppState.currentState === 'active') {
-                           // Add comprehensive null safety checks
-                           if (!remoteMessage) {
-                               console.log('Remote message is null or undefined');
-                               return;
-                           }
-                           
-                           const notification = remoteMessage.notification;
-                           if (!notification) {
-                               console.log('No notification data found in message');
-                               return;
-                           }
-                           
-                           const title = notification.title;
-                           const body = notification.body;
-                           
-                           // Validate title and body exist and are strings
-                           if (!title || !body) {
-                               console.log('Missing title or body in notification');
-                               return;
-                           }
-                           
-                           if (typeof title !== 'string' || typeof body !== 'string') {
-                               console.log('Title or body is not a string');
-                               return;
-                           }
-                           
-                           // Call with only title and body parameters
-                           schedulePushNotification(title, body);
-                       }
-                   } catch (error) {
-                       console.error('Error handling foreground notification:', error);
-                       // Don't re-throw to prevent app crash
-                   }
-                });
+                const timer = setTimeout(() => {
+                    unsubscribe = messaging().onMessage(async (remoteMessage) => {
+                      if (Platform.OS === 'android') {
+                        const { title, body } = remoteMessage?.notification || {};
+                        console.log(title, body, 'title, body');
+                        if (!title || !body) return;
+                        await schedulePushNotification(title, body);
+                      }
+                    });
+                  }, 500); // increased delay to stabilize real devices
+                
+                  return () => {
+                    clearTimeout(timer);
+                    if (unsubscribe) unsubscribe();
+                  };
             } catch (error) {
                 console.error('Error setting up foreground message handler:', error);
             }

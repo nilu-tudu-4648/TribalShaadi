@@ -105,19 +105,19 @@ const EditLifeScreen = () => {
           (state: any) => String(state.name) === String(user.stateName),
         );
         console.log('Found user state:', userState);
-        
+
         if (userState) {
           setCitiesLoading(true);
           try {
             const cities = await getCitiesByStateIdV2(userState.id);
             console.log('cities', cities);
             setLocalCities(cities);
-            
+
             // Find user's city from the fetched cities
             const userCity = cities.find(
               (city: any) => String(city.name) === String(user.districtName),
             );
-            
+
             setFormData(prev => ({
               ...prev,
               selectedState: userState, // Set the state object, not just the name
@@ -133,7 +133,10 @@ const EditLifeScreen = () => {
               districtId: userCity?.id || '',
             }));
           } catch (error) {
-            console.error('Error fetching cities during initialization:', error);
+            console.error(
+              'Error fetching cities during initialization:',
+              error,
+            );
           } finally {
             setCitiesLoading(false);
           }
@@ -142,8 +145,6 @@ const EditLifeScreen = () => {
     };
     initializeFormData();
   }, [user, states]);
-
-
 
   // Handle state selection and reset city when state changes
   const handleStateSelection = useCallback((selectedState: any) => {
@@ -208,8 +209,6 @@ const EditLifeScreen = () => {
     setShowTimelinePicker(false);
   }, []);
 
-
-
   // Handle form submission
   const handleSave = useCallback(async () => {
     try {
@@ -242,12 +241,12 @@ const EditLifeScreen = () => {
   return (
     <AppSafeView style={styles.container}>
       <ProfileHeader
-           onBackPress={() => {
-            handleSave();
-            (navigation as any).navigate(ROUTES.STACK, {
-              screen: ROUTES.ACCOUNT,
-            } as never);
-          }}
+        onBackPress={() => {
+          handleSave();
+          (navigation as any).navigate(ROUTES.STACK, {
+            screen: ROUTES.ACCOUNT,
+          } as never);
+        }}
         title="Lifestyle & Hometown"
         icon={<SlidersIcon />}
       />
@@ -274,8 +273,12 @@ const EditLifeScreen = () => {
           label=""
           selectedValue={formData.selectedCity?.name}
           placeholder={citiesLoading ? 'Loading cities...' : 'Select City'}
-          onPress={() => !citiesLoading && localCities.length > 0 && setShowCityPicker(true)}
-          disabled={citiesLoading || !formData.selectedState || localCities.length === 0}
+          onPress={() =>
+            !citiesLoading && localCities.length > 0 && setShowCityPicker(true)
+          }
+          disabled={
+            citiesLoading || !formData.selectedState || localCities.length === 0
+          }
         />
 
         {/* Height Dropdown */}
@@ -361,10 +364,27 @@ const EditLifeScreen = () => {
         title="Select Height"
         items={
           height
-            ? height.map((h: any) => ({
-                ...h,
-                displayName: convertCmToReadableHeight(h.name),
-              }))
+            ? (() => {
+                // Create a map to track unique display names and keep only the first occurrence
+                const uniqueHeights = new Map();
+                const processedHeights = height.map((h: any) => ({
+                  ...h,
+                  displayName: convertCmToReadableHeight(h.name),
+                }));
+
+                // Filter out duplicates based on displayName, keeping the first occurrence
+                const deduplicatedHeights = processedHeights.filter(
+                  (h: any) => {
+                    if (!uniqueHeights.has(h.displayName)) {
+                      uniqueHeights.set(h.displayName, true);
+                      return true;
+                    }
+                    return false;
+                  },
+                );
+
+                return deduplicatedHeights;
+              })()
             : []
         }
         selectedValue={formData.heightName}

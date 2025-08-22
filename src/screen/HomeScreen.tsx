@@ -224,8 +224,7 @@ const HomeScreen = () => {
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     if (matchedUsers && matchedUsers.length > currentIndex) {
       const currentUserId = matchedUsers[currentIndex].id;
-      const nextUserId =
-        matchedUsers[(currentIndex + 1) % matchedUsers.length].id;
+      // Only fetch current user data - remove the problematic next user prefetch
       dispatch(
         getCurrentMatchedApi(
           `${baseUrl}/${getUserDetailsUrl}id=${currentUserId}`,
@@ -245,30 +244,12 @@ const HomeScreen = () => {
           },
         ),
       );
-      // Pre-fetch data for the next user
-
-      dispatch(
-        getCurrentMatchedApi(`${baseUrl}/${getUserDetailsUrl}id=${nextUserId}`),
-      );
-      dispatch(
-        getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
-          userId: nextUserId,
-        }),
-      );
-      dispatch(
-        getCurrentMatchedUserGalleryImageListApi(
-          `${baseUrl}/${getGalleryImageListUrl}`,
-          {
-            userId: nextUserId,
-          },
-        ),
-      );
     }
   }, [dispatch, matchedUsers, currentIndex]);
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
   // console.log(matchedUsers, 'matchedUsers');
-  // console.log(currentMatchedUser, 'currentMatchedUser');
+  // console.log(currentUser, 'currentUser');
 
   return (
         <GestureHandlerRootView style={styles.container}>

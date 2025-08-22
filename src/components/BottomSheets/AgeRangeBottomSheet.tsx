@@ -46,8 +46,14 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
   const [localAgeRange, setLocalAgeRange] = useState({ min: 20, max: 45 });
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
+
   useEffect(() => {
-    if (user.pFromAge && user.pToAge) {
+    if (
+      user.pFromAge !== null &&
+      user.pToAge !== null &&
+      user.pFromAge !== 'any' &&
+      user.pToAge !== 'any'
+    ) {
       setLocalAgeRange({ min: user.pFromAge, max: user.pToAge });
     }
   }, [user]);
@@ -72,7 +78,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     if (newMax - newMin < MIN_RANGE) {
       return; // Don't update if the range is less than 5 years
     }
-    
+
     const range = { min: newMin, max: newMax };
     setLocalAgeRange(range);
   };
@@ -87,11 +93,11 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
         0,
         maxThumbPosition.value - THUMB_SIZE,
       );
-      
+
       const newMinAge = Math.round(
         MIN_AGE + (newPosition / SLIDER_WIDTH) * (MAX_AGE - MIN_AGE),
       );
-      
+
       // Ensure minimum 5-year gap
       if (localAgeRange.max - newMinAge >= MIN_RANGE) {
         minThumbPosition.value = newPosition;
@@ -109,11 +115,11 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
         minThumbPosition.value + THUMB_SIZE,
         SLIDER_WIDTH,
       );
-      
+
       const newMaxAge = Math.round(
         MIN_AGE + (newPosition / SLIDER_WIDTH) * (MAX_AGE - MIN_AGE),
       );
-      
+
       // Ensure minimum 5-year gap
       if (newMaxAge - localAgeRange.min >= MIN_RANGE) {
         maxThumbPosition.value = newPosition;
@@ -148,7 +154,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     } catch (error) {
       console.log('error', error);
     } finally {
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));  
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
     }
   };

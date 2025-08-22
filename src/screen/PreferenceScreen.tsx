@@ -1,5 +1,5 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import React, { useRef, useState, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity, BackHandler } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppScrollView from '../components/AppScrollView';
 import AppText from '../components/AppText';
@@ -28,12 +28,15 @@ import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  baseUrl,
   formatHeightInFeettoInches,
   getEmploymentTypeApi,
+  getMatchedUsersUrl,
   resetPreferenceApi,
 } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import Loader from '../components/loader/Loader';
+import { setMatchedUserApi } from '../store/reducers/userReducer';
 
 const PreferenceCard = ({
   title,
@@ -121,7 +124,12 @@ const PreferenceScreen = () => {
     }...`;
   };
   const getAgeRangeValue = () => {
-    if (user.pFromAge !== "any" && user.pToAge !== "any" && user.pFromAge !== null && user.pToAge !== null) {
+    if (
+      user.pFromAge !== 'any' &&
+      user.pToAge !== 'any' &&
+      user.pFromAge !== null &&
+      user.pToAge !== null
+    ) {
       return `${user.pFromAge} - ${user.pToAge} Years`;
     }
     return 'Any';
@@ -137,7 +145,12 @@ const PreferenceScreen = () => {
     return user.religion;
   };
   const getHeightRangeValue = () => {
-    if (user.pFromHeight !== "any" && user.pToHeight !== "any" && user.pFromHeight !== null && user.pToHeight !== null) {
+    if (
+      user.pFromHeight !== 'any' &&
+      user.pToHeight !== 'any' &&
+      user.pFromHeight !== null &&
+      user.pToHeight !== null
+    ) {
       return `${formatHeightInFeettoInches(
         cmToInches(user.pFromHeight),
       )} - ${formatHeightInFeettoInches(cmToInches(user.pToHeight))}`;
@@ -185,7 +198,7 @@ const PreferenceScreen = () => {
     return `${jobTypes.slice(0, 1).join(', ')}...`;
   };
   const getSettleDownValue = () => {
-    if (user?.psettle_down !== "any" && user?.psettle_down !== null) {
+    if (user?.psettle_down !== 'any' && user?.psettle_down !== null) {
       const first = user.psettle_down.split(',')[0];
       return `${first.charAt(0).toUpperCase()}${first.slice(1)}...`;
     }
@@ -265,13 +278,32 @@ const PreferenceScreen = () => {
     return () => {};
   };
 
+  const updatePreference = useCallback(async () => {
+    try {
+      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+    } catch (error) {
+      console.log(error);
+    } finally {
+      navigation.goBack();
+    }
+  }, [dispatch, navigation]);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        updatePreference();
+        return true;
+      },
+    );
+    return () => backHandler.remove();
+  }, [updatePreference]);
   return (
     <>
       <AppSafeView style={styles.appSafeViewContainer}>
         <View style={styles.header}>
           <AppHeader
             title="Preferences"
-            onBackPress={() => navigation.goBack()}
+            onBackPress={updatePreference}
             rightButton={
               <TouchableOpacity
                 onPress={handleResetPress}

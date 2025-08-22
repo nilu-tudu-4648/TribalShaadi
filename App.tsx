@@ -20,7 +20,7 @@ import AboutPartnerScreen from './src/screen/AboutPartnerScreen';
 import UploadImageScreen from './src/screen/UploadImageScreen';
 import { store } from './src/store/configureStore';
 import SelectInterestsScreen from './src/screen/SelectInterestsScreen';
-import { checkAuth, checkUserLoggedIn, delay } from './src/constants/functions';
+import { checkAuth, checkUserLoggedIn } from './src/constants/functions';
 import { COLORS } from './src/constants/AppColors';
 import WelcomeHome from './src/screen/WelcomeHome';
 import BottomNavigation from './src/navigation/BottomNavigation';
@@ -34,12 +34,14 @@ import {
   requestUserPermission,
   notificationListner,
   createNotificationChannel,
+  requestAndroidNotificationPermission,
 } from './src/notification/notifications';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
 import { PostHogProvider } from 'posthog-react-native';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import PushNotification from 'react-native-push-notification';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -115,32 +117,31 @@ const MainApp = () => {
       console.error('Error in auth check:', error);
     }
   }, [user, dispatch, tokenExpired, isInitialized]);
-
   useEffect(() => {
-    if (!isInitialized) return; // Wait for app initialization
-    
-    // Initialize push notification setup with a delay to allow Firebase to auto-initialize
-    const setupNotifications = async () => {
-      try {
-        // Wait for Firebase to auto-initialize from config files
-        await delay();
-
-        // Create notification channel (Android)
-        createNotificationChannel();
-
-        // Request permission and get FCM token
-        await requestUserPermission();
-
-        // Set up notification listeners
-        await notificationListner();
-      } catch (error) {
-        console.error('Error initializing push notifications:', error);
-        // Continue app flow even if notifications fail
-      }
-    };
-
-    setupNotifications();
-  }, [isInitialized]);
+    // Configure PushNotification
+    PushNotification.configure({
+      onRegister: function (token: any) {
+        console.log('Push Notification TOKEN:', token);
+      },
+      onNotification: function (notification: any) {
+        console.log('Push NOTIFICATION:', notification);
+        // notification.finish(PushNotificationIOS.FetchResult.NoData);
+      },
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true,
+      },
+      popInitialNotification: true,
+      requestPermissions: true,
+    });
+  }, []);
+  useEffect(() => {
+    createNotificationChannel();
+    requestAndroidNotificationPermission();
+    requestUserPermission();
+    notificationListner();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {

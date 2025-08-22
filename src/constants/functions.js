@@ -302,7 +302,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
 export const getUserDetailsApi = async (url, dispatch, isInitialLoad = false) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    
+    console.log(token, 'token')
     if (!token || token === 'null' || token === 'undefined') {
       console.log('No valid token found for getUserDetailsApi');
       
@@ -578,8 +578,15 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
 };
 export const convertCmToReadableHeight = cm => {
   const n = Number(cm);
-  const feet = Math.floor(n / 30.48);
-  const inches = Math.round((n / 30.48 - feet) * 12);
+  let feet = Math.floor(n / 30.48);
+  let inches = Math.round((n / 30.48 - feet) * 12);
+  
+  // Handle inch overflow (12 inches = 1 foot)
+  if (inches >= 12) {
+    feet += Math.floor(inches / 12);
+    inches = inches % 12;
+  }
+  
   return `${feet}'${String(inches).padStart(2, '0')}"`;
 };
 export const formatHeightInFeettoInches = totalInches => {

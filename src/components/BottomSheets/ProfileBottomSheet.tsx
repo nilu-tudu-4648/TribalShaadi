@@ -79,7 +79,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  // console.log(currentUserPackage, 'currentUserPackage');
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
