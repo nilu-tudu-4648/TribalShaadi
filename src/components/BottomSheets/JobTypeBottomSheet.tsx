@@ -55,17 +55,28 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     if (user.pOccupationId) {
+      // Find the "Any" option
+      const anyOption = jobTypeOptions?.find(option => 
+        option.name.toLowerCase() === 'any'
+      );
+      const anyOptionId = anyOption ? String(anyOption.id) : null;
+      
       if (Array.isArray(user.pOccupationId)) {
         setLocalSelected(user.pOccupationId.map(String));
       } else if (typeof user.pOccupationId === 'string') {
-        setLocalSelected(user.pOccupationId.split(',').map(String));
+        // Check if pOccupationId is "any" string
+        if (user.pOccupationId === 'any' && anyOptionId) {
+          setLocalSelected([anyOptionId]);
+        } else {
+          setLocalSelected(user.pOccupationId.split(',').map(String));
+        }
       } else {
         setLocalSelected([]);
       }
     } else {
       setLocalSelected([]);
     }
-  }, [user.pOccupationId]);
+  }, [user.pOccupationId, jobTypeOptions]);
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];

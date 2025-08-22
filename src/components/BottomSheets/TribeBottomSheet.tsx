@@ -97,13 +97,19 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     let normalizedIds: string[] = [];
+    
     if (Array.isArray(user.pCommunityId)) {
       normalizedIds = user.pCommunityId.map((id: any) => String(id).trim());
     } else if (typeof user.pCommunityId === 'string') {
-      normalizedIds = user.pCommunityId
-        .split(',')
-        .map((id: string) => id.trim())
-        .filter(Boolean);
+      // Check if pCommunityId is "any" string
+      if (user.pCommunityId === 'any') {
+        normalizedIds = ['Any'];
+      } else {
+        normalizedIds = user.pCommunityId
+          .split(',')
+          .map((id: string) => id.trim())
+          .filter(Boolean);
+      }
     } else if (user.pCommunityId != null) {
       normalizedIds = [String(user.pCommunityId).trim()];
     }

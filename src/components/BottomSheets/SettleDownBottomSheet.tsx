@@ -37,7 +37,11 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     if (user.psettle_down) {
-      setLocalSelected(user.psettle_down.split(','));
+      // Convert "any" back to "Any" for UI display
+      const settleDownOptions = user.psettle_down.split(',').map((option: string) => 
+        option.trim() === 'any' ? 'Any' : option.trim()
+      );
+      setLocalSelected(settleDownOptions);
     } else {
       setLocalSelected([]);
     }

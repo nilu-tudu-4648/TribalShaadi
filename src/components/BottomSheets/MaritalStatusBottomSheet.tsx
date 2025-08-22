@@ -96,22 +96,33 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   };
   useEffect(() => {
     if (user?.pMaritalStatusId) {
+      // Find the "Any" option
+      const anyOption = maritalOptions?.find(option => 
+        option.name.toLowerCase() === 'any'
+      );
+      const anyOptionId = anyOption ? String(anyOption.id) : null;
+      
       let maritalStatuses: string[] = [];
       if (Array.isArray(user.pMaritalStatusId)) {
         maritalStatuses = user.pMaritalStatusId.map((id: any) => String(id));
       } else if (typeof user.pMaritalStatusId === 'string') {
-        // Handles formats like "7,6,5" or with spaces
-        maritalStatuses = user.pMaritalStatusId
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-          .map((s: string) => String(s));
+        // Check if pMaritalStatusId is "any" string
+        if (user.pMaritalStatusId === 'any' && anyOptionId) {
+          maritalStatuses = [anyOptionId];
+        } else {
+          // Handles formats like "7,6,5" or with spaces
+          maritalStatuses = user.pMaritalStatusId
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+            .map((s: string) => String(s));
+        }
       } else if (typeof user.pMaritalStatusId === 'number') {
         maritalStatuses = [user.pMaritalStatusId.toString()];
       }
       setLocalSelectedStatuses(maritalStatuses);
     }
-  }, [user, setLocalSelectedStatuses]);
+  }, [user, setLocalSelectedStatuses, maritalOptions]);
   const handleApply = async () => {
     try {
       // Clean and filter the marital status IDs
