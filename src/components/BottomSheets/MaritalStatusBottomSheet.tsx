@@ -33,18 +33,14 @@ import { setMatchedUserApi } from '../../store/reducers/userReducer';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
-  maritalOptions: Array<{id: string | number; name: string}> | undefined;
+  maritalOptions: Array<{ id: string | number; name: string }> | undefined;
   localSelectedStatuses: string[] | undefined;
   setLocalSelectedStatuses: (statuses: string[]) => void;
 }
 
 // Backdrop component definition outside render
 const renderBackdrop = (props: any) => (
-  <BottomSheetBackdrop
-    {...props}
-    appearsOnIndex={0}
-    disappearsOnIndex={-1}
-  />
+  <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
 );
 
 const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
@@ -54,7 +50,8 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   setLocalSelectedStatuses,
 }) => {
   const snapPoints = ['30%', '30%'];
-
+  console.log('localSelectedStatuses', localSelectedStatuses);
+  console.log('maritalOptions', maritalOptions);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string | number) => {
@@ -62,19 +59,19 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
     const currentStatuses = Array.isArray(localSelectedStatuses)
       ? localSelectedStatuses.map(s => String(s))
       : [];
-    
+
     // Find the "Any" option
-    const anyOption = maritalOptions?.find(option => 
-      option.name.toLowerCase() === 'any'
+    const anyOption = maritalOptions?.find(
+      option => option.name.toLowerCase() === 'any',
     );
     const anyOptionId = anyOption ? String(anyOption.id) : null;
-    
+
     let updatedStatuses;
-    
+
     if (currentStatuses.includes(statusId)) {
       // If clicking on already selected item, remove it
       updatedStatuses = currentStatuses.filter(s => s !== statusId);
-      
+
       // If no options are selected after removal, automatically select "Any"
       if (updatedStatuses.length === 0 && anyOptionId) {
         updatedStatuses = [anyOptionId];
@@ -97,11 +94,11 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   useEffect(() => {
     if (user?.pMaritalStatusId) {
       // Find the "Any" option
-      const anyOption = maritalOptions?.find(option => 
-        option.name.toLowerCase() === 'any'
+      const anyOption = maritalOptions?.find(
+        option => option.name.toLowerCase() === 'any',
       );
       const anyOptionId = anyOption ? String(anyOption.id) : null;
-      
+
       let maritalStatuses: string[] = [];
       if (Array.isArray(user.pMaritalStatusId)) {
         maritalStatuses = user.pMaritalStatusId.map((id: any) => String(id));
@@ -126,27 +123,30 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   const handleApply = async () => {
     try {
       // Clean and filter the marital status IDs
-      const safeStatuses = Array.isArray(localSelectedStatuses) ? localSelectedStatuses : [];
-      const cleanedStatuses = safeStatuses
-        .filter(status => status && status.toString().trim() !== ''); // Remove empty/null values
+      const safeStatuses = Array.isArray(localSelectedStatuses)
+        ? localSelectedStatuses
+        : [];
+      const cleanedStatuses = safeStatuses.filter(
+        status => status && status.toString().trim() !== '',
+      ); // Remove empty/null values
 
       // Find the "Any" option
-      const anyOption = maritalOptions?.find(option => 
-        option.name.toLowerCase() === 'any'
+      const anyOption = maritalOptions?.find(
+        option => option.name.toLowerCase() === 'any',
       );
       const anyOptionId = anyOption ? String(anyOption.id) : null;
-      
+
       // Check if "Any" is selected and convert it to "any" string
-      let pMaritalStatusIdString;
+      let pMaritalStatusId;
       if (anyOptionId && cleanedStatuses.includes(anyOptionId)) {
-        pMaritalStatusIdString = 'any';
+        pMaritalStatusId = 'any';
       } else {
-        pMaritalStatusIdString = cleanedStatuses.join(',');
+        pMaritalStatusId = cleanedStatuses.join(',');
       }
 
       const requestBody = {
         id: user.id,
-        pMaritalStatusId: pMaritalStatusIdString,
+        pMaritalStatusId: pMaritalStatusId,
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -158,7 +158,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
-      console.log("loading ended")
+      console.log('loading ended');
     }
   };
 
@@ -192,8 +192,14 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
             {maritalOptions?.map((option: any) => (
               <AppChip2
                 key={option.id}
-                title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
-                isSelected={Array.isArray(localSelectedStatuses) && localSelectedStatuses.includes(String(option.id))}
+                title={
+                  option.name.charAt(0).toUpperCase() +
+                  option.name.slice(1).toLowerCase()
+                }
+                isSelected={
+                  Array.isArray(localSelectedStatuses) &&
+                  localSelectedStatuses.includes(String(option.id))
+                }
                 onPress={() => handleStatusToggle(option.id)}
                 style={styles.optionChip}
               />

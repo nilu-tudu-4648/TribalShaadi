@@ -81,7 +81,7 @@ const PreferenceScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCities, setSelectedCities] = useState<any[]>([]);
   const [localSelectedStatuses, setLocalSelectedStatuses] =
-    useState<string[]>();
+    useState<string[]>([]);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [jobTypeOptions, setJobTypeOptions] = useState<string[]>([]);
   const [localSelectedReligion, setLocalSelectedReligion] = useState<
@@ -95,6 +95,22 @@ const PreferenceScreen = () => {
       setJobTypeOptions(res);
     });
   }, [dispatch]);
+
+  // Initialize "Any" selection for marital status when no user preference exists
+  useEffect(() => {
+    if (maritalStatuses && maritalStatuses.length > 0) {
+      if (!user?.pMaritalStatusId || user?.pMaritalStatusId === '') {
+        // Find the "Any" option
+        const anyOption = maritalStatuses?.find((option: any) => 
+          option.name.toLowerCase() === 'any'
+        );
+        if (anyOption && localSelectedStatuses.length === 0) {
+          console.log(String(anyOption.id), anyOption);
+          setLocalSelectedStatuses([String(anyOption.id)]);
+        }
+      }
+    }
+  }, [maritalStatuses, user?.pMaritalStatusId, localSelectedStatuses.length]);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       maritalStatusBottomSheetRef.current?.close();
@@ -183,7 +199,7 @@ const PreferenceScreen = () => {
     const states = user.pStateLivingInId
       ? user.pStateLivingInId.split(',')
       : [];
-    const selectedValues = [...cities, ...states];
+    const selectedValues = [...cities, ...states].filter(item => item !== 'any');
     if (selectedValues.length === 0) return 'Any';
     if (selectedValues.length <= 1) return selectedValues.join(', ');
     return `${selectedValues.slice(0, 1).join(', ')}...`;

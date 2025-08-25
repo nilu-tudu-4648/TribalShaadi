@@ -272,11 +272,7 @@ const UpgradeScreen = () => {
               style={styles.backgroundImage}
             >
               <Pressable
-                onPress={() =>
-                  (navigation as any).navigate(ROUTES.MAIN_TABS, {
-                    screen: ROUTES.ACCOUNT,
-                  })
-                }
+                onPress={() => navigation.goBack()}
                 style={styles.header}
               >
                 <View style={styles.backButton}>

@@ -248,8 +248,8 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
 
   // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-  // console.log(matchedUsers, 'matchedUsers');
-  // console.log(currentUser, 'currentUser');
+    // console.log(matchedUsers, 'matchedUsers');
+    // console.log(currentUser, 'currentUser');
 
   return (
         <GestureHandlerRootView style={styles.container}>

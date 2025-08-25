@@ -53,17 +53,20 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
   const { user, states } = useSelector(
     (state: any) => state.entities.authReducer,
   );
-
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [active, setActive] = useState(false);
   useEffect(() => {
     if (user.pStateLivingInId) {
-      setSelectedState(user.pStateLivingInId.split(','));
+      setSelectedState(
+        user.pStateLivingInId.split(',').filter((item: any) => item !== 'any'),
+      );
     }
     if (user.pCityLivingInId) {
-      setSelectedCities(user.pCityLivingInId.split(','));
+      setSelectedCities(
+        user.pCityLivingInId.split(',').filter((item: any) => item !== 'any'),
+      );
     }
   }, [user, setSelectedCities, setSelectedState]);
   // Handle search with useEffect instead of useMemo
@@ -160,11 +163,11 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         pStateLivingInId:
           selectedState && selectedState.length > 0
             ? selectedState.map((st: any) => st.name || st).join(',')
-            : null,
+            : 'any',
         pCityLivingInId:
           selectedCities && selectedCities.length > 0
             ? selectedCities.map(city => city.name || city).join(',')
-            : null,
+            : 'any',
       };
       console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -175,7 +178,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
       console.log(error, 'error');
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-        bottomSheetRef.current?.close();
+      bottomSheetRef.current?.close();
     }
   };
 
@@ -206,7 +209,12 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         <View
           style={[
             styles.searchContainer,
-            { borderColor: active && searchQuery.length > 0 ? COLORS.violet : COLORS.divider },
+            {
+              borderColor:
+                active && searchQuery.length > 0
+                  ? COLORS.violet
+                  : COLORS.divider,
+            },
           ]}
         >
           <SearchIcon />
@@ -391,16 +399,16 @@ const styles = StyleSheet.create({
     gap: Size8,
     paddingBottom: Size16,
   },
-    emptySelectionContainer: {
+  emptySelectionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Size20*4,
+    paddingVertical: Size20 * 4,
     width: '90%',
   },
   emptyText: {
     fontSize: fontSize16,
     fontFamily: Fonts.OPEN_SANS_REGULAR,
-    color: "#1B222B",
+    color: '#1B222B',
     textAlign: 'center',
   },
   chip: {

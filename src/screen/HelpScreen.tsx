@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Linking, Pressable } from 'react-native';
 import React from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppHeader from '../components/AppHeader';
@@ -112,7 +112,7 @@ const HelpScreen = () => {
           {menuItems.map(item => {
             const IconComponent = item.icon;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={item.id}
                 style={styles.menuItem}
                 onPress={item.onPress}
@@ -126,7 +126,7 @@ const HelpScreen = () => {
                   <AppText text={item.title} textStyle={styles.menuItemText} />
                 </View>
                 <RightArrowIcon />
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
