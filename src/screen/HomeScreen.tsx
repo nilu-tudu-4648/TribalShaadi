@@ -1,6 +1,5 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -138,7 +137,7 @@ const HomeScreen = () => {
       );
 
       animateToNext('right', () => {
-        setCurrentIndex(prev => Math.min(prev + 1, matchedUsers.length - 1));
+        setCurrentIndex(0);
       });
     } catch (error) {
       console.log(error);
@@ -160,7 +159,7 @@ const HomeScreen = () => {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
 
       animateToNext('left', () => {
-        setCurrentIndex(prev => Math.min(prev + 1, matchedUsers.length - 1));
+        setCurrentIndex(0);
       });
     } catch (error) {
       console.log(error);
@@ -247,12 +246,8 @@ const HomeScreen = () => {
     }
   }, [dispatch, matchedUsers, currentIndex]);
 
-  // const currentUser = currentMatchedUser || matchedUsers[currentIndex];
-    // console.log(matchedUsers, 'matchedUsers');
-    // console.log(currentUser, 'currentUser');
-
   return (
-        <GestureHandlerRootView style={styles.container}>
+        <View style={styles.container}>
           <AppSafeView style={styles.container}>
             <>
               {/* Profile Card */}
@@ -344,7 +339,7 @@ const HomeScreen = () => {
               )}
             </>
           </AppSafeView>
-        </GestureHandlerRootView>
+        </View>
   );
 };
 

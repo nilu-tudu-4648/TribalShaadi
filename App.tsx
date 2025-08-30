@@ -137,11 +137,22 @@ const MainApp = () => {
     });
   }, []);
   useEffect(() => {
+    // Only initialize basic notification setup, delay token requests until auth is complete
     createNotificationChannel();
     requestAndroidNotificationPermission();
-    requestUserPermission();
     notificationListner();
   }, []);
+
+  // Setup FCM token after user authentication is initialized
+  useEffect(() => {
+    if (isInitialized) {
+      try {
+        requestUserPermission();
+      } catch (error) {
+        console.error('Error setting up FCM permissions:', error);
+      }
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

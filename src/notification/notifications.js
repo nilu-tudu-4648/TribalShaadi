@@ -140,6 +140,12 @@ const sendTokenToServer = async token => {
 
     if (user && user.id && userToken && userToken !== 'null' && userToken !== 'undefined') {
       try {
+        // Additional validation to ensure token is actually valid
+        if (userToken.length < 10 || userToken === 'undefined' || userToken === 'null') {
+          console.log('Invalid user token detected, skipping FCM token upload');
+          return;
+        }
+
         const response = await axios.post(
           `${baseUrl}/${updateUrl}`,
           {
@@ -161,7 +167,12 @@ const sendTokenToServer = async token => {
           console.log('Failed to send FCM token to server - unexpected response');
         }
       } catch (apiError) {
-        console.error('API error when sending FCM token:', apiError.message);
+        // Handle 401 errors gracefully during app initialization
+        if (apiError.response && apiError.response.status === 401) {
+          console.log('User not authenticated yet, will retry FCM token upload after login');
+        } else {
+          console.error('API error when sending FCM token:', apiError.message);
+        }
         // Don't throw - just log and continue
       }
     } else {
