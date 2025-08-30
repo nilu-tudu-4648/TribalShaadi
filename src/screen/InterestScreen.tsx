@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  RefreshControl,
+  // RefreshControl,
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { fontSize14, fontSize16, SIZES } from '../constants/Sizes';
@@ -77,10 +77,10 @@ const InterestScreen = () => {
     fetchData();
   }, [fetchData]);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData();
-  }, [fetchData]);
+  // const onRefresh = useCallback(() => {
+  //   setRefreshing(true);
+  //   fetchData();
+  // }, [fetchData]);
 
   useEffect(() => {
     if (refreshing && !loader) {
@@ -205,9 +205,9 @@ const InterestScreen = () => {
                 />
               </View>
             }
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+            // refreshControl={
+            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            // }
           />
         )}
         {selectedTab === 1 && (
@@ -224,9 +224,9 @@ const InterestScreen = () => {
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+            // refreshControl={
+            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            // }
           />
         )}
         {selectedTab === 2 && (
@@ -253,9 +253,9 @@ const InterestScreen = () => {
                 />
               </View>
             }
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+            // refreshControl={
+            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            // }
           />
         )}
         <ProfileBottomSheet

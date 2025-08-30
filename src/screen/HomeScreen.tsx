@@ -34,6 +34,7 @@ import {
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
+import Loader from '../components/loader/Loader';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
@@ -76,6 +77,7 @@ const HomeScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nameLoading, setNameLoading] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
 
   const translateX = useSharedValue(0);
 
@@ -171,6 +173,7 @@ const HomeScreen = () => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       const id = user.pReligionId !== "any" && user.pReligionId?.[0] ? user.pReligionId?.[0] : user.religionId;
       dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
+      setHasRequestedMatches(true);
   }, [dispatch, user?.pReligionId, user?.religionId]);
 
   useEffect(() => {
@@ -250,8 +253,10 @@ const HomeScreen = () => {
         <View style={styles.container}>
           <AppSafeView style={styles.container}>
             <>
-              {/* Profile Card */}
-              {matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
+              {/* show loader on first render and while fetching */}
+              {!hasRequestedMatches || loader ? (
+                <Loader />
+              ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
                 <>
                   <View style={styles.carouselContainer}>
                     <Animated.View

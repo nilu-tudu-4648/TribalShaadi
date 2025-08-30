@@ -26,8 +26,8 @@ export const createNotificationChannel = () => {
   PushNotification.createChannel(
     {
       channelId: 'tribalshaadi', // LOWERCASE for Android safety
-      channelName: 'Tribal Shaadi Notifications',
-      channelDescription: 'Notifications for Tribal Shaadi app',
+      channelName: 'Tribalshaadi.ai Notifications',
+      channelDescription: 'Notifications for Tribalshaadi.ai app',
       soundName: 'default',
       importance: 4,
       vibrate: true,

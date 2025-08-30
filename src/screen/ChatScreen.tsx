@@ -4,9 +4,9 @@ import {
   Image,
   FlatList,
   Pressable,
-  RefreshControl,
+  // RefreshControl,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -51,7 +51,7 @@ const ChatScreen = () => {
     (state: any) => state.entities.chatReducer,
   );
   const dispatch = useDispatch();
-  const [refreshing, setRefreshing] = useState(false);
+  // const [refreshing, setRefreshing] = useState(false);
   const fetchData = useCallback(async () => {
     try {
       dispatch(
@@ -71,13 +71,13 @@ const ChatScreen = () => {
     fetchData();
   }, [fetchData]);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, [fetchData]);
+  // const onRefresh = useCallback(() => {
+  //   setRefreshing(true);
+  //   fetchData();
+  //   setTimeout(() => {
+  //     setRefreshing(false);
+  //   }, 1000);
+  // }, [fetchData]);
 
   const acceptFriendRequest = async (item: any) => {
     try {
@@ -192,9 +192,9 @@ const ChatScreen = () => {
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={styles.conversationsList}
             style={styles.flatListContainer}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+            // refreshControl={
+            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            // }
           />
         </AppSafeView>
       )}
