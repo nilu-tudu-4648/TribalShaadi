@@ -20,41 +20,90 @@ const isFirebaseReady = () => {
 const ForegroundHandler = (params) => {
     useEffect(() => {
         let unsubscribe = null;
+        let setupTimer = null;
+        let initializationTimer = null;
+        let isCleanedUp = false;
         
         const setupForegroundHandler = async () => {
             try {
+                // Check if component was already cleaned up
+                if (isCleanedUp) return;
+                
                 if (!isFirebaseReady()) {
                     console.warn('Firebase not initialized. Skipping foreground message handler.');
                     return;
                 }
                 
-                const timer = setTimeout(() => {
-                    unsubscribe = messaging().onMessage(async (remoteMessage) => {
-                      if (Platform.OS === 'android') {
-                        const { title, body } = remoteMessage?.notification || {};
-                        console.log(title, body, 'title, body');
-                        if (!title || !body) return;
-                        await schedulePushNotification(title, body);
-                      }
-                    });
-                  }, 500); // increased delay to stabilize real devices
+                // Clear any existing setup timer
+                if (setupTimer) {
+                    clearTimeout(setupTimer);
+                    setupTimer = null;
+                }
                 
-                  return () => {
-                    clearTimeout(timer);
-                    if (unsubscribe) unsubscribe();
-                  };
+                setupTimer = setTimeout(() => {
+                    try {
+                        // Double check cleanup status
+                        if (isCleanedUp) return;
+                        
+                        unsubscribe = messaging().onMessage(async (remoteMessage) => {
+                          try {
+                            if (Platform.OS === 'android') {
+                              const { title, body } = remoteMessage?.notification || {};
+                              console.log(title, body, 'title, body');
+                              if (!title || !body) return;
+                              
+                              // Wrap schedulePushNotification in try-catch to prevent crashes
+                              try {
+                                await schedulePushNotification(title, body);
+                              } catch (scheduleError) {
+                                console.error('Error scheduling push notification:', scheduleError);
+                                // Don't re-throw to prevent app crash
+                              }
+                            }
+                          } catch (messageError) {
+                            console.error('Error processing foreground message:', messageError);
+                            // Don't re-throw to prevent app crash
+                          }
+                        });
+                    } catch (setupError) {
+                        console.error('Error in message handler setup:', setupError);
+                    }
+                }, 500); // increased delay to stabilize real devices
+                
             } catch (error) {
                 console.error('Error setting up foreground message handler:', error);
             }
         };
         
         // Add a small delay to ensure Firebase is initialized
-        const timer = setTimeout(setupForegroundHandler, 2000);
+        initializationTimer = setTimeout(() => {
+            if (!isCleanedUp) {
+                setupForegroundHandler();
+            }
+        }, 2000);
         
         return () => {
-            clearTimeout(timer);
+            // Mark as cleaned up to prevent any async operations
+            isCleanedUp = true;
+            
+            // Clear all timers
+            if (initializationTimer) {
+                clearTimeout(initializationTimer);
+                initializationTimer = null;
+            }
+            if (setupTimer) {
+                clearTimeout(setupTimer);
+                setupTimer = null;
+            }
+            
+            // Unsubscribe from messaging
             if (unsubscribe) {
-                unsubscribe();
+                try {
+                    unsubscribe();
+                } catch (unsubscribeError) {
+                    console.error('Error unsubscribing from foreground messages:', unsubscribeError);
+                }
+                unsubscribe = null;
             }
         };
     }, [])

@@ -41,7 +41,6 @@ import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
 import { PostHogProvider } from 'posthog-react-native';
 import ErrorBoundary from './src/components/ErrorBoundary';
-import PushNotification from 'react-native-push-notification';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -118,39 +117,40 @@ const MainApp = () => {
     }
   }, [user, dispatch, tokenExpired, isInitialized]);
   useEffect(() => {
-    // Configure PushNotification
-    PushNotification.configure({
-      onRegister: function (token: any) {
-        console.log('Push Notification TOKEN:', token);
-      },
-      onNotification: function (notification: any) {
-        console.log('Push NOTIFICATION:', notification);
-        // notification.finish(PushNotificationIOS.FetchResult.NoData);
-      },
-      permissions: {
-        alert: true,
-        badge: true,
-        sound: true,
-      },
-      popInitialNotification: true,
-      requestPermissions: true,
-    });
-  }, []);
-  useEffect(() => {
-    // Only initialize basic notification setup, delay token requests until auth is complete
-    createNotificationChannel();
-    requestAndroidNotificationPermission();
-    notificationListner();
+    // Initialize notification system in proper sequence
+    const initializeNotifications = async () => {
+      try {
+        // Step 1: Create notification channel (required for Android)
+        createNotificationChannel();
+        
+        // Step 2: Request Android 13+ permissions if needed
+        await requestAndroidNotificationPermission();
+        
+        // Step 3: Setup notification listeners (background/quit state handlers)
+        // This is safe to call early as it has Firebase checks
+        notificationListner();
+        
+      } catch (error) {
+        console.error('Error initializing notification system:', error);
+      }
+    };
+    
+    initializeNotifications();
   }, []);
 
-  // Setup FCM token after user authentication is initialized
+  // Setup FCM permissions and token after user authentication is initialized
   useEffect(() => {
     if (isInitialized) {
-      try {
-        requestUserPermission();
-      } catch (error) {
-        console.error('Error setting up FCM permissions:', error);
-      }
+      // Add small delay to ensure all other initializations are complete
+      const timer = setTimeout(async () => {
+        try {
+          await requestUserPermission();
+        } catch (error) {
+          console.error('Error setting up FCM permissions:', error);
+        }
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
   }, [isInitialized]);
 

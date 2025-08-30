@@ -245,31 +245,7 @@ export const notificationListner = async () => {
         // Continue app flow even if initial notification check fails
       });
 
-    // Handle background messages
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      try {
-        console.log('Message handled in the background!');
-
-        // Add null safety checks
-        if (!remoteMessage) {
-          console.log('Background message: remoteMessage is null or undefined');
-          return;
-        }
-
-        // Process any data-only logic here if needed
-        const data = remoteMessage.data;
-        if (data && typeof data === 'object') {
-          console.log('Processing background data:', data);
-          // Handle data processing, storage updates, etc.
-          // Add any specific background processing logic here
-        } else {
-          console.log('Background message: No valid data found');
-        }
-      } catch (error) {
-        console.error('Error handling background message:', error);
-        // Don't re-throw to prevent crashes
-      }
-    });
+    // Background message handler is registered once in index.js as recommended.
 
     // Handle token refresh
     messaging().onTokenRefresh(async token => {
@@ -368,28 +344,67 @@ export const schedulePushNotification = async (title, message) => {
   if (Platform.OS !== 'android') return; // fix: don't touch iOS
 
   try {
-    if (!title || !message) return;
-    if (typeof title !== 'string' || typeof message !== 'string') return;
-    if (!title.trim().length || !message.trim().length) return;
-
-    const hasChannel = await ensureChannelReady('tribalshaadi');
-    if (!hasChannel) {
-      console.log('Notification channel not ready — skipping notification');
+    // Enhanced input validation
+    if (!title || !message) {
+      console.log('schedulePushNotification: Missing title or message');
+      return;
+    }
+    if (typeof title !== 'string' || typeof message !== 'string') {
+      console.log('schedulePushNotification: Title and message must be strings');
+      return;
+    }
+    if (!title.trim().length || !message.trim().length) {
+      console.log('schedulePushNotification: Title and message cannot be empty');
       return;
     }
 
-    PushNotification.localNotification({
-      channelId: 'tribalshaadi',
-      title: title.trim(),
-      message: message.trim(),
-      playSound: true,
-      soundName: 'default',
-      autoCancel: true,
-      priority: 'high',
-      importance: 'high',
-    });
+    // Android 13+ runtime permission check to avoid native crashes
+    if (Platform.Version >= 33) {
+      try {
+        const granted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        if (!granted) {
+          console.log('schedulePushNotification: Notification permission not granted, skipping');
+          return;
+        }
+      } catch (permErr) {
+        console.log('schedulePushNotification: Permission check failed, skipping', permErr);
+        return;
+      }
+    }
+
+    // Add timeout to prevent hanging
+    const hasChannel = await Promise.race([
+      ensureChannelReady('tribalshaadi'),
+      new Promise((resolve) => setTimeout(() => resolve(false), 3000)) // 3 second timeout
+    ]);
+    
+    if (!hasChannel) {
+      console.log('Notification channel not ready or timeout — skipping notification');
+      return;
+    }
+
+    // Additional safety check before showing notification
+    try {
+      PushNotification.localNotification({
+        channelId: 'tribalshaadi',
+        title: title.trim(),
+        message: message.trim(),
+        playSound: true,
+        soundName: 'default',
+        autoCancel: true,
+        allowWhileIdle: true,
+        // priority and importance are controlled by the channel; avoid passing mismatched types here
+      });
+      console.log('Local notification scheduled successfully');
+    } catch (notificationError) {
+      console.error('Error showing local notification:', notificationError);
+      // Don't re-throw to prevent crashes
+    }
   } catch (err) {
-    console.log('Foreground notification failed:', err);
+    console.error('Error in schedulePushNotification:', err);
+    // Don't re-throw to prevent app crashes
   }
 };
 
