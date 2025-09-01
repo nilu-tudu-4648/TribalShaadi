@@ -554,14 +554,14 @@ export const uploadImage = async (
 export const deleteUserApi = async (id, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    const response = await axios.post(`${baseUrl}/${deleteUserUrl}/${id}`, {
+    const response = await axios.delete(`${baseUrl}/${deleteUserUrl}/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     console.log(response, 'response deleteUser');
     await AsyncStorage.clear();
-    dispatch(logoutFromReducer());
+    logoutUser(dispatch);
   } catch (error) {
     console.log(error.response, 'deleteUserApi');
   }
@@ -843,3 +843,5 @@ export const verifySelfieApi = async (data, dispatch) => {
     dispatch(setLoaderPayment(false));
   }
 };
+
+

@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AppHeader from '../components/AppHeader';
 import { COLORS } from '../constants/AppColors';
 import AppSafeView from '../components/AppSafeView';
@@ -9,7 +9,7 @@ import AppText from '../components/AppText';
 import { fontSize16, Size12, Size25, Size4, Size8 } from '../constants/Sizes';
 import AppButton from '../components/AppButton';
 import LogoutDialog from '../components/dialogs/LogoutDialog';
-import { logoutUser } from '../constants/functions';
+import { deleteUserApi, logoutUser } from '../constants/functions';
 import { useNavigation } from '@react-navigation/native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import DeleteBottomSheet from '../components/BottomSheets/DeleteBottomSheet';
@@ -17,16 +17,21 @@ import AccountBottomSheet from '../components/BottomSheets/AccountBottomSheet';
 
 const SettingsScreen = () => {
   const dispatch = useDispatch();
+
+  const { user } = useSelector((state: any) => state.entities.authReducer);
   const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const accountBottomSheetRef = useRef<BottomSheet | null>(null);
   const handleLogout = () => {
+    if (isDeleteDialogVisible) {
+      return deleteUserApi(user.id, dispatch);
+    }
     setIsLogoutDialogVisible(false);
     logoutUser(dispatch);
   };
   const navigation = useNavigation();
   const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
-  
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       accountBottomSheetRef.current?.close();
@@ -35,20 +40,27 @@ const SettingsScreen = () => {
 
     return unsubscribe;
   }, [navigation]);
-  
+
   const openDeleteBottomSheet = () => {
     deleteBottomSheetRef?.current?.expand();
   };
   const handleDelete = (reason: string) => {
     console.log('reason', reason);
   };
+  const onDismiss = () => {
+    setIsDeleteDialogVisible(false);
+    setIsLogoutDialogVisible(false);
+  };
   return (
     <AppSafeView style={styles.container}>
       <AppHeader title="Settings" onBackPress={() => navigation.goBack()} />
       <View style={styles.topContainer}>
-        <TouchableOpacity style={styles.iconContainer} onPress={() => {
-          accountBottomSheetRef?.current?.expand();
-        }}>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => {
+            accountBottomSheetRef?.current?.expand();
+          }}
+        >
           <View style={styles.iconContainer}>
             <LightBulbIcon />
             <AppText text="Account details" />
@@ -72,17 +84,16 @@ const SettingsScreen = () => {
         />
       </View>
       <LogoutDialog
-        isVisible={isLogoutDialogVisible}
-        onDismiss={() => setIsLogoutDialogVisible(false)}
+        isVisible={isLogoutDialogVisible || isDeleteDialogVisible}
+        onDismiss={onDismiss}
         onLogout={handleLogout}
         isDelete={isDeleteDialogVisible}
       />
       <DeleteBottomSheet
         bottomSheetRef={deleteBottomSheetRef}
         onReport={handleDelete}
-        onPressYes={() =>{
+        onPressYes={() => {
           setIsDeleteDialogVisible(true);
-          setIsLogoutDialogVisible(true);
         }}
       />
       <AccountBottomSheet bottomSheetRef={accountBottomSheetRef} />
