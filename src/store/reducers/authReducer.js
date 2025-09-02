@@ -16,6 +16,9 @@ const initialState = {
   educationTypes: [],
   occupations: [],
   income: [],
+  employmentTypes: [],
+  occupationsByEmploymentType: [],
+  occupationCategories: [],
   height: '',
   diet: '',
   updatedUser: null,
@@ -109,8 +112,19 @@ const authReducer = createSlice({
       reducer.loader = false;
       reducer.diet = action.payload.recordList;
     },
+    getEmploymentTypesDataReceived: (reducer, action) => {
+      reducer.loader = false;
+      reducer.employmentTypes = action.payload.recordList;
+    },
+    getOccupationsByEmploymentTypeDataReceived: (reducer, action) => {
+      reducer.loader = false;
+      reducer.occupationsByEmploymentType = action.payload.recordList;
+    },
+    getOccupationCategoriesByOccupationIdDataReceived: (reducer, action) => {
+      reducer.loader = false;
+      reducer.occupationCategories = action.payload.recordList;
+    },
     completeUserProfileV2UpdatedDataReceived: (reducer, action) => {
-      console.log(action.payload, 'action.payload');
       reducer.updatedUser = action.payload;
     },
     completeUserProfileV2InterestsDataReceived: (reducer, action) => {
@@ -148,6 +162,9 @@ const {
   getDietDataReceived,
   completeUserProfileV2InterestsDataReceived,
   getAllCitiesDataReceived,
+  getEmploymentTypesDataReceived,
+  getOccupationsByEmploymentTypeDataReceived,
+  getOccupationCategoriesByOccupationIdDataReceived,
 } = authReducer.actions;
 export const sendOTP = (url, data) =>
   apiCallBegan({
@@ -248,6 +265,30 @@ export const getIncome = url =>
     url,
     onStart: authReducerDataRequested.type,
     onSuccess: getIncomeDataReceived.type,
+    onError: authReducerDataRequestFailed.type,
+  });
+  export const getEmploymentTypes = url =>
+    apiCallBegan({
+      method: 'get',
+      url,
+      onStart: authReducerDataRequested.type,
+      onSuccess: getEmploymentTypesDataReceived.type,
+      onError: authReducerDataRequestFailed.type,
+    });
+export const getOccupationsByEmploymentType = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: authReducerDataRequested.type,
+    onSuccess: getOccupationsByEmploymentTypeDataReceived.type,
+    onError: authReducerDataRequestFailed.type,
+  });
+export const getOccupationCategoriesByOccupationId = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: authReducerDataRequested.type,
+    onSuccess: getOccupationCategoriesByOccupationIdDataReceived.type,
     onError: authReducerDataRequestFailed.type,
   });
 export const completeUserProfileV2Updated = (url, data) =>

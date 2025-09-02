@@ -45,6 +45,8 @@ export const getEducationUrl = 'admin/education/getEducation';
 export const getEducationTypeUrl = 'admin/education/getEducationType';
 export const getOccupationUrl = 'admin/occupation/getOccupation';
 export const getEmploymentTypeUrl = 'admin/employmentType/getEmploymentType';
+export const getOccupationByEmploymentTypeUrl = '/admin/occupation/getOccupationByEmploymentType?employmentTypeId=';
+export const getOccupationCategoryByOccupationIdUrl = '/admin/occupationcategory/getOccupationCategoryByOccupationId?occupationId=';
 export const getIncomeUrl = 'admin/annualIncome/getAnnualIncome';
 export const getHeightUrl = 'admin/height/getHeight';
 export const getDietUrl = 'admin/diet/getDiet';

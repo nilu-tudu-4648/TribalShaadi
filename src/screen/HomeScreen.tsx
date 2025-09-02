@@ -34,7 +34,7 @@ import {
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
-import Loader from '../components/loader/Loader';
+import ProfileCardShimmer from '../components/ProfileCardShimmer';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
@@ -253,9 +253,9 @@ const HomeScreen = () => {
         <View style={styles.container}>
           <AppSafeView style={styles.container}>
             <>
-              {/* show loader on first render and while fetching */}
+              {/* show shimmer on first render and while fetching */}
               {!hasRequestedMatches || loader ? (
-                <Loader />
+                <ProfileCardShimmer />
               ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
                 <>
                   <View style={styles.carouselContainer}>
@@ -286,7 +286,7 @@ const HomeScreen = () => {
                         partnerExpectation={
                           currentMatchedUser?.about_lifepartener
                         }
-                        employedIn={currentMatchedUser?.employedIn}
+                        employedIn={currentMatchedUser?.employmentType}
                         occupation={currentMatchedUser?.occupation}
                         organizationName={currentMatchedUser?.companyName}
                         settlingTime={currentMatchedUser?.planingto_settle}

@@ -19,12 +19,18 @@ import AppPickerModal from '../components/AppPickerModal';
 import {
   completeUserProfileV2Updated,
   getEducationTypes,
+  getEmploymentTypes,
   getIncome,
   getOccupation,
+  getOccupationCategoriesByOccupationId,
+  getOccupationsByEmploymentType,
 } from '../store/reducers/authReducer';
 import {
   getEducationTypeUrl,
+  getEmploymentTypeUrl,
   getIncomeUrl,
+  getOccupationByEmploymentTypeUrl,
+  getOccupationCategoryByOccupationIdUrl,
   getOccupationUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
@@ -43,27 +49,34 @@ const QualificationScreen = () => {
   const [selectedOccupation, setSelectedOccupation] = useState<any>(null);
   const [organizationName, setOrganizationName] = useState('');
   const [selectedIncome, setSelectedIncome] = useState<any>(null);
-
+  const [selectedOccupationCategory, setSelectedOccupationCategory] =
+    useState<any>(null);
+  const [showOccupationCategoryPicker, setShowOccupationCategoryPicker] =
+    useState(false);
   const [showQualificationPicker, setShowQualificationPicker] = useState(false);
   const [showWorkExperiencePicker, setShowWorkExperiencePicker] =
     useState(false);
   const [showOccupationPicker, setShowOccupationPicker] = useState(false);
   const [showIncomePicker, setShowIncomePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, educationTypes, occupations, income, loader } = useSelector(
-    (state: any) => state.entities.authReducer,
-  );
+  const {
+    user,
+    educationTypes,
+    income,
+    loader,
+    employmentTypes,
+    occupationsByEmploymentType,
+    occupationCategories,
+  } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const educationTypesList = educationTypes || [];
-  const workExperiences = [
-    { id: 1, name: 'Yes' },
-    { id: 0, name: 'No' },
-  ];
   const incomeList = income || [];
+  console.log(selectedWorkExperience);
+  console.log(occupationCategories, 'occupationCategories');
   useEffect(() => {
     dispatch(getEducationTypes(getEducationTypeUrl));
+    dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
-    dispatch(getIncome(getIncomeUrl));
   }, [dispatch]);
 
   const handleContinue = async () => {
@@ -79,17 +92,20 @@ const QualificationScreen = () => {
     setLoading(true);
 
     try {
+      const isWorking = selectedWorkExperience?.name !== 'Not Working';
       const requestBody = {
         id: user.id,
         educationTypeId: selectedQualification.id,
         college_name: collegeName,
-        areYouWorking: selectedWorkExperience.id,
-        occupationId: selectedOccupation.id,
-        ...(selectedWorkExperience?.id === 1 && {
+        employmentTypeId: selectedWorkExperience.id,
+        ...(isWorking && { 
+          occupationId: selectedOccupation.id,
+          occupationCategoryId: selectedOccupationCategory.id,
           companyName: organizationName,
-          annualIncomeId: selectedIncome.id,
+          annualIncomeId: selectedIncome.id, 
         }),
       };
+      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -105,20 +121,20 @@ const QualificationScreen = () => {
     selectedQualification &&
     selectedWorkExperience &&
     selectedOccupation &&
-    (selectedWorkExperience?.id === 1
-      ? selectedIncome && organizationName // Only check income and organization name if working
+    (selectedWorkExperience?.name !== 'Not Working'
+      ? selectedIncome // Only check income and organization name if working
       : true); // If not working, these fields are not required
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-        <HeaderBack />
+          <HeaderBack />
           {/* Title */}
           <AppText text="Your highest qualification" textStyle={styles.title} />
 
@@ -149,44 +165,49 @@ const QualificationScreen = () => {
           <AppDropdown
             label=""
             selectedValue={selectedWorkExperience?.name || ''}
-            placeholder="Are you working?"
+            placeholder="You are working with?"
             onPress={() => setShowWorkExperiencePicker(true)}
           />
-
-          {/* Occupation Dropdown */}
-          <AppDropdown
-            label=""
-            selectedValue={selectedOccupation?.name || ''}
-            placeholder="Occupation"
-            onPress={() => setShowOccupationPicker(true)}
-          />
-
-          {/* Organization Name Text Input */}
-          {selectedWorkExperience?.id === 1 && (
-            <View style={styles.textInputContainer}>
-              <AppTextInput
-                placeholder="Organization name"
-                value={organizationName}
-                onChangeText={setOrganizationName}
-                keyboardType="default"
-                placeholderTextColor={COLORS.placeholderText}
-                style={styles.textInputStyle}
+          {selectedWorkExperience?.name !== 'Not Working' && (
+            <>
+              {/* Occupation Dropdown */}
+              <AppDropdown
+                label=""
+                selectedValue={selectedOccupation?.name || ''}
+                placeholder="Occupation"
+                onPress={() => setShowOccupationPicker(true)}
               />
-            </View>
-          )}
+              {/* Occupation Dropdown */}
+              <AppDropdown
+                label=""
+                selectedValue={selectedOccupationCategory?.name || ''}
+                placeholder="Occupation Category"
+                onPress={() => setShowOccupationCategoryPicker(true)}
+              />
 
-          {/* Income Dropdown */}
-          {selectedWorkExperience?.id === 1 && (
-            <AppDropdown
-              label=""
-              selectedValue={selectedIncome?.value || ''}
-              placeholder="Income"
-              onPress={() => setShowIncomePicker(true)}
-            />
+             
+             {/* Organization Name Text Input */}
+             <AppTextInput
+               placeholder="Organization Name"
+               value={organizationName}
+               onChangeText={setOrganizationName}
+               keyboardType="default"
+               placeholderTextColor={COLORS.placeholderText}
+               style={styles.textInputStyle}
+             />
+              {/* Income Dropdown */}
+
+              <AppDropdown
+                label=""
+                selectedValue={selectedIncome?.value || ''}
+                placeholder="Income"
+                onPress={() => setShowIncomePicker(true)}
+              />
+            </>
           )}
         </View>
       </ScrollView>
-      
+
       {/* Continue Button - Fixed at bottom */}
       <View style={styles.buttonContainer}>
         <AppButton
@@ -205,8 +226,8 @@ const QualificationScreen = () => {
             isFormValid
               ? styles.continueButtonTextActive
               : styles.continueButtonTextInactive,
-            ]}
-          />
+          ]}
+        />
       </View>
 
       {/* Qualification Picker Modal */}
@@ -216,7 +237,6 @@ const QualificationScreen = () => {
         items={educationTypesList}
         selectedValue={selectedQualification?.name || ''}
         onSelect={value => {
-          // Store the full object
           setSelectedQualification(value);
         }}
         onClose={() => setShowQualificationPicker(false)}
@@ -227,11 +247,15 @@ const QualificationScreen = () => {
       <AppPickerModal
         visible={showWorkExperiencePicker}
         title="Select Work Experience"
-        items={workExperiences}
+        items={employmentTypes.filter((item: any) => item.name !== 'any')}
         selectedValue={selectedWorkExperience?.name || ''}
         onSelect={value => {
-          // Store the full object
           setSelectedWorkExperience(value);
+          dispatch(
+            getOccupationsByEmploymentType(
+              getOccupationByEmploymentTypeUrl + value.id,
+            ),
+          );
         }}
         onClose={() => setShowWorkExperiencePicker(false)}
         isObjects={true}
@@ -241,13 +265,30 @@ const QualificationScreen = () => {
       <AppPickerModal
         visible={showOccupationPicker}
         title="Select Occupation"
-        items={occupations}
+        items={occupationsByEmploymentType}
         selectedValue={selectedOccupation?.name || ''}
         onSelect={value => {
-          // Store the full object
           setSelectedOccupation(value);
+          dispatch(
+            getOccupationCategoriesByOccupationId(
+              getOccupationCategoryByOccupationIdUrl + value.id,
+            ),
+          );
         }}
         onClose={() => setShowOccupationPicker(false)}
+        isObjects={true}
+      />
+      {/* Occupation Picker Modal */}
+      <AppPickerModal
+        visible={showOccupationCategoryPicker}
+        title="Select Occupation Category"
+        items={occupationCategories}
+        selectedValue={selectedOccupationCategory?.name || ''}
+        onSelect={value => {
+          dispatch(getIncome(getIncomeUrl));
+          setSelectedOccupationCategory(value);
+        }}
+        onClose={() => setShowOccupationCategoryPicker(false)}
         isObjects={true}
       />
 
@@ -258,7 +299,6 @@ const QualificationScreen = () => {
         items={incomeList}
         selectedValue={selectedIncome?.value || ''}
         onSelect={value => {
-          // Store the full object
           setSelectedIncome(value);
         }}
         onClose={() => setShowIncomePicker(false)}

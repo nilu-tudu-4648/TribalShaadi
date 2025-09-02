@@ -177,13 +177,16 @@ const AddressScreen = () => {
       selectedState &&
       selectedCity &&
       selectedMaritalStatus &&
-      selectedSettlingDown
+      selectedSettlingDown &&
+      selectedKids
+
     );
   }, [
     selectedState,
     selectedCity,
     selectedMaritalStatus,
     selectedSettlingDown,
+    selectedKids,
   ]);
 
   return (

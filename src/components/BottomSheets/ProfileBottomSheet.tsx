@@ -257,7 +257,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                   <View style={styles.detailText}>
                     <AppText text="Employed in" textStyle={styles.label} />
                     <AppText
-                      text={selectedUser?.employedIn}
+                      text={selectedUser?.employmentType}
                       textStyle={styles.value}
                     />
                   </View>
@@ -308,6 +308,19 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 }}
                 style={styles.galleryImage}
               />
+            </View>
+            <AppText text="Education" textStyle={styles.sectionTitle} />
+            <View style={styles.detailRow}>
+              <View style={styles.detailText}>
+                <AppText
+                  text="Highest Qualification"
+                  textStyle={styles.headerLabel}
+                />
+                <AppText
+                  text={selectedUser?.educationType}
+                  textStyle={styles.headerValue}
+                />
+              </View>
             </View>
             <AppText text="College/University" textStyle={styles.headerLabel} />
             <AppText
@@ -438,13 +451,13 @@ const styles = StyleSheet.create({
     color: COLORS.textInactive,
   },
   headerValue: {
-    fontSize: SIZES.h4,
-    fontWeight: 'bold',
+    fontSize: fontSize16,
+    fontWeight: '600',
     color: COLORS.black,
   },
   actionsContainer: {
     gap: SIZES.padding * 3,
-    paddingVertical: SIZES.padding,
+    paddingVertical: SIZES.padding*3,
   },
   attributesContainer: {
     flexDirection: 'row',

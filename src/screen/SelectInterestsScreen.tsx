@@ -127,16 +127,16 @@ const SelectInterestsScreen = () => {
           title="Continue"
           onPress={handleContinue}
           isLoading={loader}
-          isButtonDisabled={selected.length < 1}
+          isButtonDisabled={selected.length < maxSelect}
           buttonStyle={[
             styles.continueButton,
-            selected.length !== 0
+            selected.length === maxSelect
               ? styles.continueButtonActive
               : styles.continueButtonInactive,
           ]}
           textStyle={[
             styles.continueButtonText,
-            selected.length !== 0
+            selected.length === maxSelect
               ? styles.continueButtonTextActive
               : styles.continueButtonTextInactive,
           ]}

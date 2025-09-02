@@ -14,6 +14,9 @@ import {
   getEducationTypes,
   getOccupation,
   getIncome,
+  getEmploymentTypes,
+  getOccupationsByEmploymentType,
+  getOccupationCategoriesByOccupationId,
 } from '../store/reducers/authReducer';
 import {
   updateUrl,
@@ -23,35 +26,29 @@ import {
   getEducationTypeUrl,
   getOccupationUrl,
   getIncomeUrl,
+  getEmploymentTypeUrl,
+  getOccupationByEmploymentTypeUrl,
+  getOccupationCategoryByOccupationIdUrl,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import ProfileHeader from '../components/Header/ProfileHeader';
 import { EducationIcon } from '../components/svg/SvgIcons';
 import { ROUTES } from '../constants/data';
 
-// Company types - keeping as hardcoded since no specific API exists
-const COMPANY_TYPES = [
-  { id: '1', name: 'Private Company' },
-  { id: '2', name: 'Government' },
-  { id: '3', name: 'MNC' },
-  { id: '4', name: 'Startup' },
-  { id: '5', name: 'Self Employed' },
-  { id: '6', name: 'Business' },
-  { id: '7', name: 'Not Working' },
-];
-
 const EditEducationScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const { user, loader, educationTypes, occupations, income } = useSelector(
-    (state: any) => state.entities.authReducer,
-  );
-
-  console.log('user', user);
+  const {
+    user,
+    loader,
+    educationTypes,
+    income,
+    employmentTypes,
+    occupationsByEmploymentType,
+  } = useSelector((state: any) => state.entities.authReducer);
   // Data from API with fallback to empty arrays
   const educationTypesList = educationTypes || [];
-  const jobRolesList = occupations || [];
   const salaryRangesList = income || [];
 
   // Form state
@@ -59,9 +56,8 @@ const EditEducationScreen = () => {
     educationTypeId: '',
     educationName: '',
     collegeName: '',
-    companyTypeId: '',
+    employmentTypeId: '',
     companyTypeName: '',
-    jobRoleId: '',
     jobRoleName: '',
     companyName: '',
     salaryId: '',
@@ -70,17 +66,20 @@ const EditEducationScreen = () => {
     annualIncomeId: '',
     occupationId: '',
     occupationName: '',
+    occupationCategoryName: '',
   });
 
   // Picker modal states
   const [showEducationPicker, setShowEducationPicker] = useState(false);
   const [showCompanyTypePicker, setShowCompanyTypePicker] = useState(false);
   const [showJobRolePicker, setShowJobRolePicker] = useState(false);
+  // const [showOccupationCategoryPicker, setShowOccupationCategoryPicker] = useState(false);
   const [showSalaryPicker, setShowSalaryPicker] = useState(false);
 
   // Fetch API data on component mount
   useEffect(() => {
     dispatch(getEducationTypes(getEducationTypeUrl));
+    dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
     dispatch(getIncome(getIncomeUrl));
   }, [dispatch]);
@@ -94,22 +93,21 @@ const EditEducationScreen = () => {
         occupationName: user.occupationName || '',
         educationName: user.educationType || '',
         collegeName: user.college_name || '',
-        companyTypeId: user.companyTypeId || '1',
-        companyTypeName: user.companyTypeName || 'Private Company',
-        jobRoleId: user.jobRoleId || '1',
-        jobRoleName: user.jobRoleName || 'Admin Professional',
-        companyName: user.companyName || 'Tribalshaadi',
+        employmentTypeId: user.employmentTypeId || '1',
+        companyTypeName: user.employmentType || '',
+        jobRoleName: user.occupation || '',
+        companyName: user.companyName || '',
         salaryId: user.annualIncomeId || '',
         salaryName: user.annualIncome || '',
         annualIncome: user.annualIncome || '',
         annualIncomeId: user.annualIncomeId || '',
+        occupationCategoryName: user.occupationCategoryName || '',
       });
     }
   }, [user]);
 
   // Handle education selection
   const handleEducationSelection = useCallback((selectedEducation: any) => {
-    console.log('selectedEducation', selectedEducation);
     setFormData(prev => ({
       ...prev,
       educationTypeId: selectedEducation.id,
@@ -119,28 +117,44 @@ const EditEducationScreen = () => {
   }, []);
 
   // Handle company type selection
-  const handleCompanyTypeSelection = useCallback((selectedCompanyType: any) => {
-    setFormData(prev => ({
-      ...prev,
-      companyTypeId: selectedCompanyType.id,
-      companyTypeName: selectedCompanyType.name,
-    }));
-    setShowCompanyTypePicker(false);
-  }, []);
+  const handleCompanyTypeSelection = useCallback(
+    (selectedCompanyType: any) => {
+        setFormData(prev => ({
+          ...prev,
+          employmentTypeId: selectedCompanyType.id,
+          companyTypeName: selectedCompanyType.name,
+        }));
+        dispatch(
+          getOccupationsByEmploymentType(
+            getOccupationByEmploymentTypeUrl + selectedCompanyType.id,
+          ),
+        );
+      setShowCompanyTypePicker(false);
+    },
+    [dispatch],
+  );
 
   // Handle job role selection
-  const handleJobRoleSelection = useCallback((selectedJobRole: any) => {
-    setFormData(prev => ({
-      ...prev,
-      jobRoleId: selectedJobRole.id,
-      jobRoleName: selectedJobRole.name,
-    }));
-    setShowJobRolePicker(false);
-  }, []);
+  const handleJobRoleSelection = useCallback(
+    (selectedJobRole: any) => {
+      setFormData(prev => ({
+        ...prev,
+        jobRoleName: selectedJobRole.name,
+        occupationId: selectedJobRole.id,
+        // occupationCategoryName: selectedJobRole.name,
+      }));
+      dispatch(
+        getOccupationCategoriesByOccupationId(
+          getOccupationCategoryByOccupationIdUrl + selectedJobRole.id,
+        ),
+      );
+      setShowJobRolePicker(false);
+    },
+    [dispatch],
+  );
 
   // Handle salary selection
   const handleSalarySelection = useCallback((selectedSalary: any) => {
-    console.log('selectedSalary', selectedSalary);
     setFormData(prev => ({
       ...prev,
       annualIncomeId: selectedSalary.id,
@@ -154,15 +168,14 @@ const EditEducationScreen = () => {
     try {
       const requestBody = {
         id: user.id,
-        educationTypeId: formData.educationTypeId,
-        occupationId: formData.occupationId,
         college_name: formData.collegeName,
-        companyTypeId: formData.companyTypeId,
-        jobRoleId: formData.jobRoleId,
+        educationTypeId: formData.educationTypeId,
+        employmentTypeId: formData.employmentTypeId,
+        occupationId: formData.occupationId,
         companyName: formData.companyName,
         annualIncomeId: formData.annualIncomeId,
       };
-
+      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -219,43 +232,54 @@ const EditEducationScreen = () => {
             selectedValue={formData.companyTypeName}
             placeholder="Select Company Type"
             onPress={() => setShowCompanyTypePicker(true)}
-            disabled={true}
           />
         </View>
 
         {/* Job Role Dropdown */}
-        <View>
-          <AppDropdown
-            label=""
-            selectedValue={formData.jobRoleName}
-            placeholder="Select Job Role"
-            onPress={() => setShowJobRolePicker(true)}
-            disabled={true}
-          />
-        </View>
+        {formData.companyTypeName !== 'Not Working' && (
+          <>
+            <View>
+              <AppDropdown
+                label=""
+                selectedValue={formData.jobRoleName}
+                placeholder="Select Job Role"
+                onPress={() => setShowJobRolePicker(true)}
+              />
+            </View>
+            {/* Occupation Category Dropdown */}
+            {/* <View>
+              <AppDropdown
+                label=""
+                selectedValue={formData.occupationCategoryName}
+                placeholder="Select Occupation Category"
+                onPress={() => setShowOccupationCategoryPicker(true)}
+              />
+            </View> */}
 
-        {/* Company Name */}
-        <View>
-          <AppTextInput
-            placeholder="Company Name"
-            value={formData.companyName}
-            onChangeText={text =>
-              setFormData(prev => ({ ...prev, companyName: text }))
-            }
-            keyboardType="default"
-            textInputStyle={styles.textInput}
-          />
-        </View>
+            {/* Company Name */}
+            <View>
+              <AppTextInput
+                placeholder="Company Name"
+                value={formData.companyName}
+                onChangeText={text =>
+                  setFormData(prev => ({ ...prev, companyName: text }))
+                }
+                keyboardType="default"
+                textInputStyle={styles.textInput}
+              />
+            </View>
 
-        {/* Salary Range Dropdown */}
-        <View>
-          <AppDropdown
-            label=""
-            selectedValue={formData.salaryName}
-            placeholder="Select Salary Range"
-            onPress={() => setShowSalaryPicker(true)}
-          />
-        </View>
+            {/* Salary Range Dropdown */}
+            <View>
+              <AppDropdown
+                label=""
+                selectedValue={formData.salaryName}
+                placeholder="Select Salary Range"
+                onPress={() => setShowSalaryPicker(true)}
+              />
+            </View>
+          </>
+        )}
       </View>
 
       {/* Save Button */}
@@ -282,7 +306,7 @@ const EditEducationScreen = () => {
 
       <AppPickerModal
         visible={showCompanyTypePicker}
-        items={COMPANY_TYPES}
+        items={employmentTypes.filter((item: any) => item.name !== 'any')}
         selectedValue={formData.companyTypeName}
         onSelect={handleCompanyTypeSelection}
         onClose={() => setShowCompanyTypePicker(false)}
@@ -292,7 +316,7 @@ const EditEducationScreen = () => {
 
       <AppPickerModal
         visible={showJobRolePicker}
-        items={jobRolesList}
+        items={occupationsByEmploymentType}
         selectedValue={formData.jobRoleName}
         onSelect={handleJobRoleSelection}
         onClose={() => setShowJobRolePicker(false)}
