@@ -98,7 +98,7 @@ const QualificationScreen = () => {
         employmentTypeId: selectedWorkExperience.id,
         ...(isWorking && { 
           occupationId: selectedOccupation.id,
-          // occupationCategoryId: selectedOccupationCategory.id,
+          occupationCategoryId: selectedOccupationCategory.id,
           companyName: organizationName,
           annualIncomeId: selectedIncome.id, 
         }),
@@ -244,7 +244,7 @@ const QualificationScreen = () => {
       {/* Work Experience Picker Modal */}
       <AppPickerModal
         visible={showWorkExperiencePicker}
-        title="Select Work Experience"
+        title="You are working with"
         items={employmentTypes.filter((item: any) => item.name !== 'any')}
         selectedValue={selectedWorkExperience?.name || ''}
         onSelect={value => {

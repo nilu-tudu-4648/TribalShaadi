@@ -112,8 +112,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       style={styles.scrollView}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
-      nestedScrollEnabled={true} // Android
+      nestedScrollEnabled={true}
       scrollEnabled={true}
+      horizontal={false}
+      directionalLockEnabled={true}
+      scrollEventThrottle={16}
     >
       <View style={styles.imageContainer}>
         <ImageBackground
@@ -315,7 +318,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
-export default ProfileCard;
+export default React.memo(ProfileCard);
 
 const styles = StyleSheet.create({
   imageContainer: {

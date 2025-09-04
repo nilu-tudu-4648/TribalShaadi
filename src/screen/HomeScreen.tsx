@@ -248,7 +248,7 @@ const HomeScreen = () => {
       );
     }
   }, [dispatch, matchedUsers, currentIndex]);
-
+  console.log(matchedUsers, 'matchedUsers');
   return (
         <View style={styles.container}>
           <AppSafeView style={styles.container}>
@@ -314,6 +314,7 @@ const HomeScreen = () => {
                       buttonStyle={styles.declineButton}
                       textStyle={styles.declineButtonText}
                       isButtonDisabled={isLoading}
+                      pressable={true}
                     />
                     <AppButton
                       title="Connect"
@@ -323,6 +324,7 @@ const HomeScreen = () => {
                       buttonStyle={styles.connectButton}
                       textStyle={styles.connectButtonText}
                       isButtonDisabled={isLoading}
+                      pressable={true}
                     />
                   </View>
                 </>

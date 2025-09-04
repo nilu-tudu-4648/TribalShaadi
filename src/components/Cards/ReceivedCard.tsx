@@ -73,6 +73,7 @@ const ReceivedCard = ({
             isLoading={false}
             buttonStyle={styles.declineButton}
             textStyle={styles.declineButtonText}
+            pressable={true}
           />
           <AppButton
             title="Accept"
@@ -81,6 +82,7 @@ const ReceivedCard = ({
             isLoading={false}
             buttonStyle={styles.connectButton}
             textStyle={styles.connectButtonText}
+            pressable={true}
           />
         </View>
       )}

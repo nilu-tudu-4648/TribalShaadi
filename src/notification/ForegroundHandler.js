@@ -3,6 +3,9 @@ import { Platform } from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
 import { schedulePushNotification } from "./notifications";
+import { getProposalsGotByMeApi } from "../store/reducers/userReducer";
+import { baseUrl, getProposalsGotByMeUrl } from "../constants/functions";
+import { store } from "../store/configureStore";
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -50,6 +53,8 @@ const ForegroundHandler = (params) => {
                             if (Platform.OS === 'android') {
                               const { title, body } = remoteMessage?.notification || {};
                               console.log(title, body, 'title, body');
+                              store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+              
                               if (!title || !body) return;
                               
                               // Wrap schedulePushNotification in try-catch to prevent crashes

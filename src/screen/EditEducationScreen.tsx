@@ -230,7 +230,7 @@ const EditEducationScreen = () => {
           <AppDropdown
             label=""
             selectedValue={formData.companyTypeName}
-            placeholder="Select Company Type"
+            placeholder="You are working with"
             onPress={() => setShowCompanyTypePicker(true)}
           />
         </View>
@@ -310,7 +310,7 @@ const EditEducationScreen = () => {
         selectedValue={formData.companyTypeName}
         onSelect={handleCompanyTypeSelection}
         onClose={() => setShowCompanyTypePicker(false)}
-        title="Select Company Type"
+        title="You are working with"
         isObjects={true}
       />
 

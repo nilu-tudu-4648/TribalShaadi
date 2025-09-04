@@ -32,7 +32,7 @@ interface AccountBottomSheetProps {
 const AccountBottomSheet: React.FC<AccountBottomSheetProps> = ({
   bottomSheetRef,
 }) => {
-  const snapPoints = ['40%', '40%'];
+  const snapPoints = ['45%', '45%'];
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleSheetChanges = (index: number) => {
     if (index === -1) {

@@ -28,7 +28,7 @@ const PaymentSuccess = () => {
   const handleClose = useCallback(() => {
     // Navigate back to the main tabs, specifically to Account screen
     (navigation as any).navigate(ROUTES.MAIN_TABS, {
-      screen: ROUTES.ACCOUNT,
+      screen: ROUTES.INTEREST,
     });
   }, [navigation]);
 

@@ -4,6 +4,7 @@ import {
   TextStyle,
   TouchableOpacity,
   ViewStyle,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import AppText from './AppText';
@@ -19,6 +20,7 @@ const AppButton = ({
   textStyle,
   isLoading,
   loaderSize,
+  pressable = false,
 }: {
   title: string;
   onPress: () => void;
@@ -27,13 +29,27 @@ const AppButton = ({
   textStyle?: StyleProp<TextStyle>;
   isLoading?: boolean;
   loaderSize?: number;
+  pressable?: boolean;
 }) => {
-  return (
+  return pressable ? (
+    <Pressable
+      style={[styles.button, buttonStyle]}
+      onPress={onPress}
+      disabled={isButtonDisabled || isLoading}
+    >
+      {isLoading ? (
+        <GradientLoader size={loaderSize || Size25} />
+      ) : (
+        <AppText text={title} textStyle={[styles.text, textStyle]} />
+      )}
+    </Pressable>
+  ) : (
     <TouchableOpacity
       style={[styles.button, buttonStyle]}
       onPress={onPress}
       disabled={isButtonDisabled || isLoading}
-      activeOpacity={0.8}>
+      activeOpacity={0.8}
+    >
       {isLoading ? (
         <GradientLoader size={loaderSize || Size25} />
       ) : (

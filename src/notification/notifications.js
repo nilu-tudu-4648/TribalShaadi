@@ -59,7 +59,6 @@ export const configurePushNotification = () => {
           // Handle "New Match" navigation
           if (title === 'Congrats 🎉 new request received!') {
             try {
-              // dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
               // Ensure ROUTES is available before using it
               if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
                 navigate(ROUTES.INTEREST, { matchId: userInfo.matchId || null });
