@@ -4,9 +4,10 @@ import { getApps } from '@react-native-firebase/app';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, updateUrl } from '../constants/functions';
-import { ASYNC_VARIBLES } from '../constants/data';
+import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import axios from 'axios';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { navigate } from '../navigation/NavigationRef';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -34,6 +35,81 @@ export const createNotificationChannel = () => {
     },
     (created) => console.log(`Notification channel created: ${created}`),
   );
+};
+
+export const configurePushNotification = () => {
+  PushNotification.configure({
+    // (optional) Called when Token is generated (iOS and Android)
+    onRegister: function (token) {
+      console.log('TOKEN:', token);
+    },
+
+    // (required) Called when a remote is received or opened, or local notification is opened
+    onNotification: function (notification) {
+      console.log('LOCAL NOTIFICATION ==>', notification);
+
+      if (notification.userInteraction) {
+        // notification was opened by user from notification
+        console.log('Notification was tapped by user');
+        
+        try {
+          const userInfo = notification.userInfo || notification.data || {};
+          const title = userInfo.notificationTitle || notification.title;
+          
+          // Handle "New Match" navigation
+          if (title === 'Congrats 🎉 new request received!') {
+            try {
+              // dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+              // Ensure ROUTES is available before using it
+              if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
+                navigate(ROUTES.INTEREST, { matchId: userInfo.matchId || null });
+              } else {
+                console.error('ROUTES not available or INTEREST route not defined');
+              }
+            } catch (navError) {
+              console.error('Error navigating to interest screen from local notification:', navError);
+            }
+          }
+          
+          // Handle other notification types here if needed
+          // ...
+          
+        } catch (error) {
+          console.error('Error handling local notification tap:', error);
+        }
+      }
+    },
+
+    // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
+    onAction: function (notification) {
+      console.log('ACTION:', notification.action);
+      console.log('NOTIFICATION:', notification);
+
+      // process the action
+    },
+
+    // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
+    onRegistrationError: function(err) {
+      console.error(err.message, err);
+    },
+
+    // Android only - iOS permissions not needed
+    permissions: {
+      alert: false,
+      badge: false,
+      sound: false,
+    },
+
+    // Should the initial notification be popped automatically
+    // default: true
+    popInitialNotification: true,
+
+    /**
+     * Android only - no iOS permissions needed
+     * Set to false since we're only targeting Android
+     */
+    requestPermissions: false,
+  });
 };
 
 export const requestAndroidNotificationPermission = async () => {
@@ -213,6 +289,20 @@ export const notificationListner = async () => {
 
         console.log('Background notification data:', remoteMessage.notification);
         
+        // Handle specific notification types
+        if (remoteMessage.notification && remoteMessage.notification.title === 'Congrats 🎉 new request received!') {
+          try {
+            // Ensure ROUTES is available before using it
+            if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
+              navigate(ROUTES.INTEREST, { matchId: remoteMessage.data?.matchId || null });
+            } else {
+              console.error('ROUTES not available or INTEREST route not defined');
+            }
+          } catch (navError) {
+            console.error('Error navigating to interest screen:', navError);
+          }
+        }
+        
         // Handle notification action here with error handling
         handleNotificationAction(remoteMessage);
       } catch (error) {
@@ -227,9 +317,19 @@ export const notificationListner = async () => {
       .then(async remoteMessage => {
         try {
           if (remoteMessage) {
-            console.log('Notification caused app to open from quit state');
             console.log('Quit state notification data:', remoteMessage.notification);
-            
+            if (remoteMessage.notification && remoteMessage.notification.title === 'Congrats 🎉 new request received!') {
+              try {
+                // Ensure ROUTES is available before using it
+                if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
+                  navigate(ROUTES.INTEREST, { matchId: remoteMessage.data?.matchId || null });
+                } else {
+                  console.error('ROUTES not available or INTEREST route not defined');
+                }
+              } catch (navError) {
+                console.error('Error navigating to interest screen:', navError);
+              }
+            }
             // Handle notification action here with error handling
             handleNotificationAction(remoteMessage);
           } else {
@@ -340,7 +440,7 @@ const ensureChannelReady = async (channelId = 'tribalshaadi') => {
   });
 };
 
-export const schedulePushNotification = async (title, message) => {
+export const schedulePushNotification = async (title, message, notificationData = {}) => {
   if (Platform.OS !== 'android') return; // fix: don't touch iOS
 
   try {
@@ -395,6 +495,11 @@ export const schedulePushNotification = async (title, message) => {
         soundName: 'default',
         autoCancel: true,
         allowWhileIdle: true,
+        userInfo: {
+          ...notificationData,
+          notificationTitle: title.trim(),
+          notificationBody: message.trim()
+        },
         // priority and importance are controlled by the channel; avoid passing mismatched types here
       });
       console.log('Local notification scheduled successfully');
@@ -438,4 +543,5 @@ export default {
   requestUserPermission,
   notificationListner,
   schedulePushNotification,
+  configurePushNotification,
 };

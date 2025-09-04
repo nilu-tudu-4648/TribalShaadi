@@ -480,7 +480,7 @@ export const checkAuth = async dispatch => {
     }
     
     // If we reach here, profile is complete
-    console.log('Profile is complete, setting registration completed');
+    // console.log('Profile is complete, setting registration completed');
     
     // Safe check for interests and set registration completed
     try {

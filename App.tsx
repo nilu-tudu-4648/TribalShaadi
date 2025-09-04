@@ -35,6 +35,7 @@ import {
   notificationListner,
   createNotificationChannel,
   requestAndroidNotificationPermission,
+  configurePushNotification,
 } from './src/notification/notifications';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
@@ -120,13 +121,16 @@ const MainApp = () => {
     // Initialize notification system in proper sequence
     const initializeNotifications = async () => {
       try {
-        // Step 1: Create notification channel (required for Android)
+        // Step 1: Configure push notifications for local notification handling
+        configurePushNotification();
+        
+        // Step 2: Create notification channel (required for Android)
         createNotificationChannel();
         
-        // Step 2: Request Android 13+ permissions if needed
+        // Step 3: Request Android 13+ permissions if needed
         await requestAndroidNotificationPermission();
         
-        // Step 3: Setup notification listeners (background/quit state handlers)
+        // Step 4: Setup notification listeners (background/quit state handlers)
         // This is safe to call early as it has Firebase checks
         notificationListner();
         

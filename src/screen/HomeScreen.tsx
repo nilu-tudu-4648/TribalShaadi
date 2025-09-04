@@ -291,7 +291,7 @@ const HomeScreen = () => {
                         organizationName={currentMatchedUser?.companyName}
                         settlingTime={currentMatchedUser?.planingto_settle}
                         highestQualification={
-                          currentMatchedUser?.highestQualification
+                          currentMatchedUser?.educationType
                         }
                         college={currentMatchedUser?.college_name}
                         eatingHabits={currentMatchedUser?.diet}

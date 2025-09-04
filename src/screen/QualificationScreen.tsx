@@ -71,8 +71,6 @@ const QualificationScreen = () => {
   const dispatch = useDispatch();
   const educationTypesList = educationTypes || [];
   const incomeList = income || [];
-  console.log(selectedWorkExperience);
-  console.log(occupationCategories, 'occupationCategories');
   useEffect(() => {
     dispatch(getEducationTypes(getEducationTypeUrl));
     dispatch(getEmploymentTypes(getEmploymentTypeUrl));
@@ -100,7 +98,7 @@ const QualificationScreen = () => {
         employmentTypeId: selectedWorkExperience.id,
         ...(isWorking && { 
           occupationId: selectedOccupation.id,
-          occupationCategoryId: selectedOccupationCategory.id,
+          // occupationCategoryId: selectedOccupationCategory.id,
           companyName: organizationName,
           annualIncomeId: selectedIncome.id, 
         }),

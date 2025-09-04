@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AppState, Platform } from "react-native";
+import { Platform } from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
 import { schedulePushNotification } from "./notifications";
@@ -54,7 +54,7 @@ const ForegroundHandler = (params) => {
                               
                               // Wrap schedulePushNotification in try-catch to prevent crashes
                               try {
-                                await schedulePushNotification(title, body);
+                                await schedulePushNotification(title, body, remoteMessage.data);
                               } catch (scheduleError) {
                                 console.error('Error scheduling push notification:', scheduleError);
                                 // Don't re-throw to prevent app crash

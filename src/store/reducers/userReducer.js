@@ -57,6 +57,7 @@ const userReducer = createSlice({
       userReducer.loader = false;
     },
     setProposalsGotByMeDataReceived: (userReducer, action) => {
+      console.log("setProposalsGotByMeDataReceived", action.payload.recordList);
       userReducer.proposalsGotByMe = action.payload.recordList;
       userReducer.loader = false;
     },
