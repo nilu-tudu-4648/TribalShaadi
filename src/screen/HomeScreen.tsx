@@ -248,7 +248,7 @@ const HomeScreen = () => {
       );
     }
   }, [dispatch, matchedUsers, currentIndex]);
-  console.log(matchedUsers, 'matchedUsers');
+  // console.log(matchedUsers, 'matchedUsers');
   return (
         <View style={styles.container}>
           <AppSafeView style={styles.container}>

@@ -16,13 +16,13 @@ import AppButton from '../components/AppButton';
 import AppTextInput from '../components/AppTextInput';
 import AppDropdown from '../components/AppDropdown';
 import AppPickerModal from '../components/AppPickerModal';
+import AppSectionedPickerModal from '../components/AppSectionedPickerModal';
 import {
   completeUserProfileV2Updated,
   getEducationTypes,
   getEmploymentTypes,
   getIncome,
   getOccupation,
-  getOccupationCategoriesByOccupationId,
   getOccupationsByEmploymentType,
 } from '../store/reducers/authReducer';
 import {
@@ -37,6 +37,9 @@ import {
   setReducerLoadingfalse,
   updateUrl,
 } from '../constants/functions';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseUrl } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
@@ -52,12 +55,14 @@ const QualificationScreen = () => {
   const [selectedOccupationCategory, setSelectedOccupationCategory] =
     useState<any>(null);
   const [showOccupationCategoryPicker, setShowOccupationCategoryPicker] =
-    useState(false);
+    useState<string>('');
   const [showQualificationPicker, setShowQualificationPicker] = useState(false);
   const [showWorkExperiencePicker, setShowWorkExperiencePicker] =
     useState(false);
-  const [showOccupationPicker, setShowOccupationPicker] = useState(false);
   const [showIncomePicker, setShowIncomePicker] = useState(false);
+  const [sectionedOccupationOptions, setSectionedOccupationOptions] = useState<
+    any[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const {
     user,
@@ -66,7 +71,6 @@ const QualificationScreen = () => {
     loader,
     employmentTypes,
     occupationsByEmploymentType,
-    occupationCategories,
   } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const educationTypesList = educationTypes || [];
@@ -75,7 +79,50 @@ const QualificationScreen = () => {
     dispatch(getEducationTypes(getEducationTypeUrl));
     dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
+    dispatch(getIncome(getIncomeUrl));
   }, [dispatch]);
+
+  // Build grouped list: Occupation as heading -> Occupation Categories as items
+  useEffect(() => {
+    const buildSections = async () => {
+      if (!showOccupationCategoryPicker) return;
+      if (!Array.isArray(occupationsByEmploymentType)) return;
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        const headers = token
+          ? { Authorization: `Bearer ${token}` }
+          : undefined;
+
+        const fetchPromises = occupationsByEmploymentType.map(
+          async (occ: any) => {
+            try {
+              const url = `${baseUrl}${getOccupationCategoryByOccupationIdUrl}${occ.id}`;
+              const response = await axios.get(url, { headers });
+              const list = response?.data?.recordList || [];
+              return {
+                id: occ.id,
+                title: occ.name,
+                data: list.map((c: any) => ({
+                  id: c.id,
+                  name: c.name,
+                  occupation: occ,
+                })),
+              };
+            } catch (e) {
+              return { id: occ.id, title: occ.name, data: [] };
+            }
+          },
+        );
+
+        const sections = await Promise.all(fetchPromises);
+        setSectionedOccupationOptions(sections);
+      } catch (e) {
+        setSectionedOccupationOptions([]);
+      }
+    };
+
+    buildSections();
+  }, [showOccupationCategoryPicker, occupationsByEmploymentType]);
 
   const handleContinue = async () => {
     if (
@@ -96,12 +143,10 @@ const QualificationScreen = () => {
         educationTypeId: selectedQualification.id,
         college_name: collegeName,
         employmentTypeId: selectedWorkExperience.id,
-        ...(isWorking && { 
-          occupationId: selectedOccupation.id,
-          occupationCategoryId: selectedOccupationCategory.id,
-          companyName: organizationName,
-          annualIncomeId: selectedIncome.id, 
-        }),
+        occupationId: selectedOccupation.id,
+        occupationCategoryId: !isWorking ? null : selectedOccupationCategory.id,
+        companyName: !isWorking ? null : organizationName,
+        annualIncomeId: !isWorking ? null : selectedIncome.id,
       };
       console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -166,35 +211,32 @@ const QualificationScreen = () => {
             placeholder="You are working with?"
             onPress={() => setShowWorkExperiencePicker(true)}
           />
+          <AppDropdown
+            label=""
+            selectedValue={
+              selectedOccupationCategory?.name || selectedOccupation?.name || ''
+            }
+            placeholder="Occupation"
+            onPress={() => {
+              if (selectedWorkExperience?.name !== 'Not Working') {
+                setShowOccupationCategoryPicker('Occupation');
+              } else {
+                setShowOccupationCategoryPicker('notWorking');
+              }
+            }}
+          />
           {selectedWorkExperience?.name !== 'Not Working' && (
             <>
-              {/* Occupation Dropdown */}
-              <AppDropdown
-                label=""
-                selectedValue={selectedOccupation?.name || ''}
-                placeholder="Occupation"
-                onPress={() => setShowOccupationPicker(true)}
+              {/* Organization Name Text Input */}
+              <AppTextInput
+                placeholder="Organization Name"
+                value={organizationName}
+                onChangeText={setOrganizationName}
+                keyboardType="default"
+                placeholderTextColor={COLORS.placeholderText}
+                style={styles.textInputStyle}
               />
-              {/* Occupation Dropdown */}
-              <AppDropdown
-                label=""
-                selectedValue={selectedOccupationCategory?.name || ''}
-                placeholder="Occupation Category"
-                onPress={() => setShowOccupationCategoryPicker(true)}
-              />
-
-             
-             {/* Organization Name Text Input */}
-             <AppTextInput
-               placeholder="Organization Name"
-               value={organizationName}
-               onChangeText={setOrganizationName}
-               keyboardType="default"
-               placeholderTextColor={COLORS.placeholderText}
-               style={styles.textInputStyle}
-             />
               {/* Income Dropdown */}
-
               <AppDropdown
                 label=""
                 selectedValue={selectedIncome?.value || ''}
@@ -254,40 +296,37 @@ const QualificationScreen = () => {
               getOccupationByEmploymentTypeUrl + value.id,
             ),
           );
+          setSelectedOccupation(null);
+          setSelectedOccupationCategory(null);
         }}
         onClose={() => setShowWorkExperiencePicker(false)}
         isObjects={true}
       />
-
-      {/* Occupation Picker Modal */}
       <AppPickerModal
-        visible={showOccupationPicker}
+        visible={showOccupationCategoryPicker === 'notWorking'}
         title="Select Occupation"
-        items={occupationsByEmploymentType}
+        items={occupationsByEmploymentType.filter(
+          (item: any) => item.name !== 'any',
+        )}
         selectedValue={selectedOccupation?.name || ''}
         onSelect={value => {
-          setSelectedOccupation(value);
-          dispatch(
-            getOccupationCategoriesByOccupationId(
-              getOccupationCategoryByOccupationIdUrl + value.id,
-            ),
-          );
+          setSelectedOccupation({ id: value.id, name: value.name });
         }}
-        onClose={() => setShowOccupationPicker(false)}
+        onClose={() => setShowOccupationCategoryPicker('')}
         isObjects={true}
       />
-      {/* Occupation Picker Modal */}
-      <AppPickerModal
-        visible={showOccupationCategoryPicker}
-        title="Select Occupation Category"
-        items={occupationCategories}
-        selectedValue={selectedOccupationCategory?.name || ''}
-        onSelect={value => {
-          dispatch(getIncome(getIncomeUrl));
-          setSelectedOccupationCategory(value);
+
+      {/* Grouped Occupation + Category Picker */}
+      <AppSectionedPickerModal
+        visible={showOccupationCategoryPicker === 'Occupation'}
+        title="Select Occupation"
+        sections={sectionedOccupationOptions}
+        selectedItemId={selectedOccupationCategory?.id}
+        onSelect={(item, section) => {
+          setSelectedOccupation({ id: section.id, name: section.title });
+          setSelectedOccupationCategory({ id: item.id, name: item.name });
         }}
-        onClose={() => setShowOccupationCategoryPicker(false)}
-        isObjects={true}
+        onClose={() => setShowOccupationCategoryPicker('')}
       />
 
       {/* Income Picker Modal */}
