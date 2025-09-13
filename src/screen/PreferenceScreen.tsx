@@ -110,7 +110,15 @@ const PreferenceScreen = () => {
         }
       }
     }
-  }, [maritalStatuses, user?.pMaritalStatusId, localSelectedStatuses.length]);
+    if(user.pReligionId){
+      const anyOption = religion?.find((option: any) => 
+        option.name.toLowerCase() === 'any'
+      );
+      if (anyOption && user?.pReligionId === 'any') {
+        setLocalSelectedReligion(String(anyOption.id));
+      }
+    }
+  }, [maritalStatuses, user?.pMaritalStatusId, localSelectedStatuses.length, user?.pReligionId, localSelectedReligionId?.length, religion]);
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       maritalStatusBottomSheetRef.current?.close();
@@ -155,10 +163,10 @@ const PreferenceScreen = () => {
     if (user.pReligionId) {
       return (
         religion.find((item: any) => item.id == user.pReligionId[0])?.name ||
-        user.religion
+        'Any'
       );
     }
-    return user.religion;
+    return 'Any';
   };
   const getHeightRangeValue = () => {
     if (

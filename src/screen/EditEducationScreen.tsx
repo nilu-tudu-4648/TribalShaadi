@@ -23,12 +23,12 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
-  getEducationTypeUrl,
   getOccupationUrl,
   getIncomeUrl,
   getEmploymentTypeUrl,
   getOccupationByEmploymentTypeUrl,
   getOccupationCategoryByOccupationIdUrl,
+  getEducationUrl,
 } from '../constants/functions';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,12 +51,12 @@ const EditEducationScreen = () => {
     occupationsByEmploymentType,
   } = useSelector((state: any) => state.entities.authReducer);
   // Data from API with fallback to empty arrays
-  const educationTypesList = educationTypes || [];
   const salaryRangesList = income || [];
 
   // Form state
   const [formData, setFormData] = useState({
     educationTypeId: '',
+    educationId: '',
     educationName: '',
     collegeName: '',
     employmentTypeId: '',
@@ -80,16 +80,37 @@ const EditEducationScreen = () => {
   const [sectionedOccupationOptions, setSectionedOccupationOptions] = useState<
     any[]
   >([]);
+  const [educationSections, setEducationSections] = useState<any[]>([]);
   // const [showOccupationCategoryPicker, setShowOccupationCategoryPicker] = useState(false);
   const [showSalaryPicker, setShowSalaryPicker] = useState(false);
 
   // Fetch API data on component mount
   useEffect(() => {
-    dispatch(getEducationTypes(getEducationTypeUrl));
+    dispatch(getEducationTypes(getEducationUrl));
     dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
     dispatch(getIncome(getIncomeUrl));
   }, [dispatch]);
+
+  // Build sectioned education list whenever educationTypes changes
+  useEffect(() => {
+    if (!Array.isArray(educationTypes)) {
+      setEducationSections([]);
+      return;
+    }
+    const sections = educationTypes.map((type: any) => ({
+      id: type.id,
+      title: type.name,
+      data: Array.isArray(type.educations)
+        ? type.educations.map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            educationTypeId: type.id,
+          }))
+        : [],
+    }));
+    setEducationSections(sections);
+  }, [educationTypes]);
 
   // Build grouped list for job roles when picker opens
   useEffect(() => {
@@ -132,8 +153,9 @@ const EditEducationScreen = () => {
       setFormData({
         occupationId: user.occupationId || '',
         educationTypeId: user.educationTypeId || '',
+        educationId: user.educationId || '',
         occupationName: user.occupationName || '',
-        educationName: user.educationType || '',
+        educationName: user.education || '',
         collegeName: user.college_name || '',
         employmentTypeId: user.employmentTypeId || '1',
         companyTypeName: user.employmentType || '',
@@ -149,12 +171,13 @@ const EditEducationScreen = () => {
     }
   }, [user]);
 
-  // Handle education selection
-  const handleEducationSelection = useCallback((selectedEducation: any) => {
+  // Handle education selection from sectioned picker
+  const handleEducationSelection = useCallback((item: any, section: any) => {
     setFormData(prev => ({
       ...prev,
-      educationTypeId: selectedEducation.id,
-      educationName: selectedEducation.name,
+      educationTypeId: (item && item.educationTypeId) || (section && section.id) || '',
+      educationName: item?.name || '',
+      educationId: item?.id || '',
     }));
     setShowEducationPicker(false);
   }, []);
@@ -209,7 +232,8 @@ const EditEducationScreen = () => {
       const requestBody = {
         id: user.id,
         college_name: formData.collegeName,
-        educationTypeId: formData.educationTypeId,
+        educationTypeId:formData.educationTypeId,
+        educationId: formData.educationId,
         employmentTypeId: formData.employmentTypeId,
         occupationId: formData.occupationId,
         occupationCategoryId: !isWorking ? null : formData.occupationCategoryId,
@@ -327,14 +351,13 @@ const EditEducationScreen = () => {
       </View>
 
       {/* Picker Modals */}
-      <AppPickerModal
+      <AppSectionedPickerModal
         visible={showEducationPicker}
-        items={educationTypesList}
-        selectedValue={formData.educationName}
+        title="Highest Qualification"
+        sections={educationSections}
+        selectedItemId={undefined}
         onSelect={handleEducationSelection}
         onClose={() => setShowEducationPicker(false)}
-        title="Select Education Level"
-        isObjects={true}
       />
 
       <AppPickerModal

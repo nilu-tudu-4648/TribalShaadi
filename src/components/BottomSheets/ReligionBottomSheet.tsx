@@ -64,7 +64,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
-    if (user.pReligionId) {
+    if (user.pReligionId && user.pReligionId !== 'any') {
       setLocalSelectedReligion(user.pReligionId);
     }
   }, [user, setLocalSelectedReligion]);
@@ -92,10 +92,6 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
       console.log('anyOption found:', anyOption);
       
       const anyOptionId = anyOption ? String(anyOption.id) : null;
-      console.log('anyOptionId:', anyOptionId);
-      console.log('localSelectedReligionId:', localSelectedReligionId);
-      console.log('Comparison result:', anyOptionId && String(localSelectedReligionId) === anyOptionId);
-      
       // Check if "Any" is selected and convert it to "any" string
       let pReligionIdValue;
       if (anyOptionId && String(localSelectedReligionId) === anyOptionId) {

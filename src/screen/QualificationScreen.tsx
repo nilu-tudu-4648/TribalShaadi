@@ -26,7 +26,7 @@ import {
   getOccupationsByEmploymentType,
 } from '../store/reducers/authReducer';
 import {
-  getEducationTypeUrl,
+  getEducationUrl,
   getEmploymentTypeUrl,
   getIncomeUrl,
   getOccupationByEmploymentTypeUrl,
@@ -64,24 +64,43 @@ const QualificationScreen = () => {
     any[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [educationSections, setEducationSections] = useState<any[]>([]);
   const {
     user,
-    educationTypes,
     income,
     loader,
+    educationTypes,
     employmentTypes,
     occupationsByEmploymentType,
   } = useSelector((state: any) => state.entities.authReducer);
-  const dispatch = useDispatch();
-  const educationTypesList = educationTypes || [];
+      const dispatch = useDispatch();
   const incomeList = income || [];
-  useEffect(() => {
-    dispatch(getEducationTypes(getEducationTypeUrl));
+    useEffect(() => {
+    dispatch(getEducationTypes(getEducationUrl));
     dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
     dispatch(getIncome(getIncomeUrl));
   }, [dispatch]);
 
+  // Build sectioned education list whenever educationTypes changes
+  useEffect(() => {
+    if (!Array.isArray(educationTypes)) {
+      setEducationSections([]);
+      return;
+    }
+    const sections = educationTypes.map((type: any) => ({
+      id: type.id,
+      title: type.name,
+      data: Array.isArray(type.educations)
+        ? type.educations.map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            educationTypeId: type.id,
+          }))
+        : [],
+    }));
+    setEducationSections(sections);
+  }, [educationTypes]);
   // Build grouped list: Occupation as heading -> Occupation Categories as items
   useEffect(() => {
     const buildSections = async () => {
@@ -140,7 +159,8 @@ const QualificationScreen = () => {
       const isWorking = selectedWorkExperience?.name !== 'Not Working';
       const requestBody = {
         id: user.id,
-        educationTypeId: selectedQualification.id,
+        educationTypeId:selectedQualification.educationTypeId,
+        educationId: selectedQualification.id,
         college_name: collegeName,
         employmentTypeId: selectedWorkExperience.id,
         occupationId: selectedOccupation.id,
@@ -270,17 +290,21 @@ const QualificationScreen = () => {
         />
       </View>
 
-      {/* Qualification Picker Modal */}
-      <AppPickerModal
+      {/* Qualification Picker Modal - Sectioned by Education Type */}
+      <AppSectionedPickerModal
         visible={showQualificationPicker}
         title="Highest Qualification"
-        items={educationTypesList}
-        selectedValue={selectedQualification?.name || ''}
-        onSelect={value => {
-          setSelectedQualification(value);
+        sections={educationSections}
+        selectedItemId={selectedQualification?.id}
+        onSelect={(item, section) => {
+          // Persist both selected education (degree) and its type
+          setSelectedQualification({
+            id: item.id,
+            name: item.name,
+            educationTypeId: (item as any).educationTypeId ?? section.id,
+          });
         }}
         onClose={() => setShowQualificationPicker(false)}
-        isObjects={true}
       />
 
       {/* Work Experience Picker Modal */}
