@@ -1,8 +1,8 @@
 import {
+  Pressable,
   StyleProp,
   StyleSheet,
   TextStyle,
-  TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
@@ -40,12 +40,12 @@ const AppHeader = ({
       ]}
     >
       <View style={[styles.leftButton, leftButtonStyle]}>
-        <TouchableOpacity
+        <Pressable
           onPress={onBackPress || navigation.goBack}
           style={styles.backButton}
         >
           <ArrowIosBackSvg color={arrowColor} />
-        </TouchableOpacity>
+        </Pressable>
         <AppText text={title} textStyle={[styles.title, titleStyle]} />
       </View>
       <View style={styles.rightButton}>{rightButton}</View>
