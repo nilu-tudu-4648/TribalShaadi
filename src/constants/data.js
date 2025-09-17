@@ -11,6 +11,7 @@ export const ASYNC_VARIBLES = {
   USER: 'user',
   CHAT_MESSAGES: 'chatMessages',
   FCM_TOKEN: 'fcmToken',
+  LAST_MESSAGE: 'lastMessage',
 };
 // Routes
 export const ROUTES = {

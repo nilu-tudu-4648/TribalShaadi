@@ -31,6 +31,7 @@ import {
   delay,
   getProposalsGotByMeUrl,
   getChatHistoryByUserId,
+  getAcceptedProposalByIdUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -56,6 +57,7 @@ import {
 } from '../store/reducers/authReducer';
 import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
 import {
+  getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
   setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
@@ -171,7 +173,7 @@ const HomeScreen = () => {
   };
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-      const id = user.pReligionId !== "any" && user.pReligionId?.[0] ? user.pReligionId?.[0] : user.religionId;
+      const id = user?.pReligionId !== "any" && user?.pReligionId?.[0] ? user?.pReligionId?.[0] : user?.religionId;
       dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
       setHasRequestedMatches(true);
   }, [dispatch, user?.pReligionId, user?.religionId]);
@@ -213,6 +215,9 @@ const HomeScreen = () => {
   }, [dispatch]);
   useEffect(() => {
     const fetchChatHistory = async () => {
+      dispatch(
+        getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
+      );
       const chatHistory = await getChatHistoryByUserId(user.id);
       const filteredChat = chatHistory.filter((chat: any) => {
         return chat.userId !== user.id && chat.isRead === 0;

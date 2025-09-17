@@ -457,6 +457,12 @@ export const schedulePushNotification = async (title, message, notificationData 
       return;
     }
 
+    // Suppress test or placeholder notifications universally (foreground/background/quit)
+    if (title === 'testing') {
+      console.log("schedulePushNotification: Suppressing notification with title 'testing'");
+      return;
+    }
+
     // Android 13+ runtime permission check to avoid native crashes
     if (Platform.Version >= 33) {
       try {

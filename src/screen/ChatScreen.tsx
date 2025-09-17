@@ -1,12 +1,5 @@
-import {
-  StyleSheet,
-  View,
-  Image,
-  FlatList,
-  Pressable,
-  // RefreshControl,
-} from 'react-native';
-import React, { useCallback, useEffect } from 'react';
+import { StyleSheet, View, Image, FlatList, Pressable } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -25,7 +18,7 @@ import {
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
-import { ROUTES } from '../constants/data';
+import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,6 +36,7 @@ import {
 } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
 import Loader from '../components/loader/Loader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -50,8 +44,10 @@ const ChatScreen = () => {
   const { loader, acceptedProposalById, unreadChatHistory } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
+  console.log(acceptedProposalById, 'acceptedProposalById');
+  console.log(unreadChatHistory, 'unreadChatHistory');
+  const [lastMessage, setLastMessage] = useState<any>(null);
   const dispatch = useDispatch();
-  // const [refreshing, setRefreshing] = useState(false);
   const fetchData = useCallback(async () => {
     try {
       dispatch(
@@ -70,14 +66,6 @@ const ChatScreen = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // const onRefresh = useCallback(() => {
-  //   setRefreshing(true);
-  //   fetchData();
-  //   setTimeout(() => {
-  //     setRefreshing(false);
-  //   }, 1000);
-  // }, [fetchData]);
 
   const acceptFriendRequest = async (item: any) => {
     try {
@@ -102,7 +90,63 @@ const ChatScreen = () => {
       console.log('error', error);
     }
   };
+  useEffect(() => {
+    const getLastMessage = async () => {
+      try {
+        const item = await AsyncStorage.getItem('lastMessage');
+        if (!item) {
+          setLastMessage([]);
+          return;
+        }
+        let data = [];
+        try {
+          data = JSON.parse(item);
+          if (!Array.isArray(data)) {
+            data = [data];
+          }
+        } catch (e) {
+          data = [];
+        }
+        setLastMessage(data);
+      } catch (error) {
+        console.log('error', error);
+        setLastMessage([]);
+      }
+    };
+    getLastMessage();
+  }, []);
 
+  // Refresh when screen gains focus (e.g., after navigating back from conversations)
+  useEffect(() => {
+    const unsubscribe = (navigation as any).addListener('focus', () => {
+      // re-fetch server data
+      fetchData();
+      // re-load last message preview from storage
+      (async () => {
+        try {
+          const item = await AsyncStorage.getItem(ASYNC_VARIBLES.LAST_MESSAGE);
+          if (!item) {
+            setLastMessage([]);
+            return;
+          }
+          let data = [];
+          try {
+            data = JSON.parse(item);
+            if (!Array.isArray(data)) {
+              data = [data];
+            }
+          } catch (e) {
+            data = [];
+          }
+          setLastMessage(data);
+        } catch (error) {
+          console.log('error', error);
+          setLastMessage([]);
+        }
+      })();
+    });
+    return unsubscribe;
+  }, [navigation, fetchData]);
   const renderConversationItem = (item: any) => {
     // Memoize filtered unread chats for this friendId
     const unreadChatsForFriend = unreadChatHistory.filter(
@@ -110,7 +154,10 @@ const ChatScreen = () => {
     );
     const unreadCount = unreadChatsForFriend.length;
     const latestUnreadChat = unreadChatsForFriend[0];
-
+    // console.log(lastMessage, 'lastMessageArray');
+    const latestMessage = lastMessage?.find(
+      (message: any) => message.friendId === item.friendId,
+    );
     // Determine the time to display
     const displayTime = latestUnreadChat?.created_at
       ? new Date(latestUnreadChat.created_at)
@@ -133,18 +180,30 @@ const ChatScreen = () => {
             textStyle={styles.userName}
           />
           <AppText
-            text={item.isNewStatus !== 1 ? item.message : 'Send a message'}
+            text={
+              latestMessage?.message
+                ? latestMessage?.message
+                : unreadCount > 0
+                ? latestUnreadChat?.content
+                : item.isNewStatus !== 1
+                ? item.message
+                : 'Send a message'
+            }
             textStyle={styles.messageText}
           />
         </View>
         {item.isNewStatus !== 1 ? (
           <View style={styles.timeContainer}>
             <AppText
-              text={displayTime.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              })}
+              text={
+                latestMessage?.time
+                  ? latestMessage?.time
+                  : displayTime.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true,
+                    })
+              }
               textStyle={styles.timeText}
             />
             {unreadCount > 0 && (

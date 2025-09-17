@@ -124,7 +124,7 @@ const InterestScreen = () => {
       console.log(error);
     }
   };
-  const handleAcceptProposal = (item: any) => {
+  const handleAcceptProposal = async (item: any) => {
     console.log('handleAcceptProposal', item.senderUserId);
     try {
       dispatch(
@@ -142,13 +142,15 @@ const InterestScreen = () => {
           receiverUserId: item.senderUserId,
         }),
       );
-      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(setAcceptedUser(item));
+      await delay();
       (navigation as any).navigate(ROUTES.STACK, {
         screen: ROUTES.MATCHING,
       });
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     }
   };
 

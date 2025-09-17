@@ -5,6 +5,7 @@ const initialState = {
   acceptedProposalById: [],
   insertUserNotifications: [],
   unreadChatHistory: [],
+  newUserNumber: 0,
 };
 
 const chatReducer = createSlice({
@@ -12,7 +13,7 @@ const chatReducer = createSlice({
   initialState,
   reducers: {
     chatReducerDataRequested: (chatReducer, action) => {
-      chatReducer.loader = true;
+      chatReducer.loader = false;
     },
     chatReducerDataReceived: (chatReducer, action) => {
       chatReducer.loader = false;
@@ -25,6 +26,7 @@ const chatReducer = createSlice({
     chatReducerAcceptedProposalByIdReceived: (chatReducer, action) => {
       chatReducer.loader = false;
       chatReducer.acceptedProposalById = action.payload.recordList;
+      chatReducer.newUserNumber = action.payload.recordList.filter((item) => item.isNewStatus===1).length;
     },
     chatReducerInsertUserNotificationsReceived: (chatReducer, action) => {
       chatReducer.loader = false;
@@ -33,10 +35,25 @@ const chatReducer = createSlice({
     setUnreadChatHistory: (chatReducer, action) => {
       chatReducer.unreadChatHistory = action.payload;
     },
+    addUnreadChatForeground: (chatReducer, action) => {
+      const payload = action.payload || {};
+      console.log(payload, 'payload');
+      const newUnreadItem = {
+        userId: payload.userId,
+        isRead: 0,
+        content: payload.content || '',
+        created_at: payload.created_at || new Date().toISOString(),
+        origin: 'foreground',
+      };
+      chatReducer.unreadChatHistory = [
+        newUnreadItem,
+        ...(chatReducer.unreadChatHistory || []),
+      ];
+    },
   },
 });
 
-export const { setUnreadChatHistory } = chatReducer.actions;
+export const { setUnreadChatHistory, addUnreadChatForeground } = chatReducer.actions;
 
 const {
   chatReducerDataRequestFailed,

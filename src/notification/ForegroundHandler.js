@@ -4,8 +4,9 @@ import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
 import { schedulePushNotification } from "./notifications";
 import { getProposalsGotByMeApi } from "../store/reducers/userReducer";
-import { baseUrl, getProposalsGotByMeUrl } from "../constants/functions";
+import { baseUrl, getProposalsGotByMeUrl, getAcceptedProposalByIdUrl, getChatHistoryByUserId, delay } from "../constants/functions";
 import { store } from "../store/configureStore";
+import { getAcceptedProposalByIdApi, setUnreadChatHistory, addUnreadChatForeground } from "../store/reducers/chatReducer";
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -53,9 +54,36 @@ const ForegroundHandler = (params) => {
                             if (Platform.OS === 'android') {
                               const { title, body } = remoteMessage?.notification || {};
                               console.log(title, body, 'title, body');
+                              const state = store.getState();
+                              const userId = state.entities.authReducer.user?.id;
                               store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-              
-                              if (!title || !body) return;
+                              delay();
+                              console.log(userId, 'userId');
+                              store.dispatch(getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${userId}`));
+                              delay();
+                              const chatHistory = await getChatHistoryByUserId(userId);
+                              console.log(chatHistory, 'chatHistory');
+                              const filteredChat = chatHistory.filter(
+                                chat => chat.userId !== userId && chat.isRead === 0
+                              );
+                              store.dispatch(setUnreadChatHistory(filteredChat));
+                              // mark foreground unread in reducer (robust sender id detection)
+                              try {
+                                const data = remoteMessage?.data || {};
+                                const idCandidate = data.from || data.senderId || data.sender_id || data.userId || data.user_id || data.friendId || data.friend_id;
+                                const parsed = idCandidate !== undefined && idCandidate !== null ? Number(idCandidate) : NaN;
+                                const senderId = !Number.isNaN(parsed) ? parsed : null;
+                                if (senderId && senderId !== userId) {
+                                  store.dispatch(
+                                    addUnreadChatForeground({
+                                      userId: senderId,
+                                      content: body || '',
+                                      created_at: new Date().toISOString(),
+                                    })
+                                  );
+                                }
+                              } catch (_) {}
+                              if (!title || !body || title === 'testing') return;
                               
                               // Wrap schedulePushNotification in try-catch to prevent crashes
                               try {

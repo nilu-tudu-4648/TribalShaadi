@@ -9,8 +9,12 @@ import App from './App';
 import { name as appName } from './app.json';
 
 // Handle background messages (required by RN Firebase)
-messaging().setBackgroundMessageHandler(async () => {
-  // no-op for now
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  try {
+    const { title, body } = remoteMessage?.notification || {};
+    if (!title || !body || title === 'testing') return;
+    // Intentionally do not show local notifications in background/quit; OS handles notification payloads
+  } catch (_) {}
 });
 
 AppRegistry.registerComponent(appName, () => App);

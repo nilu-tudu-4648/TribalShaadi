@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, View, Image, StyleSheet } from 'react-native';
+import { StatusBar, View, Image, StyleSheet, AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -37,6 +37,7 @@ import {
   requestAndroidNotificationPermission,
   configurePushNotification,
 } from './src/notification/notifications';
+import { onAppClose } from './src/constants/functions';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
@@ -164,6 +165,27 @@ const MainApp = () => {
     }, 2000); // 2 seconds
     return () => clearTimeout(timer);
   }, []);
+
+  // Call a function when app transitions to background (best-effort app close)
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async nextState => {
+      try {
+        if (nextState === 'background') {
+          await onAppClose(dispatch);
+        }
+      } catch (error) {
+        console.error('Error in onAppClose handler:', error);
+      }
+    });
+
+    return () => {
+      try {
+        subscription.remove();
+      } catch (error) {
+        // no-op
+      }
+    };
+  }, [dispatch]);
 
   if (showSplash || !isInitialized) {
     return <SplashScreen />;

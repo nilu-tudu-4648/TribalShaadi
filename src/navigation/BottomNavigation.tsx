@@ -58,13 +58,13 @@ function BottomNavigation() {
   const { proposalsGotByMe, homeTabRefr } = useSelector(
     (state: any) => state.entities.userReducer,
   );
-  const { unreadChatHistory } = useSelector((state: any) => state.entities.chatReducer);
+  const { unreadChatHistory, newUserNumber } = useSelector((state: any) => state.entities.chatReducer);
   const dispatch = useDispatch();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color: _color, size: _size }) =>
-          getTabBarIcon(route, focused, proposalsGotByMe.length, unreadChatHistory.length),
+          getTabBarIcon(route, focused, proposalsGotByMe.length, unreadChatHistory.length+newUserNumber),
         tabBarActiveTintColor: COLORS.white,
         tabBarInactiveTintColor: COLORS.navBarInactive,
         headerShown: false,

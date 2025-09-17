@@ -14,8 +14,9 @@ import AppButton from '../components/AppButton';
 import { CloseIcon } from '../components/svg/SvgIcons2';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../constants/data';
-import { useSelector } from 'react-redux';
-import { imageUrl } from '../constants/functions';
+import { useDispatch, useSelector } from 'react-redux';
+import { baseUrl, getProposalsGotByMeUrl, imageUrl } from '../constants/functions';
+import { getProposalsGotByMeApi } from '../store/reducers/userReducer';
 
 const MathcingScreen = () => {
   // Animation values
@@ -29,6 +30,7 @@ const MathcingScreen = () => {
   const { acceptedUser } = useSelector(
     (state: any) => state.entities.userReducer,
   );
+  const dispatch = useDispatch();
   // console.log(acceptedUser, 'acceptedUser');
   useEffect(() => {
     // Animation sequence
@@ -145,6 +147,8 @@ const MathcingScreen = () => {
           },
         ]}
         onPress={() => {
+          dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+  
           (navigation as any).navigate(ROUTES.MAIN_TABS, {
             screen: ROUTES.INTEREST,
           });

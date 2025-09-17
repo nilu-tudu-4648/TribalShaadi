@@ -7,7 +7,7 @@ import {
   Platform,
   Image,
   Pressable,
-  BackHandler,  
+  BackHandler,
 } from 'react-native';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import AppSafeView from '../components/AppSafeView';
@@ -46,10 +46,18 @@ import {
   setReducerLoadingfalse,
   updateChatIsReadApi,
   updateChatIsReadUrl,
+  baseUrl,
+  insertUserNotificationsUrl,
 } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
-import { setUnreadChatHistory } from '../store/reducers/chatReducer';
+import {
+  insertUserNotificationsApi,
+  setUnreadChatHistory,
+} from '../store/reducers/chatReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ASYNC_VARIBLES } from '../constants/data';
+import axios from 'axios';
 
 // Message type definitions
 interface Message {
@@ -81,7 +89,6 @@ const ConversationsScreen = () => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const dispatch = useDispatch();
   const messageIdCounter = useRef<number>(0);
-  console.log(chatData, 'chatData');
   // Generate unique ID for messages
   const generateUniqueId = useCallback(() => {
     messageIdCounter.current += 1;
@@ -91,14 +98,14 @@ const ConversationsScreen = () => {
   // Helper function to group messages with date headers
   const groupMessagesWithDateHeaders = useCallback((messages: Message[]) => {
     if (!messages.length) return [INITIAL_STORY_STARTER];
-    
+
     const groupedMessages: Message[] = [INITIAL_STORY_STARTER];
     let lastDateHeader = '';
-    
+
     messages.forEach((message, _index) => {
       const messageTimestamp = message.timestamp || Date.now();
       const currentDateHeader = formatChatDateHeader(messageTimestamp);
-      
+
       // Add date header if this is a new day
       if (currentDateHeader !== lastDateHeader) {
         groupedMessages.push({
@@ -109,38 +116,41 @@ const ConversationsScreen = () => {
         });
         lastDateHeader = currentDateHeader;
       }
-      
+
       groupedMessages.push(message);
     });
-    
+
     return groupedMessages;
   }, []);
-  const filterReceivedMessages = useCallback(async (messages: any[]) => {
-    const receivedMessages = messages.filter(
-      (message: any) => message.userId !== user.id && message.isRead === 0,
-    );
+  const filterReceivedMessages = useCallback(
+    async (messages: any[]) => {
+      const receivedMessages = messages.filter(
+        (message: any) => message.userId !== user.id && message.isRead === 0,
+      );
 
-    if (receivedMessages.length > 0 && receivedMessages[0].chatId) {
-      await updateChatIsReadApi(`${updateChatIsReadUrl}`, {
-        chatId: receivedMessages[0].chatId,
-        isRead: true,
-      });
-    }
+      if (receivedMessages.length > 0 && receivedMessages[0].chatId) {
+        await updateChatIsReadApi(`${updateChatIsReadUrl}`, {
+          chatId: receivedMessages[0].chatId,
+          isRead: true,
+        });
+      }
 
-    const chatHistory = await getChatHistoryByUserId(user.id);
-    const filteredChat = chatHistory.filter(
-      (chat: any) => chat.userId !== user.id && chat.isRead === 0,
-    );
-    dispatch(setUnreadChatHistory(filteredChat));
+      const chatHistory = await getChatHistoryByUserId(user.id);
+      const filteredChat = chatHistory.filter(
+        (chat: any) => chat.userId !== user.id && chat.isRead === 0,
+      );
+      dispatch(setUnreadChatHistory(filteredChat));
 
-    return receivedMessages;
-  }, [user.id, dispatch]);
+      return receivedMessages;
+    },
+    [user.id, dispatch],
+  );
 
   const loadChatMessages = useCallback(async () => {
     if (!user?.id || !userDetails?.friendId) {
       return;
     }
-    
+
     try {
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -150,10 +160,11 @@ const ConversationsScreen = () => {
         user.id,
         userDetails.friendId,
       );
-      filterReceivedMessages(filteredChat);
+      await filterReceivedMessages(filteredChat);
+
       if (Array.isArray(filteredChat) && filteredChat.length > 0) {
         const loadedMessages: Message[] = filteredChat
-          .filter(record => record?.content?.trim()) // Filter out empty messages
+          .filter((record: any) => record?.content?.trim())
           .map((record: any) => {
             const isSent = String(record.userId) === String(user.id);
             return {
@@ -166,32 +177,134 @@ const ConversationsScreen = () => {
                 hour12: true,
               }),
               timestamp: new Date(record.created_at).getTime(),
-              status: 'sent', // All loaded messages should be marked as sent
+              status: 'sent',
             };
           });
-        // console.log('loadChatMessages - loaded messages count:', loadedMessages.length);
+
         const groupedMessages = groupMessagesWithDateHeaders(loadedMessages);
+
+        // Save the last message (excluding date headers) to AsyncStorage
+        // Find the last non-date-header message
+        const lastMessage = [...groupedMessages]
+          .reverse()
+          .find(msg => msg.type !== 'date_header');
+        const savedLastMessage = await AsyncStorage.getItem(
+          ASYNC_VARIBLES.LAST_MESSAGE,
+        );
+
+        if (lastMessage) {
+          let messagesArray: any[] = [];
+          if (savedLastMessage) {
+            try {
+              messagesArray = JSON.parse(savedLastMessage);
+              if (!Array.isArray(messagesArray)) {
+                messagesArray = [messagesArray];
+              }
+            } catch (e) {
+              messagesArray = [];
+            }
+            const friendId = userDetails.friendId;
+            const lastMsgWithFriendId = { ...lastMessage, friendId };
+            const idx = messagesArray.findIndex(
+              (msg: any) => msg.friendId === friendId,
+            );
+            if (idx !== -1) {
+              messagesArray[idx] = lastMsgWithFriendId;
+            } else {
+              messagesArray.push(lastMsgWithFriendId);
+            }
+            await AsyncStorage.setItem(
+              ASYNC_VARIBLES.LAST_MESSAGE,
+              JSON.stringify(messagesArray),
+            );
+          } else {
+            await AsyncStorage.setItem(
+              ASYNC_VARIBLES.LAST_MESSAGE,
+              JSON.stringify([
+                { ...lastMessage, friendId: userDetails.friendId },
+              ]),
+            );
+          }
+        }
+
         setChatData(groupedMessages);
       } else {
-        // console.log('loadChatMessages - no messages found, keeping story starter only');
         setChatData([INITIAL_STORY_STARTER]);
       }
     } catch (error) {
-      console.error('Error loading chat messages:', error);
-      // Keep story starter even if loading fails
+      console.error('error loading chat messages:', error);
       setChatData([INITIAL_STORY_STARTER]);
     }
-  }, [user?.id, userDetails?.friendId, generateUniqueId, dispatch, filterReceivedMessages, groupMessagesWithDateHeaders]);
+  }, [
+    user?.id,
+    userDetails?.friendId,
+    generateUniqueId,
+    dispatch,
+    filterReceivedMessages,
+    groupMessagesWithDateHeaders,
+  ]);
+  // Update last message preview in storage for this friend
+  const updateLastMessagePreview = useCallback(
+    async (friendId: string | number, message: Message) => {
+      try {
+        const savedLastMessage = await AsyncStorage.getItem(
+          ASYNC_VARIBLES.LAST_MESSAGE,
+        );
+        let messagesArray: any[] = [];
+        if (savedLastMessage) {
+          try {
+            messagesArray = JSON.parse(savedLastMessage);
+            if (!Array.isArray(messagesArray)) {
+              messagesArray = [messagesArray];
+            }
+          } catch (e) {
+            messagesArray = [];
+          }
+        }
+
+        const lastMsgWithFriendId = { ...message, friendId };
+        const idx = messagesArray.findIndex(
+          (msg: any) => msg.friendId === friendId,
+        );
+        if (idx !== -1) {
+          messagesArray[idx] = lastMsgWithFriendId;
+        } else {
+          messagesArray.push(lastMsgWithFriendId);
+        }
+
+        await AsyncStorage.setItem(
+          ASYNC_VARIBLES.LAST_MESSAGE,
+          JSON.stringify(messagesArray),
+        );
+      } catch (error) {
+        console.error('error updating last message preview:', error);
+      }
+    },
+    [],
+  );
   // Auto scroll to bottom
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, []);
+  const getUserStatus = useCallback(async () => {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const userStatus = await axios.get(
+      `${baseUrl}/${getUserDetailsUrl}id=${userDetails.friendId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000, // Add timeout to prevent hanging requests
+      },
+    );
+    return userStatus.data.recordList[0].middleName;
+  }, [userDetails.friendId]);
 
   // Add new message to chat
   const addMessage = useCallback(
-    (message: Omit<Message, 'id' | 'timestamp'>) => {
+    async (message: Omit<Message, 'id' | 'timestamp'>) => {
       const newMessage: Message = {
         ...message,
         id: generateUniqueId(), // Use unique ID generator
@@ -202,15 +315,16 @@ const ConversationsScreen = () => {
         const lastMessage = currentChatData[currentChatData.length - 1];
         const newMessageTimestamp = newMessage.timestamp || Date.now();
         const currentDateHeader = formatChatDateHeader(newMessageTimestamp);
-        
+
         let updatedMessages = [...currentChatData];
-        
+
         // Check if we need to add a date header before the new message
-        const needsDateHeader = 
-          !lastMessage || 
-          lastMessage.type === 'story_starter' || 
-          (lastMessage.timestamp && isDifferentDay(lastMessage.timestamp, newMessageTimestamp));
-        
+        const needsDateHeader =
+          !lastMessage ||
+          lastMessage.type === 'story_starter' ||
+          (lastMessage.timestamp &&
+            isDifferentDay(lastMessage.timestamp, newMessageTimestamp));
+
         if (needsDateHeader) {
           const dateHeaderMessage: Message = {
             id: `date_header_${newMessageTimestamp}`,
@@ -220,25 +334,51 @@ const ConversationsScreen = () => {
           };
           updatedMessages.push(dateHeaderMessage);
         }
-        
+
         updatedMessages.push(newMessage);
         return updatedMessages;
       });
 
+      // Persist last message preview live with a proper time (avoid "sending...")
+      const previewMessage: Message = {
+        ...newMessage,
+        time:
+          newMessage.status === 'sending' ? getCurrentTime() : newMessage.time,
+      };
+      await updateLastMessagePreview(userDetails.friendId, previewMessage);
+      //this is for updating the unread chat history
+      const userStatus = await getUserStatus();
+      if (userStatus === 'online') {
+        dispatch(
+          insertUserNotificationsApi(
+            `${baseUrl}/${insertUserNotificationsUrl}`,
+            {
+              title: 'testing',
+              message: 'rrr',
+              receiverUserId: userDetails.friendId,
+            },
+          ),
+        );
+      }
       // Scroll immediately after state update
       setTimeout(() => {
         scrollToBottom();
       }, 50); // Small delay to ensure state update is processed
     },
-    [scrollToBottom, generateUniqueId],
+    [
+      scrollToBottom,
+      generateUniqueId,
+      dispatch,
+      userDetails.friendId,
+      updateLastMessagePreview,
+      getUserStatus,
+    ],
   );
 
   // Initialize socket connection with fallback URLs
   const initializeSocket = useCallback(
     (attempt: number = 0) => {
-      const serverUrls = [
-        'https://api.tribalshaadi.co.in',
-      ];
+      const serverUrls = ['https://api.tribalshaadi.co.in'];
 
       if (attempt >= serverUrls.length) {
         console.error('❌ All connection attempts failed');
@@ -332,6 +472,15 @@ const ConversationsScreen = () => {
         );
 
         scrollToBottom(); // Auto-scroll when message status updates
+        // Update last message preview time to confirmed time
+        updateLastMessagePreview(userDetails.friendId, {
+          id: generateUniqueId(),
+          type: 'sent',
+          message: content,
+          time: getCurrentTime(),
+          timestamp: Date.now(),
+          status: 'sent',
+        } as Message);
       });
 
       socket.current.on('error_message', error => {
@@ -361,6 +510,8 @@ const ConversationsScreen = () => {
       userDetails?.friendId,
       addMessage,
       scrollToBottom,
+      generateUniqueId,
+      updateLastMessagePreview,
       // loadChatMessages,
     ],
   );
@@ -421,7 +572,7 @@ const ConversationsScreen = () => {
       addMessage({
         type: 'sent',
         message: content,
-        time: 'sending...',
+        time: getCurrentTime(),
         status: 'sending',
       });
       setMessageText('');
@@ -434,7 +585,6 @@ const ConversationsScreen = () => {
       });
     }
   };
-
   const renderMessage = (item: Message) => {
     if (item.type === 'story_starter') {
       return (
@@ -524,10 +674,13 @@ const ConversationsScreen = () => {
     loadChatMessages();
   }, [navigation, loadChatMessages]);
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleBack();
-      return true;
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        handleBack();
+        return true;
+      },
+    );
     return () => backHandler.remove();
   }, [handleBack]);
   return (
@@ -539,10 +692,7 @@ const ConversationsScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable
-            style={styles.backButton}
-            onPress={handleBack}
-          >
+          <Pressable style={styles.backButton} onPress={handleBack}>
             <ArrowIosBackSvg
               color={COLORS.black}
               width={Size25}

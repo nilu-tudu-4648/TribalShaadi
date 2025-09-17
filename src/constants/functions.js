@@ -214,7 +214,12 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
       navigate(ROUTES.WELCOME);
       return;
     }
-
+    dispatch(
+      completeUserProfileV2Updated(updateUrl, {
+        id: user.id,
+        middleName:"online",
+      }),
+    );
     // Pass isInitialLoad flag to getUserDetailsApi to handle 401 errors appropriately
     await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, isInitialLoad);
   } catch (error) {
@@ -269,6 +274,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
         completeUserProfileV2Updated(updateUrl, {
           id: user.id,
           fcmToken: fcmToken,
+          middleName:"online",
         }),
       );
       dispatch(setLoadingfalse());
@@ -508,6 +514,9 @@ export const checkAuth = async dispatch => {
 export const logoutUser = async dispatch => {
   try {
     dispatch(setUserRegistrationCompleted(false));
+    await AsyncStorage.removeItem(ASYNC_VARIBLES.USER);
+    await AsyncStorage.removeItem(ASYNC_VARIBLES.USER_TOKEN);
+    await AsyncStorage.removeItem(ASYNC_VARIBLES.FCM_TOKEN);
     await AsyncStorage.clear();
     dispatch(logoutFromReducer());
     dispatch(setReducerCleaned());
@@ -807,8 +816,6 @@ export const updateProposalIsNewApi = async (url, data) => {
   }
 };
 export const updateChatIsReadApi = async (url, data) => {
-  console.log(data, 'data updateChatIsReadApi');
-  console.log(`${baseUrl}/${url}`, 'url');
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const response = await axios.post(`${baseUrl}/${url}`, data, {
@@ -846,4 +853,26 @@ export const verifySelfieApi = async (data, dispatch) => {
   }
 };
 
+
+// Called when the app moves to background (best-effort app close hook)
+export const onAppClose = async (dispatch) => {
+  try {
+    const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+    const user = JSON.parse(userDataString);
+    const requestBody = {
+      id: user.id,
+      middleName:"offline",
+    };
+    console.log('requestBody', requestBody);
+    dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+    setReducerLoadingfalse(dispatch, () => {
+      getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+    });
+    // Place any clean-up, persistence, or analytics flushes here
+    // Example: await AsyncStorage.flushGetRequests?.();
+    // Keep it fast and non-blocking; OS may kill the app quickly
+  } catch (error) {
+    console.error('onAppClose error:', error);
+  }
+};
 
