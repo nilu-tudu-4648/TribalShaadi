@@ -41,6 +41,8 @@ import AppToast from '../components/AppToast';
 import AlertBottomSheet from '../components/BottomSheets/AlertBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
+import { ASYNC_VARIBLES } from '../constants/data';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UploadImageScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
@@ -155,9 +157,8 @@ const UploadImageScreen = () => {
 
   const handleContinue = async () => {
     try {
-      // Call update user API to refresh user details
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-      // Navigate to next screen
+      await AsyncStorage.setItem(ASYNC_VARIBLES.ALL_IMAGES_UPLOADED, 'true');
     } catch (error) {
       console.log('NETWORK ERROR:', error);
       AppToast('Failed to update user details. Please try again.');

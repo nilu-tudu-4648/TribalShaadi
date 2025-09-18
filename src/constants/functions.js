@@ -15,7 +15,11 @@ import axios from 'axios';
 import AppToast from '../components/AppToast';
 import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
-import { getPackageByUserIdApi, setLoaderPayment, setSelfieVerify } from '../store/reducers/paymentReducer';
+import {
+  getPackageByUserIdApi,
+  setLoaderPayment,
+  setSelfieVerify,
+} from '../store/reducers/paymentReducer';
 
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
@@ -45,8 +49,10 @@ export const getEducationUrl = 'admin/education/getEducation';
 export const getEducationTypeUrl = 'admin/education/getEducationType';
 export const getOccupationUrl = 'admin/occupation/getOccupation';
 export const getEmploymentTypeUrl = 'admin/employmentType/getEmploymentType';
-export const getOccupationByEmploymentTypeUrl = '/admin/occupation/getOccupationByEmploymentType?employmentTypeId=';
-export const getOccupationCategoryByOccupationIdUrl = '/admin/occupationcategory/getOccupationCategoryByOccupationId?occupationId=';
+export const getOccupationByEmploymentTypeUrl =
+  '/admin/occupation/getOccupationByEmploymentType?employmentTypeId=';
+export const getOccupationCategoryByOccupationIdUrl =
+  '/admin/occupationcategory/getOccupationCategoryByOccupationId?occupationId=';
 export const getIncomeUrl = 'admin/annualIncome/getAnnualIncome';
 export const getHeightUrl = 'admin/height/getHeight';
 export const getDietUrl = 'admin/diet/getDiet';
@@ -177,10 +183,14 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
   try {
     // Add a small delay to prevent race conditions with other AsyncStorage operations
     await delay(100);
-    
+
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
 
-    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
+    if (
+      !userDataString ||
+      userDataString === 'null' ||
+      userDataString === 'undefined'
+    ) {
       console.log('No valid user data found in storage');
       navigate(ROUTES.WELCOME);
       return;
@@ -196,7 +206,10 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
       );
       // Clear corrupted data
       try {
-        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+        await AsyncStorage.multiRemove([
+          ASYNC_VARIBLES.USER,
+          ASYNC_VARIBLES.USER_TOKEN,
+        ]);
       } catch (clearError) {
         console.error('Error clearing corrupted data:', clearError);
       }
@@ -207,7 +220,10 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
     if (!user || typeof user !== 'object' || !user.id) {
       console.log('User object is invalid - checkUserLoggedIn');
       try {
-        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+        await AsyncStorage.multiRemove([
+          ASYNC_VARIBLES.USER,
+          ASYNC_VARIBLES.USER_TOKEN,
+        ]);
       } catch (clearError) {
         console.error('Error clearing invalid user data:', clearError);
       }
@@ -217,11 +233,15 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
     dispatch(
       completeUserProfileV2Updated(updateUrl, {
         id: user.id,
-        middleName:"online",
+        middleName: 'online',
       }),
     );
     // Pass isInitialLoad flag to getUserDetailsApi to handle 401 errors appropriately
-    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, isInitialLoad);
+    await getUserDetailsApi(
+      `${getUserDetailsUrl}id=${user.id}`,
+      dispatch,
+      isInitialLoad,
+    );
   } catch (error) {
     console.error('Error in checkUserLoggedIn:', error);
     // Ensure we don't crash the app - navigate to welcome as fallback
@@ -256,40 +276,39 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
     AppToast('OTP verified successfully');
-    console.log(response.data, 'verifyOTP');
     if (response.data.status === 200) {
       const user = response.data.recordList[0];
-      console.log(user, 'verifyOTP');
-      
       // Handle empty token by using user.id as fallback or generate a temporary token
       const userWithToken = {
         ...user,
-        token: user.token || `temp_token_${user.id}_${Date.now()}`
+        token: user.token || `temp_token_${user.id}_${Date.now()}`,
       };
-      
+
       await saveUserToStorage(userWithToken);
-      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, false);
+      await getUserDetailsApi(
+        `${getUserDetailsUrl}id=${user.id}`,
+        dispatch,
+        false,
+      );
       const fcmToken = await AsyncStorage.getItem(ASYNC_VARIBLES.FCM_TOKEN);
       dispatch(
         completeUserProfileV2Updated(updateUrl, {
           id: user.id,
           fcmToken: fcmToken,
-          middleName:"online",
+          middleName: 'online',
         }),
       );
       dispatch(setLoadingfalse());
-      
       // Wait a bit for all dispatches to complete
       await delay(500);
-      
-      // Check auth and navigate accordingly
       try {
         const authResult = await checkAuth(dispatch);
-        
         // If profile is complete but checkAuth didn't navigate, navigate to main tabs
         if (authResult === true) {
           dispatch(setUserRegistrationCompleted(true));
-          console.log('Navigating to main tabs after successful OTP verification');
+          console.log(
+            'Navigating to main tabs after successful OTP verification',
+          );
           navigate(ROUTES.MAIN_TABS);
         }
       } catch (navError) {
@@ -297,7 +316,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
         // Fallback: at least set registration completed so app state is updated
         dispatch(setUserRegistrationCompleted(true));
       }
-      
+
       return true;
     } else {
       return false;
@@ -307,51 +326,59 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     console.log(error);
   }
 };
-export const getUserDetailsApi = async (url, dispatch, isInitialLoad = false) => {
+export const getUserDetailsApi = async (
+  url,
+  dispatch,
+  isInitialLoad = false,
+) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token')
+    console.log(token, 'token');
     if (!token || token === 'null' || token === 'undefined') {
       console.log('No valid token found for getUserDetailsApi');
-      
+
       // During initial load, navigate to welcome instead of crashing
       if (isInitialLoad) {
         console.log('Initial load without token - navigating to welcome');
         navigate(ROUTES.WELCOME);
         return null;
       }
-      
+
       console.log('No token available - skipping API call');
       return null;
     }
-    
+
     const response = await axios.get(`${baseUrl}/${url}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       timeout: 10000, // Add timeout to prevent hanging requests
     });
-    
+
     // Validate response structure
-    if (!response.data || !response.data.recordList || !response.data.recordList[0]) {
+    if (
+      !response.data ||
+      !response.data.recordList ||
+      !response.data.recordList[0]
+    ) {
       console.error('Invalid response structure from getUserDetailsApi');
       return null;
     }
-    
+
     const userData = response.data.recordList[0];
-    
+
     // Safely save to AsyncStorage
     try {
       await AsyncStorage.setItem(ASYNC_VARIBLES.USER, JSON.stringify(userData));
     } catch (storageError) {
       console.error('Error saving user data to storage:', storageError);
     }
-    
+
     // Safe dispatch
     try {
       if (typeof dispatch === 'function') {
         dispatch(setUser({ ...userData, token: token }));
-        
+
         // Safe additional API calls
         if (userData.id) {
           dispatch(
@@ -369,23 +396,28 @@ export const getUserDetailsApi = async (url, dispatch, isInitialLoad = false) =>
     } catch (dispatchError) {
       console.error('Error dispatching user data:', dispatchError);
     }
-    
+
     return userData;
   } catch (error) {
     console.error('Error in getUserDetailsApi:', error);
-    
+
     // Handle different error types safely
     if (error.response && error.response.data) {
       const status = error.response.data.status;
-      
+
       if (status === 401) {
         console.log('Authentication error (401) - token expired or invalid');
-        
+
         // During initial load, don't logout aggressively - just navigate to welcome
         if (isInitialLoad) {
-          console.log('Initial load with invalid token - clearing storage and navigating to welcome');
+          console.log(
+            'Initial load with invalid token - clearing storage and navigating to welcome',
+          );
           try {
-            await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+            await AsyncStorage.multiRemove([
+              ASYNC_VARIBLES.USER,
+              ASYNC_VARIBLES.USER_TOKEN,
+            ]);
             navigate(ROUTES.WELCOME);
           } catch (clearError) {
             console.error('Error clearing storage on 401:', clearError);
@@ -418,22 +450,30 @@ export const getUserDetailsApi = async (url, dispatch, isInitialLoad = false) =>
     } else if (error.code === 'ECONNABORTED') {
       console.error('Request timeout in getUserDetailsApi');
     } else if (error.message === 'Network Error') {
-      console.error('Network error in getUserDetailsApi - continuing without crash');
+      console.error(
+        'Network error in getUserDetailsApi - continuing without crash',
+      );
     } else {
       console.error('Unexpected error in getUserDetailsApi:', error.message);
     }
-    
+
     return null;
+  } finally {
+    dispatch(setLoadingfalse());
   }
 };
 export const checkAuth = async dispatch => {
   try {
     // Add delay to prevent race conditions
     await delay(200);
-    
+
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
     // If no user data, let checkUserLoggedIn handle it
-    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
+    if (
+      !userDataString ||
+      userDataString === 'null' ||
+      userDataString === 'undefined'
+    ) {
       console.log('No user data found in storage - checkAuth (skipping)');
       return false;
     }
@@ -445,9 +485,15 @@ export const checkAuth = async dispatch => {
       console.error('Error parsing user data in checkAuth:', parseError);
       // Clear corrupted data and let checkUserLoggedIn handle navigation
       try {
-        await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
+        await AsyncStorage.multiRemove([
+          ASYNC_VARIBLES.USER,
+          ASYNC_VARIBLES.USER_TOKEN,
+        ]);
       } catch (clearError) {
-        console.error('Error clearing corrupted data in checkAuth:', clearError);
+        console.error(
+          'Error clearing corrupted data in checkAuth:',
+          clearError,
+        );
       }
       return false;
     }
@@ -457,7 +503,7 @@ export const checkAuth = async dispatch => {
       console.log('User object is invalid - checkAuth (skipping)');
       return false;
     }
-    
+
     console.log('checkAuth - User profile check:', user);
 
     // Check profile completion steps in order with safe navigation
@@ -471,9 +517,19 @@ export const checkAuth = async dispatch => {
           (typeof fieldValue === 'string' && fieldValue.trim() === '') ||
           (Array.isArray(fieldValue) && fieldValue.length === 0)
         ) {
-          console.log(`Redirecting to ${step.screen} - missing ${step.field}`);
           try {
-            navigate(step.screen);
+            if (step.screen === ROUTES.SELECT_INTERESTS) {
+              const allImagesUploaded = await AsyncStorage.getItem(
+                ASYNC_VARIBLES.ALL_IMAGES_UPLOADED,
+              );
+              if (allImagesUploaded === 'true') {
+                navigate(step.screen);
+              } else {
+                navigate(ROUTES.UPLOAD_IMAGE);
+              }
+            } else {
+              navigate(step.screen);
+            }
           } catch (navError) {
             console.error('Error navigating in checkAuth:', navError);
           }
@@ -484,13 +540,17 @@ export const checkAuth = async dispatch => {
       console.error('Error in profile completion check:', profileCheckError);
       return false;
     }
-    
+
     // If we reach here, profile is complete
     // console.log('Profile is complete, setting registration completed');
-    
+
     // Safe check for interests and set registration completed
     try {
-      if (user.intrests && Array.isArray(user.intrests) && user.intrests.length > 0) {
+      if (
+        user.intrests &&
+        Array.isArray(user.intrests) &&
+        user.intrests.length > 0
+      ) {
         if (typeof dispatch === 'function') {
           dispatch(setUserRegistrationCompleted(true));
         }
@@ -502,9 +562,12 @@ export const checkAuth = async dispatch => {
         }
       }
     } catch (interestError) {
-      console.error('Error setting user registration completed:', interestError);
+      console.error(
+        'Error setting user registration completed:',
+        interestError,
+      );
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error in checkAuth:', error);
@@ -520,7 +583,18 @@ export const logoutUser = async dispatch => {
     await AsyncStorage.clear();
     dispatch(logoutFromReducer());
     dispatch(setReducerCleaned());
-    navigate(ROUTES.WELCOME);
+
+    // Refresh FCM token instead of restarting the app
+    try {
+      const { refreshFCMToken } = require('../notification/notifications');
+      await refreshFCMToken();
+      console.log('FCM token refreshed after logout');
+    } catch (fcmError) {
+      console.error('Error refreshing FCM token after logout:', fcmError);
+    }
+
+    // navigate(ROUTES.WELCOME);
+    // RNRestart.restart(); // Removed - using FCM token refresh instead
   } catch (error) {
     console.log(error);
   }
@@ -580,7 +654,9 @@ export const deleteUserApi = async (id, dispatch) => {
 export const setReducerLoadingfalse = async (dispatch, func) => {
   try {
     await delay();
-    func();
+    if (func) {
+      func();
+    }
   } catch (error) {
     console.log(error, 'setReducerLoadingfalse');
   } finally {
@@ -591,13 +667,13 @@ export const convertCmToReadableHeight = cm => {
   const n = Number(cm);
   let feet = Math.floor(n / 30.48);
   let inches = Math.round((n / 30.48 - feet) * 12);
-  
+
   // Handle inch overflow (12 inches = 1 foot)
   if (inches >= 12) {
     feet += Math.floor(inches / 12);
     inches = inches % 12;
   }
-  
+
   return `${feet}'${String(inches).padStart(2, '0')}"`;
 };
 export const formatHeightInFeettoInches = totalInches => {
@@ -640,7 +716,11 @@ export const resetPreferenceApi = async (dispatch, func) => {
       },
     );
     console.log(response.data, 'resetPreferenceApi');
-    await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch, false);
+    await getUserDetailsApi(
+      `${getUserDetailsUrl}id=${user.id}`,
+      dispatch,
+      false,
+    );
   } catch (error) {
     console.log(error, 'resetPreferenceApi');
   } finally {
@@ -853,26 +933,40 @@ export const verifySelfieApi = async (data, dispatch) => {
   }
 };
 
-
 // Called when the app moves to background (best-effort app close hook)
-export const onAppClose = async (dispatch) => {
+export const onAppClose = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
     const user = JSON.parse(userDataString);
     const requestBody = {
       id: user.id,
-      middleName:"offline",
+      middleName: 'offline',
     };
-    console.log('requestBody', requestBody);
+    console.log('requestBody onAppClose', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
       getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     });
-    // Place any clean-up, persistence, or analytics flushes here
-    // Example: await AsyncStorage.flushGetRequests?.();
-    // Keep it fast and non-blocking; OS may kill the app quickly
   } catch (error) {
     console.error('onAppClose error:', error);
   }
 };
 
+// Called when the app comes to foreground
+export const onAppForeground = async dispatch => {
+  try {
+    const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+    const user = JSON.parse(userDataString);
+    const requestBody = {
+      id: user.id,
+      middleName: 'online',
+    };
+    console.log('requestBody onAppForeground', requestBody);
+    dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+    setReducerLoadingfalse(dispatch, () => {
+      getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+    });
+  } catch (error) {
+    console.error('onAppForeground error:', error);
+  }
+};

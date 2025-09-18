@@ -37,7 +37,7 @@ import {
   requestAndroidNotificationPermission,
   configurePushNotification,
 } from './src/notification/notifications';
-import { onAppClose } from './src/constants/functions';
+import { onAppClose, onAppForeground } from './src/constants/functions';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
@@ -166,15 +166,17 @@ const MainApp = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Call a function when app transitions to background (best-effort app close)
+  // Call functions when app transitions between background and foreground
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async nextState => {
       try {
         if (nextState === 'background') {
           await onAppClose(dispatch);
+        } else if (nextState === 'active') {
+          await onAppForeground(dispatch);
         }
       } catch (error) {
-        console.error('Error in onAppClose handler:', error);
+        console.error('Error in AppState change handler:', error);
       }
     });
 

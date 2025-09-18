@@ -3,11 +3,13 @@ import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { baseUrl, updateUrl } from '../constants/functions';
+import { baseUrl, delay, getProposalsGotByMeUrl, updateUrl } from '../constants/functions';
 import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import axios from 'axios';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { navigate } from '../navigation/NavigationRef';
+import { store } from '../store/configureStore';
+import { getProposalsGotByMeApi } from '../store/reducers/userReducer';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -285,9 +287,9 @@ export const notificationListner = async () => {
           console.log('Background notification: remoteMessage is null or undefined');
           return;
         }
-
+        delay();
+        store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
         console.log('Background notification data:', remoteMessage.notification);
-        
         // Handle specific notification types
         if (remoteMessage.notification && remoteMessage.notification.title === 'Congrats 🎉 new request received!') {
           try {
@@ -544,9 +546,45 @@ const subscribeToAllUsersTopics = async () => {
   }
 };
 
+// Function to refresh FCM token
+export const refreshFCMToken = async () => {
+  if (!isFirebaseReady()) {
+    console.warn('Firebase not initialized. Skipping FCM token refresh.');
+    return;
+  }
+
+  try {
+    console.log('Refreshing FCM token...');
+    // Get a new token
+    const newToken = await messaging().getToken();
+    if (newToken && typeof newToken === 'string') {
+      console.log('New FCM token received:', newToken.substring(0, 20) + '...');
+      
+      // Store the new token
+      await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, newToken);
+      console.log('New FCM token stored successfully');
+      
+      // Send new token to server
+      await sendTokenToServer(newToken);
+      
+      // Subscribe to topics again
+      await subscribeToAllUsersTopics();
+      
+      return newToken;
+    } else {
+      console.warn('Failed to get new FCM token');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error refreshing FCM token:', error);
+    return null;
+  }
+};
+
 export default {
   requestUserPermission,
   notificationListner,
   schedulePushNotification,
   configurePushNotification,
+  refreshFCMToken,
 };

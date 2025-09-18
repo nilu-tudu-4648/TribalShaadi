@@ -77,10 +77,6 @@ const InterestScreen = () => {
     fetchData();
   }, [fetchData]);
 
-  // const onRefresh = useCallback(() => {
-  //   setRefreshing(true);
-  //   fetchData();
-  // }, [fetchData]);
 
   useEffect(() => {
     if (refreshing && !loader) {

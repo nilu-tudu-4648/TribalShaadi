@@ -74,9 +74,14 @@ const AppSectionedPickerModal: React.FC<Props> = ({
                         onClose();
                       }}
                     >
-                      <AppText text={item.name} textStyle={styles.itemText} />
+                      <View style={{ width: '90%' }}>
+                        <AppText text={item.name} textStyle={styles.itemText} />
+                      </View>
                       <View
-                        style={[styles.radioOuter, isSelected && styles.radioOuterSelected]}
+                        style={[
+                          styles.radioOuter,
+                          isSelected && styles.radioOuterSelected,
+                        ]}
                       >
                         {isSelected && <View style={styles.radioInner} />}
                       </View>
@@ -148,6 +153,7 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: fontSize16,
     color: COLORS.textBlack,
+    // textTransform: 'capitalize',
   },
   radioOuter: {
     width: 20,
@@ -159,16 +165,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioOuterSelected: {
-    borderColor: COLORS.primaryBlue,
-  },
+    borderColor: COLORS.violet,
+  },  
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.primaryBlue,
+    backgroundColor: COLORS.violet,
   },
 });
 
 export default AppSectionedPickerModal;
-
-

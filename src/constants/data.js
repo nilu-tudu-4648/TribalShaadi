@@ -12,6 +12,7 @@ export const ASYNC_VARIBLES = {
   CHAT_MESSAGES: 'chatMessages',
   FCM_TOKEN: 'fcmToken',
   LAST_MESSAGE: 'lastMessage',
+  ALL_IMAGES_UPLOADED: 'allImagesUploaded',
 };
 // Routes
 export const ROUTES = {
