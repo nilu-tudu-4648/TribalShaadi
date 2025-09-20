@@ -53,7 +53,6 @@ import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
 import {
   insertUserNotificationsApi,
-  setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ASYNC_VARIBLES } from '../constants/data';
@@ -135,11 +134,7 @@ const ConversationsScreen = () => {
         });
       }
 
-      const chatHistory = await getChatHistoryByUserId(user.id);
-      const filteredChat = chatHistory.filter(
-        (chat: any) => chat.userId !== user.id && chat.isRead === 0,
-      );
-      dispatch(setUnreadChatHistory(filteredChat));
+      await getChatHistoryByUserId(user.id, dispatch);
 
       return receivedMessages;
     },
@@ -354,7 +349,7 @@ const ConversationsScreen = () => {
             `${baseUrl}/${insertUserNotificationsUrl}`,
             {
               title: 'testing',
-              message: 'rrr',
+              message: 'new message',
               receiverUserId: userDetails.friendId,
             },
           ),

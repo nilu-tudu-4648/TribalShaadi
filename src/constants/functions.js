@@ -20,6 +20,7 @@ import {
   setLoaderPayment,
   setSelfieVerify,
 } from '../store/reducers/paymentReducer';
+import { setUnreadChatHistory } from '../store/reducers/chatReducer';
 
 // Configuration for user profile completion checks
 const PROFILE_COMPLETION_STEPS = [
@@ -819,7 +820,7 @@ export const getEmploymentTypeApi = async dispatch => {
     return [];
   }
 };
-export const getChatHistoryByUserId = async userId => {
+export const getChatHistoryByUserId = async (userId, dispatch) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const response = await axios.post(
@@ -833,9 +834,12 @@ export const getChatHistoryByUserId = async userId => {
         },
       },
     );
-    return response.data.recordList;
+    const filteredChat =  response.data.recordList.filter(
+      chat => chat.userId !== userId && chat.isRead === 0
+    );
+    dispatch(setUnreadChatHistory(filteredChat));
   } catch (error) {
-    console.log(error, 'getChatHistoryByUserId');
+    console.log(error.response.data, 'getChatHistoryByUserId');
     return [];
   }
 };

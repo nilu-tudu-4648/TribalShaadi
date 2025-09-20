@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  // RefreshControl,
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { fontSize14, fontSize16, SIZES } from '../constants/Sizes';
@@ -54,16 +53,17 @@ const InterestScreen = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
   const {
     proposalsSendByMe,
     proposalsGotByMe,
-    loader,
     passedUsers,
     currentUserPackage,
   } = useSelector((state: any) => state.entities.userReducer);
   const fetchData = useCallback(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
+    setIsLoading(false);
   }, [dispatch]);
 
   useEffect(() => {
@@ -77,15 +77,15 @@ const InterestScreen = () => {
     fetchData();
   }, [fetchData]);
 
-
   useEffect(() => {
-    if (refreshing && !loader) {
+    if (refreshing) {
       setRefreshing(false);
     }
-  }, [loader, refreshing]);
+  }, [refreshing]);
 
   const handleCardPress = async (id: string) => {
     try {
+      setIsLoading(true);
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
       dispatch(
         getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
@@ -104,10 +104,13 @@ const InterestScreen = () => {
       bottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleRejectProposal = async (id: string) => {
     try {
+      setIsLoading(true);
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
           proposalUserId: id,
@@ -118,11 +121,14 @@ const InterestScreen = () => {
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleAcceptProposal = async (item: any) => {
     console.log('handleAcceptProposal', item.senderUserId);
     try {
+      setIsLoading(true);
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
           proposalUserId: item.senderUserId,
@@ -144,8 +150,10 @@ const InterestScreen = () => {
         screen: ROUTES.MATCHING,
       });
     } catch (error) {
+      setIsLoading(false);
       console.log(error, 'error');
     } finally {
+      setIsLoading(false);
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     }
   };
@@ -263,7 +271,7 @@ const InterestScreen = () => {
           currentUserPackage={currentUserPackage}
         />
       </AppSafeView>
-      {loader && (
+      {isLoading && (
         <View style={styles.loaderOverlay}>
           <Loader />
         </View>

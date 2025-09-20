@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, FlatList, Pressable } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -24,7 +24,6 @@ import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getAcceptedProposalByIdUrl,
-  getChatHistoryByUserId,
   imageUrl,
   updateProposalIsNewApi,
   updateProposalIsNewUrl,
@@ -32,7 +31,6 @@ import {
 
 import {
   getAcceptedProposalByIdApi,
-  setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
 import Loader from '../components/loader/Loader';
@@ -44,29 +42,9 @@ const ChatScreen = () => {
   const { loader, acceptedProposalById, unreadChatHistory } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
-  console.log(acceptedProposalById, 'acceptedProposalById');
-  console.log(unreadChatHistory, 'unreadChatHistory');
+  // console.log(acceptedProposalById, 'acceptedProposalById');
   const [lastMessage, setLastMessage] = useState<any>(null);
   const dispatch = useDispatch();
-  const fetchData = useCallback(async () => {
-    try {
-      dispatch(
-        getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
-      );
-      const chatHistory = await getChatHistoryByUserId(user.id);
-      const filteredChat = chatHistory.filter((chat: any) => {
-        return chat.userId !== user.id && chat.isRead === 0;
-      });
-      dispatch(setUnreadChatHistory(filteredChat));
-    } catch (error) {
-      console.log('error', error);
-    }
-  }, [dispatch, user?.id]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
   const acceptFriendRequest = async (item: any) => {
     try {
       if (item.isNewStatus === 1) {
@@ -119,8 +97,6 @@ const ChatScreen = () => {
   // Refresh when screen gains focus (e.g., after navigating back from conversations)
   useEffect(() => {
     const unsubscribe = (navigation as any).addListener('focus', () => {
-      // re-fetch server data
-      fetchData();
       // re-load last message preview from storage
       (async () => {
         try {
@@ -146,7 +122,7 @@ const ChatScreen = () => {
       })();
     });
     return unsubscribe;
-  }, [navigation, fetchData]);
+  }, [navigation]);
   const renderConversationItem = (item: any) => {
     // Memoize filtered unread chats for this friendId
     const unreadChatsForFriend = unreadChatHistory.filter(

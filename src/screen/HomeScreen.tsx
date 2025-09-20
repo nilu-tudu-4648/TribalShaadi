@@ -59,14 +59,12 @@ import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
-  setUnreadChatHistory,
 } from '../store/reducers/chatReducer';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
   const {
     matchedUsers,
-    loader,
     currentMatchedUser,
     currentMatchedUserGalleryImageList,
   } = useSelector((state: any) => state.entities.userReducer);
@@ -75,7 +73,7 @@ const HomeScreen = () => {
   );
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nameLoading, setNameLoading] = useState(false);
   const [displayName, setDisplayName] = useState('');
@@ -115,8 +113,6 @@ const HomeScreen = () => {
     });
   };
   
-  
-
   const handleSendProposal = async (id: string) => {
     try {
       setIsLoading(true);
@@ -215,14 +211,17 @@ const HomeScreen = () => {
   }, [dispatch]);
   useEffect(() => {
     const fetchChatHistory = async () => {
-      dispatch(
-        getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
-      );
-      const chatHistory = await getChatHistoryByUserId(user.id);
-      const filteredChat = chatHistory.filter((chat: any) => {
-        return chat.userId !== user.id && chat.isRead === 0;
-      });
-      dispatch(setUnreadChatHistory(filteredChat));
+      try {
+        
+        dispatch(
+          getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
+        );
+        await getChatHistoryByUserId(user.id, dispatch);
+      } catch (error) {
+        console.log(error, 'error');
+      }finally{
+        setIsLoading(false);
+      }
     };
     fetchChatHistory();
   }, [user?.id, dispatch]);
@@ -259,7 +258,7 @@ const HomeScreen = () => {
           <AppSafeView style={styles.container}>
             <>
               {/* show shimmer on first render and while fetching */}
-              {!hasRequestedMatches || loader ? (
+              {!hasRequestedMatches || isLoading ? (
                 <ProfileCardShimmer />
               ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
                 <>
@@ -283,7 +282,7 @@ const HomeScreen = () => {
                           matchedUsers[currentIndex]?.galleryImageList ||
                           []
                         }
-                        isLoading={loader}
+                        isLoading={isLoading}
                         maritalStatus={currentMatchedUser?.maritalStatus}
                         dob={currentMatchedUser?.birthDate}
                         motherTongue={currentMatchedUser?.motherTongue}
