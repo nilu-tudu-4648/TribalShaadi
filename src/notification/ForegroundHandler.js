@@ -1,14 +1,23 @@
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import { getApps } from '@react-native-firebase/app';
-import { schedulePushNotification } from "./notifications";
-import { getProposalsGotByMeApi } from "../store/reducers/userReducer";
-import { baseUrl, getProposalsGotByMeUrl, getAcceptedProposalByIdUrl, getChatHistoryByUserId, delay } from "../constants/functions";
-import { store } from "../store/configureStore";
-import { getAcceptedProposalByIdApi, setUnreadChatHistory, addUnreadChatForeground } from "../store/reducers/chatReducer";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ASYNC_VARIBLES } from "../constants/data";
+import { schedulePushNotification } from './notifications';
+import { getProposalsGotByMeApi } from '../store/reducers/userReducer';
+import {
+  baseUrl,
+  getProposalsGotByMeUrl,
+  getAcceptedProposalByIdUrl,
+  getChatHistoryByUserId,
+  getUserDetailsApi,
+  getUserDetailsUrl,
+} from '../constants/functions';
+import { store } from '../store/configureStore';
+import {
+  getAcceptedProposalByIdApi,
+} from '../store/reducers/chatReducer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ASYNC_VARIBLES } from '../constants/data';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -18,125 +27,156 @@ const isFirebaseReady = () => {
   try {
     return getApps().length > 0;
   } catch (error) {
-    console.error('Error checking Firebase status in ForegroundHandler:', error);
+    console.error(
+      'Error checking Firebase status in ForegroundHandler:',
+      error,
+    );
     return false;
   }
 };
 
-const ForegroundHandler = (params) => {
-    useEffect(() => {
-        let unsubscribe = null;
-        let setupTimer = null;
-        let initializationTimer = null;
-        let isCleanedUp = false;
-        
-        const setupForegroundHandler = async () => {
-            try {
-                // Check if component was already cleaned up
-                if (isCleanedUp) return;
-                
-                if (!isFirebaseReady()) {
-                    console.warn('Firebase not initialized. Skipping foreground message handler.');
-                    return;
+const ForegroundHandler = params => {
+  useEffect(() => {
+    let unsubscribe = null;
+    let setupTimer = null;
+    let initializationTimer = null;
+    let isCleanedUp = false;
+
+    const setupForegroundHandler = async () => {
+      try {
+        // Check if component was already cleaned up
+        if (isCleanedUp) return;
+
+        if (!isFirebaseReady()) {
+          console.warn(
+            'Firebase not initialized. Skipping foreground message handler.',
+          );
+          return;
+        }
+
+        // Clear any existing setup timer
+        if (setupTimer) {
+          clearTimeout(setupTimer);
+          setupTimer = null;
+        }
+
+        setupTimer = setTimeout(() => {
+          try {
+            // Double check cleanup status
+            if (isCleanedUp) return;
+
+            unsubscribe = messaging().onMessage(async remoteMessage => {
+              try {
+                if (Platform.OS === 'android') {
+                  const { title, body } = remoteMessage?.notification || {};
+                  console.log(title, body, 'title, body');
+                  const userDataString = await AsyncStorage.getItem(
+                    ASYNC_VARIBLES.USER,
+                  );
+                  const user = JSON.parse(userDataString);
+                  store.dispatch(
+                    getAcceptedProposalByIdApi(
+                      `${getAcceptedProposalByIdUrl}/${user.id}`,
+                    ),
+                  );
+                  store.dispatch(
+                    getProposalsGotByMeApi(
+                      `${baseUrl}/${getProposalsGotByMeUrl}`,
+                    ),
+                  );
+                  await getUserDetailsApi(
+                    `${getUserDetailsUrl}id=${user.id}`,
+                    store.dispatch,
+                  );
+                  await getChatHistoryByUserId(user.id, store.dispatch);
+
+                  // mark foreground unread in reducer (robust sender id detection)
+                  // try {
+                  //   const data = remoteMessage?.data || {};
+                  //   const idCandidate = data.from || data.senderId || data.sender_id || data.userId || data.user_id || data.friendId || data.friend_id;
+                  //   const parsed = idCandidate !== undefined && idCandidate !== null ? Number(idCandidate) : NaN;
+                  //   const senderId = !Number.isNaN(parsed) ? parsed : null;
+                  //   if (senderId && senderId !== user.id) {
+                  //     store.dispatch(
+                  //       addUnreadChatForeground({
+                  //         userId: senderId,
+                  //         content: body || '',
+                  //         created_at: new Date().toISOString(),
+                  //       })
+                  //     );
+                  //   }
+                  // } catch (_) {}
+                  if (!title || !body || title === 'testing') return;
+
+                  // Wrap schedulePushNotification in try-catch to prevent crashes
+                  try {
+                    await schedulePushNotification(
+                      title,
+                      body,
+                      remoteMessage.data,
+                    );
+                  } catch (scheduleError) {
+                    console.error(
+                      'Error scheduling push notification:',
+                      scheduleError,
+                    );
+                    // Don't re-throw to prevent app crash
+                  }
                 }
-                
-                // Clear any existing setup timer
-                if (setupTimer) {
-                    clearTimeout(setupTimer);
-                    setupTimer = null;
-                }
-                
-                setupTimer = setTimeout(() => {
-                    try {
-                        // Double check cleanup status
-                        if (isCleanedUp) return;
-                        
-                        unsubscribe = messaging().onMessage(async (remoteMessage) => {
-                          try {
-                            if (Platform.OS === 'android') {
-                              const { title, body } = remoteMessage?.notification || {};
-                              console.log(title, body, 'title, body');
-                              const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
-                              const user = JSON.parse(userDataString);
-                              store.dispatch(getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user.id}`));
-                              store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-                              await getChatHistoryByUserId(user.id, store.dispatch);
-                           
-                              // mark foreground unread in reducer (robust sender id detection)
-                              // try {
-                              //   const data = remoteMessage?.data || {};
-                              //   const idCandidate = data.from || data.senderId || data.sender_id || data.userId || data.user_id || data.friendId || data.friend_id;
-                              //   const parsed = idCandidate !== undefined && idCandidate !== null ? Number(idCandidate) : NaN;
-                              //   const senderId = !Number.isNaN(parsed) ? parsed : null;
-                              //   if (senderId && senderId !== user.id) {
-                              //     store.dispatch(
-                              //       addUnreadChatForeground({
-                              //         userId: senderId,
-                              //         content: body || '',
-                              //         created_at: new Date().toISOString(),
-                              //       })
-                              //     );
-                              //   }
-                              // } catch (_) {}
-                              if (!title || !body || title === 'testing') return;
-                              
-                              // Wrap schedulePushNotification in try-catch to prevent crashes
-                              try {
-                                await schedulePushNotification(title, body, remoteMessage.data);
-                              } catch (scheduleError) {
-                                console.error('Error scheduling push notification:', scheduleError);
-                                // Don't re-throw to prevent app crash
-                              }
-                            }
-                          } catch (messageError) {
-                            console.error('Error processing foreground message:', messageError);
-                            // Don't re-throw to prevent app crash
-                          }
-                        });
-                    } catch (setupError) {
-                        console.error('Error in message handler setup:', setupError);
-                    }
-                }, 500); // increased delay to stabilize real devices
-                
-            } catch (error) {
-                console.error('Error setting up foreground message handler:', error);
-            }
-        };
-        
-        // Add a small delay to ensure Firebase is initialized
-        initializationTimer = setTimeout(() => {
-            if (!isCleanedUp) {
-                setupForegroundHandler();
-            }
-        }, 2000);
-        
-        return () => {
-            // Mark as cleaned up to prevent any async operations
-            isCleanedUp = true;
-            
-            // Clear all timers
-            if (initializationTimer) {
-                clearTimeout(initializationTimer);
-                initializationTimer = null;
-            }
-            if (setupTimer) {
-                clearTimeout(setupTimer);
-                setupTimer = null;
-            }
-            
-            // Unsubscribe from messaging
-            if (unsubscribe) {
-                try {
-                    unsubscribe();
-                } catch (unsubscribeError) {
-                    console.error('Error unsubscribing from foreground messages:', unsubscribeError);
-                }
-                unsubscribe = null;
-            }
-        };
-    }, [])
- 
-    return null
+              } catch (messageError) {
+                console.error(
+                  'Error processing foreground message:',
+                  messageError,
+                );
+                // Don't re-throw to prevent app crash
+              }
+            });
+          } catch (setupError) {
+            console.error('Error in message handler setup:', setupError);
+          }
+        }, 500); // increased delay to stabilize real devices
+      } catch (error) {
+        console.error('Error setting up foreground message handler:', error);
+      }
+    };
+
+    // Add a small delay to ensure Firebase is initialized
+    initializationTimer = setTimeout(() => {
+      if (!isCleanedUp) {
+        setupForegroundHandler();
+      }
+    }, 2000);
+
+    return () => {
+      // Mark as cleaned up to prevent any async operations
+      isCleanedUp = true;
+
+      // Clear all timers
+      if (initializationTimer) {
+        clearTimeout(initializationTimer);
+        initializationTimer = null;
+      }
+      if (setupTimer) {
+        clearTimeout(setupTimer);
+        setupTimer = null;
+      }
+
+      // Unsubscribe from messaging
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (unsubscribeError) {
+          console.error(
+            'Error unsubscribing from foreground messages:',
+            unsubscribeError,
+          );
+        }
+        unsubscribe = null;
+      }
+    };
+  }, []);
+
+  return null;
 };
 
-export default ForegroundHandler
+export default ForegroundHandler;

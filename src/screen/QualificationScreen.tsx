@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
   fontSize18,
@@ -43,6 +43,7 @@ import { baseUrl } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
+import AppSafeView from '../components/AppSafeView';
 
 const QualificationScreen = () => {
   const [selectedQualification, setSelectedQualification] = useState<any>(null);
@@ -189,7 +190,7 @@ const QualificationScreen = () => {
       : true); // If not working, these fields are not required
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppSafeView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -366,7 +367,7 @@ const QualificationScreen = () => {
         isObjects={true}
         displayProperty="value"
       />
-    </SafeAreaView>
+    </AppSafeView>
   );
 };
 
@@ -374,6 +375,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+    padding: 0,
   },
   scrollView: {
     flex: 1,

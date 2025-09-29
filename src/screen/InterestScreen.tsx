@@ -155,6 +155,16 @@ const InterestScreen = () => {
     } finally {
       setIsLoading(false);
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
+      dispatch(
+        insertUserNotificationsApi(
+          `${baseUrl}/${insertUserNotificationsUrl}`,
+          {
+            title: 'testing',
+            message: 'new message',
+            receiverUserId: user.id,
+          },
+        ),
+      );
     }
   };
 
