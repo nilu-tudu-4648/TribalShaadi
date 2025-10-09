@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize20,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     fontWeight: 'bold',
   },
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   ageDisplayText: {
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
     fontWeight: 'bold',
   },

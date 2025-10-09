@@ -60,6 +60,8 @@ import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
 } from '../store/reducers/chatReducer';
+import BottomSheet from '@gorhom/bottom-sheet';
+import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -86,24 +88,31 @@ const HomeScreen = () => {
 
   const opacity = useSharedValue(1);
 
+  const reportBottomSheetRef = useRef<BottomSheet | null>(null);
+  const openReport = () => {
+    reportBottomSheetRef?.current?.expand();
+  };
   const animatedCardStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
     opacity: opacity.value,
   }));
-  
+
   const animateToNext = (direction: 'left' | 'right', callback: () => void) => {
     // Slide + fade out
-    translateX.value = withTiming(direction === 'left' ? -screenWidth : screenWidth, {
-      duration: 350,
-      easing: Easing.out(Easing.cubic),
-    });
+    translateX.value = withTiming(
+      direction === 'left' ? -screenWidth : screenWidth,
+      {
+        duration: 350,
+        easing: Easing.out(Easing.cubic),
+      },
+    );
     opacity.value = withTiming(0, { duration: 300 }, () => {
       runOnJS(callback)();
-  
+
       // Prepare new card off-screen and hidden
       translateX.value = direction === 'left' ? screenWidth : -screenWidth;
       opacity.value = 0;
-  
+
       // Slide + fade in new card
       translateX.value = withTiming(0, {
         duration: 350,
@@ -112,7 +121,7 @@ const HomeScreen = () => {
       opacity.value = withTiming(1, { duration: 300 });
     });
   };
-  
+
   const handleSendProposal = async (id: string) => {
     try {
       setIsLoading(true);
@@ -169,9 +178,12 @@ const HomeScreen = () => {
   };
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-      const id = user?.pReligionId !== "any" && user?.pReligionId?.[0] ? user?.pReligionId?.[0] : user?.religionId;
-      dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
-      setHasRequestedMatches(true);
+    const id =
+      user?.pReligionId !== 'any' && user?.pReligionId?.[0]
+        ? user?.pReligionId?.[0]
+        : user?.religionId;
+    dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
+    setHasRequestedMatches(true);
   }, [dispatch, user?.pReligionId, user?.religionId]);
 
   useEffect(() => {
@@ -212,14 +224,15 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        
         dispatch(
-          getAcceptedProposalByIdApi(`${getAcceptedProposalByIdUrl}/${user?.id}`),
+          getAcceptedProposalByIdApi(
+            `${getAcceptedProposalByIdUrl}/${user?.id}`,
+          ),
         );
         await getChatHistoryByUserId(user.id, dispatch);
       } catch (error) {
         console.log(error, 'error');
-      }finally{
+      } finally {
         setIsLoading(false);
       }
     };
@@ -254,103 +267,107 @@ const HomeScreen = () => {
   }, [dispatch, matchedUsers, currentIndex]);
   // console.log(matchedUsers, 'matchedUsers');
   return (
-        <View style={styles.container}>
-          <AppSafeView style={styles.container}>
+    <View style={styles.container}>
+      <AppSafeView style={styles.container}>
+        <>
+          {/* show shimmer on first render and while fetching */}
+          {!hasRequestedMatches || isLoading ? (
+            <ProfileCardShimmer />
+          ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
             <>
-              {/* show shimmer on first render and while fetching */}
-              {!hasRequestedMatches || isLoading ? (
-                <ProfileCardShimmer />
-              ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
-                <>
-                  <View style={styles.carouselContainer}>
-                    <Animated.View
-                      style={[styles.profileCardContainer, animatedCardStyle]}
-                    >
-                      <ProfileCard
-                        name={nameLoading ? 'Loading...' : displayName}
-                        isNameLoading={nameLoading}
-                        age={matchedUsers[currentIndex]?.age}
-                        height={currentMatchedUser?.height}
-                        religion={currentMatchedUser?.religion}
-                        caste={currentMatchedUser?.community}
-                        districtName={currentMatchedUser?.districtName}
-                        stateName={currentMatchedUser?.stateName}
-                        bio={matchedUsers[currentIndex]?.aboutMe}
-                        image={matchedUsers[currentIndex]?.imageUrl || ''}
-                        galleryImageList={
-                          currentMatchedUserGalleryImageList ||
-                          matchedUsers[currentIndex]?.galleryImageList ||
-                          []
-                        }
-                        isLoading={isLoading}
-                        maritalStatus={currentMatchedUser?.maritalStatus}
-                        dob={currentMatchedUser?.birthDate}
-                        motherTongue={currentMatchedUser?.motherTongue}
-                        annualIncome={currentMatchedUser?.annualIncome}
-                        partnerExpectation={
-                          currentMatchedUser?.about_lifepartener
-                        }
-                        employedIn={currentMatchedUser?.employmentType}
-                        occupation={currentMatchedUser?.occupation}
-                        organizationName={currentMatchedUser?.companyName}
-                        settlingTime={currentMatchedUser?.planingto_settle}
-                        highestQualification={
-                          currentMatchedUser?.educationType
-                        }
-                        college={currentMatchedUser?.college_name}
-                        eatingHabits={currentMatchedUser?.diet}
-                        drinkingHabits={currentMatchedUser?.drinking}
-                        smokingHabits={currentMatchedUser?.smoking}
-                        kids={currentMatchedUser?.kids}
-                        interests={currentMatchedUser?.intrests}
-                        isVerified={currentMatchedUser?.isVerified}
-                        isPremium={currentUserPackage.length > 0}
-                      />
-                    </Animated.View>
-                  </View>
-                  {/* Optional: Keep buttons for users who prefer tapping */}
-                  <View style={styles.floatingButtonContainer}>
-                    <AppButton
-                      title="Decline"
-                      onPress={() =>
-                        handleCancelProposal(matchedUsers[currentIndex].id)
-                      }
-                      buttonStyle={styles.declineButton}
-                      textStyle={styles.declineButtonText}
-                      isButtonDisabled={isLoading}
-                      pressable={true}
-                    />
-                    <AppButton
-                      title="Connect"
-                      onPress={() =>
-                        handleSendProposal(matchedUsers[currentIndex].id)
-                      }
-                      buttonStyle={styles.connectButton}
-                      textStyle={styles.connectButtonText}
-                      isButtonDisabled={isLoading}
-                      pressable={true}
-                    />
-                  </View>
-                </>
-              ) : (
-                <View style={styles.exhaustedContainer}>
-                  <Image
-                    source={require('../assets/images/ExhaustedImage.png')}
-                    style={styles.exhaustedImage}
+              <View style={styles.carouselContainer}>
+                <Animated.View
+                  style={[styles.profileCardContainer, animatedCardStyle]}
+                >
+                  <ProfileCard
+                    name={nameLoading ? 'Loading...' : displayName}
+                    isNameLoading={nameLoading}
+                    age={matchedUsers[currentIndex]?.age}
+                    height={currentMatchedUser?.height}
+                    religion={currentMatchedUser?.religion}
+                    caste={currentMatchedUser?.community}
+                    districtName={currentMatchedUser?.districtName}
+                    stateName={currentMatchedUser?.stateName}
+                    bio={matchedUsers[currentIndex]?.aboutMe}
+                    image={matchedUsers[currentIndex]?.imageUrl || ''}
+                    galleryImageList={
+                      currentMatchedUserGalleryImageList ||
+                      matchedUsers[currentIndex]?.galleryImageList ||
+                      []
+                    }
+                    isLoading={isLoading}
+                    maritalStatus={currentMatchedUser?.maritalStatus}
+                    dob={currentMatchedUser?.birthDate}
+                    motherTongue={currentMatchedUser?.motherTongue}
+                    annualIncome={currentMatchedUser?.annualIncome}
+                    partnerExpectation={currentMatchedUser?.about_lifepartener}
+                    employedIn={currentMatchedUser?.employmentType}
+                    occupation={currentMatchedUser?.occupation}
+                    organizationName={currentMatchedUser?.companyName}
+                    settlingTime={currentMatchedUser?.planingto_settle}
+                    highestQualification={currentMatchedUser?.educationType}
+                    college={currentMatchedUser?.college_name}
+                    eatingHabits={currentMatchedUser?.diet}
+                    drinkingHabits={currentMatchedUser?.drinking}
+                    smokingHabits={currentMatchedUser?.smoking}
+                    kids={currentMatchedUser?.kids}
+                    interests={currentMatchedUser?.intrests}
+                    isVerified={currentMatchedUser?.isVerified}
+                    isPremium={currentUserPackage.length > 0}
+                    openReport={openReport}
                   />
-                  <AppText
-                    text="All matches exhausted"
-                    textStyle={styles.exhaustedTitle}
-                  />
-                  <AppText
-                    text="Come back and check tomorrow for more matches"
-                    textStyle={styles.exhaustedSubtitle}
-                  />
-                </View>
-              )}
+                </Animated.View>
+              </View>
+              {/* Optional: Keep buttons for users who prefer tapping */}
+              <View style={styles.floatingButtonContainer}>
+                <AppButton
+                  title="Decline"
+                  onPress={() =>
+                    handleCancelProposal(matchedUsers[currentIndex].id)
+                  }
+                  buttonStyle={styles.declineButton}
+                  textStyle={styles.declineButtonText}
+                  isButtonDisabled={isLoading}
+                  pressable={true}
+                />
+                <AppButton
+                  title="Connect"
+                  onPress={() =>
+                    handleSendProposal(matchedUsers[currentIndex].id)
+                  }
+                  buttonStyle={styles.connectButton}
+                  textStyle={styles.connectButtonText}
+                  isButtonDisabled={isLoading}
+                  pressable={true}
+                />
+              </View>
             </>
-          </AppSafeView>
-        </View>
+          ) : (
+            <View style={styles.exhaustedContainer}>
+              <Image
+                source={require('../assets/images/ExhaustedImage.png')}
+                style={styles.exhaustedImage}
+              />
+              <AppText
+                text="All matches exhausted"
+                textStyle={styles.exhaustedTitle}
+              />
+              <AppText
+                text="Come back and check tomorrow for more matches"
+                textStyle={styles.exhaustedSubtitle}
+              />
+            </View>
+          )}
+        </>
+      </AppSafeView>
+      <ReportBottomSheet
+        bottomSheetRef={reportBottomSheetRef}
+        onReport={(reportReason: string) => {
+          console.log('Profile reported for:', reportReason);
+          // Add your report logic here
+        }}
+      />
+    </View>
   );
 };
 

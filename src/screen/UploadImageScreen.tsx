@@ -35,13 +35,13 @@ import AppText from '../components/AppText';
 import GradientLoader from '../components/GradientLoader';
 import { CloseIcon } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserDetailsApi, uploadImage } from '../constants/functions';
+import { getUserDetailsApi, navigateToLastScreen, uploadImage } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import AlertBottomSheet from '../components/BottomSheets/AlertBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
-import { ASYNC_VARIBLES } from '../constants/data';
+import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UploadImageScreen = () => {
@@ -162,6 +162,8 @@ const UploadImageScreen = () => {
     } catch (error) {
       console.log('NETWORK ERROR:', error);
       AppToast('Failed to update user details. Please try again.');
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.SELECT_INTERESTS);
     }
   };
 
@@ -236,7 +238,7 @@ const UploadImageScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER)} />
 
         {/* Title Section */}
         <View style={styles.titleSection}>

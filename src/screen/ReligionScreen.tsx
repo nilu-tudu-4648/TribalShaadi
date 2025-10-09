@@ -28,11 +28,13 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
+  navigateToLastScreen,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
 import AppText from '../components/AppText';
-import { MOTHER_TONGUE } from '../constants/data';
+import { MOTHER_TONGUE, ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 const ReligionScreen = () => {
   const [selectedReligion, setSelectedReligion] = useState('');
@@ -49,13 +51,16 @@ const ReligionScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   useEffect(() => {
     dispatch(getReligion(getReligionUrl));
   }, [dispatch]);
 
   useEffect(() => {
     if (selectedReligionId) {
-      dispatch(getCommunity(`${getCommunityUrl}religionId=${selectedReligionId}`));
+      dispatch(
+        getCommunity(`${getCommunityUrl}religionId=${selectedReligionId}`),
+      );
     }
   }, [dispatch, selectedReligionId]);
   // Extract religion and community data from the API
@@ -94,6 +99,8 @@ const ReligionScreen = () => {
       });
     } catch (error) {
       console.log(error, 'error');
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.ADDRESS);
     }
   };
 
@@ -102,7 +109,9 @@ const ReligionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack />
+        <HeaderBack
+          onPress={() => navigateToLastScreen(navigation, ROUTES.BIRTH_DATE)}
+        />
 
         {/* Title */}
         <AppText text="Religion" textStyle={styles.title} />

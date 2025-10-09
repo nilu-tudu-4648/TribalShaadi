@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontWeight: '600',
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   headerCenter: {
     flex: 1,
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
   },
   connectionStatus: {
     fontSize: fontSize12,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     paddingTop: Size4,
   },
   headerSpacer: {
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize12,
     color: COLORS.black,
     textAlign: 'center',
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   messageContainer: {
     gap: Size5,
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: fontSize12,
     color: COLORS.textSecondary,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   receivedMessageBubble: {
     backgroundColor: COLORS.white,
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
   receivedMessageText: {
     fontSize: fontSize14,
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   sentMessageBubble: {
     backgroundColor: COLORS.recivedBackground,
@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
   sentMessageText: {
     fontSize: fontSize14,
     color: COLORS.white,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     lineHeight: 20,
   },
   inputContainer: {
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: fontSize14,
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     textAlignVertical: 'top',
     minHeight: Size20,
     maxHeight: fontSize14 * 1.4 * 4, // Approximately 4 lines
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
   dateHeaderText: {
     fontSize: fontSize12,
     color: COLORS.textSecondary,
-    fontFamily: FONT_FAMILY.OPEN_SANS_MEDIUM,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_MEDIUM,
     textAlign: 'center',
   },
 });

@@ -34,6 +34,7 @@ import {
   getOccupationUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
+  navigateToLastScreen,
   setReducerLoadingfalse,
   updateUrl,
 } from '../constants/functions';
@@ -44,6 +45,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
 import AppSafeView from '../components/AppSafeView';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 const QualificationScreen = () => {
   const [selectedQualification, setSelectedQualification] = useState<any>(null);
@@ -74,9 +77,10 @@ const QualificationScreen = () => {
     employmentTypes,
     occupationsByEmploymentType,
   } = useSelector((state: any) => state.entities.authReducer);
-      const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
   const incomeList = income || [];
-    useEffect(() => {
+  useEffect(() => {
     dispatch(getEducationTypes(getEducationUrl));
     dispatch(getEmploymentTypes(getEmploymentTypeUrl));
     dispatch(getOccupation(getOccupationUrl));
@@ -160,7 +164,7 @@ const QualificationScreen = () => {
       const isWorking = selectedWorkExperience?.name !== 'Not Working';
       const requestBody = {
         id: user.id,
-        educationTypeId:selectedQualification.educationTypeId,
+        educationTypeId: selectedQualification.educationTypeId,
         educationId: selectedQualification.id,
         college_name: collegeName,
         employmentTypeId: selectedWorkExperience.id,
@@ -178,6 +182,7 @@ const QualificationScreen = () => {
       console.error('Error submitting qualification:', error);
     } finally {
       setLoading(false);
+      navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES);
     }
   };
 
@@ -198,7 +203,7 @@ const QualificationScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <HeaderBack />
+          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ADDRESS)} />
           {/* Title */}
           <AppText text="Your highest qualification" textStyle={styles.title} />
 

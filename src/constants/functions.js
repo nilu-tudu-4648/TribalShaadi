@@ -161,7 +161,6 @@ export const formatChatDateHeader = timestamp => {
     return '';
   }
 };
-
 // Helper function to check if two timestamps are on different days
 export const isDifferentDay = (timestamp1, timestamp2) => {
   if (!timestamp1 || !timestamp2) return false;
@@ -279,7 +278,6 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     AppToast('OTP verified successfully');
     if (response.data.status === 200) {
       const user = response.data.recordList[0];
-      // Handle empty token by using user.id as fallback or generate a temporary token
       const userWithToken = {
         ...user,
         token: user.token || `temp_token_${user.id}_${Date.now()}`,
@@ -304,9 +302,9 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
       await delay(500);
       try {
         const authResult = await checkAuth(dispatch);
+        console.log(authResult, 'authResult');
         // If profile is complete but checkAuth didn't navigate, navigate to main tabs
         if (authResult === true) {
-          dispatch(setUserRegistrationCompleted(true));
           console.log(
             'Navigating to main tabs after successful OTP verification',
           );
@@ -314,10 +312,7 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
         }
       } catch (navError) {
         console.error('Error during post-OTP navigation:', navError);
-        // Fallback: at least set registration completed so app state is updated
-        dispatch(setUserRegistrationCompleted(true));
       }
-
       return true;
     } else {
       return false;
@@ -334,7 +329,6 @@ export const getUserDetailsApi = async (
 ) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    console.log(token, 'token');
     if (!token || token === 'null' || token === 'undefined') {
       console.log('No valid token found for getUserDetailsApi');
 
@@ -465,16 +459,11 @@ export const getUserDetailsApi = async (
 };
 export const checkAuth = async dispatch => {
   try {
-    // Add delay to prevent race conditions
     await delay(200);
 
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
-    // If no user data, let checkUserLoggedIn handle it
-    if (
-      !userDataString ||
-      userDataString === 'null' ||
-      userDataString === 'undefined'
-    ) {
+
+    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
       console.log('No user data found in storage - checkAuth (skipping)');
       return false;
     }
@@ -482,96 +471,42 @@ export const checkAuth = async dispatch => {
     let user;
     try {
       user = JSON.parse(userDataString);
-    } catch (parseError) {
-      console.error('Error parsing user data in checkAuth:', parseError);
-      // Clear corrupted data and let checkUserLoggedIn handle navigation
-      try {
-        await AsyncStorage.multiRemove([
-          ASYNC_VARIBLES.USER,
-          ASYNC_VARIBLES.USER_TOKEN,
-        ]);
-      } catch (clearError) {
-        console.error(
-          'Error clearing corrupted data in checkAuth:',
-          clearError,
-        );
-      }
+    } catch {
+      await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
       return false;
     }
-
-    // If no user object, let checkUserLoggedIn handle it
-    if (!user || typeof user !== 'object' || !user.id) {
-      console.log('User object is invalid - checkAuth (skipping)');
-      return false;
-    }
-
-    console.log('checkAuth - User profile check:', user);
-
-    // Check profile completion steps in order with safe navigation
+    console.log(user, 'user in checkAuth');
+    // Last screen check
     try {
-      for (const step of PROFILE_COMPLETION_STEPS) {
-        const fieldValue = user[step.field];
-
-        // Check if field is missing, null, undefined, or empty string
-        if (
-          !fieldValue ||
-          (typeof fieldValue === 'string' && fieldValue.trim() === '') ||
-          (Array.isArray(fieldValue) && fieldValue.length === 0)
-        ) {
-          try {
-            if (step.screen === ROUTES.SELECT_INTERESTS) {
-              const allImagesUploaded = await AsyncStorage.getItem(
-                ASYNC_VARIBLES.ALL_IMAGES_UPLOADED,
-              );
-              if (allImagesUploaded === 'true') {
-                navigate(step.screen);
-              } else {
-                navigate(ROUTES.UPLOAD_IMAGE);
-              }
-            } else {
-              navigate(step.screen);
-            }
-          } catch (navError) {
-            console.error('Error navigating in checkAuth:', navError);
-          }
+      if (user.intrests) {
+        dispatch(setUserRegistrationCompleted(true));
+        return true; 
+      }
+      if (typeof getLastScreenName === 'function') {
+        const lastScreenName = await getLastScreenName();
+        if (lastScreenName && lastScreenName !== 'null') {
+          console.log(lastScreenName, 'lastScreenName');
+          navigate(lastScreenName);
           return false;
         }
-      }
-    } catch (profileCheckError) {
-      console.error('Error in profile completion check:', profileCheckError);
-      return false;
-    }
 
-    // If we reach here, profile is complete
-    // console.log('Profile is complete, setting registration completed');
-
-    // Safe check for interests and set registration completed
-    try {
-      if (
-        user.intrests &&
-        Array.isArray(user.intrests) &&
-        user.intrests.length > 0
-      ) {
-        if (typeof dispatch === 'function') {
-          dispatch(setUserRegistrationCompleted(true));
+        for (const step of PROFILE_COMPLETION_STEPS) {
+          if (!user[step.field]) {
+            console.log(step.screen, 'step.screen');
+            navigate(step.screen);
+            return false;
+          }
         }
       } else {
-        // Even if interests are missing, if all other profile steps are complete,
-        // we should still mark registration as completed
-        if (typeof dispatch === 'function') {
-          dispatch(setUserRegistrationCompleted(true));
-        }
+        console.log('getLastScreenName not defined');
+        return false;
       }
-    } catch (interestError) {
-      console.error(
-        'Error setting user registration completed:',
-        interestError,
-      );
+    } catch (err) {
+      console.error('Error in getLastScreenName:', err);
+      return false;
     }
-
-    return true;
   } catch (error) {
-    console.error('Error in checkAuth:', error);
+    console.error('Error in checkAuth:', error?.message, error?.stack);
     return false;
   }
 };
@@ -593,9 +528,6 @@ export const logoutUser = async dispatch => {
     } catch (fcmError) {
       console.error('Error refreshing FCM token after logout:', fcmError);
     }
-
-    // navigate(ROUTES.WELCOME);
-    // RNRestart.restart(); // Removed - using FCM token refresh instead
   } catch (error) {
     console.log(error);
   }
@@ -972,5 +904,30 @@ export const onAppForeground = async dispatch => {
     });
   } catch (error) {
     console.error('onAppForeground error:', error);
+  }
+};
+
+export const savedLastScreenName = async (screenName) => {
+try {
+  await AsyncStorage.setItem(ASYNC_VARIBLES.LAST_SCREEN_NAME, screenName);
+} catch (error) {
+  console.error('savedLastScreenName error:', error);
+}
+};
+
+export const getLastScreenName = async () => {
+  try {
+    return await AsyncStorage.getItem(ASYNC_VARIBLES.LAST_SCREEN_NAME);
+  } catch (error) {
+    console.error('getLastScreenName error:', error);
+    return null;
+  }
+};
+export const navigateToLastScreen = async (navigation,ROUTES) => {
+  try {
+    navigation.navigate(ROUTES);
+    savedLastScreenName(ROUTES);
+  } catch (error) {
+    console.error('navigateToLastScreen error:', error);
   }
 };

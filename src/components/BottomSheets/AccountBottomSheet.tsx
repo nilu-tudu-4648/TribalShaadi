@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize20,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
     paddingBottom: Size12,
   },

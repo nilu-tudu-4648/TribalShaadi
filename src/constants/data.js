@@ -13,6 +13,7 @@ export const ASYNC_VARIBLES = {
   FCM_TOKEN: 'fcmToken',
   LAST_MESSAGE: 'lastMessage',
   ALL_IMAGES_UPLOADED: 'allImagesUploaded',
+  LAST_SCREEN_NAME: 'lastScreenName',
 };
 // Routes
 export const ROUTES = {
@@ -95,7 +96,7 @@ export const DRINKING_OPTIONS = [
   'Teetotaler',
 ];
 
-export const SMOKING_OPTIONS = ['No', 'Yes'];
+export const SMOKING_OPTIONS = ['No', 'Yes','Planning to quit'];
 
 export const SETTLING_DOWN_OPTIONS = [
   'Any',

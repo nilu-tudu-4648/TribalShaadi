@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, FlatList, Pressable } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -23,18 +23,28 @@ import { useNavigation } from '@react-navigation/native';
 import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  baseUrl,
+  delay,
   getAcceptedProposalByIdUrl,
+  getGalleryImageListUrl,
+  getPackageByUserIdUrl,
+  getSelectedUserUrl,
   imageUrl,
   updateProposalIsNewApi,
   updateProposalIsNewUrl,
 } from '../constants/functions';
 
-import {
-  getAcceptedProposalByIdApi,
-} from '../store/reducers/chatReducer';
+import { getAcceptedProposalByIdApi } from '../store/reducers/chatReducer';
 import AppChip2 from '../components/chips/AppChip2';
 import Loader from '../components/loader/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileBottomSheet from '../components/BottomSheets/ProfileBottomSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
+import {
+  getCurrentMatchedUserGalleryImageListApi,
+  getSelectedUserApi,
+  getSelectedUserPackageApi,
+} from '../store/reducers/userReducer';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -44,7 +54,44 @@ const ChatScreen = () => {
   );
   // console.log(acceptedProposalById, 'acceptedProposalById');
   const [lastMessage, setLastMessage] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const profileBottomSheetRef = useRef<BottomSheet>(null);
+  const { packageByUserId } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
+  const handleCardPress = async (id: string) => {
+    try {
+      setIsLoading(true);
+      dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
+      dispatch(
+        getSelectedUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
+          userId: id,
+        }),
+      );
+      dispatch(
+        getCurrentMatchedUserGalleryImageListApi(
+          `${baseUrl}/${getGalleryImageListUrl}`,
+          {
+            userId: id,
+          },
+        ),
+      );
+      await delay();
+      profileBottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
+    } catch (error) {
+      console.log(error, 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      profileBottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   const acceptFriendRequest = async (item: any) => {
     try {
       if (item.isNewStatus === 1) {
@@ -140,17 +187,18 @@ const ChatScreen = () => {
       : new Date(item.friendsSince);
 
     return (
-      <Pressable
-        key={item.id}
-        style={styles.conversationItem}
-        onPress={() => acceptFriendRequest(item)}
-      >
-        <Image
-          source={{ uri: imageUrl + item.image }}
-          style={styles.profileImage}
-          resizeMode="cover"
-        />
-        <View style={styles.conversationContent}>
+      <View key={item.id} style={styles.conversationItem}>
+        <Pressable onPress={() => handleCardPress(item.friendId)}>
+          <Image
+            source={{ uri: imageUrl + item.image }}
+            style={styles.profileImage}
+            resizeMode="cover"
+          />
+        </Pressable>
+        <Pressable
+          onPress={() => acceptFriendRequest(item)}
+          style={styles.conversationContent}
+        >
           <AppText
             text={`${item.firstName} ${item.lastName ?? ''}`}
             textStyle={styles.userName}
@@ -167,7 +215,7 @@ const ChatScreen = () => {
             }
             textStyle={styles.messageText}
           />
-        </View>
+        </Pressable>
         {item.isNewStatus !== 1 ? (
           <View style={styles.timeContainer}>
             <AppText
@@ -197,7 +245,7 @@ const ChatScreen = () => {
             textStyle={styles.newButtonText}
           />
         )}
-      </Pressable>
+      </View>
     );
   };
 
@@ -233,6 +281,18 @@ const ChatScreen = () => {
           />
         </AppSafeView>
       )}
+      <ProfileBottomSheet
+        bottomSheetRef={profileBottomSheetRef}
+        isButtonVisible={false}
+        user={user}
+        currentUserPackage={packageByUserId}
+        report={false}
+      />
+      {isLoading && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
+        </View>
+      )}
     </>
   );
 };
@@ -251,7 +311,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize28,
     fontWeight: '800',
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_EXTRA_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BLACK,
   },
   conversationsSection: {
     flex: 1,
@@ -265,7 +325,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontWeight: '600',
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   conversationsList: {
     gap: Size12,
@@ -303,12 +363,12 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontWeight: '600',
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   messageText: {
     fontSize: fontSize14,
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   newButton: {
     backgroundColor: '#F7F3FF',
@@ -322,7 +382,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     color: COLORS.violet,
     fontWeight: '600',
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   timeContainer: {
     justifyContent: 'space-between',
@@ -341,5 +401,16 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: COLORS.borderLight4,
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });

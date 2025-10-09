@@ -21,10 +21,12 @@ import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import { useDispatch, useSelector } from 'react-redux';
 import { completeUserProfileV2Updated } from '../store/reducers/authReducer';
-import { getUserDetailsApi, setReducerLoadingfalse } from '../constants/functions';
+import { getUserDetailsApi, navigateToLastScreen, setReducerLoadingfalse } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import { updateUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 interface Question {
   id: string;
@@ -47,6 +49,7 @@ const question: Question = {
 const AboutPartnerScreen = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -79,13 +82,15 @@ const AboutPartnerScreen = () => {
       });
       } catch (error) {
       console.log('NETWORK ERROR:', error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} />
 
         {/* Question Title */}
         <AppText text={question.question} textStyle={styles.title} />

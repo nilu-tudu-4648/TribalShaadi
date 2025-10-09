@@ -4,6 +4,7 @@ import {
   ImageBackground,
   ScrollView,
   Image,
+  Pressable,
 } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -42,6 +43,7 @@ import {
 import AppChip from '../AppChip';
 import FONT_FAMILY from '../../constants/Fonts';
 import NameComponent from '../NameComponent';
+import { ReportIcon } from '../svg/SvgIcons2';
 
 export interface ProfileCardProps {
   name: string;
@@ -74,6 +76,7 @@ export interface ProfileCardProps {
   isVerified: boolean;
   isPremium: boolean;
   isNameLoading?: boolean;
+  openReport: () => void;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -106,6 +109,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isVerified,
   isPremium,
   isNameLoading = false,
+  openReport,
 }) => {
   return (
     <ScrollView
@@ -313,6 +317,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             />
           ))}
         </View>
+        <Pressable
+                onPress={openReport}
+                style={styles.reportButtonContainer}
+              >
+                <ReportIcon />
+                <AppText text="Report" textStyle={styles.reportButtonText} />
+              </Pressable>
       </View>
     </ScrollView>
   );
@@ -420,7 +431,7 @@ const styles = StyleSheet.create({
   value: {
     fontWeight: 'bold',
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   label: {
     color: COLORS.textGrey,
@@ -494,5 +505,16 @@ const styles = StyleSheet.create({
     borderColor: COLORS.borderBottom2,
     borderWidth: 1,
     borderRadius: Size8,
+  },
+  reportButtonContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SIZES.base,
+  },
+  reportButtonText: {
+    color: COLORS.red,
+    fontSize: SIZES.font,
+    fontWeight: 'bold',
   },
 });

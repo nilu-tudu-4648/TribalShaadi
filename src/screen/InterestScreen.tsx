@@ -6,7 +6,13 @@ import {
   Image,
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { fontSize14, fontSize16, SIZES } from '../constants/Sizes';
+import {
+  fontSize14,
+  fontSize16,
+  fontSize28,
+  Size16,
+  SIZES,
+} from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import { INTEREST_TABS, ROUTES } from '../constants/data';
@@ -42,6 +48,7 @@ import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
 import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 import Loader from '../components/loader/Loader';
+import FONT_FAMILY from '../constants/Fonts';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
@@ -156,14 +163,11 @@ const InterestScreen = () => {
       setIsLoading(false);
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(
-        insertUserNotificationsApi(
-          `${baseUrl}/${insertUserNotificationsUrl}`,
-          {
-            title: 'testing',
-            message: 'new message',
-            receiverUserId: user.id,
-          },
-        ),
+        insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+          title: 'testing',
+          message: 'new message',
+          receiverUserId: user.id,
+        }),
       );
     }
   };
@@ -171,8 +175,10 @@ const InterestScreen = () => {
   return (
     <>
       <AppSafeView style={styles.container}>
-        <AppText text="Interests" textStyle={styles.title} />
-        <View style={styles.tabsContainer}>
+          <View style={styles.header}>
+            <AppText text="Interests" textStyle={styles.headerTitle} />
+          </View>
+         <View style={styles.tabsContainer}>
           {INTEREST_TABS.map((tab, idx) => (
             <TouchableOpacity
               key={tab.label}
@@ -240,9 +246,6 @@ const InterestScreen = () => {
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.gridContainer}
             showsVerticalScrollIndicator={false}
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
           />
         )}
         {selectedTab === 2 && (
@@ -269,9 +272,6 @@ const InterestScreen = () => {
                 />
               </View>
             }
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
           />
         )}
         <ProfileBottomSheet
@@ -296,9 +296,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingTop: SIZES.base * 4, // Approximately 48
     paddingHorizontal: SIZES.padding2,
     gap: SIZES.padding,
+  },
+  header: {
+    paddingVertical: Size16,
+  },
+  headerTitle: {
+    fontSize: fontSize28,
+    fontWeight: '800',
+    color: COLORS.black,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BLACK,
   },
   title: {
     fontSize: SIZES.h1,

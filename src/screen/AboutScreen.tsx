@@ -24,9 +24,12 @@ import { completeUserProfileV2Updated } from '../store/reducers/authReducer';
 import {
   getUserDetailsApi,
   getUserDetailsUrl,
+  navigateToLastScreen,
   setReducerLoadingfalse,
   updateUrl,
 } from '../constants/functions';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 const AboutScreen = () => {
   const [aboutText, setAboutText] = useState('');
@@ -35,6 +38,7 @@ const AboutScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const MAX_WORDS = 35;
   // Count words in the text
   const getWordCount = (text: string) => {
@@ -65,6 +69,8 @@ const AboutScreen = () => {
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER);
     }
   };
 
@@ -72,14 +78,14 @@ const AboutScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <HeaderBack />
+          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES)} />
 
           {/* Title */}
           <AppText text="About Yourself" textStyle={styles.title} />

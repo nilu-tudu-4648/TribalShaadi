@@ -147,7 +147,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
           {religionOptions.map(option => (
             <AppChip2
               key={option.id}
-              title={option.name.charAt(0).toUpperCase() + option.name.slice(1).toLowerCase()}
+              title={option.name}
               isSelected={localSelectedReligion == option.id}
               onPress={() => {
                 setLocalSelectedReligionId(option.id);
@@ -188,13 +188,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize20,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     fontWeight: 'bold',
   },
   headerSubtitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textInactive,
     textAlign: 'center',
   },

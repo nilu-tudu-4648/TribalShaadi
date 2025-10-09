@@ -192,10 +192,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
             {maritalOptions?.map((option: any) => (
               <AppChip2
                 key={option.id}
-                title={
-                  option.name.charAt(0).toUpperCase() +
-                  option.name.slice(1).toLowerCase()
-                }
+                title={option.name}
                 isSelected={
                   Array.isArray(localSelectedStatuses) &&
                   localSelectedStatuses.includes(String(option.id))
@@ -239,12 +236,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize20,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.black,
   },
   headerSubtitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textInactive,
     textAlign: 'center',
   },
@@ -267,6 +264,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: COLORS.white,
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
   },
 });

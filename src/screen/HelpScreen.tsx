@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     gap: Sizes.Size16,
   },
   menuItemText: {
-    fontSize: Sizes.fontSize18,
+    fontSize: Sizes.fontSize16,
     color: COLORS.textPrimary,
     fontWeight: '500',
   },

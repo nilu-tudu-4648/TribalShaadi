@@ -26,13 +26,15 @@ import {
   convertCmToReadableHeight,
   getDietUrl,
   getHeightUrl,
+  navigateToLastScreen,
   setReducerLoadingfalse,
   updateUrl,
 } from '../constants/functions';
 import { getUserDetailsApi } from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
-import { DRINKING_OPTIONS, SMOKING_OPTIONS } from '../constants/data';
+import { DRINKING_OPTIONS, ROUTES, SMOKING_OPTIONS } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 const PhysicalAttributesScreen = () => {
   const [selectedHeight, setSelectedHeight] = useState('');
@@ -43,13 +45,12 @@ const PhysicalAttributesScreen = () => {
 
   const [showHeightPicker, setShowHeightPicker] = useState(false);
 
-
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const { user, loader, height, diet } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   // Diet options will come from the API
-
 
   useEffect(() => {
     dispatch(getHeight(getHeightUrl));
@@ -85,6 +86,7 @@ const PhysicalAttributesScreen = () => {
     } catch (error) {
       console.error('Error submitting physical attributes:', error);
     } finally {
+      navigateToLastScreen(navigation, ROUTES.ABOUT);
     }
   };
 
@@ -131,7 +133,9 @@ const PhysicalAttributesScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack />
+        <HeaderBack
+          onPress={() => navigateToLastScreen(navigation, ROUTES.QUALIFICATION)}
+        />
 
         {/* Title */}
         <AppText text="Height" textStyle={styles.title} />
@@ -206,16 +210,18 @@ const PhysicalAttributesScreen = () => {
                   ...h,
                   displayName: convertCmToReadableHeight(h.name),
                 }));
-                
+
                 // Filter out duplicates based on displayName, keeping the first occurrence
-                const deduplicatedHeights = processedHeights.filter((h: any) => {
-                  if (!uniqueHeights.has(h.displayName)) {
-                    uniqueHeights.set(h.displayName, true);
-                    return true;
-                  }
-                  return false;
-                });
-                
+                const deduplicatedHeights = processedHeights.filter(
+                  (h: any) => {
+                    if (!uniqueHeights.has(h.displayName)) {
+                      uniqueHeights.set(h.displayName, true);
+                      return true;
+                    }
+                    return false;
+                  },
+                );
+
                 return deduplicatedHeights;
               })()
             : []

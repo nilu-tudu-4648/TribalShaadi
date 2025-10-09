@@ -46,7 +46,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
           </View>
         </View>
       ) : (
-        <>
+        <View style={styles.nameMainContainer}>
           <View style={styles.nameContainer}>
             <AppText text={`${name}, ${age}`} textStyle={styles.name} />
             {isVerified && (
@@ -81,7 +81,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
               style={styles.aiVerifiedIcon}
             />
           )}
-        </>
+        </View>
       )}
     </View>
   );
@@ -95,6 +95,10 @@ const styles = StyleSheet.create({
     padding: SIZES.padding,
     gap: SIZES.base / 2,
     paddingBottom: SIZES.mediumTitle,
+  },
+  nameMainContainer: {
+    top: '10%',
+    gap: SIZES.base*.8,
   },
   name: {
     fontSize: fontSize24,
@@ -136,9 +140,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '50%',
+    width: '100%',
     height: Size25 * 1.2,
-    resizeMode: 'contain',
   },
   homeIconContainer: {
     flexDirection: 'row',

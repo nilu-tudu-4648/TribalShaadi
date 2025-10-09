@@ -30,10 +30,13 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   setReducerLoadingfalse,
+  navigateToLastScreen,
 } from '../constants/functions';
 import { getCities } from '../store/reducers/authReducer';
 import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
+import { useNavigation } from '@react-navigation/native';
+import { ROUTES } from '../constants/data';
 
 const AddressScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
@@ -50,7 +53,7 @@ const AddressScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
-
+  const navigation = useNavigation();
   useEffect(() => {
     dispatch(getStates(getStatesUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -134,6 +137,8 @@ const AddressScreen = () => {
       });
     } catch (error) {
       console.error('Error submitting address:', error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.QUALIFICATION);
     }
   }, [
     selectedState,
@@ -143,6 +148,7 @@ const AddressScreen = () => {
     selectedKids,
     user,
     dispatch,
+    navigation,
   ]);
 
   // Handle state selection and reset city when state changes
@@ -198,7 +204,7 @@ const AddressScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-         <HeaderBack />
+         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.RELIGION)} />
           {/* State Dropdown */}
           <AppDropdown
             label=""

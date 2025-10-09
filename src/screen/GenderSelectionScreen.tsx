@@ -26,6 +26,7 @@ import AppToast from '../components/AppToast';
 import {
   getUserDetailsApi,
   getUserDetailsUrl,
+  navigateToLastScreen,
   updateUrl,
 } from '../constants/functions';
 import { ROUTES } from '../constants/data';
@@ -60,6 +61,8 @@ const GenderSelectionScreen = () => {
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     } catch (error) {
       console.log(error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.NAME);
     }
   };
 

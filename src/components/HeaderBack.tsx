@@ -5,17 +5,17 @@ import {
   Size18,
   Size4,
 } from '../constants/Sizes';
-import { useNavigation } from '@react-navigation/native';
 import { ArrowIosBackSvg } from './svg/SvgIcons';
+import { useNavigation } from '@react-navigation/native';
 
 
-const HeaderBack = () => {
-    const navigation = useNavigation();
-  return (
-    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.container}>
+const HeaderBack = ({ onPress = () => {} }: { onPress?: () => void }) => {
+  const navigation = useNavigation();
+    return (
+      <TouchableOpacity onPress={onPress || navigation.goBack()} style={styles.container}>
         <ArrowIosBackSvg />
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
 };
 
 export default HeaderBack;

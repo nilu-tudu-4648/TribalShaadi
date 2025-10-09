@@ -150,12 +150,12 @@ const styles = StyleSheet.create({
   headerContainer: { alignItems: 'flex-start', gap: Size12 },
   headerTitle: {
     fontSize: fontSize18,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
   },
   headerSubtitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textInactive,
   },
   chipsContainer: {
@@ -173,6 +173,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: COLORS.white,
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
   },
 });

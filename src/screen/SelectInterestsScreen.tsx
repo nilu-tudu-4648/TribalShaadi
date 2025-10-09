@@ -23,7 +23,7 @@ import {
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateUrl } from '../constants/functions';
+import { navigateToLastScreen, updateUrl } from '../constants/functions';
 import { completeUserProfileV2Interests } from '../store/reducers/authReducer';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES, INTERESTS } from '../constants/data';
@@ -72,6 +72,8 @@ const SelectInterestsScreen = () => {
       dispatch(completeUserProfileV2Interests(updateUrl, requestBody));
     } catch (error) {
       console.log('error', error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.WELCOME_HOME);
     }
   };
 
@@ -79,7 +81,7 @@ const SelectInterestsScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
-        <HeaderBack />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE)} />
 
         <View style={styles.headerRow}>
           <AppText text="Select interests" textStyle={styles.title} />

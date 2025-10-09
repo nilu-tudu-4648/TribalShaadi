@@ -143,8 +143,7 @@ const PreferenceScreen = () => {
     if (selectedStatuses.length === 0) return 'Any';
     if (selectedStatuses.length <= 1) return selectedStatuses.join(', ');
     return `${
-      selectedStatuses.slice(0, 1).join(', ').charAt(0).toUpperCase() +
-      selectedStatuses.slice(0, 1).join(', ').slice(1)
+      selectedStatuses.slice(0, 1).join(', ')
     }...`;
   };
   const getAgeRangeValue = () => {
@@ -459,7 +458,7 @@ const styles = StyleSheet.create({
   header: {},
   headerTitle: {
     fontSize: fontSize22,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
   },
   resetButton: {
@@ -473,7 +472,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: COLORS.white,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     fontSize: fontSize14,
   },
   container: {
@@ -485,13 +484,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize18,
-    fontFamily: Fonts.OPEN_SANS_SEMI_CONDENSED_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     letterSpacing: 0.9,
   },
   sectionDescription: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.secondaryText,
   },
   cardContainer: {
@@ -521,17 +520,17 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textInactive,
     marginBottom: Size4,
   },
   cardValue: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
   },
   cardContent: {
-    width: '80%',
+    width: '85%',
   },
   secondaryTextStyle: {
     color: COLORS.secondaryText,

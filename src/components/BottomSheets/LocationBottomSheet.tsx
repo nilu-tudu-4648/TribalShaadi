@@ -365,11 +365,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
   },
   sectionTitle: {
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
   },
   infoBanner: {
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textBlack,
     flex: 1,
   },
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: '#1B222B',
     textAlign: 'center',
   },
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     gap: Size8,
   },
-  chipText: { fontSize: fontSize14, fontFamily: Fonts.OPEN_SANS_REGULAR },
+  chipText: { fontSize: fontSize14, fontFamily: Fonts.PRODUCT_SANS_REGULAR },
   applyButton: {
     backgroundColor: COLORS.black,
     paddingVertical: Size14,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: COLORS.white,
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
   },
   searchResultRow: {
     paddingVertical: Size14,
@@ -447,12 +447,12 @@ const styles = StyleSheet.create({
   },
   searchResultName: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textBlack,
   },
   searchResultType: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textGrey,
     backgroundColor: COLORS.lightgrey,
     paddingHorizontal: Size8,

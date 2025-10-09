@@ -256,13 +256,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fontSize20,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     fontWeight: 'bold',
   },
   headerSubtitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textInactive,
     textAlign: 'center',
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textBlack,
     left: Size14,
   },

@@ -52,7 +52,7 @@ const JustPayScreen = () => {
                 textAlign: 'center',
                 fontSize: fontSize14,
                 fontWeight: '400',
-                fontFamily: FONT_FAMILY.OPEN_SANS_REGULAR,
+                fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
               },
             ]}
           />
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
   },
   image: {

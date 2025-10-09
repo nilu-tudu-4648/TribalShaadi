@@ -20,14 +20,22 @@ import AppButton from '../components/AppButton';
 import { completeUserProfileV2Updated } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import { getUserDetailsApi, setReducerLoadingfalse, updateUrl } from '../constants/functions';
+import {
+  getUserDetailsApi,
+  navigateToLastScreen,
+  setReducerLoadingfalse,
+  updateUrl,
+} from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppText from '../components/AppText';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 
 const NameScreen = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -45,7 +53,13 @@ const NameScreen = () => {
 
   useEffect(() => {
     // Validate email on change
-    setIsValidEmail(emailRegex.test(email));
+    // If email field is empty (showing placeholder or existing email), consider it valid
+    if (email.trim() === '') {
+      setIsValidEmail(true);
+    } else {
+      // If user is typing, validate the new email
+      setIsValidEmail(emailRegex.test(email));
+    }
   }, [email, emailRegex]);
   // Function to check if name contains only letters and spaces
   const isValidName = (name: string) => {
@@ -88,25 +102,29 @@ const NameScreen = () => {
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.BIRTH_DATE);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <HeaderBack />
+          <HeaderBack
+            onPress={() => navigateToLastScreen(navigation, ROUTES.GENDER)}
+          />
           <AppText text="Name & Email" textStyle={styles.title} />
           {/* Text Input */}
           <AppTextInput
             placeholder="Full Name"
             placeholderTextColor={COLORS.placeholderText}
-            value={fullName}
+            value={fullName || user.firstName + ' ' + user.lastName}
             onChangeText={validateAndSetName}
             keyboardType="default"
             textInputStyle={styles.textInput}
@@ -115,7 +133,7 @@ const NameScreen = () => {
           <AppTextInput
             placeholder="Email"
             placeholderTextColor={COLORS.placeholderText}
-            value={email}
+            value={email || user.email}
             onChangeText={setEmail}
             keyboardType="default"
             textInputStyle={styles.textInput}
@@ -131,16 +149,16 @@ const NameScreen = () => {
             title="Confirm"
             onPress={handleConfirm}
             isLoading={loader}
-            isButtonDisabled={!fullName.trim() || loader}
+            isButtonDisabled={!isValidEmail || loader}
             buttonStyle={[
               styles.button,
-              !fullName.trim() || !isValidEmail || loader
+              !isValidEmail || loader
                 ? styles.buttonDisabled
                 : styles.buttonEnabled,
             ]}
             textStyle={[
               styles.buttonText,
-              !fullName.trim() || !isValidEmail || loader
+              !isValidEmail || loader
                 ? styles.buttonTextDisabled
                 : styles.buttonTextEnabled,
             ]}

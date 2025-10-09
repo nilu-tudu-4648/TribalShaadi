@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
   },
   bottomContainer: {
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   pricingDuration: {
     fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   pricingSubtext: {
     fontSize: fontSize14,
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
   },
   pricingPrice: {
     fontSize: fontSize18,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.violet,
   },
   badgeContainer: {
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: fontSize12,
     color: COLORS.white,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   buttonContainer: {
     paddingVertical: Size12,
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: fontSize18,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   disclaimerText: {
     textAlign: 'center',
@@ -624,13 +624,13 @@ const styles = StyleSheet.create({
   },
   offerTitle: {
     fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     textAlign: 'center',
   },
   offerSubTitle: {
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     textAlign: 'center',
   },
@@ -646,13 +646,13 @@ const styles = StyleSheet.create({
   },
   offerContainerText: {
     fontSize: fontSize12,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
     textAlign: 'center',
   },
   offerTitleWhite: {
     fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     textAlign: 'center',
     fontStyle: 'italic',
     fontWeight: 'bold',
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   },
   offerPriceWhite: {
     fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.OPEN_SANS_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     textAlign: 'center',
     color: COLORS.white,
   },

@@ -120,14 +120,14 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     fontWeight: '700',
     color: COLORS.black,
     lineHeight: 22,
   },
   answerText: {
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     fontWeight: '400',
     color: COLORS.textSecondary,
     lineHeight: 20,

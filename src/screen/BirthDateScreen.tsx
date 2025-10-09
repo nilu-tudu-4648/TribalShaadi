@@ -32,10 +32,13 @@ import { CalendarIcon } from '../components/svg/SvgIcons';
 import {
   getUserDetailsApi,
   getUserDetailsUrl,
+  navigateToLastScreen,
   setReducerLoadingfalse,
   updateUrl,
 } from '../constants/functions';
 import AppText from '../components/AppText';
+import { ROUTES } from '../constants/data';
+import { useNavigation } from '@react-navigation/native';
 const BirthDateScreen = () => {
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -44,7 +47,7 @@ const BirthDateScreen = () => {
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
-
+  const navigation = useNavigation();
   // Function to calculate age and validate if user is 18+
   const validateAge = (selectedDate: Date) => {
     const today = new Date();
@@ -100,13 +103,15 @@ const BirthDateScreen = () => {
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      navigateToLastScreen(navigation, ROUTES.RELIGION);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)} />
         <AppText text="Add your date of birth" textStyle={styles.title} />
 
         <AppText
@@ -123,7 +128,7 @@ const BirthDateScreen = () => {
             text={dateOfBirth.toLocaleDateString('en-GB', {
               day: '2-digit',
               month: '2-digit',
-              year: 'numeric'
+              year: 'numeric',
             })}
             textStyle={styles.dateInput}
           />

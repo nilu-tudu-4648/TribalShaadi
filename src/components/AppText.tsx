@@ -45,10 +45,10 @@ const styles = StyleSheet.create({
   text: {
     fontSize: fontSize16,
     color: COLORS.black,
-    // Use system fonts as fallback for production safety
-    fontFamily: Platform.OS === 'ios' 
-      ? FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD || 'System' 
-      : FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD || 'sans-serif',
+    // Use Product Sans everywhere with system fallback
+    fontFamily: Platform.OS === 'ios'
+      ? FONT_FAMILY.PRODUCT_SANS_MEDIUM || 'System'
+      : FONT_FAMILY.PRODUCT_SANS_MEDIUM || 'sans-serif',
     fontWeight: '600',
     letterSpacing: 0.6,
   },

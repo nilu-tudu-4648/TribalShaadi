@@ -355,13 +355,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize20,
     fontWeight: '700',
     color: COLORS.black,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   menuItemDescription: {
     fontSize: fontSize12,
     color: COLORS.textSecondary,
     lineHeight: fontSize18,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     fontWeight: '400',
   },
   arrowContainer: {

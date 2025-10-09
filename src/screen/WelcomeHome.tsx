@@ -21,7 +21,9 @@ import {
 } from '../constants/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserDetailsApi, getUserDetailsUrl } from '../constants/functions';
+import { getUserDetailsApi, getUserDetailsUrl, savedLastScreenName } from '../constants/functions';
+import { setUserRegistrationCompleted } from '../store/reducers/userReducer';
+import { ROUTES } from '../constants/data';
 
 const WelcomeHome = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
@@ -35,6 +37,8 @@ const WelcomeHome = () => {
       console.log(error, 'error');
     } finally {
       setIsLoading(false);
+      dispatch(setUserRegistrationCompleted(true));
+      savedLastScreenName(ROUTES.MAIN_TABS);
     }
   };
   return (

@@ -37,11 +37,7 @@ interface JobTypeBottomSheetProps {
 
 // Backdrop component definition outside render
 const renderBackdrop = (props: any) => (
-  <BottomSheetBackdrop
-    {...props}
-    appearsOnIndex={0}
-    disappearsOnIndex={-1}
-  />
+  <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} />
 );
 
 const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
@@ -49,18 +45,17 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   jobTypeOptions,
 }) => {
   const snapPoints = ['50%'];
-  const [localSelected, setLocalSelected] =
-    useState<string[]>();
+  const [localSelected, setLocalSelected] = useState<string[]>();
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   useEffect(() => {
     if (user.pOccupationId) {
       // Find the "Any" option
-      const anyOption = jobTypeOptions?.find(option => 
-        option.name.toLowerCase() === 'any'
+      const anyOption = jobTypeOptions?.find(
+        option => option.name.toLowerCase() === 'any',
       );
       const anyOptionId = anyOption ? String(anyOption.id) : null;
-      
+
       if (Array.isArray(user.pOccupationId)) {
         setLocalSelected(user.pOccupationId.map(String));
       } else if (typeof user.pOccupationId === 'string') {
@@ -80,15 +75,15 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const handleToggle = (jobType: string) => {
     // Ensure localSelected is always an array
     const currentSelected = Array.isArray(localSelected) ? localSelected : [];
-    
+
     // Find the "Any" option
-    const anyOption = jobTypeOptions?.find(option => 
-      option.name.toLowerCase() === 'any'
+    const anyOption = jobTypeOptions?.find(
+      option => option.name.toLowerCase() === 'any',
     );
     const anyOptionId = anyOption ? String(anyOption.id) : null;
-    
+
     let updated: string[];
-    
+
     if (currentSelected.includes(jobType)) {
       // If clicking on already selected item, remove it
       updated = currentSelected.filter(j => j !== jobType);
@@ -111,11 +106,11 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
   const handleApply = async () => {
     try {
       // Find the "Any" option
-      const anyOption = jobTypeOptions?.find(option => 
-        option.name.toLowerCase() === 'any'
+      const anyOption = jobTypeOptions?.find(
+        option => option.name.toLowerCase() === 'any',
       );
       const anyOptionId = anyOption ? String(anyOption.id) : null;
-      
+
       // Check if "Any" is selected and convert it to "any" string
       let pOccupationIdString;
       if (anyOptionId && localSelected?.includes(anyOptionId)) {
@@ -171,10 +166,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
           {jobTypeOptions.map((option: any) => (
             <AppChip2
               key={option.id}
-              title={
-                option.name.charAt(0).toUpperCase() +
-                option.name.slice(1).toLowerCase()
-              }
+              title={option.name}
               isSelected={localSelected?.includes(String(option.id))}
               onPress={() => handleToggle(String(option.id))}
             />
@@ -203,12 +195,12 @@ const styles = StyleSheet.create({
   headerContainer: { alignItems: 'flex-start', gap: Size12 },
   headerTitle: {
     fontSize: fontSize18,
-    fontFamily: Fonts.OPEN_SANS_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
     color: COLORS.textBlack,
   },
   headerSubtitle: {
     fontSize: fontSize14,
-    fontFamily: Fonts.OPEN_SANS_REGULAR,
+    fontFamily: Fonts.PRODUCT_SANS_REGULAR,
     color: COLORS.textInactive,
   },
   chipsContainer: {
@@ -226,6 +218,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: COLORS.white,
     fontSize: fontSize16,
-    fontFamily: Fonts.OPEN_SANS_SEMI_BOLD,
+    fontFamily: Fonts.PRODUCT_SANS_BOLD,
   },
 });

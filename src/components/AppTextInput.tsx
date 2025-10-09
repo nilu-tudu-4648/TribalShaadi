@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     paddingVertical: SIZES.base,
     borderBottomWidth: borderWidth,
     borderColor: COLORS.borderBottom,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_MEDIUM,
     fontWeight: '600',
     letterSpacing: 0.6,
   },

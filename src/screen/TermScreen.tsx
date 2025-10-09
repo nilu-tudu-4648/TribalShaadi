@@ -241,20 +241,20 @@ const styles = StyleSheet.create({
   },
   effectiveDate: {
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     fontWeight: '600',
     color: COLORS.black,
   },
   sectionTitle: {
     fontSize: fontSize16,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     fontWeight: '700',
     color: COLORS.black,
     lineHeight: 22,
   },
   sectionContent: {
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_REGULAR,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     fontWeight: '400',
     color: COLORS.black,
     lineHeight: 20,

@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   value: {
     fontWeight: 'bold',
     fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.OPEN_SANS_CONDENSED_SEMI_BOLD,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   label: {
     color: COLORS.textGrey,
