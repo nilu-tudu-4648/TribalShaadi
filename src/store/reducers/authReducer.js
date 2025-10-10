@@ -300,6 +300,15 @@ export const completeUserProfileV2Updated = (url, data) =>
     onSuccess: completeUserProfileV2UpdatedDataReceived.type,
     onError: authReducerDataRequestFailed.type,
   });
+export const completeUserProfileV2UpdatedwithoutLoader = (url, data) =>
+  apiCallBegan({
+    method: 'post',
+    url,
+    data,
+    onStart: authReducerDataRequestFailed.type,
+    onSuccess: completeUserProfileV2UpdatedDataReceived.type,
+    onError: authReducerDataRequestFailed.type,
+  });
 export const getHeight = url =>
   apiCallBegan({
     method: 'get',

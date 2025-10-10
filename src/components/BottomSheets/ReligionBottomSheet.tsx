@@ -26,7 +26,7 @@ import {
   getMatchedUsersUrl,
 } from '../../constants/functions';
 import {
-  completeUserProfileV2Updated,
+  completeUserProfileV2UpdatedwithoutLoader,
   getCommunity,
 } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
@@ -107,14 +107,14 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
         pReligionId: pReligionIdValue,
       };
       console.log('requestBody', requestBody);
-      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
-      setReducerLoadingfalse(dispatch, () => {
-        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-      });
+      dispatch(completeUserProfileV2UpdatedwithoutLoader(updateUrl, requestBody));
     } catch (error) {
       console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
       bottomSheetRef.current?.close();
     }
   };

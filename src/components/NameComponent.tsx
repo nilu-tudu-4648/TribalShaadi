@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   aiVerifiedIcon: {
     width: '100%',
     height: Size25 * 1.2,
+    resizeMode: 'contain',
   },
   homeIconContainer: {
     flexDirection: 'row',

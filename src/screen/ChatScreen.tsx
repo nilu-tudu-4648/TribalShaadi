@@ -15,6 +15,7 @@ import {
   Size25,
   Size10,
   Size4,
+  fontSize12,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
@@ -354,10 +355,8 @@ const styles = StyleSheet.create({
     borderRadius: Size25,
   },
   conversationContent: {
-    flex: 1,
-    justifyContent: 'center',
-    left: Size12,
     gap: Size4,
+    width:"75%",
   },
   userName: {
     fontSize: fontSize16,
@@ -391,7 +390,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     color: '#A0A0A0',
-    fontSize: fontSize14,
+    fontSize: fontSize12,
   },
   notificationChip: {
     position: 'absolute',

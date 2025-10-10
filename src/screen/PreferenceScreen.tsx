@@ -161,7 +161,7 @@ const PreferenceScreen = () => {
   const getReligionValue = () => {
     if (user.pReligionId) {
       return (
-        religion.find((item: any) => item.id == user.pReligionId[0])?.name ||
+        religion.find((item: any) => item.id == user.pReligionId)?.name ||
         'Any'
       );
     }
