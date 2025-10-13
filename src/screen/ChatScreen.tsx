@@ -353,10 +353,11 @@ const styles = StyleSheet.create({
     width: Size50,
     height: Size50,
     borderRadius: Size25,
+    right: Size10 * 0.5,
   },
   conversationContent: {
     gap: Size4,
-    width:"75%",
+    width: '75%',
   },
   userName: {
     fontSize: fontSize16,
@@ -368,6 +369,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
+    width: '95%',
   },
   newButton: {
     backgroundColor: '#F7F3FF',
@@ -376,6 +378,7 @@ const styles = StyleSheet.create({
     paddingVertical: Size8,
     borderWidth: 1,
     borderColor: COLORS.violet,
+    right: Size10 * 2,
   },
   newButtonText: {
     fontSize: fontSize14,

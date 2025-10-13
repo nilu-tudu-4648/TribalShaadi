@@ -46,18 +46,16 @@ const NameScreen = () => {
     const filteredText = text.replace(/[^a-zA-Z\s]/g, '');
     setFullName(filteredText);
   };
-  const [isValidEmail, setIsValidEmail] = useState(true);
+  const [isValidEmail, setIsValidEmail] = useState(false);
 
   // Email validation regex
   const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, []);
 
   useEffect(() => {
     // Validate email on change
-    // If email field is empty (showing placeholder or existing email), consider it valid
     if (email.trim() === '') {
-      setIsValidEmail(true);
+      setIsValidEmail(false);
     } else {
-      // If user is typing, validate the new email
       setIsValidEmail(emailRegex.test(email));
     }
   }, [email, emailRegex]);
@@ -80,6 +78,17 @@ const NameScreen = () => {
         return;
       }
 
+      // Validate email
+      if (!email.trim()) {
+        AppToast('Please enter your email address');
+        return;
+      }
+
+      if (!isValidEmail) {
+        AppToast('Please enter a valid email address');
+        return;
+      }
+
       // Split full name into firstName and lastName
       const nameParts = fullName.trim().split(' ');
       const firstName = nameParts[0] || '';
@@ -94,7 +103,7 @@ const NameScreen = () => {
         id: user.id,
         firstName: firstName,
         lastName: lastName,
-        email: email,
+        email: email.trim(),
       };
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
@@ -124,7 +133,7 @@ const NameScreen = () => {
           <AppTextInput
             placeholder="Full Name"
             placeholderTextColor={COLORS.placeholderText}
-            value={fullName || user.firstName + ' ' + user.lastName}
+            value={fullName}
             onChangeText={validateAndSetName}
             keyboardType="default"
             textInputStyle={styles.textInput}
@@ -133,13 +142,13 @@ const NameScreen = () => {
           <AppTextInput
             placeholder="Email"
             placeholderTextColor={COLORS.placeholderText}
-            value={email || user.email}
+            value={email}
             onChangeText={setEmail}
-            keyboardType="default"
+            keyboardType="email-address"
             textInputStyle={styles.textInput}
             style={styles.inputContainer}
           />
-          {!isValidEmail && (
+          {!isValidEmail && email.trim() !== '' && (
             <AppText
               text="Please enter a valid email address"
               textStyle={styles.errorText}

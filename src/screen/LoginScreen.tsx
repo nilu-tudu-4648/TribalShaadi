@@ -125,7 +125,7 @@ const LoginScreen: React.FC = () => {
               source={require('../assets/images/crossred.png')}
               style={styles.crossIcon}
             />
-            <AppText text='User not found. Please register first.'/>
+            <AppText text='User not found. Please register first.' textStyle={styles.alreadyExistsText} />
             <AppButton
               title="Register"
               loaderSize={Size22}
@@ -195,6 +195,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  alreadyExistsText: {
+    fontSize: fontSize14,
+    textAlign: 'center',
   },
   crossIcon: {
     width: Size20 * 2,

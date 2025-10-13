@@ -23,6 +23,7 @@ import {
   Size14,
   Size4,
   Size8,
+  Size40,
 } from '../constants/Sizes';
 import { CheckCircleIcon } from '../components/svg/SvgIcons2';
 import AppHeader from '../components/AppHeader';
@@ -503,7 +504,7 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: Size12,
-    paddingVertical: Size14,
+    paddingVertical: Size12,
     paddingHorizontal: Size12,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -513,6 +514,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
+    height: Size40*2,
+    overflow: 'hidden',
   },
   clickableCard: {
     borderWidth: borderWidth,
