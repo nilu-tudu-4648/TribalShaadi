@@ -20,7 +20,6 @@ import {
   sendProposalUrl,
   getReligionUrl,
   getMaritalStatusUrl,
-  getCommunityUrl,
   getHeightUrl,
   getDietUrl,
   getPassedUsersUrl,
@@ -48,7 +47,6 @@ import {
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
 import {
-  getCommunity,
   getDiet,
   getHeight,
   getMaritalStatus,
@@ -178,11 +176,6 @@ const HomeScreen = () => {
   };
   useEffect(() => {
     dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-    const id =
-      user?.pReligionId !== 'any' && user?.pReligionId?.[0]
-        ? user?.pReligionId?.[0]
-        : user?.religionId;
-    dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
     setHasRequestedMatches(true);
   }, [dispatch, user?.pReligionId, user?.religionId]);
 

@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Size12,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     color: COLORS.textBlack,
   },
   cardContent: {
-    width: '85%',
+    width: '90%',
   },
   secondaryTextStyle: {
     color: COLORS.secondaryText,

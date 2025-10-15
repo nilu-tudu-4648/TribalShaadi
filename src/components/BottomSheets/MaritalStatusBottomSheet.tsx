@@ -50,8 +50,8 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   setLocalSelectedStatuses,
 }) => {
   const snapPoints = ['30%', '30%'];
-  console.log('localSelectedStatuses', localSelectedStatuses);
-  console.log('maritalOptions', maritalOptions);
+  // console.log('localSelectedStatuses', localSelectedStatuses);
+  // console.log('maritalOptions', maritalOptions);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string | number) => {
@@ -251,9 +251,10 @@ const styles = StyleSheet.create({
     gap: Size12,
   },
   optionChip: {
-    minWidth: '30%',
+    height: 48,
     alignItems: 'center',
-    paddingHorizontal: Size12,
+    justifyContent: 'center',
+    paddingHorizontal: Size16,
   },
   applyButton: {
     backgroundColor: COLORS.black,

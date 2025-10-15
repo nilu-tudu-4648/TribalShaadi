@@ -26,7 +26,7 @@ import {
   getMatchedUsersUrl,
 } from '../../constants/functions';
 import {
-  completeUserProfileV2UpdatedwithoutLoader,
+  completeUserProfileV2Updated,
   getCommunity,
 } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
@@ -107,7 +107,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
         pReligionId: pReligionIdValue,
       };
       console.log('requestBody', requestBody);
-      dispatch(completeUserProfileV2UpdatedwithoutLoader(updateUrl, requestBody));
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     } catch (error) {
       console.log('error', error);
     } finally {

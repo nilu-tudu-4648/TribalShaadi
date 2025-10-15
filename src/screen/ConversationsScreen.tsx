@@ -342,19 +342,6 @@ const ConversationsScreen = () => {
       };
       await updateLastMessagePreview(userDetails.friendId, previewMessage);
       //this is for updating the unread chat history
-      const userStatus = await getUserStatus();
-      if (userStatus === 'online') {
-        dispatch(
-          insertUserNotificationsApi(
-            `${baseUrl}/${insertUserNotificationsUrl}`,
-            {
-              title: 'testing',
-              message: 'new message',
-              receiverUserId: userDetails.friendId,
-            },
-          ),
-        );
-      }
       // Scroll immediately after state update
       setTimeout(() => {
         scrollToBottom();
@@ -363,10 +350,8 @@ const ConversationsScreen = () => {
     [
       scrollToBottom,
       generateUniqueId,
-      dispatch,
       userDetails.friendId,
       updateLastMessagePreview,
-      getUserStatus,
     ],
   );
 
@@ -451,12 +436,13 @@ const ConversationsScreen = () => {
               hour12: true,
             }),
           });
+
         } else {
           console.log('⚠️ Message from unexpected user, ignoring');
         }
       });
 
-      socket.current.on('message_sent', ({ content }) => {
+      socket.current.on('message_sent', async ({ content }) => {
         console.log('✅ Message sent confirmation received for:', content);
         setChatData(currentChatData =>
           currentChatData.map(msg =>
@@ -465,6 +451,20 @@ const ConversationsScreen = () => {
               : msg,
           ),
         );
+        const userStatus = await getUserStatus();
+        console.log(userStatus, 'userStatus');
+        if (userStatus === 'online') {
+          dispatch(
+            insertUserNotificationsApi(
+              `${baseUrl}/${insertUserNotificationsUrl}`,
+              {
+                title: 'testing',
+                message: 'new message',
+                receiverUserId: userDetails.friendId,
+              },
+            ),
+          );
+        }
 
         scrollToBottom(); // Auto-scroll when message status updates
         // Update last message preview time to confirmed time
@@ -507,6 +507,8 @@ const ConversationsScreen = () => {
       scrollToBottom,
       generateUniqueId,
       updateLastMessagePreview,
+      dispatch,
+      getUserStatus,
       // loadChatMessages,
     ],
   );
