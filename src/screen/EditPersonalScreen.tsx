@@ -422,7 +422,7 @@ const EditPersonalScreen = () => {
 
       <AppPickerModal
         visible={showMotherTonguePicker}
-        items={MOTHER_TONGUE}
+        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
         selectedValue={selectedMotherTongue}
         onSelect={handleMotherTongueSelection}
         onClose={() => setShowMotherTonguePicker(false)}
@@ -432,7 +432,7 @@ const EditPersonalScreen = () => {
 
       <AppPickerModal
         visible={showLanguagePicker}
-        items={MOTHER_TONGUE}
+        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
         selectedValue={formData.motherTongue}
         onSelect={handleLanguageSelection}
         onClose={() => setShowLanguagePicker(false)}

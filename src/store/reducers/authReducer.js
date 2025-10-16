@@ -70,11 +70,11 @@ const authReducer = createSlice({
     },
     getReligionDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.religion = action.payload.recordList;
+      reducer.religion = action.payload.recordList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     },
     getCommunityDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.community = action.payload.recordList;
+      reducer.community = action.payload.recordList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));;
     },
     getStatesDataReceived: (reducer, action) => {
       reducer.loader = false;

@@ -84,21 +84,21 @@ const HelpScreen = () => {
       title: 'Call Support',
       icon: ChatBubbleIcon,
       iconColor: COLORS.violet,
-      onPress: () => Linking.openURL('tel:+91 92341 90205'),
+      onPress: () => Linking.openURL('tel:+91 72507 16171'),
     },
     {
       id: 'whatsapp',
       title: 'WhatsApp Support',
       icon: MessageIcon,
       iconColor: '#25D366',
-      onPress: () => Linking.openURL('https://wa.me/919234190205'),
+      onPress: () => Linking.openURL('https://wa.me/917250716171'),
     },
     {
       id: 'email',
       title: 'Email Support',
       icon: EmailIcon,
       iconColor: '#3B82F6',
-      onPress: () => Linking.openURL('mailto:dummy@tribalshaadi.com'),
+      onPress: () => Linking.openURL('mailto:support@tribalshaadi.ai'),
     },
   ];
 

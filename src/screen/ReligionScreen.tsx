@@ -201,7 +201,7 @@ const ReligionScreen = () => {
       <AppPickerModal
         visible={showMotherTonguePicker}
         title="Select Mother Tongue"
-        items={MOTHER_TONGUE}
+        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
         selectedValue={selectedMotherTongue}
         onSelect={handleMotherTongueSelection}
         onClose={() => setShowMotherTonguePicker(false)}
