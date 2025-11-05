@@ -27,6 +27,7 @@ import { updateUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 interface Question {
   id: string;
@@ -88,8 +89,8 @@ const AboutPartnerScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={globalStyles.container}>
+      <View style={globalStyles.content}>
         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} />
 
         {/* Question Title */}
@@ -142,16 +143,16 @@ const AboutPartnerScreen = () => {
           isLoading={loader}
           isButtonDisabled={!isAnswered || loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isAnswered
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isAnswered
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -223,27 +224,6 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
 });
 

@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  TouchableOpacity,
   Image,
   StyleSheet,
   SafeAreaView,
+  Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AppButton from '../components/AppButton';
 import { COLORS } from '../constants/AppColors';
 import {
-  fontSize18,
-  fontSize20,
   fontSize32,
   Size10,
   Size18,
   Size8,
-  Size2,
-  Size5,
   Size4,
+  fontSize14,
+  SIZES,
+  Size20,
 } from '../constants/Sizes';
 import { completeUserProfileV2Gender } from '../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,6 +30,7 @@ import {
 } from '../constants/functions';
 import { ROUTES } from '../constants/data';
 import AppText from '../components/AppText';
+import { globalStyles } from '../constants/globalStyles';
 const GenderSelectionScreen = () => {
   const { user, loader, userProfileGenderUpdated } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -70,49 +70,40 @@ const GenderSelectionScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={{ gap: Size4 }}>
-          <AppText text="I identify" textStyle={styles.title} />
-          <AppText text="myself as..." textStyle={styles.title} />
+          <AppText text="Tell us about you" textStyle={globalStyles.title} />
         </View>
+        <View style={{ gap: Size10 }}> 
+          <AppText text="Select your gender" textStyle={styles.subtitle} />
+         <View style={{ gap: Size20 }}> 
+          <Pressable
+            style={[
+              styles.genderOption,
+              selectedGender === 'male' && styles.selectedGender,
+            ]}
+            onPress={() => handleSelect('male')}
+          >
+            <AppText text="Male" textStyle={styles.genderText} />
+            <Image
+              source={require('../assets/images/Male.png')}
+              style={styles.genderImage}
+            />
+          </Pressable>
 
-        <TouchableOpacity
-          style={[
-            styles.genderOption,
-            styles.maleOption,
-            { opacity: selectedGender === 'male' ? 1 : 0.6 },
-          ]}
-          onPress={() => handleSelect('male')}
-        >
-          <Image
-            source={require('../assets/images/Male.png')}
-            style={styles.genderImage}
-          />
-          <AppText text="Male" textStyle={styles.genderText} />
-          {selectedGender === 'male' && (
-            <View style={styles.checkIconContainer}>
-              <AppText text="✓" textStyle={styles.checkIcon} />
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.genderOption,
-            styles.femaleOption,
-            { opacity: selectedGender === 'female' ? 1 : 0.6 },
-          ]}
-          onPress={() => handleSelect('female')}
-        >
-          <Image
-            source={require('../assets/images/Female.png')}
-            style={styles.genderImage}
-          />
-          <AppText text="Female" textStyle={styles.genderText} />
-          {selectedGender === 'female' && (
-            <View style={styles.checkIconContainer}>
-              <AppText text="✓" textStyle={styles.checkIcon} />
-            </View>
-          )}
-        </TouchableOpacity>
+          <Pressable
+            style={[
+              styles.genderOption,
+              selectedGender === 'female' && styles.selectedGender,
+            ]}
+            onPress={() => handleSelect('female')}
+          >
+            <AppText text="Female" textStyle={styles.genderText} />
+            <Image
+              source={require('../assets/images/Female.png')}
+              style={styles.genderImage}
+            />
+          </Pressable>
+          </View>
+        </View>
         <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} />
         <AppButton
           title="Continue"
@@ -120,16 +111,16 @@ const GenderSelectionScreen = () => {
           isLoading={loader}
           isButtonDisabled={!selectedGender || loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             selectedGender
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             selectedGender
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -149,78 +140,34 @@ const styles = StyleSheet.create({
     gap: Size18 * 2,
     paddingTop: Size18 * 2,
   },
-  title: {
-    fontSize: fontSize32,
-    fontWeight: 'bold',
+  subtitle: {
+    fontSize: fontSize14,
     color: COLORS.black,
-    textAlign: 'left',
-    lineHeight: fontSize32,
+    fontWeight: '400',
   },
   genderOption: {
-    alignSelf: 'center',
-    width: Size18 * 10,
-    height: Size18 * 10,
-    borderRadius: Size18 * 5,
+    flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    gap: Size10,
-  },
-  maleOption: {
-    backgroundColor: COLORS.maleOption,
-  },
-  femaleOption: {
-    backgroundColor: COLORS.femaleOption,
+    justifyContent: 'space-between',
+    paddingHorizontal: Size20,
+    paddingVertical: Size20,
+    borderWidth: 1,
+    borderRadius: Size8,
+    backgroundColor: COLORS.lightGrey,
   },
   genderImage: {
-    width: Size10 * 10,
-    height: Size10 * 10,
+    width: SIZES.width * 0.22,
+    height: SIZES.width * 0.22,
+    resizeMode: 'contain',
   },
   genderText: {
-    fontSize: fontSize20,
-    fontWeight: '600',
-    color: COLORS.black,
+    fontSize: fontSize32,
+    fontWeight: '400',
   },
-  continueButton: {
-    width: '100%',
-    borderRadius: Size8,
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.black,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.continueInactive,
-  },
-  continueButtonText: {
-    fontSize: fontSize18,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.textInactive,
-  },
-  checkIconContainer: {
-    position: 'absolute',
-    top: Size10,
-    right: Size10,
-    backgroundColor: COLORS.success,
-    borderRadius: Size10 * 1.5,
-    width: Size10 * 3,
-    height: Size10 * 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: Size2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: Size5,
-  },
-  checkIcon: {
-    color: COLORS.white,
-    fontSize: fontSize18,
-    fontWeight: 'bold',
+  selectedGender: {
+    borderColor: COLORS.violet,
+    backgroundColor: COLORS.lightViolet2,
   },
 });
 

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { View, SafeAreaView, StyleSheet, Image } from 'react-native';
 import {
   fontSize14,
-  fontSize16,
-  fontSize24,
   lignHeight24,
   Size8,
   Size10,
   lignHeight72,
   Size22,
   Size20,
+  fontSize36,
+  fontSize20,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
@@ -36,7 +36,7 @@ const RegisterScreen: React.FC = () => {
     isValid: false,
     message: '',
   });
-  const url =  'admin/users/sendLoginOTP'
+  const url = 'admin/users/sendLoginOTP';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -59,7 +59,7 @@ const RegisterScreen: React.FC = () => {
         contactNo: '+91' + validation.cleanedNumber,
       };
       console.log('requestBody', requestBody);
-      const response = await sendOTPForLogin(url, requestBody,setLoading);
+      const response = await sendOTPForLogin(url, requestBody, setLoading);
       console.log('response', response);
       if (response) {
         navigation.navigate('OTP', {
@@ -80,9 +80,9 @@ const RegisterScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.headerSection}>
-          <AppText text="Phone number" textStyle={styles.title} />
+          <AppText text="What’s your phone number?" textStyle={styles.title} />
           <AppText
-            text="It helps us verify and make tribalshaadi.ai a safe place to foster genuine connections"
+            text="A special experience might just be ‘calling‘ !"
             textStyle={styles.subtitle}
           />
         </View>
@@ -127,7 +127,7 @@ const RegisterScreen: React.FC = () => {
             <AppButton
               title="Log In"
               loaderSize={Size22}
-              onPress={()=>navigation.navigate('Login')}
+              onPress={() => navigation.navigate('Login')}
               isButtonDisabled={isButtonDisabled}
               buttonStyle={[
                 styles.button,
@@ -166,11 +166,16 @@ const styles = StyleSheet.create({
   },
   headerSection: { gap: Size8 },
   title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
+    fontSize: fontSize36,
+    fontWeight: '500',
     color: COLORS.black,
   },
-  subtitle: { fontSize: fontSize16, color: COLORS.grey },
+  subtitle: {
+    fontSize: fontSize20,
+    color: COLORS.greyText2,
+    fontWeight: '400',
+
+  },
   spacer: { flex: 1 },
   button: {
     borderRadius: lignHeight24,

@@ -17,10 +17,9 @@ import {
   Size18,
   Size8,
   fontSize12,
-  fontSize14,
   fontSize16,
-  borderWidth,
-  fontSize24,
+  Size4,
+  inputHeight,
 } from '../constants/Sizes';
 import AppButton from '../components/AppButton';
 import DateTimePicker from '@react-native-community/datetimepicker'; // DateTimePickerEvent,
@@ -39,10 +38,12 @@ import {
 import AppText from '../components/AppText';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 const BirthDateScreen = () => {
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [isAgeValid, setIsAgeValid] = useState(true); // Track if user meets 18+ requirement
+  const [isFocused, setIsFocused] = useState(false);
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -71,6 +72,7 @@ const BirthDateScreen = () => {
     const currentDate = selectedDate || dateOfBirth;
     setShowPicker(Platform.OS === 'ios');
     setDateOfBirth(currentDate);
+    setIsFocused(false);
 
     // Check if user is at least 18 years old
     const ageIsValid = validateAge(currentDate);
@@ -109,19 +111,25 @@ const BirthDateScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.container}>
       <View style={styles.content}>
         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)} />
-        <AppText text="Add your date of birth" textStyle={styles.title} />
+        <AppText text="Add your date of birth" textStyle={globalStyles.title} />
 
         <AppText
           text="This won't be shared but Human at heart. First let's start with birth date."
-          textStyle={styles.subtitle}
+          textStyle={globalStyles.subtitle}
         />
 
         <TouchableOpacity
-          style={styles.dateInputContainer}
-          onPress={() => setShowPicker(true)}
+          style={[
+            styles.dateInputContainer,
+            isFocused && styles.dateInputFocused,
+          ]}
+          onPress={() => {
+            setShowPicker(true);
+            setIsFocused(true);
+          }}
           activeOpacity={0.8}
         >
           <AppText
@@ -156,16 +164,16 @@ const BirthDateScreen = () => {
           isButtonDisabled={!dateOfBirth || !isAgeValid || loader}
           isLoading={loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             !dateOfBirth || !isAgeValid
-              ? styles.continueButtonInactive
-              : styles.continueButtonActive,
+              ? globalStyles.continueButtonInactive
+              : globalStyles.continueButtonActive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             !dateOfBirth || !isAgeValid
-              ? styles.continueButtonTextInactive
-              : styles.continueButtonTextActive,
+              ? globalStyles.continueButtonTextInactive
+              : globalStyles.continueButtonTextActive,
           ]}
         />
       </View>
@@ -184,7 +192,6 @@ const BirthDateScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.white },
   content: {
     flex: 1,
     paddingHorizontal: lignHeight24,
@@ -192,27 +199,24 @@ const styles = StyleSheet.create({
     gap: lignHeight20,
     paddingTop: lignHeight72,
   },
-  title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
-    color: COLORS.textBlack,
-  },
-  subtitle: {
-    fontSize: fontSize14,
-    color: COLORS.textGrey,
-    lineHeight: lignHeight20,
-  },
   dateInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: borderWidth,
-    borderBottomColor: COLORS.borderBottom,
+    borderWidth: 0.7,
+    borderColor: COLORS.greyText,
+    borderRadius: Size4,
+    paddingHorizontal: Size8,
+    height: inputHeight,
+  },
+  dateInputFocused: {
+    borderColor: COLORS.violet,
+    borderWidth: 1,
   },
   dateInput: {
     flex: 1,
+    textAlignVertical: 'center',
     fontSize: fontSize16,
     color: COLORS.textBlack,
-    paddingVertical: Size12,
   },
   calendarIcon: {
     padding: Size8,
@@ -234,27 +238,6 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     textAlign: 'left',
     lineHeight: Size16,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
   sheidImage: {
     width: Size18,

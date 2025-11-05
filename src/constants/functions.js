@@ -614,23 +614,6 @@ export const formatHeightInFeettoInches = totalInches => {
   const inches = totalInches % 12;
   return `${feet}ft ${inches}in`;
 };
-export const getCitiesByStateId = async stateId => {
-  try {
-    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-    const response = await axios.get(
-      `${baseUrl}/${getCitiesUrl}?stateId=${stateId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    return response.data.recordList;
-  } catch (error) {
-    console.log(error, 'getCitiesByStateId');
-    return [];
-  }
-};
 export const resetPreferenceApi = async (dispatch, func) => {
   const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
   const user = JSON.parse(userDataString);
@@ -687,7 +670,7 @@ export const getCitiesByStateIdV2 = async stateId => {
     );
     return response.data.recordList;
   } catch (error) {
-    console.log(error, 'getCitiesByStateId');
+    console.log(error, 'getCitiesByStateIdV2');
     return [];
   }
 };

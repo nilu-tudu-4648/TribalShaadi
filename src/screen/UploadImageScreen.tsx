@@ -16,13 +16,13 @@ import {
   Size8,
   Size12,
   Size16,
-  Size40,
   Size18,
   fontSize12,
   Size10,
   SIZES,
   Size20,
   lignHeight53,
+  Size14,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -35,7 +35,11 @@ import AppText from '../components/AppText';
 import GradientLoader from '../components/GradientLoader';
 import { CloseIcon } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserDetailsApi, navigateToLastScreen, uploadImage } from '../constants/functions';
+import {
+  getUserDetailsApi,
+  navigateToLastScreen,
+  uploadImage,
+} from '../constants/functions';
 import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import AlertBottomSheet from '../components/BottomSheets/AlertBottomSheet';
@@ -43,6 +47,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
 import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { globalStyles } from '../constants/globalStyles';
 
 const UploadImageScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
@@ -204,27 +209,13 @@ const UploadImageScreen = () => {
               </View>
             )}
           </ImageBackground>
-          {/* {index === 0 && (
-            <Image
-              source={require('../assets/images/imageBanner.png')}
-              style={styles.bannerOverlay}
-              resizeMode="contain"
-            />
-          )} */}
         </>
       ) : (
         <View style={styles.cameraIcon}>
           <Image
-            source={require('../assets/images/camera.png')}
+            source={require('../assets/images/plus.png')}
             style={styles.cameraIconImage}
           />
-          {/* {index === 0 && (
-            <Image
-              source={require('../assets/images/imageBanner.png')}
-              style={styles.bannerOverlay}
-              resizeMode="contain"
-            />
-          )} */}
           {uploadingIndex === index && (
             <View style={styles.uploadingOverlay}>
               <GradientLoader size={20} />
@@ -238,14 +229,19 @@ const UploadImageScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER)} />
+        <HeaderBack
+          onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER)}
+        />
 
         {/* Title Section */}
         <View style={styles.titleSection}>
-          <AppText text="Add your best photos" textStyle={styles.title} />
           <AppText
-            text="You can change photos later in Edit Profile"
-            textStyle={styles.subtitle}
+            text="Pick your best moments"
+            textStyle={globalStyles.title}
+          />
+          <AppText
+            text="Please upload a clear photo of your face, looking at the camera"
+            textStyle={globalStyles.subtitle}
           />
         </View>
 
@@ -263,14 +259,11 @@ const UploadImageScreen = () => {
             style={styles.sheidImage}
           />
           <View style={styles.descriptionTextContainer}>
-            <AppText useChildren textStyle={styles.descriptionText}>
-              {`Upload a clear photo of your face to enhance profile verification. This may also be needed for AI-powered selfie verification. `}
-              <AppText
-                text="Read Guidelines"
-                onPress={() => bottomSheetRef.current?.snapToIndex(0)}
-                textStyle={styles.boldText}
-              />
-            </AppText>
+            <AppText
+              text="Read Guidelines"
+              onPress={() => bottomSheetRef.current?.snapToIndex(0)}
+              textStyle={styles.boldText}
+            />
           </View>
         </View>
         {isAIViewing && (
@@ -300,16 +293,16 @@ const UploadImageScreen = () => {
           isLoading={loader}
           isButtonDisabled={isButtonDisabled}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isButtonDisabled
-              ? styles.continueButtonDisabled
-              : styles.continueButtonActive,
+              ? globalStyles.continueButtonInactive
+              : globalStyles.continueButtonActive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isButtonDisabled
-              ? styles.continueButtonTextDisabled
-              : styles.continueButtonTextActive,
+              ? globalStyles.continueButtonTextInactive
+              : globalStyles.continueButtonTextActive,
           ]}
         />
       </View>
@@ -348,13 +341,13 @@ const styles = StyleSheet.create({
   },
   imageGrid: {
     flexDirection: 'row',
-    gap: Size16,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   imageSlot: {
-    width: '30%',
-    height: SIZES.height * 0.14,
+    width: SIZES.width * 0.26,
+    height: SIZES.width * 0.26,
     borderRadius: Size12,
-    borderColor: COLORS.violet,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.lightGreyBackground,
@@ -364,7 +357,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   imageSlotEmpty: {
-    borderWidth: 1,
+    borderWidth: 0,
   },
   imageSlotUploading: {
     opacity: 0.5,
@@ -385,8 +378,6 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   cameraIcon: {
-    width: Size40,
-    height: Size40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -394,42 +385,21 @@ const styles = StyleSheet.create({
   spacer: {
     flex: 1,
   },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: COLORS.disabledBG,
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.black,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextDisabled: {
-    color: COLORS.grey,
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
   descriptionBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1E5FF',
     borderRadius: Size12,
-    padding: Size16,
     gap: Size8,
+    alignSelf: 'center',
   },
   sheidImage: {
-    width: Size18,
-    height: Size18,
+    width: Size14,
+    height: Size14,
     resizeMode: 'contain',
   },
   descriptionTextContainer: {
-    flex: 1,
+    // flex: 1,
+    // width: '100%',
   },
   descriptionText: {
     fontSize: fontSize12,
@@ -463,6 +433,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   boldText: {
+    fontSize: fontSize12,
     fontWeight: '600',
     color: COLORS.violet,
   },

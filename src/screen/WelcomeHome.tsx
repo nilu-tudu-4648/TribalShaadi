@@ -1,7 +1,6 @@
 import { StyleSheet, View, Image, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import AppButton from '../components/AppButton';
-import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import {
   screenHeight,
@@ -19,11 +18,15 @@ import {
   Size16,
   lignHeight32,
 } from '../constants/Sizes';
-import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserDetailsApi, getUserDetailsUrl, savedLastScreenName } from '../constants/functions';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  savedLastScreenName,
+} from '../constants/functions';
 import { setUserRegistrationCompleted } from '../store/reducers/userReducer';
 import { ROUTES } from '../constants/data';
+import { globalStyles } from '../constants/globalStyles';
 
 const WelcomeHome = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
@@ -42,55 +45,23 @@ const WelcomeHome = () => {
     }
   };
   return (
-    <LinearGradient
-      colors={[COLORS.white, '#F3EFFF', '#E9F0FF']}
-      style={styles.gradientBg}
-    >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={globalStyles.container}>
         <View style={styles.content}>
-          <View style={styles.titleContainer}>
-            <Image
-              source={require('../assets/images/premiumLogo.png')}
-              style={styles.welcomeImage}
-              resizeMode="contain"
-            />
-          </View>
+          <Image
+            source={require('../assets/images/welcome2.png')}
+            style={styles.welcomeImage}
+            resizeMode="contain"
+          />
 
-          <View style={styles.subtitleContainer}>
-            <AppText text="Designed to be" textStyle={styles.subtitleText} />
-            <AppText text="found, matched" textStyle={styles.subtitleText} />
-            <AppText text="by AI" textStyle={styles.subtitleText} />
-          </View>
-
-          <View style={styles.imageCardShadow}>
-            <View style={styles.imageWrapper}>
-              <Image
-                source={require('../assets/images/welcome.png')}
-                style={styles.welcomeImage}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <LinearGradient
-            colors={[COLORS.violet, COLORS.primaryBlue]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientButton}
-          >
-            <AppButton
-              isLoading={isLoading}
-              title="Continue"
-              onPress={getUserDetails}
-              buttonStyle={styles.continueButton}
-              textStyle={styles.continueButtonText}
-            />
-          </LinearGradient>
+          <AppButton
+            isLoading={isLoading}
+            title="Continue"
+            onPress={getUserDetails}
+            buttonStyle={globalStyles.continueButton}
+            textStyle={styles.continueButtonText}
+          />
         </View>
       </SafeAreaView>
-    </LinearGradient>
   );
 };
 
@@ -102,7 +73,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
@@ -180,8 +151,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   welcomeImage: {
-    width: screenWidth('50%'),
-    height: screenHeight('22%'),
+    width: screenWidth('100%'),
+    height: screenHeight('80%'),
   },
   buttonContainer: {
     width: '100%',
@@ -198,15 +169,12 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   continueButton: {
-    backgroundColor: 'transparent',
     paddingVertical: Size16,
     borderRadius: 100,
     width: '100%',
-    elevation: 0,
-    shadowColor: 'transparent',
   },
   continueButtonText: {
-    color: COLORS.white,
+    color: COLORS.violet,
     fontSize: fontSize20,
     fontWeight: '700',
     letterSpacing: 0.5,

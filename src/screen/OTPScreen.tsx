@@ -16,7 +16,8 @@ import {
   SIZES,
   fontSize14,
   Size10,
-  fontSize24,
+  fontSize36,
+  fontSize16,
 } from '../constants/Sizes';
 import { RootStackParamList } from '../../App';
 import HeaderBack from '../components/HeaderBack';
@@ -27,6 +28,7 @@ const OTPScreen = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [error, setError] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const route = useRoute<RouteProp<RootStackParamList, 'OTP'>>();
@@ -129,27 +131,38 @@ const OTPScreen = () => {
         />
 
         <View style={styles.otpContainer}>
-          {otp.map((digit, index) => (
-            <TextInput
-              key={index}
-              value={digit}
-              autoFocus={index === 0}
-              onChangeText={text => handleInputChange(text, index)}
-              onKeyPress={({ nativeEvent }) =>
-                handleKeyPress(nativeEvent.key, index)
-              }
-              keyboardType="numeric"
-              maxLength={1}
-              style={{
-                ...styles.otpInput,
-                borderColor: error ? COLORS.red : COLORS.borderColor,
-                borderWidth: error ? 1 : 0.5,
-              }}
-              ref={ref => {
-                inputRefs.current[index] = ref;
-              }}
-            />
-          ))}
+          {otp.map((digit, index) => {
+            const isFocused = focusedIndex === index;
+            const borderColor = error 
+              ? COLORS.red 
+              : isFocused 
+                ? COLORS.violet 
+                : COLORS.borderColor;
+            const borderWidth = error ? 1 : isFocused ? 1.5 : 0.5;
+
+            return (
+              <TextInput
+                key={index}
+                value={digit}
+                autoFocus={index === 0}
+                onChangeText={text => handleInputChange(text, index)}
+                onKeyPress={({ nativeEvent }) =>
+                  handleKeyPress(nativeEvent.key, index)
+                }
+                onFocus={() => setFocusedIndex(index)}
+                onBlur={() => setFocusedIndex(null)}
+                keyboardType="numeric"
+                maxLength={1}
+                style={[
+                  styles.otpInput,
+                  { borderColor, borderWidth },
+                ]}
+                ref={ref => {
+                  inputRefs.current[index] = ref;
+                }}
+              />
+            );
+          })}
         </View>
 
         <TouchableOpacity onPress={handleResend} disabled={timer > 0 || loader}>
@@ -187,11 +200,11 @@ const styles = StyleSheet.create({
     paddingTop: lignHeight72,
   },
   title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
+    fontSize: fontSize36,
+    fontWeight: '500',
     color: COLORS.black,
   },
-  subtitle: { fontSize: fontSize14, color: COLORS.grey },
+  subtitle: { fontSize: fontSize16, color: COLORS.greyText2 },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',

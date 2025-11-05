@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
       ? FONT_FAMILY.PRODUCT_SANS_MEDIUM || 'System'
       : FONT_FAMILY.PRODUCT_SANS_MEDIUM || 'sans-serif',
     fontWeight: '600',
-    letterSpacing: 0.6,
+    letterSpacing: 0,
   },
 });

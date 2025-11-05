@@ -55,5 +55,10 @@ export const COLORS = {
   borderLight4:"#EAECEF",
   recivedBackground:"#00A3FF",
   matchBg:"#C799FF",
-  offerBg:"#E3CCFF"
+  offerBg:"#E3CCFF",
+  greyText:"#B7B7B7",
+  greyText2:"#9982B6",
+  lightViolet2:"#F6F3FF",
+  lightGrey:"#FBFBFB",
+  lightGrey2:"#DCDCDC"
 };

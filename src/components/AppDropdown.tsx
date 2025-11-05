@@ -1,17 +1,20 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  Pressable,
+} from 'react-native';
 import AppText from './AppText';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize16,
   Size8,
-  Size12,
   Size4,
   borderWidth,
-  Size18,
-  Size10,
+  inputHeight,
 } from '../constants/Sizes';
-import { DropdownIcon } from './svg/SvgIcons';
 
 interface AppDropdownProps {
   label: string;
@@ -32,16 +35,20 @@ const AppDropdown: React.FC<AppDropdownProps> = ({
   dropdownContainerStyle,
   dropdownStyle,
 }) => {
+  const handlePress = () => {
+    onPress();
+  };
+
   return (
     <View style={[styles.dropdownContainer, dropdownContainerStyle]}>
       {label && <AppText text={label} textStyle={styles.dropdownLabel} />}
-      <TouchableOpacity 
+      <Pressable
         style={[
           styles.dropdown,
           disabled && styles.dropdownDisabled,
           dropdownStyle,
-        ]} 
-        onPress={disabled ? undefined : onPress}
+        ]}
+        onPress={disabled ? undefined : handlePress}
         disabled={disabled}
       >
         <AppText
@@ -52,34 +59,38 @@ const AppDropdown: React.FC<AppDropdownProps> = ({
             disabled && styles.disabledText,
           ]}
         />
-        <DropdownIcon 
+        {/* <DropdownIcon 
           width={Size18} 
           height={Size10} 
           color={disabled ? COLORS.placeholderInactive : COLORS.borderBottom} 
-        />
-      </TouchableOpacity>
+        /> */}
+      </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   dropdownContainer: {
-    gap: Size8, 
+    gap: Size8,
   },
   dropdownLabel: {
     fontSize: fontSize16,
     color: COLORS.textBlack,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   dropdown: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: borderWidth,
-    borderBottomColor: COLORS.borderBottom,
-    paddingVertical: Size12,
-    paddingHorizontal: Size4,
-    gap: Size8,
+    borderWidth: borderWidth,
+    borderColor: COLORS.greyText,
+    borderRadius: Size4,
+    height: inputHeight,
+    paddingHorizontal: Size8,
+  },
+  dropdownFocused: {
+    borderColor: COLORS.violet,
+    borderWidth: 1,
   },
   dropdownDisabled: {
     borderBottomColor: COLORS.placeholderInactive,
@@ -88,14 +99,13 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: fontSize16,
     color: COLORS.textBlack,
-    flex: 1,
   },
   placeholderText: {
-    color: COLORS.placeholderText,
+    color: COLORS.greyText,
   },
   disabledText: {
-    color: COLORS.placeholderInactive,
+    color: COLORS.greyText,
   },
 });
 
-export default AppDropdown; 
+export default AppDropdown;

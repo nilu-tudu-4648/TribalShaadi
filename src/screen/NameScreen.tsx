@@ -5,15 +5,10 @@ import AppTextInput from '../components/AppTextInput';
 import {
   fontSize14,
   lignHeight24,
-  Size10,
   lignHeight72,
   Size40,
   fontSize24,
-  fontSize16,
-  Size12,
-  borderWidth,
   Size18,
-  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppButton from '../components/AppButton';
@@ -30,6 +25,7 @@ import { getUserDetailsUrl } from '../constants/functions';
 import AppText from '../components/AppText';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 const NameScreen = () => {
   const [fullName, setFullName] = useState('');
@@ -117,10 +113,10 @@ const NameScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.container}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={globalStyles.scrollView}
+        contentContainerStyle={globalStyles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -128,7 +124,8 @@ const NameScreen = () => {
           <HeaderBack
             onPress={() => navigateToLastScreen(navigation, ROUTES.GENDER)}
           />
-          <AppText text="Name & Email" textStyle={styles.title} />
+          <AppText text="What should we call you?" textStyle={globalStyles.title} />
+          <AppText text="Tell us your name and email — it’s how your matches will know the real you." textStyle={globalStyles.subtitle} />
           {/* Text Input */}
           <AppTextInput
             placeholder="Full Name"
@@ -136,8 +133,6 @@ const NameScreen = () => {
             value={fullName}
             onChangeText={validateAndSetName}
             keyboardType="default"
-            textInputStyle={styles.textInput}
-            style={styles.inputContainer}
           />
           <AppTextInput
             placeholder="Email"
@@ -145,8 +140,6 @@ const NameScreen = () => {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
-            textInputStyle={styles.textInput}
-            style={styles.inputContainer}
           />
           {!isValidEmail && email.trim() !== '' && (
             <AppText
@@ -154,22 +147,23 @@ const NameScreen = () => {
               textStyle={styles.errorText}
             />
           )}
+          <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} />
           <AppButton
             title="Confirm"
             onPress={handleConfirm}
             isLoading={loader}
             isButtonDisabled={!isValidEmail || loader}
             buttonStyle={[
-              styles.button,
+              {...globalStyles.continueButton,alignSelf:'flex-end'},
               !isValidEmail || loader
-                ? styles.buttonDisabled
-                : styles.buttonEnabled,
+                ? globalStyles.continueButtonInactive
+                : globalStyles.continueButtonActive,
             ]}
             textStyle={[
-              styles.buttonText,
+              globalStyles.continueButtonText,
               !isValidEmail || loader
-                ? styles.buttonTextDisabled
-                : styles.buttonTextEnabled,
+                ? globalStyles.continueButtonTextInactive
+                : globalStyles.continueButtonTextActive,
             ]}
           />
         </View>
@@ -179,17 +173,6 @@ const NameScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: screenHeight(2),
-  },
   content: {
     flex: 1,
     paddingHorizontal: lignHeight24,
@@ -208,33 +191,6 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     fontWeight: '400',
   },
-  title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
-    color: COLORS.black,
-  },
-  inputContainer: {},
-  textInput: {
-    fontSize: fontSize16,
-    color: COLORS.textBlack,
-    paddingVertical: Size12,
-    paddingHorizontal: 0,
-    borderBottomWidth: borderWidth,
-    borderBottomColor: COLORS.borderBottom,
-    backgroundColor: 'transparent',
-  },
-  button: {
-    borderRadius: lignHeight24,
-    paddingVertical: Size10,
-    width: '30%',
-    alignSelf: 'flex-end',
-  },
-  buttonEnabled: { backgroundColor: COLORS.black },
-  buttonDisabled: { backgroundColor: COLORS.disabledBG },
-  buttonContent: { alignItems: 'center' },
-  buttonText: { fontSize: fontSize14, fontWeight: '600' },
-  buttonTextEnabled: { color: COLORS.white },
-  buttonTextDisabled: { color: COLORS.disabledText },
   errorText: {
     color: COLORS.red,
     fontSize: fontSize14,

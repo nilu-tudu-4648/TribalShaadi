@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, SafeAreaView, StyleSheet } from 'react-native';
 import {
-  fontSize16,
-  lignHeight24,
-  Size12,
-  Size4,
+  Size25,
   Size8,
-  borderWidth,
-  lignHeight72,
-  lignHeight20,
-  fontSize24,
 } from '../constants/Sizes';
-import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
 import AppButton from '../components/AppButton';
 import AppDropdown from '../components/AppDropdown';
@@ -19,6 +11,7 @@ import AppPickerModal from '../components/AppPickerModal';
 import {
   completeUserProfileV2Updated,
   getCommunity,
+  getMaritalStatus,
   getReligion,
 } from '../store/reducers/authReducer';
 import {
@@ -29,12 +22,13 @@ import {
   getUserDetailsUrl,
   setReducerLoadingfalse,
   navigateToLastScreen,
+  getMaritalStatusUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
-import AppText from '../components/AppText';
 import { MOTHER_TONGUE, ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 const ReligionScreen = () => {
   const [selectedReligion, setSelectedReligion] = useState('');
@@ -47,13 +41,16 @@ const ReligionScreen = () => {
   const [showReligionPicker, setShowReligionPicker] = useState(false);
   const [showTribePicker, setShowTribePicker] = useState(false);
   const [showMotherTonguePicker, setShowMotherTonguePicker] = useState(false);
-  const { user, loader, religion, community } = useSelector(
+  const [showMaritalStatusPicker, setShowMaritalStatusPicker] = useState(false);
+  const [selectedMaritalStatus, setSelectedMaritalStatus] = useState<any>(null);
+  const { user, loader, religion, community, maritalStatuses } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
   useEffect(() => {
     dispatch(getReligion(getReligionUrl));
+    dispatch(getMaritalStatus(getMaritalStatusUrl));
   }, [dispatch]);
 
   useEffect(() => {
@@ -72,7 +69,10 @@ const ReligionScreen = () => {
     setSelectedTribe('');
     setSelectedTribeId(null);
   };
-
+  const maritalStatusesList = useMemo(
+    () => maritalStatuses || [],
+    [maritalStatuses],
+  );
   const handleTribeSelection = (tribeItem: any) => {
     setSelectedTribe(tribeItem.name);
     setSelectedTribeId(tribeItem.id);
@@ -80,6 +80,10 @@ const ReligionScreen = () => {
   const handleMotherTongueSelection = (motherTongueItem: any) => {
     setSelectedMotherTongue(motherTongueItem.label);
   };
+  // Handle marital status selection
+  const handleMaritalStatusSelection = useCallback((status: any) => {
+    setSelectedMaritalStatus(status);
+  }, []);
   const handleContinue = async () => {
     if (!selectedReligion || !selectedTribe || !selectedMotherTongue) {
       AppToast('Please select all required fields');
@@ -90,6 +94,7 @@ const ReligionScreen = () => {
       const requestBody = {
         id: user.id,
         religionId: selectedReligionId,
+        maritalStatusId: selectedMaritalStatus.id,
         communityId: selectedTribeId,
         motherTongue: selectedMotherTongue,
       };
@@ -104,52 +109,52 @@ const ReligionScreen = () => {
     }
   };
 
-  const isFormValid = selectedReligion && selectedTribe && selectedMotherTongue;
+  const isFormValid =
+    selectedReligion &&
+    selectedTribe &&
+    selectedMotherTongue &&
+    selectedMaritalStatus;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={globalStyles.container}>
+      <View style={globalStyles.content}>
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.BIRTH_DATE)}
         />
+        <View style={{ gap: Size25 }}>
+          <View style={{ gap: Size8 }}>
+            {/* Religion Dropdown */}
+            <AppDropdown
+              label="Religion & Tribe"
+              selectedValue={selectedReligion}
+              placeholder="Select Religion"
+              onPress={() => setShowReligionPicker(true)}
+            />
 
-        {/* Title */}
-        <AppText text="Religion" textStyle={styles.title} />
-
-        {/* Religion Dropdown */}
-        <AppDropdown
-          label="Religion"
-          selectedValue={selectedReligion}
-          placeholder="Select Religion"
-          onPress={() => setShowReligionPicker(true)}
-        />
-
-        {/* Tribe Dropdown */}
-        <AppDropdown
-          label="Tribe"
-          selectedValue={selectedTribe}
-          placeholder="Select Tribe"
-          onPress={() => setShowTribePicker(true)}
-        />
-        <AppDropdown
-          label="Mother Tongue"
-          selectedValue={selectedMotherTongue}
-          placeholder="Select Mother Tongue"
-          onPress={() => setShowMotherTonguePicker(true)}
-        />
-
-        {/* Mother Tongue Input */}
-        {/* <View style={styles.inputContainer}>
-          <AppText text="Mother tongue" textStyle={styles.inputLabel} />
-          <AppTextInput
-            placeholder="Enter Mother Tongue"
-            value={selectedMotherTongue}
-            onChangeText={setSelectedMotherTongue}
-            keyboardType="default"
-            style={styles.textInputContainer}
-            textInputStyle={styles.textInputStyle}
-          />
-        </View> */}
+            {/* Tribe Dropdown */}
+            <AppDropdown
+              label=""
+              selectedValue={selectedTribe}
+              placeholder="Select Tribe"
+              onPress={() => setShowTribePicker(true)}
+            />
+          </View>
+          <View style={{ gap: Size25 }}>
+            <AppDropdown
+              label="Mother Tongue"
+              selectedValue={selectedMotherTongue}
+              placeholder="Select Mother Tongue"
+              onPress={() => setShowMotherTonguePicker(true)}
+            />
+            {/* Marital Status Dropdown */}
+            <AppDropdown
+              label="Marital Status"
+              selectedValue={selectedMaritalStatus?.name || ''}
+              placeholder="Select your marital status"
+              onPress={() => setShowMaritalStatusPicker(true)}
+            />
+          </View>
+        </View>
 
         {/* Spacer */}
         <View style={styles.spacer} />
@@ -161,16 +166,16 @@ const ReligionScreen = () => {
           isLoading={loader}
           isButtonDisabled={!isFormValid || loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isFormValid
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isFormValid
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -201,10 +206,22 @@ const ReligionScreen = () => {
       <AppPickerModal
         visible={showMotherTonguePicker}
         title="Select Mother Tongue"
-        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
+        items={MOTHER_TONGUE.sort((a, b) =>
+          a.label.toLowerCase().localeCompare(b.label.toLowerCase()),
+        )}
         selectedValue={selectedMotherTongue}
         onSelect={handleMotherTongueSelection}
         onClose={() => setShowMotherTonguePicker(false)}
+        isObjects={true}
+      />
+      {/* Marital Status Picker Modal */}
+      <AppPickerModal
+        visible={showMaritalStatusPicker}
+        title="Select Marital Status"
+        items={maritalStatusesList.filter((item: any) => item.name !== 'any')}
+        selectedValue={selectedMaritalStatus?.name || ''}
+        onSelect={handleMaritalStatusSelection}
+        onClose={() => setShowMaritalStatusPicker(false)}
         isObjects={true}
       />
     </SafeAreaView>
@@ -212,66 +229,10 @@ const ReligionScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: lignHeight24,
-    paddingVertical: lignHeight24,
-    gap: lignHeight20,
-    paddingTop: lignHeight72,
-  },
-  title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
-    color: COLORS.black,
-  },
   spacer: {
     flex: 1,
   },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
-  },
 
-  inputContainer: {
-    gap: Size8,
-  },
-  inputLabel: {
-    fontSize: fontSize16,
-    color: COLORS.black,
-    fontWeight: '500',
-  },
-  textInputContainer: {
-    gap: 0,
-  },
-  textInputStyle: {
-    fontSize: fontSize16,
-    color: COLORS.black,
-    paddingVertical: Size12,
-    paddingHorizontal: Size4,
-    borderBottomWidth: borderWidth,
-    borderBottomColor: COLORS.borderBottom,
-  },
 });
 
 export default ReligionScreen;

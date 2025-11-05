@@ -10,15 +10,15 @@ import HeaderBack from '../components/HeaderBack';
 import { COLORS } from '../constants/AppColors';
 import {
   fontSize16,
-  fontSize14,
   lignHeight24,
   lignHeight72,
   Size16,
-  Size8,
   lignHeight20,
-  Size20,
   Size12,
   fontSize24,
+  Size4,
+  borderWidth,
+  Size10,
 } from '../constants/Sizes';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
@@ -27,6 +27,7 @@ import { navigateToLastScreen, updateUrl } from '../constants/functions';
 import { completeUserProfileV2Interests } from '../store/reducers/authReducer';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES, INTERESTS } from '../constants/data';
+import { globalStyles } from '../constants/globalStyles';
 
 const SelectInterestsScreen = () => {
   const [selected, setSelected] = useState<string[]>([]);
@@ -114,9 +115,6 @@ const SelectInterestsScreen = () => {
                   text={item}
                   textStyle={[
                     styles.interestText,
-                    isSelected
-                      ? styles.interestTextSelected
-                      : styles.interestTextUnselected,
                   ]}
                 />
               </TouchableOpacity>
@@ -131,16 +129,16 @@ const SelectInterestsScreen = () => {
           isLoading={loader}
           isButtonDisabled={selected.length < maxSelect}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             selected.length === maxSelect
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             selected.length === maxSelect
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -180,51 +178,30 @@ const styles = StyleSheet.create({
   interestsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: Size12,
   },
   interestChip: {
     paddingHorizontal: Size16,
-    paddingVertical: Size8,
-    borderRadius: Size20,
+    paddingVertical: Size10,
+    borderRadius: Size4,
     flexDirection: 'row',
     alignItems: 'center',
+    width: '47%',
+    borderColor: COLORS.lightGrey2,
+    borderWidth: borderWidth,
   },
   interestChipSelected: {
-    backgroundColor: COLORS.violet,
+    backgroundColor: COLORS.lightViolet2,
+    borderColor: COLORS.violet,
+    borderWidth: borderWidth,
   },
   interestChipUnselected: {
     backgroundColor: COLORS.lightGreyBackground,
   },
   interestText: {
-    fontSize: fontSize14,
-    letterSpacing: 1.3,
-  },
-  interestTextSelected: {
-    color: COLORS.white,
-  },
-  interestTextUnselected: {
-    color: COLORS.textBlack,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
     fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
+    color: COLORS.black,
   },
 });
 

@@ -1,32 +1,30 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   View,
   Image,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/AppColors';
 import {
   Size16,
-  Size4,
-  Size40,
   Size8,
-  fontSize18,
-  fontSize24,
+  Size12,
+  fontSize36,
+  lignHeight20,
   lignHeight24,
   screenHeight,
   screenWidth,
-  fontSize36,
-  Size12,
-  lignHeight20,
+  fontSize20,
+  fontSize12,
 } from '../constants/Sizes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
-import SwipeButton from '../components/SwipeButton';
 import ErrorBoundary from '../components/ErrorBoundary';
+import OnboardingButton from '../components/buttons/OnboardingButton';
 
 type RootStackParamList = {
   Login: undefined;
@@ -34,33 +32,18 @@ type RootStackParamList = {
   OTP: { phoneNumber: string };
 };
 
-type SwipeButtonHandle = {
-  reset: () => void;
-};
 
 const WelcomeScreen = () => {
   const [imageError, setImageError] = useState(false);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const swipeButtonRef = React.useRef<SwipeButtonHandle>(null);
 
   React.useEffect(() => {
     // Initialize welcome screen and preload critical resources
     console.log('WelcomeScreen mounted successfully');
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      try {
-        if (swipeButtonRef.current) {
-          swipeButtonRef.current.reset();
-        }
-      } catch (error) {
-        console.error('Error resetting swipe button:', error);
-      }
-    }, []),
-  );
 
   const handleNavigation = (route: 'Login' | 'Register') => {
     try {
@@ -81,16 +64,13 @@ const WelcomeScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Header */}
           <View style={styles.header}>
-            <AppText
-              text="Made with ❤️ in Jharkhand"
-              textStyle={styles.headerText}
-            />
+            <Image source={require('../assets/images/nlogo.png')} style={styles.logo} />
           </View>
 
           {/* Profile Circle Section */}
           {!imageError ? (
             <Image
-              source={require('../assets/images/SplashImage.png')}
+              source={require('../assets/images/welcomeImage.png')}
               style={styles.profileSection}
               onError={handleImageError}
               defaultSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/59/AwYDAQEA' }}
@@ -103,50 +83,23 @@ const WelcomeScreen = () => {
 
           {/* CTA Section */}
           <View style={styles.ctaSection}>
-            <View style={styles.brandContainer}>
-              {/* Logo with fallback */}
-              {!imageError ? (
-                <Image
-                  source={require('../assets/images/logo.png')}
-                  style={styles.logoPlaceholder}
-                  onError={handleImageError}
-                />
-              ) : (
-                <View style={[styles.logoPlaceholder, styles.logoFallback]} />
-              )}
-              <AppText text="Tribalshaadi.ai" textStyle={styles.brandText} />
-            </View>
-            <View>
-              <AppText text="AI - powered" textStyle={styles.aiText} />
-              <AppText text="Tribal Matchmaking" textStyle={styles.titleText} />
-            </View>
-            <View style={styles.actionContainer}>
-              <View style={styles.swipeButtonContainer}>
-                <ErrorBoundary
-                  fallback={
-                    <TouchableOpacity 
-                      style={styles.fallbackButton}
-                      onPress={() => handleNavigation('Register')}
-                    >
-                      <AppText 
-                        text="Register with phone" 
-                        textStyle={styles.fallbackButtonText} 
-                      />
-                    </TouchableOpacity>
-                  }
-                >
-                  <SwipeButton
-                    ref={swipeButtonRef}
-                    onToggle={() => handleNavigation('Register')}
-                  />
-                </ErrorBoundary>
-              </View>
+            <OnboardingButton 
+              title="Create a free account" 
+              onPress={() => handleNavigation('Register')} 
+              isFormValid={true} 
+              loader={false} 
+            />
+            
+            <View style={styles.loginContainer}>
+              <AppText textStyle={styles.orText} text="Or "/>
               <TouchableOpacity onPress={() => handleNavigation('Login')}>
-                <AppText
-                  text="Already have an account? Log in"
-                  textStyle={styles.loginText}
-                />
+                <AppText textStyle={styles.loginLink} text="Log in"/>
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.termsContainer}>
+              <AppText textStyle={styles.termsText} text="By signing up, you agree to our Terms and Conditions"/>
+              <AppText textStyle={styles.termsText} text="See how we use your data in our Privacy Policy"/>
             </View>
           </View>
         </ScrollView>
@@ -168,13 +121,10 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
   },
-  headerText: {
-    color: COLORS.black,
-    fontSize: fontSize18,
-    fontWeight: '600',
-  },
-  heartText: {
-    color: COLORS.redHeart,
+  logo: {
+    width: 139,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
   profileSection: {
     width: screenWidth('90%'),
@@ -183,62 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     resizeMode: 'contain',
   },
-  mainCircle: {
-    width: screenWidth('75%'),
-    height: screenWidth('75%'),
-    borderRadius: screenWidth('37.5%'),
-    backgroundColor: COLORS.lightYellow,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mainProfile: {
-    width: screenWidth('20%'),
-    height: screenWidth('20%'),
-    borderRadius: screenWidth('10%'),
-  },
-  ctaSection: {
-    backgroundColor: COLORS.welcomeBottom,
-    padding: lignHeight24,
-    paddingVertical: lignHeight20,
-    gap: Size40,
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Size8,
-  },
-  logoPlaceholder: {
-    width: lignHeight24,
-    height: lignHeight24,
-    backgroundColor: COLORS.white,
-    borderRadius: Size4,
-  },
-  brandText: {
-    color: COLORS.black,
-    fontSize: fontSize18,
-    fontWeight: '600',
-  },
-  aiText: {
-    color: COLORS.white,
-    fontSize: fontSize24,
-    backgroundColor: COLORS.black,
-    width: screenWidth('40%'),
-    textAlign: 'center',
-    borderRadius: Size8,
-  },
-  titleText: {
-    color: COLORS.black,
-    fontSize: fontSize36,
-    fontWeight: '400',
-  },
-  loginText: {
-    textAlign: 'center',
-    color: COLORS.black,
-  },
-  loginLink: {
-    textDecorationLine: 'underline',
-  },
-  // Fallback styles for error states
   imagePlaceholder: {
     backgroundColor: COLORS.lightgrey,
     justifyContent: 'center',
@@ -248,27 +142,51 @@ const styles = StyleSheet.create({
     fontSize: fontSize36 * 2,
     textAlign: 'center',
   },
-  logoFallback: {
-    backgroundColor: COLORS.violet,
+  titleSection: {
+    paddingHorizontal: lignHeight24,
+    paddingBottom: Size16,
   },
-  fallbackButton: {
-    backgroundColor: COLORS.black,
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 25,
-    width: screenWidth('85%'),
-    alignItems: 'center',
+  titleText: {
+    color: COLORS.black,
+    fontSize: fontSize36,
+    fontWeight: '400',
+    textAlign: 'left',
   },
-  fallbackButtonText: {
-    color: COLORS.white,
-    fontSize: fontSize18,
-    fontWeight: '600',
+  tribeText: {
+    fontFamily: 'Brush Script MT',
+    fontStyle: 'italic',
+    fontWeight: '700',
   },
-  actionContainer: {
+  ctaSection: {
+    backgroundColor: COLORS.white,
+    padding: lignHeight24,
+    paddingVertical: lignHeight20,
     gap: Size12,
   },
-  swipeButtonContainer: {
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  orText: {
+    color: COLORS.black,
+    fontSize: fontSize20,
+    fontWeight: '400',
+  
+  },
+  loginLink: {
+    color: COLORS.violet,
+    fontSize: fontSize20,
+    fontWeight: '400',
+  },
+  termsContainer: {
+    paddingTop: Size8,
+  },
+  termsText: {
+    textAlign: 'center',
+    color: COLORS.greyText,
+    fontSize: fontSize12,
+    fontWeight: '400',
   },
 });
 

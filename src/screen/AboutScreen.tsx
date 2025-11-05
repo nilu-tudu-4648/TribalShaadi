@@ -3,15 +3,11 @@ import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
   fontSize24,
-  lignHeight24,
   Size8,
-  lignHeight72,
   fontSize14,
   Size12,
   Size4,
   SIZES,
-  borderWidth,
-  screenHeight,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -30,6 +26,7 @@ import {
 } from '../constants/functions';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 const AboutScreen = () => {
   const [aboutText, setAboutText] = useState('');
@@ -77,24 +74,25 @@ const AboutScreen = () => {
   const isFormValid = aboutText.trim().length > 0 && wordCount <= MAX_WORDS;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.container}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={globalStyles.scrollView}
+        contentContainerStyle={globalStyles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.content}>
+        <View style={globalStyles.content}>
           <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES)} />
 
           {/* Title */}
-          <AppText text="About Yourself" textStyle={styles.title} />
-
+          <AppText text="What makes you a 11/10?" textStyle={globalStyles.title} />
+          <AppText text="Share a few lines about yourself — honest, simple, and real" textStyle={globalStyles.subtitle} />
           {/* Text Input Area */}
           <View style={styles.textInputContainer}>
             <AppTextInput
-              placeholder="Write about yourself in 35 words"
-              placeholderTextColor={COLORS.grey}
+              label={false}
+              placeholder="Write something"
+              placeholderTextColor={COLORS.black}
               value={aboutText}
               onChangeText={setAboutText}
               keyboardType="default"
@@ -105,7 +103,7 @@ const AboutScreen = () => {
             />
           </View>
 
-          {/* Word Counter */}
+
           <View style={styles.counterContainer}>
             <AppText
               text={`${wordCount}/${MAX_WORDS} words`}
@@ -115,9 +113,9 @@ const AboutScreen = () => {
               ]}
             />
           </View>
-
           {/* Spacer */}
           <View style={styles.spacer} />
+          {/* Word Counter */}
 
           {/* Continue Button */}
           <AppButton
@@ -126,16 +124,16 @@ const AboutScreen = () => {
             isLoading={loader}
             isButtonDisabled={!isFormValid || loader}
             buttonStyle={[
-              styles.continueButton,
+              globalStyles.continueButton,
               isFormValid
-                ? styles.continueButtonActive
-                : styles.continueButtonInactive,
+                ? globalStyles.continueButtonActive
+                : globalStyles.continueButtonInactive,
             ]}
             textStyle={[
-              styles.continueButtonText,
+              globalStyles.continueButtonText,
               isFormValid
-                ? styles.continueButtonTextActive
-                : styles.continueButtonTextInactive,
+                ? globalStyles.continueButtonTextActive
+                : globalStyles.continueButtonTextInactive,
             ]}
           />
         </View>
@@ -145,33 +143,16 @@ const AboutScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: screenHeight(2),
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: lignHeight24,
-    paddingVertical: lignHeight24,
-    gap: lignHeight24,
-    paddingTop: lignHeight72,
-  },
   title: {
     fontSize: fontSize24,
     color: COLORS.textBlack,
-    // fontFamily: FONTS.OPEN_SANS_CONDENSED_BOLD,
     fontWeight: '600',
   },
   textInputContainer: {
-    paddingVertical: Size8,
+    minHeight: SIZES.height * 0.2,
+    maxHeight: SIZES.height * 0.4,
     gap: Size8,
+    backgroundColor: COLORS.cardBg,
   },
   textInputWrapper: {
     // Container wrapper style for AppTextInput
@@ -181,11 +162,9 @@ const styles = StyleSheet.create({
     color: COLORS.textBlack,
     minHeight: SIZES.height * 0.2,
     maxHeight: SIZES.height * 0.4,
-    paddingVertical: Size12,
     paddingHorizontal: Size12,
     textAlign: 'left',
-    borderWidth: borderWidth,
-    borderColor: COLORS.borderGrey,
+    borderWidth: 0,
     borderRadius: Size4,
   },
   counterContainer: {
@@ -201,27 +180,6 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
 });
 

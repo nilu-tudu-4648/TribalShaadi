@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import {
-  fontSize16,
   fontSize18,
   fontSize24,
   lignHeight24,
@@ -42,11 +41,11 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 const QualificationScreen = () => {
   const [selectedQualification, setSelectedQualification] = useState<any>(null);
@@ -203,73 +202,69 @@ const QualificationScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ADDRESS)} />
-          {/* Title */}
-          <AppText text="Your highest qualification" textStyle={styles.title} />
-
-          {/* Highest Qualification Dropdown */}
-          <AppDropdown
-            label=""
-            selectedValue={selectedQualification?.name || ''}
-            placeholder="Select highest degree"
-            onPress={() => setShowQualificationPicker(true)}
+          <HeaderBack
+            onPress={() => navigateToLastScreen(navigation, ROUTES.ADDRESS)}
           />
+          {/* Highest Qualification Dropdown */}
+          <View style={{ gap: Size8 }}>
+            <AppDropdown
+              label="Your highest qualification"
+              selectedValue={selectedQualification?.name || ''}
+              placeholder="Highest qualification"
+              onPress={() => setShowQualificationPicker(true)}
+            />
 
-          {/* College/University/School Text Input */}
-          <View style={styles.textInputContainer}>
+            {/* College/University/School Text Input */}
             <AppTextInput
+              label={false}
               placeholder="College/University/School"
               value={collegeName}
               onChangeText={setCollegeName}
               keyboardType="default"
-              placeholderTextColor={COLORS.placeholderText}
-              style={styles.textInputStyle}
             />
           </View>
-
-          {/* Work Experience Section */}
-          <AppText text="Work Experience" textStyle={styles.sectionTitle} />
-
           {/* Work Experience Dropdown */}
-          <AppDropdown
-            label=""
-            selectedValue={selectedWorkExperience?.name || ''}
-            placeholder="You are working with?"
-            onPress={() => setShowWorkExperiencePicker(true)}
-          />
-          <AppDropdown
-            label=""
-            selectedValue={
-              selectedOccupationCategory?.name || selectedOccupation?.name || ''
-            }
-            placeholder="Occupation"
-            onPress={() => {
-              if (selectedWorkExperience?.name !== 'Not Working') {
-                setShowOccupationCategoryPicker('Occupation');
-              } else {
-                setShowOccupationCategoryPicker('notWorking');
+          <View style={{ gap: Size8 }}>
+            <AppDropdown
+              label="Work Status"
+              selectedValue={selectedWorkExperience?.name || ''}
+              placeholder="You are working with?"
+              onPress={() => setShowWorkExperiencePicker(true)}
+            />
+            <AppDropdown
+              label=""
+              selectedValue={
+                selectedOccupationCategory?.name ||
+                selectedOccupation?.name ||
+                ''
               }
-            }}
-          />
+              placeholder="Occupation"
+              onPress={() => {
+                if (selectedWorkExperience?.name !== 'Not Working') {
+                  setShowOccupationCategoryPicker('Occupation');
+                } else {
+                  setShowOccupationCategoryPicker('notWorking');
+                }
+              }}
+            />
+          </View>
           {selectedWorkExperience?.name !== 'Not Working' && (
-            <>
+            <View style={{ gap: Size8 }}>
               {/* Organization Name Text Input */}
               <AppTextInput
                 placeholder="Organization Name"
                 value={organizationName}
                 onChangeText={setOrganizationName}
                 keyboardType="default"
-                placeholderTextColor={COLORS.placeholderText}
-                style={styles.textInputStyle}
               />
               {/* Income Dropdown */}
               <AppDropdown
-                label=""
+                label="Annual Income"
                 selectedValue={selectedIncome?.value || ''}
-                placeholder="Income"
+                placeholder="Annual Income"
                 onPress={() => setShowIncomePicker(true)}
               />
-            </>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -282,16 +277,16 @@ const QualificationScreen = () => {
           isButtonDisabled={!isFormValid || loading}
           isLoading={loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isFormValid
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isFormValid
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -406,12 +401,6 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     paddingTop: Size16,
   },
-  textInputContainer: {
-    // Container for text inputs
-  },
-  textInputStyle: {
-    // Text input styling
-  },
   buttonContainer: {
     paddingHorizontal: lignHeight24,
     paddingVertical: screenHeight(2), // Responsive padding
@@ -419,28 +408,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopWidth: 0.5,
     borderTopColor: COLORS.borderLight,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: screenHeight(6), // Responsive button height
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.black,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
 });
 

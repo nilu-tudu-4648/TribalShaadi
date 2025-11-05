@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Image } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import {
   fontSize14,
-  fontSize16,
-  fontSize24,
   lignHeight24,
   Size8,
   Size10,
   lignHeight72,
   Size22,
   Size20,
+  fontSize36,
+  fontSize20,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
@@ -37,7 +37,7 @@ const LoginScreen: React.FC = () => {
     isValid: false,
     message: '',
   });
-  const url =  'admin/users/sendOTPForLogin';
+  const url = 'admin/users/sendOTPForLogin';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -60,13 +60,13 @@ const LoginScreen: React.FC = () => {
         contactNo: '+91' + validation.cleanedNumber,
       };
       console.log('requestBody', requestBody);
-      const response = await sendOTPForLogin(url, requestBody,setLoading);
+      const response = await sendOTPForLogin(url, requestBody, setLoading);
       console.log('response', response);
       if (response) {
         navigation.navigate('OTP', {
           phoneNumber: validation.cleanedNumber || phoneNumber,
         });
-      }else{
+      } else {
         setAlreadyExists(true);
       }
     } catch (error: any) {
@@ -80,76 +80,84 @@ const LoginScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.headerSection}>
-          <AppText text="Phone number" textStyle={styles.title} />
-          <AppText
-            text="Enter Mobile Number"
-            textStyle={styles.subtitle}
-          />
-        </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.content}>
+            <View style={styles.headerSection}>
+              <AppText text="Phone number" textStyle={styles.title} />
+              <AppText text="Enter Mobile Number" textStyle={styles.subtitle} />
+            </View>
 
-        {/* Phone Number Input */}
-        <AppTextInput
-          value={phoneNumber}
-          onChangeText={handlePhoneNumberChange}
-          placeholder="Phone number"
-          placeholderTextColor={COLORS.placeholderText}
-          keyboardType="phone-pad"
-          autoComplete="tel"
-          maxLength={10}
-          autoFocus={true}
-        />
-        <AppButton
-          isLoading={loading}
-          title="Verify"
-          loaderSize={Size22}
-          onPress={handleVerify}
-          isButtonDisabled={isButtonDisabled}
-          buttonStyle={[
-            styles.button,
-            isButtonDisabled ? styles.buttonDisabled : styles.buttonEnabled,
-          ]}
-          textStyle={[
-            styles.buttonText,
-            isButtonDisabled
-              ? styles.buttonTextDisabled
-              : styles.buttonTextEnabled,
-          ]}
-        />
-        {/* Spacer */}
-        <View style={styles.spacer} />
-        {alreadyExists && (
-          <View style={styles.alreadyExistsContainer}>
-            <Image
-              source={require('../assets/images/crossred.png')}
-              style={styles.crossIcon}
+            {/* Phone Number Input */}
+            <AppTextInput
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              placeholder="Phone number"
+              placeholderTextColor={COLORS.placeholderText}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              maxLength={10}
+              autoFocus={true}
             />
-            <AppText text='User not found. Please register first.' textStyle={styles.alreadyExistsText} />
             <AppButton
-              title="Register"
+              isLoading={loading}
+              title="Verify"
               loaderSize={Size22}
-              onPress={()=>navigation.navigate('Register')}
+              onPress={handleVerify}
               isButtonDisabled={isButtonDisabled}
               buttonStyle={[
                 styles.button,
-                { width: '25%', backgroundColor: '#FFDCE4' },
+                isButtonDisabled ? styles.buttonDisabled : styles.buttonEnabled,
               ]}
               textStyle={[
                 styles.buttonText,
-                { color: '#FF507A', fontSize: fontSize14 },
+                isButtonDisabled
+                  ? styles.buttonTextDisabled
+                  : styles.buttonTextEnabled,
               ]}
             />
+            
+            {/* Error Message - Now positioned before spacer */}
+            {alreadyExists && (
+              <View style={styles.alreadyExistsContainer}>
+                <Image
+                  source={require('../assets/images/crossred.png')}
+                  style={styles.crossIcon}
+                />
+                <AppText
+                  text="User not found. Please register first."
+                  textStyle={styles.alreadyExistsText}
+                />
+                <AppButton
+                  title="Register"
+                  loaderSize={Size22}
+                  onPress={() => navigation.navigate('Register')}
+                  isButtonDisabled={false}
+                  buttonStyle={[styles.button, styles.registerButton]}
+                  textStyle={[styles.buttonText, styles.registerButtonText]}
+                />
+              </View>
+            )}
+            
+            {/* Spacer */}
+            <View style={styles.spacer} />
+            
+            {/* Info */}
+            <View style={styles.infoContainer}>
+              <AppText
+                text="We'll send you a verification code via SMS"
+                textStyle={styles.infoText}
+              />
+            </View>
           </View>
-        )}
-        {/* Info */}
-        <View style={styles.infoContainer}>
-          <AppText
-            text="We'll send you a verification code via SMS"
-            textStyle={styles.infoText}
-          />
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -158,6 +166,8 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.white },
+  keyboardView: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   content: {
     flex: 1,
     paddingHorizontal: lignHeight24,
@@ -167,11 +177,15 @@ const styles = StyleSheet.create({
   },
   headerSection: { gap: Size8 },
   title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
+    fontSize: fontSize36,
+    fontWeight: '500',
     color: COLORS.black,
   },
-  subtitle: { fontSize: fontSize16, color: COLORS.grey },
+  subtitle: {
+    fontSize: fontSize20,
+    color: COLORS.greyText2,
+    fontWeight: '400',
+  },
   spacer: { flex: 1 },
   button: {
     borderRadius: lignHeight24,
@@ -195,6 +209,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: lignHeight24,
   },
   alreadyExistsText: {
     fontSize: fontSize14,
@@ -203,5 +218,13 @@ const styles = StyleSheet.create({
   crossIcon: {
     width: Size20 * 2,
     height: Size20 * 2,
+  },
+  registerButton: {
+    width: '25%',
+    backgroundColor: '#FFDCE4',
+  },
+  registerButtonText: {
+    color: '#FF507A',
+    fontSize: fontSize14,
   },
 });

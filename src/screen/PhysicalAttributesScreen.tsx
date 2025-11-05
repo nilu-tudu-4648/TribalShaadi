@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, SafeAreaView, StyleSheet } from 'react-native';
 import {
   fontSize16,
-  fontSize18,
   lignHeight24,
   Size12,
-  Size8,
   lignHeight72,
   lignHeight20,
 } from '../constants/Sizes';
@@ -35,6 +33,7 @@ import { getUserDetailsUrl } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import { DRINKING_OPTIONS, ROUTES, SMOKING_OPTIONS } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../constants/globalStyles';
 
 const PhysicalAttributesScreen = () => {
   const [selectedHeight, setSelectedHeight] = useState('');
@@ -137,12 +136,9 @@ const PhysicalAttributesScreen = () => {
           onPress={() => navigateToLastScreen(navigation, ROUTES.QUALIFICATION)}
         />
 
-        {/* Title */}
-        <AppText text="Height" textStyle={styles.title} />
-
         {/* Height Dropdown */}
         <AppDropdown
-          label=""
+          label="Height"
           selectedValue={selectedHeight}
           placeholder="Select height"
           onPress={() => setShowHeightPicker(true)}
@@ -183,16 +179,16 @@ const PhysicalAttributesScreen = () => {
           isButtonDisabled={!isFormValid || loader}
           isLoading={loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isFormValid
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isFormValid
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -258,8 +254,7 @@ const styles = StyleSheet.create({
     color: COLORS.violet,
   },
   sectionTitle: {
-    fontSize: fontSize18,
-    fontWeight: '600',
+    fontSize: fontSize16,
     color: COLORS.black,
   },
   optionSection: {
@@ -273,27 +268,6 @@ const styles = StyleSheet.create({
 
   spacer: {
     flex: 1,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.black,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
 });
 

@@ -2,11 +2,9 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import {
   fontSize16,
-  fontSize24,
   lignHeight24,
   Size12,
   Size16,
-  Size40,
   Size8,
   screenHeight,
 } from '../constants/Sizes';
@@ -19,13 +17,11 @@ import AppChip from '../components/AppChip';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   completeUserProfileV2Updated,
-  getMaritalStatus,
   getStates,
 } from '../store/reducers/authReducer';
 import {
   getStatesUrl,
   getCitiesUrl,
-  getMaritalStatusUrl,
   updateUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
@@ -37,26 +33,24 @@ import AppText from '../components/AppText';
 import AppToast from '../components/AppToast';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../constants/data';
+import { globalStyles } from '../constants/globalStyles';
 
 const AddressScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCity, setSelectedCity] = useState<any>(null);
-  const [selectedMaritalStatus, setSelectedMaritalStatus] = useState<any>(null);
   const [selectedSettlingDown, setSelectedSettlingDown] = useState('');
   const [selectedKids, setSelectedKids] = useState('');
   const [showStatePicker, setShowStatePicker] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
-  const [showMaritalStatusPicker, setShowMaritalStatusPicker] = useState(false);
   const [citiesLoading, setCitiesLoading] = useState(false);
 
-  const { user, states, cities, maritalStatuses, loader } = useSelector(
+  const { user, states, cities, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
   useEffect(() => {
     dispatch(getStates(getStatesUrl));
-    dispatch(getMaritalStatus(getMaritalStatusUrl));
   }, [dispatch]);
 
   // Load cities when state is selected
@@ -76,10 +70,7 @@ const AddressScreen = () => {
 
   // Memoize the lists to avoid unnecessary re-renders
   const statesList = useMemo(() => states || [], [states]);
-  const maritalStatusesList = useMemo(
-    () => maritalStatuses || [],
-    [maritalStatuses],
-  );
+
 
   // Get filtered cities - filter by selected state
   const filteredCities = useMemo(() => {
@@ -112,7 +103,6 @@ const AddressScreen = () => {
     if (
       !selectedState ||
       !selectedCity ||
-      !selectedMaritalStatus ||
       !selectedSettlingDown
     ) {
       AppToast('Please select all required fields');
@@ -122,7 +112,6 @@ const AddressScreen = () => {
     try {
       const requestBody = {
         id: user.id,
-        maritalStatusId: selectedMaritalStatus.id,
         permanentAddress: {
           stateId: selectedState.id,
           districtId: selectedCity.id,
@@ -143,7 +132,6 @@ const AddressScreen = () => {
   }, [
     selectedState,
     selectedCity,
-    selectedMaritalStatus,
     selectedSettlingDown,
     selectedKids,
     user,
@@ -162,10 +150,7 @@ const AddressScreen = () => {
     setSelectedCity(city);
   }, []);
 
-  // Handle marital status selection
-  const handleMaritalStatusSelection = useCallback((status: any) => {
-    setSelectedMaritalStatus(status);
-  }, []);
+
 
   // Handle settling down selection
   const handleSettlingDownSelection = useCallback((option: string) => {
@@ -182,7 +167,6 @@ const AddressScreen = () => {
     return (
       selectedState &&
       selectedCity &&
-      selectedMaritalStatus &&
       selectedSettlingDown &&
       selectedKids
 
@@ -190,26 +174,26 @@ const AddressScreen = () => {
   }, [
     selectedState,
     selectedCity,
-    selectedMaritalStatus,
     selectedSettlingDown,
     selectedKids,
   ]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.container}>
       <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={globalStyles.scrollView}
+        contentContainerStyle={globalStyles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.content}>
+        <View style={globalStyles.content}>
          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.RELIGION)} />
           {/* State Dropdown */}
+          <View style={{ gap: Size8 }}>
           <AppDropdown
-            label=""
+            label="Home Town"
             selectedValue={selectedState?.name || ''}
-            placeholder="Home State/UT"
+            placeholder="Select State"
             onPress={() => setShowStatePicker(true)}
           />
 
@@ -217,18 +201,13 @@ const AddressScreen = () => {
           <AppDropdown
             label=""
             selectedValue={selectedCity?.name || ''}
-            placeholder={citiesLoading ? 'Loading cities...' : 'Home City'}
+            placeholder={citiesLoading ? 'Loading cities...' : 'Select City'}
             onPress={() => !citiesLoading && setShowCityPicker(true)}
             disabled={citiesLoading || !selectedState}
           />
+          </View>
           <View style={{ height: Size16 }} />
-          {/* Marital Status Dropdown */}
-          <AppDropdown
-            label="Marital Status"
-            selectedValue={selectedMaritalStatus?.name || ''}
-            placeholder="Select your marital status"
-            onPress={() => setShowMaritalStatusPicker(true)}
-          />
+ 
           <View style={{ height: Size16/2 }} />
           {/* Planning to settle down Chips */}
           <View style={styles.chipSection}>
@@ -309,55 +288,11 @@ const AddressScreen = () => {
         onClose={() => setShowCityPicker(false)}
         isObjects={true}
       />
-
-      {/* Marital Status Picker Modal */}
-      <AppPickerModal
-        visible={showMaritalStatusPicker}
-        title="Select Marital Status"
-        items={maritalStatusesList.filter((item: any) => item.name !== 'any')}
-        selectedValue={selectedMaritalStatus?.name || ''}
-        onSelect={handleMaritalStatusSelection}
-        onClose={() => setShowMaritalStatusPicker(false)}
-        isObjects={true}
-      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: screenHeight(2),
-  },
-  content: {
-    paddingHorizontal: lignHeight24,
-    paddingVertical: screenHeight(2),
-    gap: lignHeight24,
-    paddingTop: screenHeight(4),
-  },
-  backButton: {
-    width: Size40,
-    height: Size40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: fontSize24,
-    color: COLORS.textBlack,
-    fontWeight: '400',
-  },
-  title: {
-    fontSize: fontSize24,
-    fontWeight: 'bold',
-    color: COLORS.textBlack,
-  },
   chipSection: {
     gap: Size16,
   },
