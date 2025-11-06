@@ -16,6 +16,7 @@ import {
   Size10,
   Size4,
   fontSize12,
+  fontSize24,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
@@ -46,6 +47,7 @@ import {
   getSelectedUserApi,
   getSelectedUserPackageApi,
 } from '../store/reducers/userReducer';
+import { SIZES } from '../constants/Sizes';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -276,9 +278,11 @@ const ChatScreen = () => {
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={styles.conversationsList}
             style={styles.flatListContainer}
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
+            ListEmptyComponent={() => (
+              <View style={styles.emptyContainer}>
+                <AppText text="Send or accept interests to start. Once there’s a match, your connections will appear here." textStyle={styles.emptyText} />
+              </View>
+            )}
           />
         </AppSafeView>
       )}
@@ -414,5 +418,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    height: SIZES.height * 0.7,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: fontSize24,
+    color: COLORS.disabledText,
+    textAlign: 'center',
   },
 });

@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
@@ -37,6 +32,7 @@ import { PersonalityIcon } from '../components/svg/SvgIcons';
 import { INTERESTS, ROUTES, VALUES_OPTIONS } from '../constants/data';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
+import { globalStyles } from '../constants/globalStyles';
 
 const EditPersonalityScreen = () => {
   const navigation = useNavigation();
@@ -68,58 +64,61 @@ const EditPersonalityScreen = () => {
       // AppToast('You can select up to 5 interests only.');
     }
   };
-// Update the useEffect that initializes the form data
-useEffect(() => {
-  if (user) {
-    setFormData({
-      bio: user.aboutMe || '',
-      personalityTraitName: user.about_lifepartener || '',
-      interests: user.intrests || '',
-    });
+  // Update the useEffect that initializes the form data
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        bio: user.aboutMe || '',
+        personalityTraitName: user.about_lifepartener || '',
+        interests: user.intrests || '',
+      });
 
-    // Handle existing interests
-    if (user.intrests && user.intrests.length > 0) {
-      // Split the comma-separated string into individual interests
-      const userInterests = user.intrests
-        .split(',')
-        .map((item: string) => item.trim());
+      // Handle existing interests
+      if (user.intrests && user.intrests.length > 0) {
+        // Split the comma-separated string into individual interests
+        const userInterests = user.intrests
+          .split(',')
+          .map((item: string) => item.trim());
 
-      // Find matching interests from the INTERESTS array (case-insensitive)
-      const matchedInterests = INTERESTS.filter(interest => 
-        userInterests.some((userInterest: string) => 
-          interest.toLowerCase().includes(userInterest.toLowerCase()) ||
-          userInterest.toLowerCase().includes(interest.toLowerCase()) ||
-          interest.toLowerCase().includes(userInterest.toLowerCase())
-        )
-      );
+        // Find matching interests from the INTERESTS array (case-insensitive)
+        const matchedInterests = INTERESTS.filter(interest =>
+          userInterests.some(
+            (userInterest: string) =>
+              interest.toLowerCase().includes(userInterest.toLowerCase()) ||
+              userInterest.toLowerCase().includes(interest.toLowerCase()) ||
+              interest.toLowerCase().includes(userInterest.toLowerCase()),
+          ),
+        );
 
-      setSelected(matchedInterests);
+        setSelected(matchedInterests);
+      }
     }
-  }
-}, [user]);
+  }, [user]);
 
-// Update the handleSave function to maintain the same format
-const handleSave = useCallback(async () => {
-  const selectedInterests = selected.map(item => item.split(' ').slice(1).join(' ')).join(',');
-  try {
-    const requestBody = {
-      id: user.id,
-      aboutMe: formData.bio,
-      about_lifepartener: formData.personalityTraitName,
-      intrests: selectedInterests, 
-    };
-    dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
-    setReducerLoadingfalse(dispatch, () => {
-      getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
-    });
+  // Update the handleSave function to maintain the same format
+  const handleSave = useCallback(async () => {
+    const selectedInterests = selected
+      .map(item => item.split(' ').slice(1).join(' '))
+      .join(',');
+    try {
+      const requestBody = {
+        id: user.id,
+        aboutMe: formData.bio,
+        about_lifepartener: formData.personalityTraitName,
+        intrests: selectedInterests,
+      };
+      dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
+      setReducerLoadingfalse(dispatch, () => {
+        getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      });
 
-    AppToast('Personality & Preferences updated successfully');
-    navigation.goBack();
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    AppToast('Error updating profile. Please try again.');
-  }
-}, [formData, user, dispatch, navigation, selected]);
+      AppToast('Personality & Preferences updated successfully');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      AppToast('Error updating profile. Please try again.');
+    }
+  }, [formData, user, dispatch, navigation, selected]);
   // Handle bio text change
   const handleBioChange = useCallback((text: string) => {
     const words = text
@@ -161,7 +160,7 @@ const handleSave = useCallback(async () => {
         }}
         icon={<PersonalityIcon size={Size25} />}
       />
-      <ScrollView 
+      <ScrollView
         style={styles.mainScrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
@@ -170,6 +169,7 @@ const handleSave = useCallback(async () => {
         {/* Bio Text Area */}
         <View style={styles.bioContainer}>
           <AppTextInput
+            label={false}
             placeholder="Write about yourself in 35 words"
             placeholderTextColor={COLORS.grey}
             value={formData.bio}
@@ -179,9 +179,15 @@ const handleSave = useCallback(async () => {
             multiline={true}
             textAlignVertical="top"
           />
-          <AppText text={`${getWordCount()}/${MAX_BIO_LENGTH} Words`} textStyle={styles.wordCount} />
+          {/* <AppText  /> */}
         </View>
 
+        <View style={styles.counterContainer}>
+          <AppText
+            text={`${getWordCount()}/${MAX_BIO_LENGTH} Words`}
+            textStyle={styles.wordCount}
+          />
+        </View>
         {/* Personality Trait Dropdown */}
         <View>
           <AppDropdown
@@ -189,6 +195,8 @@ const handleSave = useCallback(async () => {
             selectedValue={formData.personalityTraitName}
             placeholder="Select Personality Trait"
             onPress={() => setShowPersonalityPicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
@@ -245,6 +253,7 @@ const handleSave = useCallback(async () => {
         onClose={() => setShowPersonalityPicker(false)}
         title="What values are most important to you in a life partner?"
         isObjects={true}
+        modalTitleStyle={styles.modalTitle}
       />
     </AppSafeView>
   );
@@ -264,7 +273,13 @@ const styles = StyleSheet.create({
     paddingVertical: Size25,
   },
   bioContainer: {
-    gap: Size16,
+    // gap: Size16,
+    minHeight: SIZES.height * 0.15,
+    maxHeight: SIZES.height * 0.15,
+  },
+  counterContainer: {
+    alignItems: 'flex-end',
+    paddingHorizontal: Size8,
   },
   textInput: {
     fontSize: fontSize16,
@@ -319,6 +334,10 @@ const styles = StyleSheet.create({
   },
   interestTextUnselected: {
     color: COLORS.textBlack,
+  },
+  modalTitle: {
+    left: 10,
+    width: '80%',
   },
 });
 

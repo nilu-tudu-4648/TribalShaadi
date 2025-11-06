@@ -60,6 +60,7 @@ import {
 } from '../store/reducers/chatReducer';
 import BottomSheet from '@gorhom/bottom-sheet';
 import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
+import SelfieBottomSheet from '../components/BottomSheets/SelfieBottomSheet';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -87,8 +88,12 @@ const HomeScreen = () => {
   const opacity = useSharedValue(1);
 
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
+  const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
+  };
+  const openSelfie = () => {
+    selfieBottomSheetRef?.current?.expand();
   };
   const animatedCardStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -326,7 +331,9 @@ const HomeScreen = () => {
                 <AppButton
                   title="Connect"
                   onPress={() =>
-                    handleSendProposal(matchedUsers[currentIndex].id)
+                    user.isVerified
+                      ? handleSendProposal(matchedUsers[currentIndex].id)
+                      : openSelfie()
                   }
                   buttonStyle={styles.connectButton}
                   textStyle={styles.connectButtonText}
@@ -360,6 +367,7 @@ const HomeScreen = () => {
           // Add your report logic here
         }}
       />
+      <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
     </View>
   );
 };

@@ -14,7 +14,10 @@ import {
   Size4,
   borderWidth,
   inputHeight,
+  Size18,
+  Size10,
 } from '../constants/Sizes';
+import { DropdownIcon } from './svg/SvgIcons';
 
 interface AppDropdownProps {
   label: string;
@@ -24,6 +27,7 @@ interface AppDropdownProps {
   disabled?: boolean;
   dropdownContainerStyle?: StyleProp<ViewStyle>;
   dropdownStyle?: StyleProp<ViewStyle>;
+  isDropdownIcon?: boolean;
 }
 
 const AppDropdown: React.FC<AppDropdownProps> = ({
@@ -34,6 +38,7 @@ const AppDropdown: React.FC<AppDropdownProps> = ({
   disabled = false,
   dropdownContainerStyle,
   dropdownStyle,
+  isDropdownIcon = false,
 }) => {
   const handlePress = () => {
     onPress();
@@ -59,11 +64,13 @@ const AppDropdown: React.FC<AppDropdownProps> = ({
             disabled && styles.disabledText,
           ]}
         />
-        {/* <DropdownIcon 
+        {isDropdownIcon && (
+        <DropdownIcon
           width={Size18} 
           height={Size10} 
-          color={disabled ? COLORS.placeholderInactive : COLORS.borderBottom} 
-        /> */}
+            color={disabled ? COLORS.disabledText : COLORS.textBlack} 
+          />
+        )}
       </Pressable>
     </View>
   );

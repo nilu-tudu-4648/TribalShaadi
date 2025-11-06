@@ -187,6 +187,8 @@ const QualificationScreen = () => {
 
   const isFormValid =
     selectedQualification &&
+    collegeName &&
+    organizationName &&
     selectedWorkExperience &&
     selectedOccupation &&
     (selectedWorkExperience?.name !== 'Not Working'

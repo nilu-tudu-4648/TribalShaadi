@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image } from 'react-native';
 import React from 'react';
 import AppText from './AppText';
-import { fontSize14, fontSize24, SIZES, Size25 } from '../constants/Sizes';
+import { fontSize24, SIZES, Size25, fontSize16 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { HomeIcon2 } from './svg/SvgIcons';
 import { convertCmToReadableHeight } from '../constants/functions';
@@ -75,12 +75,14 @@ const NameComponent: React.FC<NameComponentProps> = ({
               textStyle={styles.location}
             />
           </View>
+          <View style={styles.aiVerifiedContainer}>
           {isVerified && (
             <Image
-              source={require('./../assets/images/aiverified.png')}
-              style={styles.aiVerifiedIcon}
+            source={require('./../assets/images/aiverified.png')}
+            style={styles.aiVerifiedIcon}
             />
           )}
+          </View>
         </View>
       )}
     </View>
@@ -104,29 +106,19 @@ const styles = StyleSheet.create({
     fontSize: fontSize24,
     fontWeight: '700',
     color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
   },
   age: {
     fontWeight: '400',
   },
   details: {
-    fontSize: fontSize14,
+    fontSize: fontSize16,
     color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
+    fontWeight: '400',
   },
   location: {
-    fontSize: fontSize14,
+    fontSize: fontSize16,
     color: COLORS.white,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    zIndex: 1,
+    fontWeight: '400',
   },
 
   nameContainer: {
@@ -140,7 +132,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '100%',
+    width: '50%',
     height: Size25 * 1.2,
     resizeMode: 'contain',
   },
@@ -185,5 +177,8 @@ const styles = StyleSheet.create({
     height: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 6,
+  },
+  aiVerifiedContainer: {
+    width: "100%",
   },
 });

@@ -1,4 +1,5 @@
-export const COLORS = {
+export const 
+COLORS = {
   black: '#000000',
   white: '#ffffff',
   primary: '#2563EB',
@@ -60,5 +61,7 @@ export const COLORS = {
   greyText2:"#9982B6",
   lightViolet2:"#F6F3FF",
   lightGrey:"#FBFBFB",
-  lightGrey2:"#DCDCDC"
+  lightGrey2:"#DCDCDC",
+  chipBg:"#F6F6F6",
+  greyText3:"#8F8F8F"
 };

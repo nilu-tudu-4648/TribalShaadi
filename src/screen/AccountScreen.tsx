@@ -28,6 +28,7 @@ import {
   SettingsIcon,
   RocketIcon,
   GovtIdIcon,
+  HeartIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { baseUrl, delay, imageUrl } from '../constants/functions';
@@ -45,6 +46,7 @@ import {
   getPackageByUserIdUrl,
   getSelectedUserUrl,
 } from '../constants/functions';
+import DeviceInfo from 'react-native-device-info';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -237,6 +239,15 @@ const AccountScreen = () => {
               );
             })}
           </View>
+          <View style={styles.logoContainer}>
+            <Image source={require('../assets/images/newlogo.png')} style={styles.logo} />
+            <AppText text={`Version ${DeviceInfo.getVersion()}`} textStyle={styles.logoutText} />
+            <View style={styles.madeWithContainer}>
+              <AppText text="Made with" textStyle={styles.logoutText} />
+              <HeartIcon color={COLORS.greyText3} width={Sizes.Size20*.7} height={Sizes.Size20} />
+              <AppText text="in Jharkhand" textStyle={styles.logoutText} />
+            </View>
+          </View>
         </View>
       )}
       <ProfileBottomSheet
@@ -351,5 +362,30 @@ const styles = StyleSheet.create({
     fontSize: Sizes.fontSize16,
     color: COLORS.greytext,
     textAlign: 'center',
+  },
+  logoContainer: {
+    position: 'absolute',
+    paddingVertical: Sizes.Size10,
+    paddingHorizontal: Sizes.Size20,
+    borderRadius: Sizes.Size10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    bottom: Sizes.Size20,
+  },
+  logoutText: {
+    fontSize: Sizes.fontSize12,
+    color: COLORS.greyText3,
+  },
+  madeWithContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Sizes.Size4,
+  },
+  logo: {
+    width: "100%",
+    height: Sizes.Size50/2,
+    resizeMode: 'contain',
+    bottom: Sizes.Size10,
   },
 });

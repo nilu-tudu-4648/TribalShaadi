@@ -227,14 +227,6 @@ const EditProfileScreen = () => {
               </View>
             </View>
           </View>
-          {!isImageValid ? (
-            <Image
-              source={require('../assets/images/imagevalid2.png')}
-              style={styles.image}
-            />
-          ) : (
-            <View style={styles.image} />
-          )}
           {/* Menu Items */}
           <View style={styles.menuContainer}>
             {menuItems.map(item => (
@@ -269,6 +261,14 @@ const EditProfileScreen = () => {
             ))}
           </View>
         </ScrollView>
+          {!isImageValid ? (
+            <Image
+              source={require('../assets/images/imagevalid.png')}
+              style={styles.image}
+            />
+          ) : (
+            <View style={styles.image} />
+          )}
       </AppSafeView>
       {loading && (
         <View style={styles.loaderOverlay}>
@@ -392,10 +392,11 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   image: {
-    width: '90%',
-    height: SIZES.height * 0.08,
+    width: '100%',
+    height: SIZES.height * 0.14,
     resizeMode: 'contain',
-    left: SIZES.h6,
+    bottom: Size20*4,
+    // alignSelf: 'center',
   },
   loaderOverlay: {
     position: 'absolute',

@@ -24,6 +24,7 @@ import {
 import AppToast from '../components/AppToast';
 import { UserProfileIcon } from '../components/svg/SvgIcons';
 import ProfileHeader from '../components/Header/ProfileHeader';
+import { globalStyles } from '../constants/globalStyles';
 
 const EditPersonalScreen = () => {
   const navigation = useNavigation();
@@ -282,10 +283,11 @@ const EditPersonalScreen = () => {
         <View style={styles.fieldContainer}>
           <AppTextInput
             placeholder="Enter your full name"
+            label={false}
             value={fullName}
             onChangeText={() => {}}
             keyboardType="default"
-            style={styles.inputField}
+            textInputStyle={globalStyles.inputField}
             editable={false}
           />
         </View>
@@ -293,11 +295,12 @@ const EditPersonalScreen = () => {
         {/* Gender Field (Read-only) */}
         <View style={styles.fieldContainer}>
           <AppTextInput
+            label={false}
             placeholder="Gender"
             value={formData.gender}
             onChangeText={() => {}}
             keyboardType="default"
-            style={styles.inputField}
+            textInputStyle={globalStyles.inputField}
             editable={false}
           />
         </View>
@@ -305,11 +308,12 @@ const EditPersonalScreen = () => {
         {/* Birth Date Field (Read-only) */}
         <View style={styles.fieldContainer}>
           <AppTextInput
+            label={false}
             placeholder="Birth Date"
             value={formData.birthDate}
             onChangeText={() => {}}
             keyboardType="default"
-            style={styles.inputField}
+            textInputStyle={globalStyles.inputField}
             editable={false}
           />
         </View>
@@ -317,11 +321,12 @@ const EditPersonalScreen = () => {
         {/* Phone Number Field (Read-only) */}
         <View style={styles.fieldContainer}>
           <AppTextInput
+            label={false}
             placeholder="Phone Number"
             value={formData.phoneNumber}
             onChangeText={() => {}}
             keyboardType="numeric"
-            style={styles.inputField}
+            textInputStyle={globalStyles.inputField}
             editable={false}
           />
         </View>
@@ -333,6 +338,9 @@ const EditPersonalScreen = () => {
             selectedValue={selectedReligion}
             placeholder="Select Religion"
             onPress={() => setShowReligionPicker(true)}
+            disabled={true}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
@@ -343,7 +351,9 @@ const EditPersonalScreen = () => {
             selectedValue={selectedTribe}
             placeholder="Select Tribe"
             onPress={() => setShowTribePicker(true)}
-            disabled={!selectedReligionId}
+            disabled={true}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
@@ -354,6 +364,8 @@ const EditPersonalScreen = () => {
             selectedValue={selectedMotherTongue}
             placeholder="Select Mother Tongue"
             onPress={() => setShowMotherTonguePicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
@@ -361,9 +373,12 @@ const EditPersonalScreen = () => {
         <View style={styles.fieldContainer}>
           <AppDropdown
             label=""
+            disabled={true}
             selectedValue={formData.maritalStatusName}
             placeholder="Select Marital Status"
             onPress={() => setShowMaritalStatusPicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
       </View>
@@ -422,7 +437,9 @@ const EditPersonalScreen = () => {
 
       <AppPickerModal
         visible={showMotherTonguePicker}
-        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
+        items={MOTHER_TONGUE.sort((a, b) =>
+          a.label.toLowerCase().localeCompare(b.label.toLowerCase()),
+        )}
         selectedValue={selectedMotherTongue}
         onSelect={handleMotherTongueSelection}
         onClose={() => setShowMotherTonguePicker(false)}
@@ -432,7 +449,9 @@ const EditPersonalScreen = () => {
 
       <AppPickerModal
         visible={showLanguagePicker}
-        items={MOTHER_TONGUE.sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))}
+        items={MOTHER_TONGUE.sort((a, b) =>
+          a.label.toLowerCase().localeCompare(b.label.toLowerCase()),
+        )}
         selectedValue={formData.motherTongue}
         onSelect={handleLanguageSelection}
         onClose={() => setShowLanguagePicker(false)}
@@ -475,7 +494,7 @@ const styles = StyleSheet.create({
     gap: Size20,
   },
   fieldContainer: {},
-  inputField: {},
+
   buttonContainer: {
     padding: Size8,
   },

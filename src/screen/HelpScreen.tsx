@@ -1,19 +1,27 @@
-import { StyleSheet, View, TouchableOpacity, Linking, Pressable } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  Image,
+} from 'react-native';
 import React from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppHeader from '../components/AppHeader';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
-import {
-  LightBulbIcon,
-  RightArrowIcon,
-} from '../components/svg/SvgIcons';
+import { LightBulbIcon, RightArrowIcon } from '../components/svg/SvgIcons';
 
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
-import { ChatBubbleIcon, EmailIcon, HeartIcon, LockIcon, MessageIcon, RefundIcon, SupportIcon, TermsIcon, WarningIcon } from '../components/svg/SvgIcons2';
-
+import {
+  HeartIcon,
+  LockIcon,
+  RefundIcon,
+  SupportIcon,
+  TermsIcon,
+  WarningIcon,
+} from '../components/svg/SvgIcons2';
 
 const HelpScreen = () => {
   const navigation = useNavigation<any>();
@@ -70,35 +78,11 @@ const HelpScreen = () => {
     },
     {
       id: 'tips',
-      title: 'Tips',
+      title: 'Safety guidelines',
       icon: WarningIcon,
       onPress: () => {
         navigation.navigate(ROUTES.STACK, { screen: ROUTES.TIPS });
       },
-    },
-  ];
-
-  const contactOptions = [
-    {
-      id: 'call',
-      title: 'Call Support',
-      icon: ChatBubbleIcon,
-      iconColor: COLORS.violet,
-      onPress: () => Linking.openURL('tel:+91 72507 16171'),
-    },
-    {
-      id: 'whatsapp',
-      title: 'WhatsApp Support',
-      icon: MessageIcon,
-      iconColor: '#25D366',
-      onPress: () => Linking.openURL('https://wa.me/917250716171'),
-    },
-    {
-      id: 'email',
-      title: 'Email Support',
-      icon: EmailIcon,
-      iconColor: '#3B82F6',
-      onPress: () => Linking.openURL('mailto:support@tribalshaadi.ai'),
     },
   ];
 
@@ -130,32 +114,16 @@ const HelpScreen = () => {
             );
           })}
         </View>
-
-        {/* Contact Options */}
         <View style={styles.contactContainer}>
-          {contactOptions.map(option => {
-            const IconComponent = option.icon;
-            return (
-              <TouchableOpacity
-                key={option.id}
-                style={styles.contactOption}
-                onPress={option.onPress}
-              >
-                <View
-                  style={[
-                    styles.contactIconContainer,
-                  ]}
-                >
-                  <IconComponent
-                    width={Sizes.fontSize16}
-                    height={Sizes.fontSize16}
-                    color={COLORS.white}
-                  />
-                </View>
-                <AppText text={option.title} textStyle={styles.contactText} />
-              </TouchableOpacity>
-            );
-          })}
+          <AppText text="Contact Support" textStyle={[styles.contactText,{fontSize:Sizes.fontSize24}]} />
+          <AppText
+            text="We will be happy to assist you further"
+            textStyle={styles.contactText}
+          />
+          <Image
+            source={require('../assets/images/supportimage.png')}
+            style={styles.contactImage}
+          />
         </View>
       </View>
     </AppSafeView>
@@ -171,11 +139,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: Sizes.Size20,
     justifyContent: 'space-between',
   },
   menuContainer: {
-    flex: 1,
     gap: Sizes.Size4,
   },
   menuItem: {
@@ -198,29 +164,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   contactContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Sizes.Size8,
-    paddingBottom: Sizes.Size20,
-  },
-  contactOption: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingVertical: Sizes.Size12,
-    paddingHorizontal: Sizes.Size16,
-    gap: Sizes.Size12,
-  },
-  contactIconContainer: {
-    width: Sizes.fontSize24,
-    height: Sizes.fontSize24,
-    borderRadius: Sizes.fontSize12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
   },
   contactText: {
     fontSize: Sizes.fontSize16,
     color: COLORS.black,
-    fontWeight: '600',
+    fontWeight: '500',
+    textAlign: 'center',
+    width: '55%',
+  },
+  contactImage: {
+    width: '100%',
+    height: Sizes.Size50 * 4,
+    resizeMode: 'contain',
   },
 });

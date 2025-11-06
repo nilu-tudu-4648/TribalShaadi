@@ -5,6 +5,8 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
+  StyleProp,
+  TextStyle,
 } from 'react-native';
 import { COLORS } from '../constants/AppColors';
 import {
@@ -26,6 +28,7 @@ interface AppPickerModalProps {
   onClose: () => void;
   isObjects?: boolean; // true if items are objects with id/name properties
   displayProperty?: string; // property name to display (default: 'name')
+  modalTitleStyle?: StyleProp<TextStyle>;
 }
 
 const AppPickerModal: React.FC<AppPickerModalProps> = ({
@@ -37,6 +40,7 @@ const AppPickerModal: React.FC<AppPickerModalProps> = ({
   onClose,
   isObjects = false,
   displayProperty = 'name',
+  modalTitleStyle,
 }) => {
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
@@ -46,7 +50,7 @@ const AppPickerModal: React.FC<AppPickerModalProps> = ({
             <TouchableOpacity onPress={onClose}>
               <AppText text="Cancel" textStyle={styles.modalButton} />
             </TouchableOpacity>
-            <AppText text={title} textStyle={styles.modalTitle} />
+            <AppText text={title} textStyle={[styles.modalTitle,modalTitleStyle]} />
             <View style={styles.modalButtonPlaceholder} />
           </View>
           <ScrollView style={styles.modalList}>

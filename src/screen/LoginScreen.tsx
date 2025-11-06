@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import {
   fontSize14,
   lignHeight24,
@@ -10,6 +18,10 @@ import {
   Size20,
   fontSize36,
   fontSize20,
+  fontSize16,
+  inputHeight,
+  borderWidth,
+  Size4,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
@@ -83,28 +95,37 @@ const LoginScreen: React.FC = () => {
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
-        <ScrollView 
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.content}>
             <View style={styles.headerSection}>
               <AppText text="Phone number" textStyle={styles.title} />
               <AppText text="Enter Mobile Number" textStyle={styles.subtitle} />
             </View>
+            <View style={styles.inputContainer}>
+              <Image
+                source={require('../assets/images/india.png')}
+                style={styles.phoneIcon}
+              />
+              <AppText text="+91" textStyle={styles.phoneCode} />
 
-            {/* Phone Number Input */}
-            <AppTextInput
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              placeholder="Phone number"
-              placeholderTextColor={COLORS.placeholderText}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              maxLength={10}
-              autoFocus={true}
-            />
+              {/* Phone Number Input */}
+              <AppTextInput
+                value={phoneNumber}
+                label={false}
+                onChangeText={handlePhoneNumberChange}
+                placeholder="Phone number"
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                maxLength={10}
+                textInputStyle={styles.inputStyl}
+              />
+            </View>
             <AppButton
               isLoading={loading}
               title="Verify"
@@ -122,7 +143,7 @@ const LoginScreen: React.FC = () => {
                   : styles.buttonTextEnabled,
               ]}
             />
-            
+
             {/* Error Message - Now positioned before spacer */}
             {alreadyExists && (
               <View style={styles.alreadyExistsContainer}>
@@ -144,10 +165,10 @@ const LoginScreen: React.FC = () => {
                 />
               </View>
             )}
-            
+
             {/* Spacer */}
             <View style={styles.spacer} />
-            
+
             {/* Info */}
             <View style={styles.infoContainer}>
               <AppText
@@ -215,9 +236,38 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     textAlign: 'center',
   },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Size8,
+    width: '100%',
+    paddingHorizontal: Size8 * 2,
+    paddingVertical: Size4 / 2,
+    borderRadius: Size4,
+    borderColor: COLORS.greyText,
+    borderWidth: borderWidth,
+    height: inputHeight,
+  },
+  inputStyl: {
+    borderWidth: 0,
+    width: '100%',
+    borderLeftWidth: borderWidth,
+    borderLeftColor: COLORS.greyText,
+    borderRadius: 0,
+    height: inputHeight * 0.8,
+  },
+  phoneIcon: {
+    width: Size20 * 1.5,
+    height: Size20 * 1.5,
+  },
+  phoneCode: {
+    fontSize: fontSize16,
+    color: COLORS.greyText,
+    fontWeight: '500',
+  },
   crossIcon: {
-    width: Size20 * 2,
-    height: Size20 * 2,
+    width: Size20 * 1.5,
+    height: Size20 * 1.5,
   },
   registerButton: {
     width: '25%',

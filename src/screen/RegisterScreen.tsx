@@ -5,11 +5,12 @@ import {
   lignHeight24,
   Size8,
   Size10,
-  lignHeight72,
   Size22,
   Size20,
-  fontSize36,
-  fontSize20,
+  borderWidth,
+  Size4,
+  inputHeight,
+  fontSize16,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +22,7 @@ import {
   sendOTPForLogin,
   validateIndianPhoneNumber,
 } from '../constants/functions';
+import { globalStyles } from '../constants/globalStyles';
 
 type RootStackParamList = {
   Login: undefined;
@@ -77,27 +79,30 @@ const RegisterScreen: React.FC = () => {
   const isButtonDisabled = !phoneValidation.isValid;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.headerSection}>
-          <AppText text="What’s your phone number?" textStyle={styles.title} />
-          <AppText
-            text="A special experience might just be ‘calling‘ !"
-            textStyle={styles.subtitle}
+    <SafeAreaView style={globalStyles.container}>
+      <View style={globalStyles.content}>
+        <AppText text="What’s your phone number?" textStyle={globalStyles.title} />
+        <AppText text="A special experience might just be ‘calling‘ !" textStyle={globalStyles.subtitle} />
+
+        <View style={styles.inputContainer}>
+          <Image
+            source={require('../assets/images/india.png')}
+            style={styles.phoneIcon}
+          />
+          <AppText text="+91" textStyle={styles.phoneCode} />
+
+          {/* Phone Number Input */}
+          <AppTextInput
+            value={phoneNumber}
+            label={false}
+            onChangeText={handlePhoneNumberChange}
+            placeholder="Phone number"
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            maxLength={10}
+            textInputStyle={styles.inputStyl}
           />
         </View>
-
-        {/* Phone Number Input */}
-        <AppTextInput
-          value={phoneNumber}
-          onChangeText={handlePhoneNumberChange}
-          placeholder="Phone number"
-          placeholderTextColor={COLORS.placeholderText}
-          keyboardType="phone-pad"
-          autoComplete="tel"
-          maxLength={10}
-          autoFocus={true}
-        />
         <AppButton
           isLoading={loading}
           title="Verify"
@@ -156,26 +161,6 @@ const RegisterScreen: React.FC = () => {
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.white },
-  content: {
-    flex: 1,
-    paddingHorizontal: lignHeight24,
-    paddingVertical: lignHeight24,
-    gap: lignHeight24,
-    paddingTop: lignHeight72,
-  },
-  headerSection: { gap: Size8 },
-  title: {
-    fontSize: fontSize36,
-    fontWeight: '500',
-    color: COLORS.black,
-  },
-  subtitle: {
-    fontSize: fontSize20,
-    color: COLORS.greyText2,
-    fontWeight: '400',
-
-  },
   spacer: { flex: 1 },
   button: {
     borderRadius: lignHeight24,
@@ -201,7 +186,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   crossIcon: {
-    width: Size20 * 2,
-    height: Size20 * 2,
+    width: Size20 * 1.5,
+    height: Size20 * 1.5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Size8,
+    width: '100%',
+    paddingHorizontal: Size8*2,
+    paddingVertical:Size4/2,
+    borderRadius: Size4,
+    borderColor: COLORS.greyText,
+    borderWidth: borderWidth,
+    height:inputHeight
+  },
+  inputStyl: {
+    borderWidth: 0,
+    width: '100%',
+    borderLeftWidth: borderWidth,
+    borderLeftColor: COLORS.greyText,
+    borderRadius:0,
+    height:inputHeight*.8
+  },
+  phoneIcon: {
+    width: Size20*1.5,
+    height: Size20*1.5,
+  },
+  phoneCode: {
+    fontSize: fontSize16,
+    color: COLORS.greyText,
+    fontWeight: '500',
   },
 });

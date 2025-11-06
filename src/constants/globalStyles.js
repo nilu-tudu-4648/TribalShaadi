@@ -8,6 +8,7 @@ import {
   lignHeight24,
   lignHeight20,
   lignHeight72,
+  borderWidth,
 } from './Sizes';
 
 export const globalStyles = StyleSheet.create({
@@ -57,5 +58,9 @@ export const globalStyles = StyleSheet.create({
   },
   continueButtonTextInactive: {
     color: COLORS.textInactive,
+  },
+  inputField: {
+    borderWidth: 0,
+    borderBottomWidth: borderWidth,
   },
 });

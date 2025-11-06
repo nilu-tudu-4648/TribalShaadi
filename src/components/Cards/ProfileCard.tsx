@@ -18,6 +18,10 @@ import {
   Size10,
   Size8,
   lignHeight57,
+  fontWeight700,
+  Size14,
+  Size4,
+  fontSize18,
 } from '../../constants/Sizes';
 import {
   convertCmToReadableHeight,
@@ -39,11 +43,13 @@ import {
   CigrateIcon,
   HomeWorkOutlineIcon,
   HeartIcon2,
+  DegreeIcon,
+  EducationIcon2,
 } from '../svg/SvgIcons';
 import AppChip from '../AppChip';
-import FONT_FAMILY from '../../constants/Fonts';
 import NameComponent from '../NameComponent';
-import { ReportIcon } from '../svg/SvgIcons2';
+import { CalendarIcon2, ReportIcon } from '../svg/SvgIcons2';
+import TagPill from '../chips/TagPill';
 
 export interface ProfileCardProps {
   name: string;
@@ -133,175 +139,96 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             end={{ x: 0, y: 1 }}
             style={styles.imageOverlay}
           />
-
-            <NameComponent
-              name={name}
-              age={age}
-              isVerified={isVerified}
-              isPremium={isPremium}
-              height={height}
-              religion={religion}
-              caste={caste}
-              districtName={districtName}
-              stateName={stateName}
-              isNameLoading={isNameLoading}
-            />
+          <NameComponent
+            name={name}
+            age={age}
+            isVerified={isVerified}
+            isPremium={isPremium}
+            height={height}
+            religion={religion}
+            caste={caste}
+            districtName={districtName}
+            stateName={stateName}
+            isNameLoading={isNameLoading}
+          />
         </ImageBackground>
       </View>
-      <View style={styles.bioSection}>
-        <AppText text="Bio" textStyle={styles.bioLabel} />
-        <AppText text={bio} textStyle={styles.bio} />
-      </View>
-      <View style={styles.horizontalLine} />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <ReligionIcon />
-          <AppText text={religion} textStyle={styles.value} />
-          <AppText text={'Religion'} textStyle={styles.label} />
-        </View>
-        <View style={styles.verticalLine} />
-        <View style={styles.column}>
-          <TribeIcon />
-          <AppText text={caste} textStyle={styles.value} />
-          <AppText text={'Tribe'} textStyle={styles.label} />
-        </View>
-      </View>
-      <View style={styles.horizontalLine} />
-      <View style={styles.section}>
-        <AppText text="About" textStyle={styles.sectionTitle} />
-        <View style={styles.detailRow}>
-          <HeightIcon />
-          <View style={styles.detailText}>
-            <AppText text="Height" textStyle={styles.label} />
-            <AppText
-              text={convertCmToReadableHeight(height)}
-              textStyle={styles.value}
-            />
-          </View>
-        </View>
-        <View style={styles.detailRow}>
-          <HeartIcon2 color={COLORS.black} />
-          <View style={styles.detailText}>
-            <AppText text="Marital Status" textStyle={styles.label} />
-            <AppText text={maritalStatus} textStyle={styles.value} />
-          </View>
-        </View>
-        <View style={styles.detailRow}>
-          <CalendarIcon color={COLORS.black} />
-          <View style={styles.detailText}>
-            <AppText text="Date of Birth" textStyle={styles.label} />
-            <AppText text={formatDateShort(dob)} textStyle={styles.value} />
-          </View>
-        </View>
-        <View style={styles.detailRow}>
-          <LanguageIcon color={COLORS.black} />
-          <View style={styles.detailText}>
-            <AppText text="Mother Tongue" textStyle={styles.label} />
-            <AppText text={motherTongue} textStyle={styles.value} />
-          </View>
-        </View>
-        <View style={styles.detailRow}>
-          <RupeesIcon color={COLORS.black} />
-          <View style={styles.detailText}>
-            <AppText text="Annual Income" textStyle={styles.label} />
-            <AppText text={annualIncome} textStyle={styles.value} />
-          </View>
-        </View>
-      </View>
 
-      <View style={styles.banner}>
-        <AppText
-          text="matters most in a Life Partner!"
-          textStyle={styles.bannerSubtitle}
-        />
-        <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
+      <View style={styles.horizontalLine} />
+      <View style={styles.bioSection}>
+        <AppText text={bio} textStyle={styles.bio} />
+        <View style={styles.horizontalLine} />
+        <View style={styles.horizontalLine} />
+        <View style={styles.detailRow}>
+          <TagPill icon={<ReligionIcon />} label={religion} />
+          <TagPill icon={<TribeIcon />} label={caste} />
+          <TagPill
+            icon={<HeightIcon />}
+            label={convertCmToReadableHeight(height)}
+          />
+          <TagPill icon={<HeartIcon2 />} label={maritalStatus} />
+          <TagPill icon={<CalendarIcon />} label={formatDateShort(dob)} />
+          <TagPill icon={<LanguageIcon />} label={motherTongue} />
+          <TagPill icon={<RupeesIcon />} label={annualIncome} />
+        </View>
       </View>
+      <View style={styles.horizontalLine} />
       <Image
         source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
         style={styles.galleryImage}
       />
+      <View style={styles.horizontalLine} />
       <View style={styles.section}>
-        <View style={styles.detailRow2}>
-          <View style={styles.detailText}>
-            <AppText text="Employed in" textStyle={styles.label} />
-            <AppText text={employedIn} textStyle={styles.value} />
-          </View>
-          <PublicSectorIcon />
-        </View>
-        <View style={styles.thinLine} />
-        <View style={styles.detailRow2}>
-          <View style={styles.detailText}>
-            <AppText text="Occupation" textStyle={styles.label} />
-            <AppText text={occupation} textStyle={styles.value} />
-          </View>
-          <WorkIcon />
-        </View>
-        <View style={styles.thinLine} />
-        <View style={styles.detailRow2}>
-          <View style={styles.detailText}>
-            <AppText text="Organisation Name" textStyle={styles.label} />
-            <AppText text={organizationName} textStyle={styles.value} />
-          </View>
-          <HomeWorkOutlineIcon />
+        <AppText text="Education" textStyle={styles.sectionTitle} />
+        <TagPill icon={<DegreeIcon />} label={highestQualification} />
+        <TagPill icon={<EducationIcon2 />} label={college} />
+      </View>
+      <View style={styles.section}>
+        <AppText text="Career" textStyle={styles.sectionTitle} />
+        <TagPill icon={<PublicSectorIcon />} label={employedIn} />
+        <TagPill icon={<WorkIcon />} label={occupation} />
+        <TagPill icon={<HomeWorkOutlineIcon />} label={organizationName} />
+      </View>
+      <View style={styles.section}>
+        <View style={styles.banner}>
+          <AppText
+            text="matters most in a Life Partner!"
+            textStyle={styles.bannerSubtitle}
+          />
+          <AppText text={partnerExpectation} textStyle={styles.bannerTitle} />
         </View>
       </View>
-
-      <View style={styles.banner}>
-        <AppText
-          text="planning to settle down"
-          textStyle={styles.bannerSubtitle}
-        />
-        <AppText text={settlingTime} textStyle={styles.bannerTitle} />
-      </View>
-
+      <View style={styles.horizontalLine} />
       <View style={styles.imageWrapper}>
         <Image
           source={{ uri: imageUrl + galleryImageList[1]?.imageUrl }}
           style={styles.galleryImage}
         />
       </View>
-
-      <View style={styles.section}>
-        <AppText text="Education" textStyle={styles.sectionTitle} />
-        <View style={styles.detailRow}>
-          <View style={styles.detailText}>
-            <AppText text="Highest Qualification" textStyle={styles.label} />
-            <AppText text={highestQualification} textStyle={styles.value} />
-          </View>
-        </View>
-        <View style={styles.detailRow}>
-          <View style={styles.detailText}>
-            <AppText text="College/University" textStyle={styles.label} />
-            <AppText text={college} textStyle={styles.value} />
-          </View>
-        </View>
-      </View>
       <View style={styles.horizontalLine} />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <EatingIcon />
-          <AppText text={eatingHabits} textStyle={styles.value} />
-          <AppText text={'Eating Habits'} textStyle={styles.label} />
-        </View>
-        <View style={styles.verticalLine} />
-        <View style={styles.column}>
-          <DrinkingIcon />
-          <AppText text={drinkingHabits} textStyle={styles.value} />
-          <AppText text={'Drinking Habits'} textStyle={styles.label} />
-        </View>
-      </View>
-      <View style={styles.thinLine} />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <CigrateIcon />
-          <AppText text={smokingHabits} textStyle={styles.value} />
-          <AppText text={'Smoking Habits'} textStyle={styles.label} />
-        </View>
-        <View style={styles.verticalLine} />
-        <View style={styles.column}>
-          <KidsIcon />
-          <AppText text={kids} textStyle={styles.value} />
-          <AppText text={'Kids'} textStyle={styles.label} />
+      <View style={styles.section}>
+        <AppText text="Life Style" textStyle={styles.sectionTitle} />
+        <View style={styles.detailRow}>
+          <TagPill
+            icon={<EatingIcon />}
+            label={eatingHabits}
+            containerStyle={{ width: '46%' }}
+          />
+          <TagPill
+            icon={<DrinkingIcon />}
+            label={drinkingHabits}
+            containerStyle={{ width: '46%' }}
+          />
+          <TagPill
+            icon={<CigrateIcon />}
+            label={smokingHabits}
+            containerStyle={{ width: '46%' }}
+          />
+          <TagPill
+            icon={<KidsIcon />}
+            label={kids}
+            containerStyle={{ width: '46%' }}
+          />
         </View>
       </View>
       <View style={styles.horizontalLine} />
@@ -317,13 +244,26 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             />
           ))}
         </View>
-        <Pressable
-                onPress={openReport}
-                style={styles.reportButtonContainer}
-              >
-                <ReportIcon />
-                <AppText text="Report" textStyle={styles.reportButtonText} />
-              </Pressable>
+        <View style={styles.horizontalLine} />
+        <View style={styles.banner}>
+          <View style={styles.calendarContainer}>
+            <View style={styles.calendarTextContainer}>
+              <AppText
+                text={`${name} is ${maritalStatus} and want to settle down ${settlingTime}`}
+                textStyle={{ fontSize: fontSize18 }}
+              />
+            </View>
+            <View style={{ width: '10%', justifyContent: 'center' }}>
+              <CalendarIcon2 />
+            </View>
+          </View>
+        </View>
+        <View style={styles.horizontalLine} />
+        <Pressable onPress={openReport} style={styles.reportButtonContainer}>
+          <ReportIcon />
+          <AppText text="Report" textStyle={styles.reportButtonText} />
+        </Pressable>
+        <View style={styles.horizontalLine} />
       </View>
     </ScrollView>
   );
@@ -332,6 +272,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 export default React.memo(ProfileCard);
 
 const styles = StyleSheet.create({
+  calendarTextContainer: {
+    width: '85%',
+  },
+  calendarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Size8,
+  },
   imageContainer: {
     position: 'relative',
     width: '100%',
@@ -353,89 +301,17 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  bioLabel: {
-    fontWeight: '700',
-    fontStyle: 'italic',
-    color: COLORS.textGrey,
-  },
   bio: {
-    fontSize: fontSize14,
-    color: COLORS.textGrey,
-    lineHeight: 20,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: SIZES.padding,
-    gap: SIZES.padding,
-  },
-  declineButton: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    alignItems: 'center',
-    elevation: 3,
-  },
-  connectButtonWrapper: {
-    flex: 1,
-    borderRadius: SIZES.radius,
-    shadowColor: '#5167FC',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  connectButton: {
-    flex: 1,
-    borderRadius: SIZES.radius,
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  declineText: {
-    color: COLORS.textInactive,
-    fontWeight: '700',
     fontSize: fontSize16,
-  },
-  connectText: {
-    color: COLORS.white,
-    fontWeight: '700',
-    fontSize: fontSize16,
+    color: COLORS.secondaryText,
   },
   bioSection: {
     padding: SIZES.padding,
-    gap: SIZES.base,
   },
   horizontalLine: {
     height: Size10,
-    backgroundColor: COLORS.divider,
     width: SIZES.width,
     alignSelf: 'center',
-  },
-  verticalLine: {
-    width: 1,
-    backgroundColor: COLORS.divider,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: SIZES.padding,
-  },
-  column: {
-    alignItems: 'flex-start',
-    gap: SIZES.base / 2,
-    flex: 1,
-    paddingLeft: SIZES.padding2,
-    justifyContent: 'space-between',
-  },
-  value: {
-    fontWeight: 'bold',
-    fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-  },
-  label: {
-    color: COLORS.textGrey,
-    fontSize: fontSize14,
   },
   section: {
     padding: SIZES.padding,
@@ -443,38 +319,28 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSize16,
-    fontWeight: 'bold',
-    color: COLORS.violet,
+    fontWeight: fontWeight700,
+    color: COLORS.secondaryText,
   },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
     gap: SIZES.padding,
-  },
-  detailRow2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: SIZES.padding,
-  },
-  detailText: {
-    gap: SIZES.base2,
   },
   banner: {
-    backgroundColor: COLORS.bannerColor,
+    backgroundColor: COLORS.cardBg,
     padding: SIZES.padding,
+    paddingHorizontal: SIZES.h4,
     alignItems: 'flex-start',
     gap: SIZES.base / 2,
+    borderRadius: Size8,
   },
   bannerTitle: {
     fontSize: fontSize24,
-    fontWeight: '700',
-    color: COLORS.white,
-    fontStyle: 'italic',
+    fontWeight: fontWeight700,
   },
   bannerSubtitle: {
     fontSize: fontSize14,
-    color: COLORS.white,
   },
   interestsContainer: {
     flexDirection: 'row',
@@ -488,11 +354,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: lignHeight57,
   },
-  thinLine: {
-    height: 1,
-    backgroundColor: COLORS.borderViolet,
-    width: '100%',
-  },
   galleryImage: {
     width: '100%',
     height: SIZES.height * 0.7,
@@ -501,10 +362,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.divider,
   },
   interestChip: {
-    backgroundColor: COLORS.transparent,
-    borderColor: COLORS.borderBottom2,
-    borderWidth: 1,
-    borderRadius: Size8,
+    paddingHorizontal: Size14,
+    paddingVertical: Size4,
+    borderRadius: Size14,
+    backgroundColor: COLORS.chipBg,
+    borderWidth: 0,
   },
   reportButtonContainer: {
     alignItems: 'center',

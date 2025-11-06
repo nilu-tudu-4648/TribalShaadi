@@ -75,6 +75,9 @@ export const Size12 = screenWidth("3%");
 export const Size40 = screenWidth("9.5%");
 export const Size50 = screenWidth("12.5%");
 export const inputHeight = Size40 * 1.4;
+export const fontWeight500 = '500';
+export const fontWeight600 = '600';
+export const fontWeight700 = '700';
 
 export const SIZES = {
   // global sizes

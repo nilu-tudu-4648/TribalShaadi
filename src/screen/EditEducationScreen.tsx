@@ -37,6 +37,7 @@ import AppToast from '../components/AppToast';
 import ProfileHeader from '../components/Header/ProfileHeader';
 import { EducationIcon } from '../components/svg/SvgIcons';
 import { ROUTES } from '../constants/data';
+import { globalStyles } from '../constants/globalStyles';
 
 const EditEducationScreen = () => {
   const navigation = useNavigation();
@@ -274,19 +275,22 @@ const EditEducationScreen = () => {
             selectedValue={formData.educationName}
             placeholder="Select Education Level"
             onPress={() => setShowEducationPicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
         {/* College/Institution Name */}
         <View>
           <AppTextInput
+          label={false}
             placeholder="College/Institution Name"
             value={formData.collegeName}
             onChangeText={text =>
               setFormData(prev => ({ ...prev, collegeName: text }))
             }
             keyboardType="default"
-            textInputStyle={styles.textInput}
+            textInputStyle={globalStyles.inputField}
           />
         </View>
 
@@ -297,6 +301,8 @@ const EditEducationScreen = () => {
             selectedValue={formData.companyTypeName}
             placeholder="You are working with"
             onPress={() => setShowCompanyTypePicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
 
@@ -308,6 +314,8 @@ const EditEducationScreen = () => {
             }
             placeholder="Select Job Role"
             onPress={() => setShowJobRolePicker(true)}
+            dropdownStyle={globalStyles.inputField}
+            isDropdownIcon={true}
           />
         </View>
         {/* Job Role Dropdown */}
@@ -316,13 +324,14 @@ const EditEducationScreen = () => {
             {/* Company Name */}
             <View>
               <AppTextInput
+              label={false}
                 placeholder="Company Name"
                 value={formData.companyName}
                 onChangeText={text =>
                   setFormData(prev => ({ ...prev, companyName: text }))
                 }
                 keyboardType="default"
-                textInputStyle={styles.textInput}
+                textInputStyle={globalStyles.inputField}
               />
             </View>
 
@@ -333,6 +342,8 @@ const EditEducationScreen = () => {
                 selectedValue={formData.salaryName}
                 placeholder="Select Salary Range"
                 onPress={() => setShowSalaryPicker(true)}
+                dropdownStyle={globalStyles.inputField}
+                isDropdownIcon={true}
               />
             </View>
           </>

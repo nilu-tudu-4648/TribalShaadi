@@ -30,6 +30,7 @@ import {
   SETTLING_DOWN_OPTIONS,
   SMOKING_OPTIONS,
 } from '../constants/data';
+import { globalStyles } from '../constants/globalStyles';
 
 const EditLifeScreen = () => {
   const navigation = useNavigation();
@@ -266,6 +267,9 @@ const EditLifeScreen = () => {
               console.warn('No states available for selection');
             }
           }}
+          disabled={true}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* City Dropdown */}
@@ -276,9 +280,10 @@ const EditLifeScreen = () => {
           onPress={() =>
             !citiesLoading && localCities.length > 0 && setShowCityPicker(true)
           }
-          disabled={
-            citiesLoading || !formData.selectedState || localCities.length === 0
-          }
+     
+          disabled={true}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* Height Dropdown */}
@@ -287,6 +292,9 @@ const EditLifeScreen = () => {
           selectedValue={convertCmToReadableHeight(formData.heightName)}
           placeholder="Select Height"
           onPress={() => setShowHeightPicker(true)}
+          disabled={true}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* Diet Preference Dropdown */}
@@ -295,6 +303,8 @@ const EditLifeScreen = () => {
           selectedValue={formData.dietName}
           placeholder="Select Diet Preference"
           onPress={() => setShowDietPicker(true)}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* Drinking Dropdown */}
@@ -303,6 +313,8 @@ const EditLifeScreen = () => {
           selectedValue={formData.drinkingName}
           placeholder="Do you drink?"
           onPress={() => setShowDrinkingPicker(true)}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* Smoking Dropdown */}
@@ -311,6 +323,8 @@ const EditLifeScreen = () => {
           selectedValue={formData.smokingName}
           placeholder="Smoking Habits"
           onPress={() => setShowSmokingPicker(true)}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
 
         {/* Timeline Dropdown */}
@@ -319,6 +333,8 @@ const EditLifeScreen = () => {
           selectedValue={formData.timelineName}
           placeholder="Marriage Timeline"
           onPress={() => setShowTimelinePicker(true)}
+          dropdownStyle={globalStyles.inputField}
+          isDropdownIcon={true}
         />
       </View>
 
