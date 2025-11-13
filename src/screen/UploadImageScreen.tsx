@@ -291,7 +291,7 @@ const UploadImageScreen = () => {
           title="Continue"
           onPress={handleContinue}
           isLoading={loader}
-          isButtonDisabled={isButtonDisabled}
+          // isButtonDisabled={isButtonDisabled}
           buttonStyle={[
             globalStyles.continueButton,
             isButtonDisabled

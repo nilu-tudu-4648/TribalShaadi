@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/AppColors';
@@ -19,17 +20,21 @@ import {
   screenHeight,
   screenWidth,
   fontSize20,
-  fontSize12,
+  fontSize14,
+  Size4,
 } from '../constants/Sizes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
 import ErrorBoundary from '../components/ErrorBoundary';
 import OnboardingButton from '../components/buttons/OnboardingButton';
+import { ROUTES } from '../constants/data';
 
 type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   OTP: { phoneNumber: string };
+  TermsAndConditions: undefined;
+  PrivacyPolicy: undefined;
 };
 
 
@@ -98,8 +103,17 @@ const WelcomeScreen = () => {
             </View>
 
             <View style={styles.termsContainer}>
-              <AppText textStyle={styles.termsText} text="By signing up, you agree to our Terms and Conditions"/>
-              <AppText textStyle={styles.termsText} text="See how we use your data in our Privacy Policy"/>
+              <AppText textStyle={styles.termsText} text="By continuing, you agree to our"/>
+              <View style={{flexDirection:'row',gap:Size4,alignItems:'center',justifyContent:'center'}}>
+                <Pressable onPress={() => navigation.navigate(ROUTES.TERMS_AND_CONDITIONS as 'TermsAndConditions')}>
+
+              <AppText textStyle={[styles.termsText,{borderBottomWidth:1,borderBottomColor:COLORS.greyText}]} text="Terms & Conditions"/>
+                </Pressable>
+                <AppText textStyle={styles.termsText} text="and"/>
+                <Pressable onPress={() => navigation.navigate(ROUTES.PRIVACY_POLICY as 'PrivacyPolicy')}>
+                  <AppText textStyle={[styles.termsText,{borderBottomWidth:1,borderBottomColor:COLORS.greyText}]} text="Privacy Policy"/>
+                </Pressable>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -149,7 +163,6 @@ const styles = StyleSheet.create({
   titleText: {
     color: COLORS.black,
     fontSize: fontSize36,
-    fontWeight: '400',
     textAlign: 'left',
   },
   tribeText: {
@@ -171,13 +184,11 @@ const styles = StyleSheet.create({
   orText: {
     color: COLORS.black,
     fontSize: fontSize20,
-    fontWeight: '400',
   
   },
   loginLink: {
     color: COLORS.violet,
     fontSize: fontSize20,
-    fontWeight: '400',
   },
   termsContainer: {
     paddingTop: Size8,
@@ -185,8 +196,7 @@ const styles = StyleSheet.create({
   termsText: {
     textAlign: 'center',
     color: COLORS.greyText,
-    fontSize: fontSize12,
-    fontWeight: '400',
+    fontSize: fontSize14,
   },
 });
 

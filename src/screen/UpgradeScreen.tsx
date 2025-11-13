@@ -26,9 +26,9 @@ import {
   SIZES,
   Size25,
   fontSize36,
-  fontSize20,
-  Size14,
   Size10,
+  fontSize20,
+  fontWeight500,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
@@ -59,6 +59,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
 import RazorpayCheckout from 'react-native-razorpay';
 import Loader from '../components/loader/Loader';
+import PremiumCard from '../components/Cards/PremiumCard';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const {
@@ -72,7 +73,7 @@ const UpgradeScreen = () => {
   const [selectedPlan, setSelectedPlan] = useState(1);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
-
+  console.log(user,'user')
   const features = [
     {
       icon: <InfinityIcon color={COLORS.white} />,
@@ -155,7 +156,6 @@ const UpgradeScreen = () => {
       generateRazorPayOrderIdApi(generateRazorPayOrderIdUrl, paymentData),
     );
   };
-
   useEffect(() => {
     if (checkoutInProgress && razorPayOrderId) {
       const selectedPackage = packageList.find(
@@ -265,7 +265,17 @@ const UpgradeScreen = () => {
   return (
     <>
       <AppSafeView style={styles.container}>
-        {packageByUserId.length === 0 ? (
+        {/* If user is female, always show as premium */}
+        {user.gender === "Female" ? (
+          <PremiumCard
+            packageData={{
+              netAmount:1500,
+              endDate:"Till Marriage",
+            }}
+            features={features}
+            endDateText={`Lifetime Access`}
+          />
+        ) : packageByUserId.length === 0 ? (
           <>
             <ImageBackground
               source={require('../assets/images/update.jpg')}
@@ -278,12 +288,18 @@ const UpgradeScreen = () => {
                 <View style={styles.backButton}>
                   <ArrowIosBackSvg color={COLORS.black} />
                 </View>
+
                 <Image
                   source={require('../assets/images/premiumLogo.png')}
                   style={styles.logo}
                   resizeMode="contain"
                 />
               </Pressable>
+              <View style={styles.interestContainer}>
+                <Image source={require('../assets/images/upgradeblur.png')} style={styles.interestImage} />
+                <AppText text="See who’s interested in you" textStyle={styles.title} />
+                <AppText text="Turn interests into conversations—faster" textStyle={styles.subtitle} />
+              </View>
 
               <View style={styles.featuresContainer}>
                 {features.map((feature, index) => (
@@ -376,75 +392,14 @@ const UpgradeScreen = () => {
             </View>
           </>
         ) : (
-          <View style={styles.premiumContainer}>
-            <Pressable
-              onPress={() =>
-                (navigation as any).navigate(ROUTES.MAIN_TABS, {
-                  screen: ROUTES.ACCOUNT,
-                })
-              }
-              style={styles.header}
-            >
-              <View style={styles.backButton}>
-                <ArrowIosBackSvg color={COLORS.black} />
-              </View>
-              <Image
-                source={require('../assets/images/premiumLogo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </Pressable>
-            <View style={styles.offerContainer}>
-              <AppText
-                text="Premium Member"
-                textStyle={styles.offerTitleWhite}
-              />
-              <AppText
-                text={`₹${packageByUserId[0].netAmount}`}
-                textStyle={styles.offerPriceWhite}
-              />
-              <View style={styles.offerBadge}>
-                <AppText
-                  text={`Ends on ${formatDateShort(
-                    packageByUserId[0].endDate,
-                  )}`}
-                  textStyle={styles.offerContainerText}
-                />
-              </View>
-            </View>
-            <View>
-              <AppText
-                text="Get more with Premium"
-                textStyle={styles.offerTitle}
-              />
-              <AppText
-                text="Go Premium and enjoy full control of"
-                textStyle={styles.offerSubTitle}
-              />
-              <AppText
-                text="your Matchmaking"
-                textStyle={styles.offerSubTitle}
-              />
-            </View>
-            <Image
-              source={require('../assets/images/offers.png')}
-              style={styles.offerImage}
-              resizeMode="contain"
-            />
-            <View style={styles.featuresContainer}>
-              {features.map((feature, index) => (
-                <View key={index} style={styles.featureItem}>
-                  <View style={styles.featureIconContainer}>
-                    {feature.icon}
-                  </View>
-                  <AppText
-                    text={feature.title}
-                    textStyle={styles.featureTitle}
-                  />
-                </View>
-              ))}
-            </View>
-          </View>
+          <PremiumCard
+            packageData={{
+              netAmount: packageByUserId[0].netAmount,
+              endDate: packageByUserId[0].endDate,
+            }}
+            features={features}
+            endDateText={`Ends on ${formatDateShort(packageByUserId[0].endDate)}`}
+          />
         )}
       </AppSafeView>
       {loader && (
@@ -466,8 +421,11 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
+    height: SIZES.height * 0.8,
     paddingTop: Size40,
     justifyContent: 'space-between',
+    resizeMode: 'contain',
+    opacity: 0.8,
   },
   header: {
     flexDirection: 'row',
@@ -488,12 +446,31 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: '100%',
-    height: Size40,
+    height: Size40 * 1.2,
     resizeMode: 'contain',
+  },
+  title: {
+    fontSize: fontSize20,
+    fontWeight: fontWeight500,
+    color: COLORS.black,
+  },
+  subtitle: {
+    fontSize: fontSize14,
+    color: COLORS.black,
+  },
+  interestContainer: {
+    alignItems: 'flex-start',
+    left: Size16,
+  },
+  interestImage: {
+    width: '30%',
+    height: Size40 * 1.2,
+    resizeMode: 'contain',
+    alignSelf: 'flex-start',
   },
   featuresContainer: {
     paddingVertical: Size40,
-    gap: Size16,
+    gap: Size8,
     alignItems: 'flex-start',
     alignSelf: 'center',
   },
@@ -510,7 +487,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.violet,
   },
   featureTitle: {
-    fontSize: fontSize16,
+    fontSize: fontSize14,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     color: COLORS.black,
   },
@@ -610,67 +587,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize12,
     paddingVertical: Size12,
     paddingHorizontal: Size20,
-  },
-  offerImage: {
-    width: '100%',
-    height: SIZES.height * 0.3,
-    resizeMode: 'contain',
-  },
-  premiumContainer: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    paddingVertical: Size20,
-    justifyContent: 'space-between',
-  },
-  offerTitle: {
-    fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.black,
-    textAlign: 'center',
-  },
-  offerSubTitle: {
-    fontSize: fontSize14,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.black,
-    textAlign: 'center',
-  },
-  offerContainer: {
-    backgroundColor: COLORS.violet,
-    height: SIZES.height * 0.15,
-    borderRadius: Size12,
-    width: '92%',
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    padding: Size12,
-  },
-  offerContainerText: {
-    fontSize: fontSize12,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.black,
-    textAlign: 'center',
-  },
-  offerTitleWhite: {
-    fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-    color: COLORS.white,
-  },
-  offerPriceWhite: {
-    fontSize: fontSize20,
-    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    textAlign: 'center',
-    color: COLORS.white,
-  },
-  offerBadge: {
-    backgroundColor: COLORS.offerBg,
-    padding: Size4,
-    borderRadius: Size12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Size14,
   },
   loaderOverlay: {
     position: 'absolute',

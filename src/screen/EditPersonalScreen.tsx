@@ -237,6 +237,7 @@ const EditPersonalScreen = () => {
         id: user.id,
         religionId: selectedReligionId,
         communityId: selectedTribeId,
+        // gender: "Female",
         ...(formData.subCommunityId && {
           subCommunityId: formData.subCommunityId,
         }),
@@ -389,8 +390,8 @@ const EditPersonalScreen = () => {
           title="Save"
           onPress={handleSave}
           isLoading={loader}
-          buttonStyle={styles.saveButton}
-          textStyle={styles.saveButtonText}
+          buttonStyle={[globalStyles.continueButton,globalStyles.continueButtonActive]}
+          textStyle={[globalStyles.continueButtonText,globalStyles.continueButtonTextActive]}
         />
       </View>
 
@@ -497,13 +498,6 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     padding: Size8,
-  },
-  saveButton: {
-    backgroundColor: COLORS.violet,
-  },
-  saveButtonText: {
-    color: COLORS.white,
-    fontWeight: '600',
   },
 });
 

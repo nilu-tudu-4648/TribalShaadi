@@ -7,12 +7,13 @@ import { AppRegistry } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import App from './App';
 import { name as appName } from './app.json';
+import { NOTIFICATION_MESSAGES } from './src/constants/data';
 
 // Handle background messages (required by RN Firebase)
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   try {
     const { title, body } = remoteMessage?.notification || {};
-    if (!title || !body || title === 'testing') return;
+    if (!title || !body || title === NOTIFICATION_MESSAGES.TESTING.title) return;
     // Intentionally do not show local notifications in background/quit; OS handles notification payloads
   } catch (_) {}
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   SafeAreaView,
@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import {
   fontSize14,
@@ -19,21 +20,18 @@ import {
   fontSize36,
   fontSize20,
   fontSize16,
-  inputHeight,
-  borderWidth,
-  Size4,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import AppTextInput from '../components/AppTextInput';
 import AppToast from '../components/AppToast';
 import {
   sendOTPForLogin,
   validateIndianPhoneNumber,
 } from '../constants/functions';
+import { globalStyles } from '../constants/globalStyles';
 
 type RootStackParamList = {
   Login: undefined;
@@ -45,21 +43,20 @@ const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [alreadyExists, setAlreadyExists] = useState(false);
-  const [phoneValidation, setPhoneValidation] = useState({
-    isValid: false,
-    message: '',
-  });
   const url = 'admin/users/sendOTPForLogin';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handlePhoneNumberChange = (text: string) => {
-    setPhoneNumber(text);
-    const validation = validateIndianPhoneNumber(text);
-    setPhoneValidation(validation);
-  };
+  // Memoize phone validation to avoid recalculating on every render
+  const phoneValidation = useMemo(() => {
+    return validateIndianPhoneNumber(phoneNumber);
+  }, [phoneNumber]);
 
-  const handleVerify = async () => {
+  const handlePhoneNumberChange = useCallback((text: string) => {
+    setPhoneNumber(text);
+  }, []);
+
+  const handleVerify = useCallback(async () => {
     const validation = validateIndianPhoneNumber(phoneNumber);
     if (!validation.isValid) {
       AppToast(validation.message);
@@ -86,7 +83,7 @@ const LoginScreen: React.FC = () => {
       AppToast(error?.response?.data?.message || 'Failed to send OTP');
       return false;
     }
-  };
+  }, [phoneNumber, navigation, url]);
 
   const isButtonDisabled = !phoneValidation.isValid;
 
@@ -107,7 +104,7 @@ const LoginScreen: React.FC = () => {
               <AppText text="Phone number" textStyle={styles.title} />
               <AppText text="Enter Mobile Number" textStyle={styles.subtitle} />
             </View>
-            <View style={styles.inputContainer}>
+            <View style={globalStyles.inputContainer}>
               <Image
                 source={require('../assets/images/india.png')}
                 style={styles.phoneIcon}
@@ -115,15 +112,14 @@ const LoginScreen: React.FC = () => {
               <AppText text="+91" textStyle={styles.phoneCode} />
 
               {/* Phone Number Input */}
-              <AppTextInput
+              <TextInput
                 value={phoneNumber}
-                label={false}
                 onChangeText={handlePhoneNumberChange}
                 placeholder="Phone number"
                 keyboardType="phone-pad"
                 autoComplete="tel"
                 maxLength={10}
-                textInputStyle={styles.inputStyl}
+                style={globalStyles.inputStyl}
               />
             </View>
             <AppButton
@@ -236,26 +232,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     textAlign: 'center',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Size8,
-    width: '100%',
-    paddingHorizontal: Size8 * 2,
-    paddingVertical: Size4 / 2,
-    borderRadius: Size4,
-    borderColor: COLORS.greyText,
-    borderWidth: borderWidth,
-    height: inputHeight,
-  },
-  inputStyl: {
-    borderWidth: 0,
-    width: '100%',
-    borderLeftWidth: borderWidth,
-    borderLeftColor: COLORS.greyText,
-    borderRadius: 0,
-    height: inputHeight * 0.8,
-  },
+
   phoneIcon: {
     width: Size20 * 1.5,
     height: Size20 * 1.5,

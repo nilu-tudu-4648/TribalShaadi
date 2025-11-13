@@ -356,8 +356,8 @@ const EditEducationScreen = () => {
           title="Save"
           onPress={handleSave}
           isLoading={loader}
-          buttonStyle={styles.saveButton}
-          textStyle={styles.saveButtonText}
+          buttonStyle={[globalStyles.continueButton,globalStyles.continueButtonActive]}
+          textStyle={[globalStyles.continueButtonText,globalStyles.continueButtonTextActive]}
         />
       </View>
 
@@ -443,13 +443,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: Size4,
-  },
-  saveButton: {
-    backgroundColor: COLORS.violet,
-  },
-  saveButtonText: {
-    color: COLORS.white,
-    fontWeight: '600',
   },
 });
 

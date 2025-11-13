@@ -91,7 +91,6 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: fontSize20,
-    fontWeight: '400',
     color: COLORS.textSecondary,
     letterSpacing: 0.5,
   },
@@ -114,7 +113,6 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: fontSize24,
-    fontWeight: '400',
     color: COLORS.textPrimary,
     lineHeight: lignHeight32,
     textAlign: 'center',

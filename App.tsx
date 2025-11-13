@@ -43,6 +43,8 @@ import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
 import { PostHogProvider } from 'posthog-react-native';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import TermScreen from './src/screen/TermScreen';
+import PrivacyScreen from './src/screen/PrivacyScreen';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -229,6 +231,8 @@ const MainApp = () => {
               name={ROUTES.GENDER}
               component={GenderSelectionScreen}
             />
+                  <Stack.Screen name={ROUTES.TERMS_AND_CONDITIONS} component={TermScreen} />
+                  <Stack.Screen name={ROUTES.PRIVACY_POLICY} component={PrivacyScreen} />
             <Stack.Screen name={ROUTES.NAME} component={NameScreen} />
             <Stack.Screen
               name={ROUTES.BIRTH_DATE}

@@ -347,8 +347,8 @@ const EditLifeScreen = () => {
         onPress={handleSave}
         isLoading={loader}
         isButtonDisabled={loader}
-        buttonStyle={[styles.saveButton]}
-        textStyle={[styles.saveButtonText]}
+        buttonStyle={[globalStyles.continueButton,globalStyles.continueButtonActive]}
+        textStyle={[globalStyles.continueButtonText,globalStyles.continueButtonTextActive]}
       />
 
       {/* Picker Modals */}
@@ -483,12 +483,6 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
-  },
-  saveButton: {
-    backgroundColor: COLORS.violet,
-  },
-  saveButtonText: {
-    color: COLORS.white,
   },
 });
 

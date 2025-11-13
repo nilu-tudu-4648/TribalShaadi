@@ -4,7 +4,7 @@ import { getApps } from '@react-native-firebase/app';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, delay, getProposalsGotByMeUrl, updateUrl } from '../constants/functions';
-import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
+import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES, ROUTES } from '../constants/data';
 import axios from 'axios';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { navigate } from '../navigation/NavigationRef';
@@ -59,7 +59,7 @@ export const configurePushNotification = () => {
           const title = userInfo.notificationTitle || notification.title;
           
           // Handle "New Match" navigation
-          if (title === 'Congrats 🎉 new request received!') {
+          if (title === NOTIFICATION_MESSAGES.NEW_PROPOSAL.title) {
             try {
               // Ensure ROUTES is available before using it
               if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
@@ -291,7 +291,7 @@ export const notificationListner = async () => {
         store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
         console.log('Background notification data:', remoteMessage.notification);
         // Handle specific notification types
-        if (remoteMessage.notification && remoteMessage.notification.title === 'Congrats 🎉 new request received!') {
+        if (remoteMessage.notification && remoteMessage.notification.title === NOTIFICATION_MESSAGES.NEW_PROPOSAL.title) {
           try {
             // Ensure ROUTES is available before using it
             if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
@@ -319,7 +319,7 @@ export const notificationListner = async () => {
         try {
           if (remoteMessage) {
             console.log('Quit state notification data:', remoteMessage.notification);
-            if (remoteMessage.notification && remoteMessage.notification.title === 'Congrats 🎉 new request received!') {
+            if (remoteMessage.notification && remoteMessage.notification.title === NOTIFICATION_MESSAGES.NEW_PROPOSAL.title) {
               try {
                 // Ensure ROUTES is available before using it
                 if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
@@ -460,7 +460,7 @@ export const schedulePushNotification = async (title, message, notificationData 
     }
 
     // Suppress test or placeholder notifications universally (foreground/background/quit)
-    if (title === 'testing') {
+    if (title === NOTIFICATION_MESSAGES.TESTING.title) {
       console.log("schedulePushNotification: Suppressing notification with title 'testing'");
       return;
     }

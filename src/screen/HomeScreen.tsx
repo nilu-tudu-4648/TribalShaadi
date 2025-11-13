@@ -61,6 +61,7 @@ import {
 import BottomSheet from '@gorhom/bottom-sheet';
 import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
 import SelfieBottomSheet from '../components/BottomSheets/SelfieBottomSheet';
+import { NOTIFICATION_MESSAGES } from '../constants/data';
 
 const { width } = Dimensions.get('window');
 const HomeScreen = () => {
@@ -140,10 +141,10 @@ const HomeScreen = () => {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-          title: 'Congrats 🎉 new request received!',
-          message: `${user.firstName} ${
-            user.lastName ?? ''
-          } wants to connect with you.`,
+          title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
+          message: `${user.firstName} ${user.lastName ?? ''} ${
+            NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+          }`,
           receiverUserId: id,
         }),
       );

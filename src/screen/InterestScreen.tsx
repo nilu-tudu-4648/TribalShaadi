@@ -15,7 +15,7 @@ import {
 } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
-import { INTEREST_TABS, ROUTES } from '../constants/data';
+import { INTEREST_TABS, NOTIFICATION_MESSAGES, ROUTES } from '../constants/data';
 import RecentCard from '../components/Cards/RecentCard';
 import SentCard from '../components/Cards/SentCard';
 import ReceivedCard from '../components/Cards/ReceivedCard';
@@ -72,7 +72,6 @@ const InterestScreen = () => {
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     setIsLoading(false);
   }, [dispatch]);
-
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       bottomSheetRef.current?.close();
@@ -144,10 +143,10 @@ const InterestScreen = () => {
       );
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-          title: "You've Got a Match! 🎉",
+          title: NOTIFICATION_MESSAGES.ACCEPTED_PROPOSAL.title,
           message: `Great news! ${
             user.firstName + ' ' + (user.lastName ?? '')
-          } has accepted your interest. It's time to start a conversation and get to know each other better.`,
+          } ${NOTIFICATION_MESSAGES.ACCEPTED_PROPOSAL.message}`,
           receiverUserId: item.senderUserId,
         }),
       );
@@ -164,8 +163,8 @@ const InterestScreen = () => {
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-          title: 'testing',
-          message: 'new message',
+          title: NOTIFICATION_MESSAGES.TESTING.title,
+          message: NOTIFICATION_MESSAGES.TESTING.message,
           receiverUserId: user.id,
         }),
       );

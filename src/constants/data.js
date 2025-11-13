@@ -214,3 +214,21 @@ export const DELETE_OPTIONS = [
   "The app did not match my expectations"
 ];
 
+export const NOTIFICATION_MESSAGES = {
+  NEW_PROPOSAL: {
+    title: 'Congrats 🎉 new request received!',
+    message: `wants to connect with you. See if this could be your perfect tribal match!`,
+  },
+  NEW_MATCH: {
+    title: 'New Matches have arrived!',
+    message: `Your new matches are ready to view. Tap now and get matched on Tribalshaadi!`,
+  },
+  ACCEPTED_PROPOSAL: {
+    title: "You've Got a Match! 🎉",
+    message: `has accepted your interest. It's time to start a conversation and get to know each other better.`,
+  },
+  TESTING: {
+    title: 'testing',
+    message: 'new message',
+  },
+};

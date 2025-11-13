@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Image } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Image, TextInput } from 'react-native';
 import {
   fontSize14,
   lignHeight24,
-  Size8,
   Size10,
   Size22,
   Size20,
-  borderWidth,
-  Size4,
-  inputHeight,
   fontSize16,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
@@ -17,7 +13,6 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import AppTextInput from '../components/AppTextInput';
 import {
   sendOTPForLogin,
   validateIndianPhoneNumber,
@@ -84,7 +79,7 @@ const RegisterScreen: React.FC = () => {
         <AppText text="What’s your phone number?" textStyle={globalStyles.title} />
         <AppText text="A special experience might just be ‘calling‘ !" textStyle={globalStyles.subtitle} />
 
-        <View style={styles.inputContainer}>
+        <View style={globalStyles.inputContainer}>
           <Image
             source={require('../assets/images/india.png')}
             style={styles.phoneIcon}
@@ -92,15 +87,14 @@ const RegisterScreen: React.FC = () => {
           <AppText text="+91" textStyle={styles.phoneCode} />
 
           {/* Phone Number Input */}
-          <AppTextInput
+          <TextInput
             value={phoneNumber}
-            label={false}
             onChangeText={handlePhoneNumberChange}
             placeholder="Phone number"
             keyboardType="phone-pad"
             autoComplete="tel"
             maxLength={10}
-            textInputStyle={styles.inputStyl}
+            style={globalStyles.inputStyl}
           />
         </View>
         <AppButton
@@ -188,26 +182,6 @@ const styles = StyleSheet.create({
   crossIcon: {
     width: Size20 * 1.5,
     height: Size20 * 1.5,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Size8,
-    width: '100%',
-    paddingHorizontal: Size8*2,
-    paddingVertical:Size4/2,
-    borderRadius: Size4,
-    borderColor: COLORS.greyText,
-    borderWidth: borderWidth,
-    height:inputHeight
-  },
-  inputStyl: {
-    borderWidth: 0,
-    width: '100%',
-    borderLeftWidth: borderWidth,
-    borderLeftColor: COLORS.greyText,
-    borderRadius:0,
-    height:inputHeight*.8
   },
   phoneIcon: {
     width: Size20*1.5,

@@ -113,7 +113,7 @@ const AccountScreen = () => {
     {
       key: 'crown',
       label: 'Crown\nbadge',
-      color: packageByUserId && packageByUserId.length > 0 ? '#FFD600' : COLORS.grey,
+      color: packageByUserId && packageByUserId.length > 0 || user.gender === "Female" ? '#FFD600' : COLORS.grey,
       icon: CrownIcon,
       route: ROUTES.UPGRADE,
     },
@@ -134,7 +134,7 @@ const AccountScreen = () => {
   const actionButtons: ActionButton[] = [
     {
       key: 'plan',
-      label: packageByUserId.length > 0 ? 'My Plan' : 'Upgrade',
+      label: packageByUserId.length > 0 || user.gender === "Female" ? 'My Plan' : 'Upgrade',
       icon: RocketIcon,
       route: ROUTES.UPGRADE,
     },

@@ -55,7 +55,7 @@ import {
   insertUserNotificationsApi,
 } from '../store/reducers/chatReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ASYNC_VARIBLES } from '../constants/data';
+import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES } from '../constants/data';
 import axios from 'axios';
 
 // Message type definitions
@@ -458,8 +458,8 @@ const ConversationsScreen = () => {
             insertUserNotificationsApi(
               `${baseUrl}/${insertUserNotificationsUrl}`,
               {
-                title: 'testing',
-                message: 'new message',
+                title: NOTIFICATION_MESSAGES.TESTING.title,
+                message: NOTIFICATION_MESSAGES.TESTING.message,
                 receiverUserId: userDetails.friendId,
               },
             ),

@@ -17,7 +17,7 @@ import {
   getAcceptedProposalByIdApi,
 } from '../store/reducers/chatReducer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ASYNC_VARIBLES } from '../constants/data';
+import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES } from '../constants/data';
 
 // Silence the modular API deprecation warning
 global.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
@@ -106,7 +106,7 @@ const ForegroundHandler = params => {
                   //     );
                   //   }
                   // } catch (_) {}
-                  if (!title || !body || title === 'testing') return;
+                  if (!title || !body || title === NOTIFICATION_MESSAGES.TESTING.title) return;
 
                   // Wrap schedulePushNotification in try-catch to prevent crashes
                   try {

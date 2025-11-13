@@ -9,6 +9,9 @@ import {
   lignHeight20,
   lignHeight72,
   borderWidth,
+  fontSize16,
+  inputHeight,
+  Size4,
 } from './Sizes';
 
 export const globalStyles = StyleSheet.create({
@@ -41,10 +44,10 @@ export const globalStyles = StyleSheet.create({
   },
   continueButton: {
     width: '100%',
-    borderRadius: Size8,
+    borderRadius: Size8*0.8,
   },
   continueButtonActive: {
-    backgroundColor: COLORS.black,
+    backgroundColor: COLORS.violet,
   },
   continueButtonInactive: {
     backgroundColor: COLORS.continueInactive,
@@ -62,5 +65,27 @@ export const globalStyles = StyleSheet.create({
   inputField: {
     borderWidth: 0,
     borderBottomWidth: borderWidth,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Size8,
+    width: '100%',
+    paddingHorizontal: Size8 * 2,
+    paddingVertical: Size4 / 2,
+    borderRadius: Size4,
+    borderColor: COLORS.greyText,
+    borderWidth: borderWidth,
+    height: inputHeight,
+  },
+  inputStyl: {
+    borderWidth: 0,
+    width: '100%',
+    borderLeftWidth: borderWidth,
+    borderLeftColor: COLORS.greyText,
+    borderRadius: 0,
+    paddingLeft: Size8 * 2,
+    fontSize: fontSize16,
+    height: inputHeight * 0.8,
   },
 });

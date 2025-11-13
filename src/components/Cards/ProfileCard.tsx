@@ -83,6 +83,7 @@ export interface ProfileCardProps {
   isPremium: boolean;
   isNameLoading?: boolean;
   openReport: () => void;
+  report?: boolean;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -116,6 +117,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isPremium,
   isNameLoading = false,
   openReport,
+  report = true,
 }) => {
   return (
     <ScrollView
@@ -259,11 +261,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </View>
         </View>
         <View style={styles.horizontalLine} />
-        <Pressable onPress={openReport} style={styles.reportButtonContainer}>
-          <ReportIcon />
-          <AppText text="Report" textStyle={styles.reportButtonText} />
-        </Pressable>
-        <View style={styles.horizontalLine} />
+        {report && (
+          <Pressable onPress={openReport} style={styles.reportButtonContainer}>
+            <ReportIcon />
+            <AppText text="Report" textStyle={styles.reportButtonText} />
+          </Pressable>
+        )}
+        {/* <View style={styles.horizontalLine} /> */}
       </View>
     </ScrollView>
   );

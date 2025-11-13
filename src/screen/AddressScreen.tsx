@@ -253,16 +253,16 @@ const AddressScreen = () => {
           isLoading={loader}
           isButtonDisabled={!isFormValid || loader}
           buttonStyle={[
-            styles.continueButton,
+            globalStyles.continueButton,
             isFormValid
-              ? styles.continueButtonActive
-              : styles.continueButtonInactive,
+              ? globalStyles.continueButtonActive
+              : globalStyles.continueButtonInactive,
           ]}
           textStyle={[
-            styles.continueButtonText,
+            globalStyles.continueButtonText,
             isFormValid
-              ? styles.continueButtonTextActive
-              : styles.continueButtonTextInactive,
+              ? globalStyles.continueButtonTextActive
+              : globalStyles.continueButtonTextInactive,
           ]}
         />
       </View>
@@ -312,28 +312,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopWidth: 0.5,
     borderTopColor: COLORS.borderLight,
-  },
-  continueButton: {
-    borderRadius: Size8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: screenHeight(6), // Responsive button height
-  },
-  continueButtonActive: {
-    backgroundColor: COLORS.textBlack,
-  },
-  continueButtonInactive: {
-    backgroundColor: COLORS.borderLight,
-  },
-  continueButtonText: {
-    fontSize: fontSize16,
-    fontWeight: '600',
-  },
-  continueButtonTextActive: {
-    color: COLORS.white,
-  },
-  continueButtonTextInactive: {
-    color: COLORS.placeholderInactive,
   },
 });
 

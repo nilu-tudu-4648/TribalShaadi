@@ -10,9 +10,10 @@ import {
   Size12,
   Size16,
   Size20,
-  lignHeight20,
-  fontSize14,
   fontSize20,
+  fontSize36,
+  fontWeight500,
+  fontWeight700,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 
@@ -22,24 +23,16 @@ const TipsScreen = () => {
       title: 'Online Safety',
       points: [
         {
+          subTitle: 'Safeguard your information',
+          text: "Never share personal information, such as your home or work address, or details about your daily routine (e.g., that you go to a certain gym every Monday) with people you just made connection.",
+        },
+        {
+          subTitle: 'Continue conversations on the App',
+          text: "Keep chatting within Tribalshaadi to benefit from our safety features and reporting tools.\n\nOnly share your phone number, email, or other contact details when you feel completely ready.\n\nAvoid moving conversations to other platforms too soon—this ensures your privacy and lets us support you if needed.",
+        },
+        {
           subTitle: 'Never Send Money or Share Financial Information',
-          text: "Never send money, especially over wire transfer, even if the person claims to be in an emergency. Wiring money is like sending cash — it's nearly impossible to reverse the transaction or trace where the money went. Never share information that could be used to access your financial accounts. If another user asks you for money, report it to us immediately.",
-        },
-        {
-          subTitle: 'Protect Your Personal Information',
-          text: "Never share personal information, such as your home or work address, or details about your daily routine (e.g., that you go to a certain gym every Monday) with people you don't know. If you are a parent, limit the information that you share about your children on your profile and in early communications. Avoid sharing details such as your children's names, where they go to school, or their ages or genders.",
-        },
-        {
-          subTitle: 'Stay on the Platform',
-          text: "Keep conversations on the Tribalshaadi platform while you're getting to know someone. Because Users with bad intentions often try to move the conversation to text, messaging apps, email, or phone right away.",
-        },
-        {
-          subTitle: 'Report All Suspicious and Offensive Behavior',
-          text: "You know when someone's crossed the line and when they do, we want to know about it. Block and report anyone that violates our terms. Here are some examples of violations:\n• Requests for money or donations\n• Underage users\n• Harassment, threats, and offensive messages\n• Inappropriate or harmful behavior during or after meeting in person\n• Fraudulent profiles\n• Spam or solicitation including links to commercial websites or attempts to sell products or services",
-        },
-        {
-          subTitle: 'Protect Your Account',
-          text: 'Be sure to be careful when logging into your account from a public or shared computer. Tribalshaadi will never send you an email asking for your username and password information — if you receive an email asking for account information, report it immediately. If you are logging in using your phone number, do not share your SMS code with anyone. Any website requesting this code to verify your identity is not affiliated with Tribalshaadi in any way.',
+          text: "Never send money, especially through bank transfer, even if someone claims to be in an emergency.\n\nTransferring money is like sending cash – it's nearly impossible to reverse the transaction or trace where it went.\n\nNever share details that could give access to your financial accounts. If another user asks you for money, report it to us immediately.",
         },
       ],
     },
@@ -47,28 +40,16 @@ const TipsScreen = () => {
       title: 'Meeting in Person',
       points: [
         {
-          subTitle: "Don't Rush",
-          text: "Take your time and get to know the other person before agreeing to meet or chat off Tribalshaadi. Don't be afraid to ask questions to screen for any red flags or personal dealbreakers. After moving to chat off Tribalshaadi, a phone call or video chat can be a useful screening tool before meeting in person.",
+          subTitle: 'Take your time',
+          text: "Take your time before meeting or moving conversations outside the app. Get to know the other person well first, and don't hesitate to ask questions if something feels off. A quick phone or video call can also help you spot any red flags early.",
         },
         {
-          subTitle: 'Meet in Public and Stay in Public',
-          text: "Meet for the first few times in a populated, public place — never at your home, your date's home, or any other private location. If your date pressures you to go to a private location, end the date.",
+          subTitle: 'Meet in Public',
+          text: "For the first few meetings, choose safe, public places. If the other person pushes you to meet in a private location, it's best to end the date.",
         },
         {
-          subTitle: 'Tell Friends and Family About Your Plans',
-          text: "Tell a friend or family member of your plans, including when and where you're going. Have your cell phone charged and with you at all times.",
-        },
-        {
-          subTitle: 'Be in Control of Your Transportation',
-          text: "We want you to be in control of how you get to and from your date so that you can leave whenever you want. If you're driving yourself, it's a good idea to have a backup plan such as a ride-share app or a friend to pick you up.",
-        },
-        {
-          subTitle: "Don't Leave Drinks or Personal Items Unattended",
-          text: 'Know where your drink comes from and know where it is at all times — only accept drinks poured or served directly from the bartender or server. Many substances that are slipped into drinks to facilitate sexual assault are odorless, colorless, and tasteless. Also, keep your phone, purse, wallet, and anything containing personal information on you at all times.',
-        },
-        {
-          subTitle: 'If You Feel Uncomfortable, Leave',
-          text: "It's okay to end the date early if you're feeling uncomfortable. In fact, it's encouraged. And if your instincts are telling you something is off or you feel unsafe, ask the bartender or server for help.",
+          subTitle: 'If you feel Uncomfortable, Leave',
+          text: "Trust your instincts. If you ever feel uncomfortable, it's absolutely fine—encouraged even—to end the date early. If something feels wrong or unsafe, don't hesitate to reach out to people nearby for help.",
         },
       ],
     },
@@ -76,7 +57,7 @@ const TipsScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Safety tips" />
+      <AppHeader title="Safety Guidelines" />
 
       <ScrollView
         style={styles.scrollView}
@@ -84,10 +65,10 @@ const TipsScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.contentWrapper}>
-          <AppText text="Safe Matching Advice" textStyle={styles.mainTitle} />
+          <AppText text="Safety Guidelines" textStyle={[styles.mainTitle,styles.mainTitleText]} />
 
           <AppText
-            text="Meeting new people is exciting, but you should always be cautious when interacting with someone you don't know. Use your best judgment and put your safety first, whether you are exchanging initial messages or meeting in person. While you can't control the actions of others, there are things you can do to help you stay safe during your Tribalshaadi experience."
+            text="We at Tribalshaadi have strived to take all possible steps to build a safe online community. We advise all our users to follow the guidelines to stay safe during your Tribalshaadi experience."
             textStyle={styles.pointText}
           />
 
@@ -126,6 +107,12 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  mainTitleText: {
+    fontSize: fontSize36,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_MEDIUM,
+    color: COLORS.black,
+    fontWeight: fontWeight500,
+  },
   contentContainer: {
     padding: Size16,
     paddingBottom: Size20,
@@ -148,7 +135,7 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: fontSize20,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.black,
+    color: COLORS.violet,
     textAlign: 'left',
   },
   introText: {
@@ -160,22 +147,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontSize16,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    fontWeight: '700',
+    fontWeight: fontWeight700,
     color: COLORS.black,
-    lineHeight: 22,
   },
   bulletPoint: {
     fontSize: fontSize16,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     color: COLORS.black,
     paddingLeft: Size16,
-    lineHeight: lignHeight20,
   },
   pointText: {
-    fontSize: fontSize14,
+    fontSize: fontSize16,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
-    fontWeight: '400',
     color: COLORS.black,
-    lineHeight: 20,
   },
 });

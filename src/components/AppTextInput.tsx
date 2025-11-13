@@ -8,7 +8,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   fontSize16,
   Size16,
@@ -28,25 +28,7 @@ const removeEmojis = (text: string): string => {
   );
 };
 
-const AppTextInput = ({
-  placeholder,
-  value,
-  onChangeText,
-  keyboardType,
-  autoComplete,
-  maxLength,
-  placeholderTextColor = COLORS.greyText,
-  style,
-  textInputStyle,
-  multiline,
-  textAlignVertical,
-  autoFocus,
-  onFocus,
-  onBlur,
-  editable = true,
-  selectTextOnFocus,
-  label = true,
-}: {
+interface AppTextInputProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -65,18 +47,60 @@ const AppTextInput = ({
   editable?: boolean;
   selectTextOnFocus?: boolean;
   label?: boolean;
+}
+
+const AppTextInput = React.memo<AppTextInputProps>(({
+  placeholder,
+  value,
+  onChangeText,
+  keyboardType,
+  autoComplete,
+  maxLength,
+  placeholderTextColor = COLORS.greyText,
+  style,
+  textInputStyle,
+  multiline,
+  textAlignVertical,
+  autoFocus,
+  onFocus,
+  onBlur,
+  editable = true,
+  selectTextOnFocus,
+  label = true,
 }) => {
   const [isFocused, setIsFocused] = React.useState(false);
 
-  const handleFocus = () => {
+  const handleFocus = useCallback(() => {
     setIsFocused(true);
     onFocus?.();
-  };
+  }, [onFocus]);
 
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
     setIsFocused(false);
     onBlur?.();
-  };
+  }, [onBlur]);
+
+  const handleChangeText = useCallback((text: string) => {
+    const cleanText = removeEmojis(text);
+    onChangeText(cleanText);
+  }, [onChangeText]);
+
+  // Memoize dynamic styles to prevent recreation on every render
+  const dynamicTextInputStyle = useMemo(() => {
+    return {
+      color: editable ? COLORS.textPrimary : COLORS.disabledText,
+      borderColor: isFocused
+        ? COLORS.violet
+        : editable
+        ? COLORS.greyText
+        : COLORS.borderLight,
+    };
+  }, [editable, isFocused]);
+
+  // Memoize combined styles
+  const combinedTextInputStyle = useMemo(() => {
+    return [styles.textInput, dynamicTextInputStyle, textInputStyle];
+  }, [dynamicTextInputStyle, textInputStyle]);
 
   return (
     <View style={[styles.inputContainer, style]}>
@@ -84,24 +108,10 @@ const AppTextInput = ({
       <TextInput
         placeholder={placeholder}
         value={value}
-        onChangeText={text => {
-          const cleanText = removeEmojis(text);
-          onChangeText(cleanText);
-        }}
+        onChangeText={handleChangeText}
         keyboardType={keyboardType}
         autoComplete={autoComplete}
-        style={[
-          styles.textInput,
-          {
-            color: editable ? COLORS.textPrimary : COLORS.disabledText,
-            borderColor: isFocused
-              ? COLORS.violet
-              : editable
-              ? COLORS.greyText
-              : COLORS.borderLight,
-          },
-          textInputStyle,
-        ]}
+        style={combinedTextInputStyle}
         placeholderTextColor={placeholderTextColor}
         maxLength={maxLength}
         multiline={multiline}
@@ -114,7 +124,9 @@ const AppTextInput = ({
       />
     </View>
   );
-};
+});
+
+AppTextInput.displayName = 'AppTextInput';
 
 export default AppTextInput;
 
