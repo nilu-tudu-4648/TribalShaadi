@@ -19,6 +19,7 @@ import {
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppText from './AppText';
+import FONT_FAMILY from '../constants/Fonts';
 
 // Function to remove emojis from text
 const removeEmojis = (text: string): string => {
@@ -141,12 +142,13 @@ const styles = StyleSheet.create({
   },
   textInput: {
     fontSize: fontSize16,
-    color: COLORS.textBlack,
+    color: COLORS.greyText,
     borderWidth: borderWidth,
     borderColor: COLORS.greyText,
-    fontWeight: '500',
+    fontWeight: "400",
     borderRadius: Size4,
     paddingHorizontal: Size8,
     height: inputHeight,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
 });

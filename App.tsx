@@ -25,7 +25,11 @@ import { COLORS } from './src/constants/AppColors';
 import WelcomeHome from './src/screen/WelcomeHome';
 import BottomNavigation from './src/navigation/BottomNavigation';
 import { logoutFromReducer } from './src/store/reducers/authReducer';
-import { navigationRef, setIsReady, navigate } from './src/navigation/NavigationRef';
+import {
+  navigationRef,
+  setIsReady,
+  navigate,
+} from './src/navigation/NavigationRef';
 import { ROUTES } from './src/constants/data';
 import StackNavigation, {
   RootStackParamList as StackNavigationParamList,
@@ -82,13 +86,15 @@ const SplashScreen = () => (
 const MainApp = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Safe selectors with fallback values to prevent crashes
   const { user, tokenExpired } = useSelector(
-    (state: any) => state?.entities?.authReducer || { user: null, tokenExpired: false },
+    (state: any) =>
+      state?.entities?.authReducer || { user: null, tokenExpired: false },
   );
   const { userRegistrationCompleted } = useSelector(
-    (state: any) => state?.entities?.userReducer || { userRegistrationCompleted: false },
+    (state: any) =>
+      state?.entities?.userReducer || { userRegistrationCompleted: false },
   );
   const dispatch = useDispatch();
   // Initialize app with error handling
@@ -103,13 +109,13 @@ const MainApp = () => {
         setIsInitialized(true); // Continue with app flow even if initialization fails
       }
     };
-    
+
     initializeApp();
   }, [dispatch]);
 
   useEffect(() => {
     if (!isInitialized) return; // Wait for initialization
-    
+
     try {
       if (tokenExpired) {
         dispatch(logoutFromReducer());
@@ -126,22 +132,21 @@ const MainApp = () => {
       try {
         // Step 1: Configure push notifications for local notification handling
         configurePushNotification();
-        
+
         // Step 2: Create notification channel (required for Android)
         createNotificationChannel();
-        
+
         // Step 3: Request Android 13+ permissions if needed
         await requestAndroidNotificationPermission();
-        
+
         // Step 4: Setup notification listeners (background/quit state handlers)
         // This is safe to call early as it has Firebase checks
         notificationListner();
-        
       } catch (error) {
         console.error('Error initializing notification system:', error);
       }
     };
-    
+
     initializeNotifications();
   }, []);
 
@@ -156,7 +161,7 @@ const MainApp = () => {
           console.error('Error setting up FCM permissions:', error);
         }
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isInitialized]);
@@ -170,17 +175,20 @@ const MainApp = () => {
 
   // Call functions when app transitions between background and foreground
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async nextState => {
-      try {
-        if (nextState === 'background') {
-          await onAppClose(dispatch);
-        } else if (nextState === 'active') {
-          await onAppForeground(dispatch);
+    const subscription = AppState.addEventListener(
+      'change',
+      async nextState => {
+        try {
+          if (nextState === 'background') {
+            await onAppClose(dispatch);
+          } else if (nextState === 'active') {
+            await onAppForeground(dispatch);
+          }
+        } catch (error) {
+          console.error('Error in AppState change handler:', error);
         }
-      } catch (error) {
-        console.error('Error in AppState change handler:', error);
-      }
-    });
+      },
+    );
 
     return () => {
       try {
@@ -198,7 +206,9 @@ const MainApp = () => {
   // Safely determine initial route with fallback
   const getInitialRoute = () => {
     try {
-      return userRegistrationCompleted === true ? ROUTES.MAIN_TABS : ROUTES.WELCOME;
+      return userRegistrationCompleted === true
+        ? ROUTES.MAIN_TABS
+        : ROUTES.WELCOME;
     } catch (error) {
       console.error('Error determining initial route:', error);
       return ROUTES.WELCOME; // Safe fallback
@@ -231,8 +241,14 @@ const MainApp = () => {
               name={ROUTES.GENDER}
               component={GenderSelectionScreen}
             />
-                  <Stack.Screen name={ROUTES.TERMS_AND_CONDITIONS} component={TermScreen} />
-                  <Stack.Screen name={ROUTES.PRIVACY_POLICY} component={PrivacyScreen} />
+            <Stack.Screen
+              name={ROUTES.TERMS_AND_CONDITIONS}
+              component={TermScreen}
+            />
+            <Stack.Screen
+              name={ROUTES.PRIVACY_POLICY}
+              component={PrivacyScreen}
+            />
             <Stack.Screen name={ROUTES.NAME} component={NameScreen} />
             <Stack.Screen
               name={ROUTES.BIRTH_DATE}

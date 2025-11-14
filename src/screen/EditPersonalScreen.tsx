@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
@@ -279,6 +279,10 @@ const EditPersonalScreen = () => {
         title="Personal Details"
         icon={<UserProfileIcon />}
       />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.scrollView}>
         {/* Name Field */}
         <View style={styles.fieldContainer}>
@@ -383,7 +387,7 @@ const EditPersonalScreen = () => {
           />
         </View>
       </View>
-
+      </ScrollView>
       {/* Save Button */}
       <View style={styles.buttonContainer}>
         <AppButton

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
@@ -200,6 +200,7 @@ const EditEducationScreen = () => {
       );
 
       setShowCompanyTypePicker(false);
+      setSectionedOccupationOptions([]);
     },
     [dispatch],
   );
@@ -267,6 +268,10 @@ const EditEducationScreen = () => {
         }}
         icon={<EducationIcon size={Size25} />}
       />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
       <View style={styles.scrollView}>
         {/* Education Level Dropdown */}
         <View>
@@ -349,7 +354,7 @@ const EditEducationScreen = () => {
           </>
         )}
       </View>
-
+      </ScrollView>
       {/* Save Button */}
       <View style={styles.buttonContainer}>
         <AppButton

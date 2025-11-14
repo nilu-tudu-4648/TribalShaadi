@@ -52,6 +52,7 @@ COLORS = {
   emptyText:"#ACACAC",
   cardBg:"#F8F2FF",
   cardBg1:"#8259B3",
+  cardBg3:"#F1E5FF",
   borderLight3:"#E7E7E7",
   borderLight4:"#EAECEF",
   recivedBackground:"#00A3FF",

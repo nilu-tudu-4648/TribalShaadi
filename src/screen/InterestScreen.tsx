@@ -212,7 +212,7 @@ const InterestScreen = () => {
                     });
                   }
                 }}
-                planPurchased={packageByUserId.length > 0}
+                planPurchased={packageByUserId.length > 0 || user.gender === "Female"}
               />
             )}
             keyExtractor={(item, index) => index.toString()}

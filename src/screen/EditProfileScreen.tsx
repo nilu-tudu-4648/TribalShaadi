@@ -68,8 +68,8 @@ const EditProfileScreen = () => {
     {
       id: 1,
       title: 'Personal Details',
-      description:
-        'Update your basic information that helps others understand who you are',
+      // description:
+      //   'Update your basic information that helps others understand who you are',
       icon: UserProfileIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -79,8 +79,8 @@ const EditProfileScreen = () => {
     },
     {
       id: 2,
-      title: 'Lifestyle & Location',
-      description: 'Define your lifestyle choices and where you are based',
+      title: "Lifestyle & Hometown",
+      // description: 'Define your lifestyle choices and where you are based',
       icon: SlidersIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -91,7 +91,7 @@ const EditProfileScreen = () => {
     {
       id: 3,
       title: 'Education & Career',
-      description: 'Showcase your academic background and professional journey',
+      // description: 'Showcase your academic background and professional journey',
       icon: EducationIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -102,8 +102,8 @@ const EditProfileScreen = () => {
     {
       id: 4,
       title: 'Personality & Preferences',
-      description:
-        'Share more about yourself, your values, and what you seek in a life partner',
+      // description:
+      //   'Share more about yourself, your values, and what you seek in a life partner',
       icon: PersonalityIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -249,7 +249,7 @@ const EditProfileScreen = () => {
                       textStyle={styles.menuItemTitle}
                     />
                     <AppText
-                      text={item.description}
+                      text={''}
                       textStyle={styles.menuItemDescription}
                     />
                   </View>
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   menuContainer: {
-    // backgroundColor: 'red',
+    paddingTop: Size20,
     paddingHorizontal: compPadding,
     gap: Size20, //
   },

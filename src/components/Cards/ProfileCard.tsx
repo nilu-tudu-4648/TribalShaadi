@@ -155,9 +155,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           />
         </ImageBackground>
       </View>
-
-      <View style={styles.horizontalLine} />
       <View style={styles.bioSection}>
+        <View style={styles.horizontalLine} />
         <AppText text={bio} textStyle={styles.bio} />
         <View style={styles.horizontalLine} />
         <View style={styles.horizontalLine} />
@@ -171,9 +170,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <TagPill icon={<HeartIcon2 />} label={maritalStatus} />
           <TagPill icon={<CalendarIcon />} label={formatDateShort(dob)} />
           <TagPill icon={<LanguageIcon />} label={motherTongue} />
-          <TagPill icon={<RupeesIcon />} label={annualIncome} />
+          <TagPill icon={<RupeesIcon />} label={annualIncome || "Not Applicable"} />
         </View>
       </View>
+
       <View style={styles.horizontalLine} />
       <Image
         source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
@@ -183,13 +183,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       <View style={styles.section}>
         <AppText text="Education" textStyle={styles.sectionTitle} />
         <TagPill icon={<DegreeIcon />} label={highestQualification} />
-        <TagPill icon={<EducationIcon2 />} label={college} />
+        {college && <TagPill icon={<EducationIcon2 />} label={college} />}
       </View>
       <View style={styles.section}>
         <AppText text="Career" textStyle={styles.sectionTitle} />
         <TagPill icon={<PublicSectorIcon />} label={employedIn} />
         <TagPill icon={<WorkIcon />} label={occupation} />
-        <TagPill icon={<HomeWorkOutlineIcon />} label={organizationName} />
+        <TagPill
+          icon={<HomeWorkOutlineIcon />}
+          label={organizationName || 'Not applicable'}
+        />
       </View>
       <View style={styles.section}>
         <View style={styles.banner}>
@@ -214,22 +217,22 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <TagPill
             icon={<EatingIcon />}
             label={eatingHabits}
-            containerStyle={{ width: '46%' }}
+            containerStyle={{ width: '48%' }}
           />
           <TagPill
             icon={<DrinkingIcon />}
             label={drinkingHabits}
-            containerStyle={{ width: '46%' }}
+            containerStyle={{ width: '48%' }}
           />
           <TagPill
             icon={<CigrateIcon />}
             label={smokingHabits}
-            containerStyle={{ width: '46%' }}
+            containerStyle={{ width: '48%' }}
           />
           <TagPill
             icon={<KidsIcon />}
             label={kids}
-            containerStyle={{ width: '46%' }}
+            containerStyle={{ width: '48%' }}
           />
         </View>
       </View>
@@ -267,7 +270,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <AppText text="Report" textStyle={styles.reportButtonText} />
           </Pressable>
         )}
-        {/* <View style={styles.horizontalLine} /> */}
       </View>
     </ScrollView>
   );
@@ -311,10 +313,11 @@ const styles = StyleSheet.create({
   },
   bioSection: {
     padding: SIZES.padding,
+    width: '100%',
   },
   horizontalLine: {
     height: Size10,
-    width: SIZES.width,
+    width: '100%',
     alignSelf: 'center',
   },
   section: {

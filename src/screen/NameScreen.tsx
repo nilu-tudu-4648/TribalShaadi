@@ -9,6 +9,8 @@ import {
   Size40,
   fontSize24,
   Size18,
+  Size10,
+  Size22,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import AppButton from '../components/AppButton';
@@ -30,6 +32,7 @@ import { globalStyles } from '../constants/globalStyles';
 const NameScreen = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { user, loader } = useSelector(
@@ -94,7 +97,7 @@ const NameScreen = () => {
         AppToast('Please enter at least a first name');
         return;
       }
-
+      setLoading(true);
       const requestBody = {
         id: user.id,
         firstName: firstName,
@@ -108,6 +111,7 @@ const NameScreen = () => {
     } catch (error) {
       console.log(error);
     } finally {
+      setLoading(false);
       navigateToLastScreen(navigation, ROUTES.BIRTH_DATE);
     }
   };
@@ -124,10 +128,17 @@ const NameScreen = () => {
           <HeaderBack
             onPress={() => navigateToLastScreen(navigation, ROUTES.GENDER)}
           />
-          <AppText text="What should we call you?" textStyle={globalStyles.title} />
-          <AppText text="Tell us your name and email — it’s how your matches will know the real you." textStyle={globalStyles.subtitle} />
+          <AppText
+            text="What should we call you?"
+            textStyle={globalStyles.title}
+          />
+          <AppText
+            text="Tell us your name and email — it’s how your matches will know the real you."
+            textStyle={globalStyles.subtitle}
+          />
           {/* Text Input */}
           <AppTextInput
+            label={false}
             placeholder="Full Name"
             placeholderTextColor={COLORS.placeholderText}
             value={fullName}
@@ -135,6 +146,7 @@ const NameScreen = () => {
             keyboardType="default"
           />
           <AppTextInput
+            label={false}
             placeholder="Email"
             placeholderTextColor={COLORS.placeholderText}
             value={email}
@@ -147,23 +159,24 @@ const NameScreen = () => {
               textStyle={styles.errorText}
             />
           )}
-          <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} />
+          {/* <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} /> */}
           <AppButton
-            title="Confirm"
+            isLoading={loading}
+            title="Continue"
+            loaderSize={Size22}
             onPress={handleConfirm}
-            isLoading={loader}
             isButtonDisabled={!isValidEmail || loader}
             buttonStyle={[
-              {...globalStyles.continueButton,alignSelf:'flex-end'},
+              styles.button,
               !isValidEmail || loader
-                ? globalStyles.continueButtonInactive
-                : globalStyles.continueButtonActive,
+                ? styles.buttonDisabled
+                : styles.buttonEnabled,
             ]}
             textStyle={[
-              globalStyles.continueButtonText,
+              styles.buttonText,
               !isValidEmail || loader
-                ? globalStyles.continueButtonTextInactive
-                : globalStyles.continueButtonTextActive,
+                ? styles.buttonTextDisabled
+                : styles.buttonTextEnabled,
             ]}
           />
         </View>
@@ -195,6 +208,18 @@ const styles = StyleSheet.create({
     color: COLORS.red,
     fontSize: fontSize14,
   },
+  button: {
+    borderRadius: lignHeight24,
+    paddingVertical: Size10,
+    width: '30%',
+    alignSelf: 'flex-end',
+  },
+  buttonEnabled: { backgroundColor: COLORS.black },
+  buttonDisabled: { backgroundColor: COLORS.disabledBG },
+  buttonContent: { alignItems: 'center' },
+  buttonText: { fontSize: fontSize14, fontWeight: '600' },
+  buttonTextEnabled: { color: COLORS.white },
+  buttonTextDisabled: { color: COLORS.disabledText },
 });
 
 export default NameScreen;

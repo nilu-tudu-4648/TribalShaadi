@@ -132,8 +132,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '50%',
-    height: Size25 * 1.2,
+    width: '60%',
+    height: Size25 * 1.5,
     resizeMode: 'contain',
   },
   homeIconContainer: {

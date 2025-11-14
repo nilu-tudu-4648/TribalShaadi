@@ -47,6 +47,7 @@ import {
   getSelectedUserUrl,
 } from '../constants/functions';
 import DeviceInfo from 'react-native-device-info';
+import AppSafeView from '../components/AppSafeView';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -160,7 +161,7 @@ const AccountScreen = () => {
       {loader ? (
         <Loader />
       ) : (
-        <View style={styles.container}>
+        <AppSafeView style={styles.container}>
           {/* Profile Image with Edit Icon */}
           <View style={styles.profileContainer}>
             <TouchableOpacity
@@ -248,7 +249,7 @@ const AccountScreen = () => {
               <AppText text="in Jharkhand" textStyle={styles.logoutText} />
             </View>
           </View>
-        </View>
+        </AppSafeView>
       )}
       <ProfileBottomSheet
         bottomSheetRef={profileBottomSheetRef}
@@ -268,15 +269,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     alignItems: 'center',
-    paddingTop: Sizes.Size20,
     gap: Sizes.Size16,
+    paddingTop: "100%",
   },
   profileContainer: {
-    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     gap: Sizes.Size8,
-    paddingTop: Sizes.Size20 * 5,
   },
   profileImage: {
     width: 100,
@@ -299,8 +298,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: Sizes.fontSize24,
     fontWeight: '600',
-    paddingTop: Sizes.Size10,
-    paddingBottom: Sizes.Size8,
     textAlign: 'center',
     color: COLORS.textPrimary,
   },
@@ -308,7 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: Sizes.Size16,
-    paddingBottom: Sizes.Size20,
+    paddingVertical: Sizes.Size10,
   },
   badgeItem: {
     alignItems: 'center',
@@ -334,7 +331,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Sizes.Size10,
     width: '90%',
-    paddingTop: Sizes.Size10,
   },
   actionItem: {
     width: '30%',

@@ -12,7 +12,6 @@ import {
   lignHeight20,
   lignHeight24,
   lignHeight72,
-  Size12,
   Size16,
   Size18,
   Size8,
@@ -40,7 +39,7 @@ import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
 const BirthDateScreen = () => {
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [dateOfBirth, setDateOfBirth] = useState(null as any);
   const [showPicker, setShowPicker] = useState(false);
   const [isAgeValid, setIsAgeValid] = useState(true); // Track if user meets 18+ requirement
   const [isFocused, setIsFocused] = useState(false);
@@ -65,7 +64,7 @@ const BirthDateScreen = () => {
 
   // Validate the initial date when component mounts
   useEffect(() => {
-    setIsAgeValid(validateAge(dateOfBirth));
+    setIsAgeValid(validateAge(new Date(dateOfBirth)));
   }, [dateOfBirth]);
 
   const handleDateChange = (event: any, selectedDate: any) => {
@@ -97,7 +96,7 @@ const BirthDateScreen = () => {
     try {
       const requestBody = {
         id: user.id,
-        birthDate: dateOfBirth.toISOString(),
+        birthDate: new Date(dateOfBirth).toISOString(),
       };
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
@@ -113,11 +112,13 @@ const BirthDateScreen = () => {
   return (
     <SafeAreaView style={globalStyles.container}>
       <View style={styles.content}>
-        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)} />
-        <AppText text="Add your date of birth" textStyle={globalStyles.title} />
+        <HeaderBack
+          onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)}
+        />
+        <AppText text="When were you born?" textStyle={globalStyles.title} />
 
         <AppText
-          text="This won't be shared but Human at heart. First let's start with birth date."
+          text="Tell us your birth date — it helps us find matches closer to your preference"
           textStyle={globalStyles.subtitle}
         />
 
@@ -133,15 +134,19 @@ const BirthDateScreen = () => {
           activeOpacity={0.8}
         >
           <AppText
-            text={dateOfBirth.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            })}
+            text={
+              dateOfBirth
+                ? new Date(dateOfBirth).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })
+                : 'DD/MM/YYYY'
+            }
             textStyle={styles.dateInput}
           />
           <View style={styles.calendarIcon}>
-            <CalendarIcon width={20} height={20} color={COLORS.textBlack} />
+            <CalendarIcon width={20} height={20} color={COLORS.violet} />
           </View>
         </TouchableOpacity>
 
@@ -153,7 +158,7 @@ const BirthDateScreen = () => {
             style={styles.sheidImage}
           />
           <AppText
-            text="Please select your date of birth carefully as this information cannot be changed later and will be used for verification purposes."
+            text="Please ensure your Date of Birth matches your government ID to avoid verification issues."
             textStyle={styles.descriptionText}
           />
         </View>
@@ -180,7 +185,7 @@ const BirthDateScreen = () => {
 
       {showPicker && (
         <DateTimePicker
-          value={dateOfBirth}
+          value={dateOfBirth ? new Date(dateOfBirth) : new Date()}
           mode="date"
           display="default"
           onChange={handleDateChange}
@@ -207,6 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: Size4,
     paddingHorizontal: Size8,
     height: inputHeight,
+    top: Size8,
   },
   dateInputFocused: {
     borderColor: COLORS.violet,
@@ -216,7 +222,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlignVertical: 'center',
     fontSize: fontSize16,
-    color: COLORS.textBlack,
+    color: COLORS.greyText,
   },
   calendarIcon: {
     padding: Size8,
@@ -228,14 +234,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.lightgreen,
-    borderRadius: Size12,
+    backgroundColor: COLORS.cardBg3,
+    borderRadius: Size8,
     padding: Size16,
     gap: Size8,
+    paddingHorizontal: Size16 * 1.5,
   },
   descriptionText: {
     fontSize: fontSize12,
-    color: COLORS.black,
+    color: COLORS.matchBg,
     textAlign: 'left',
     lineHeight: Size16,
   },

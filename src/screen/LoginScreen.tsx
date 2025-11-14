@@ -148,7 +148,7 @@ const LoginScreen: React.FC = () => {
                   style={styles.crossIcon}
                 />
                 <AppText
-                  text="User not found. Please register first."
+                  text="User not found. Please register"
                   textStyle={styles.alreadyExistsText}
                 />
                 <AppButton
