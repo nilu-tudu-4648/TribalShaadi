@@ -14,6 +14,7 @@ export const ASYNC_VARIBLES = {
   LAST_MESSAGE: 'lastMessage',
   ALL_IMAGES_UPLOADED: 'allImagesUploaded',
   LAST_SCREEN_NAME: 'lastScreenName',
+  IS_COMING_FROM_ACCOUNT: 'isComingFromAccount',
 };
 // Routes
 export const ROUTES = {

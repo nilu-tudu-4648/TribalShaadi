@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Image, TextInput } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  TextInput,
+  Keyboard,
+} from 'react-native';
 import {
   fontSize14,
   lignHeight24,
@@ -41,6 +48,9 @@ const RegisterScreen: React.FC = () => {
     setPhoneNumber(text);
     const validation = validateIndianPhoneNumber(text);
     setPhoneValidation(validation);
+    if (alreadyExists) {
+      setAlreadyExists(false);
+    }
   };
 
   const handleVerify = async () => {
@@ -71,6 +81,12 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
+  const handleNavigateToLogin = useCallback(() => {
+    Keyboard.dismiss();
+    setAlreadyExists(false);
+    navigation.replace('Login');
+  }, [navigation]);
+
   const isButtonDisabled = !phoneValidation.isValid;
 
   return (
@@ -95,6 +111,7 @@ const RegisterScreen: React.FC = () => {
             autoComplete="tel"
             maxLength={10}
             style={globalStyles.inputStyl}
+            autoFocus={true}
           />
         </View>
         <AppButton
@@ -126,7 +143,7 @@ const RegisterScreen: React.FC = () => {
             <AppButton
               title="Log In"
               loaderSize={Size22}
-              onPress={() => navigation.navigate('Login')}
+              onPress={handleNavigateToLogin}
               isButtonDisabled={isButtonDisabled}
               buttonStyle={[
                 styles.button,

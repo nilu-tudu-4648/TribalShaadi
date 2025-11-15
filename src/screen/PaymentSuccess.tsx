@@ -1,42 +1,72 @@
-import { StyleSheet, View, TouchableOpacity, Image,BackHandler } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Image,
+  BackHandler,
+} from 'react-native';
 import React, { useEffect, useCallback } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/AppColors';
-import { 
-  fontSize28, 
-  fontSize24, 
-  fontSize18, 
-  fontSize16, 
-  Size16, 
-  Size20, 
-  Size25, 
-  Size40, 
+import {
+  fontSize28,
+  fontSize24,
+  fontSize18,
+  fontSize16,
+  Size16,
+  Size20,
+  Size25,
+  Size40,
   screenWidth,
   screenHeight,
-  Size50
+  Size50,
 } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import { CloseIcon } from '../components/svg/SvgIcons2';
 import FONT_FAMILY from '../constants/Fonts';
-import { ROUTES } from '../constants/data';
+import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PaymentSuccess = () => {
   const navigation = useNavigation();
-
-  const handleClose = useCallback(() => {
-    // Navigate back to the main tabs, specifically to Account screen
-    (navigation as any).navigate(ROUTES.MAIN_TABS, {
-      screen: ROUTES.INTEREST,
-    });
+  // Helper to check isComingFromAccount async and navigate accordingly
+  const handleClose = useCallback(async () => {
+    try {
+      const comingFromAccountValue = await AsyncStorage.getItem(
+        ASYNC_VARIBLES.IS_COMING_FROM_ACCOUNT,
+      );
+      if (comingFromAccountValue === 'true') {
+        (navigation as any).navigate(ROUTES.STACK, {
+          screen: ROUTES.UPGRADE,
+        });
+      } else {
+        (navigation as any).navigate(ROUTES.MAIN_TABS, {
+          screen: ROUTES.INTEREST,
+        });
+      }
+    } catch (error) {
+      (navigation as any).navigate(ROUTES.MAIN_TABS, {
+        screen: ROUTES.INTEREST,
+      });
+    } finally {
+      try {
+        await AsyncStorage.removeItem(ASYNC_VARIBLES.IS_COMING_FROM_ACCOUNT);
+      } catch (error) {
+        console.log(error, 'error');
+      }
+    }
   }, [navigation]);
 
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleClose();
-      return true;
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        handleClose();
+        return true;
+      },
+    );
     return () => backHandler.remove();
   }, [handleClose]);
 
@@ -69,13 +99,13 @@ const PaymentSuccess = () => {
           {/* Main Content */}
           <View style={styles.textSection}>
             <AppText text="Congratulations" textStyle={styles.congratsText} />
-            <AppText 
-              text="You are a premium user now!" 
-              textStyle={styles.subtitleText} 
+            <AppText
+              text="You are a premium user now!"
+              textStyle={styles.subtitleText}
             />
-            <AppText 
-              text="See 2X matches, send unlimited requests and unlock all your chats" 
-              textStyle={styles.descriptionText} 
+            <AppText
+              text="See 2X matches, send unlimited requests and unlock all your chats"
+              textStyle={styles.descriptionText}
             />
           </View>
         </View>
@@ -111,7 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: Size40,
-    paddingBottom: Size50*2,
+    paddingBottom: Size50 * 2,
   },
   successSection: {
     alignItems: 'center',
@@ -137,7 +167,7 @@ const styles = StyleSheet.create({
     gap: Size16,
   },
   congratsText: {
-    fontSize: fontSize24*1.5,
+    fontSize: fontSize24 * 1.5,
     fontWeight: '700',
     color: COLORS.white,
     textAlign: 'center',

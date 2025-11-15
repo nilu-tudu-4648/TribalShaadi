@@ -120,6 +120,7 @@ const LoginScreen: React.FC = () => {
                 autoComplete="tel"
                 maxLength={10}
                 style={globalStyles.inputStyl}
+                autoFocus={true}
               />
             </View>
             <AppButton

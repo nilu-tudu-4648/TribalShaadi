@@ -9,7 +9,7 @@ import React, { useRef, useEffect } from 'react';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
-import { ROUTES } from '../constants/data';
+import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import {
   CompositeNavigationProp,
   useNavigation,
@@ -48,6 +48,7 @@ import {
 } from '../constants/functions';
 import DeviceInfo from 'react-native-device-info';
 import AppSafeView from '../components/AppSafeView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -102,7 +103,7 @@ const AccountScreen = () => {
   };
   const dispatch = useDispatch();
   const profileBottomSheetRef = useRef<BottomSheet>(null);
-  
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       profileBottomSheetRef.current?.close();
@@ -110,11 +111,23 @@ const AccountScreen = () => {
 
     return unsubscribe;
   }, [navigation]);
+  const comingFromAccount = async () => {
+    try {
+      console.log('comingFromAccount');
+      await AsyncStorage.setItem(ASYNC_VARIBLES.IS_COMING_FROM_ACCOUNT, 'true');
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
   const badgeData: BadgeData[] = [
     {
       key: 'crown',
       label: 'Crown\nbadge',
-      color: packageByUserId && packageByUserId.length > 0 || user.gender === "Female" ? '#FFD600' : COLORS.grey,
+      color:
+        (packageByUserId && packageByUserId.length > 0) ||
+        user.gender === 'Female'
+          ? '#FFD600'
+          : COLORS.grey,
       icon: CrownIcon,
       route: ROUTES.UPGRADE,
     },
@@ -135,7 +148,10 @@ const AccountScreen = () => {
   const actionButtons: ActionButton[] = [
     {
       key: 'plan',
-      label: packageByUserId.length > 0 || user.gender === "Female" ? 'My Plan' : 'Upgrade',
+      label:
+        packageByUserId.length > 0 || user.gender === 'Female'
+          ? 'My Plan'
+          : 'Upgrade',
       icon: RocketIcon,
       route: ROUTES.UPGRADE,
     },
@@ -225,6 +241,9 @@ const AccountScreen = () => {
                     navigation.navigate(ROUTES.STACK, {
                       screen: btn.route,
                     } as never);
+                    if (btn.route === ROUTES.UPGRADE) {
+                      comingFromAccount();
+                    }
                   }}
                   key={btn.key}
                   style={styles.actionItem}
@@ -241,11 +260,21 @@ const AccountScreen = () => {
             })}
           </View>
           <View style={styles.logoContainer}>
-            <Image source={require('../assets/images/newlogo.png')} style={styles.logo} />
-            <AppText text={`Version ${DeviceInfo.getVersion()}`} textStyle={styles.logoutText} />
+            <Image
+              source={require('../assets/images/newlogo.png')}
+              style={styles.logo}
+            />
+            <AppText
+              text={`Version ${DeviceInfo.getVersion()}`}
+              textStyle={styles.logoutText}
+            />
             <View style={styles.madeWithContainer}>
               <AppText text="Made with" textStyle={styles.logoutText} />
-              <HeartIcon color={COLORS.greyText3} width={Sizes.Size20*.7} height={Sizes.Size20} />
+              <HeartIcon
+                color={COLORS.greyText3}
+                width={Sizes.Size20 * 0.7}
+                height={Sizes.Size20}
+              />
               <AppText text="in Jharkhand" textStyle={styles.logoutText} />
             </View>
           </View>
@@ -270,7 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     alignItems: 'center',
     gap: Sizes.Size16,
-    paddingTop: "100%",
+    paddingTop: '100%',
   },
   profileContainer: {
     alignItems: 'center',
@@ -379,8 +408,8 @@ const styles = StyleSheet.create({
     gap: Sizes.Size4,
   },
   logo: {
-    width: "100%",
-    height: Sizes.Size50/2,
+    width: '100%',
+    height: Sizes.Size50 / 2,
     resizeMode: 'contain',
     bottom: Sizes.Size10,
   },
