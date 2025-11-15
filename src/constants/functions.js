@@ -475,7 +475,7 @@ export const checkAuth = async dispatch => {
       await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
       return false;
     }
-    console.log(user, 'user in checkAuth');
+    // console.log(user, 'user in checkAuth');
     // Last screen check
     try {
       if (user.intrests) {
@@ -861,7 +861,7 @@ export const onAppClose = async dispatch => {
       id: user.id,
       middleName: 'offline',
     };
-    console.log('requestBody onAppClose', requestBody);
+    // console.log('requestBody onAppClose', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
       getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -880,7 +880,7 @@ export const onAppForeground = async dispatch => {
       id: user.id,
       middleName: 'online',
     };
-    console.log('requestBody onAppForeground', requestBody);
+    // console.log('requestBody onAppForeground', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
       getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);

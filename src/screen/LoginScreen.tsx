@@ -46,6 +46,7 @@ const LoginScreen: React.FC = () => {
   const url = 'admin/users/sendOTPForLogin';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const isIOS = Platform.OS === 'ios';
 
   // Memoize phone validation to avoid recalculating on every render
   const phoneValidation = useMemo(() => {
@@ -87,95 +88,103 @@ const LoginScreen: React.FC = () => {
 
   const isButtonDisabled = !phoneValidation.isValid;
 
+  const content = (
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.content}>
+        <View style={styles.headerSection}>
+          <AppText text="Phone number" textStyle={styles.title} />
+          <AppText text="Enter Mobile Number" textStyle={styles.subtitle} />
+        </View>
+        <View style={globalStyles.inputContainer}>
+          <Image
+            source={require('../assets/images/india.png')}
+            style={styles.phoneIcon}
+          />
+          <AppText text="+91" textStyle={styles.phoneCode} />
+
+          {/* Phone Number Input */}
+          <TextInput
+            value={phoneNumber}
+            onChangeText={handlePhoneNumberChange}
+            placeholder="Phone number"
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            maxLength={10}
+            style={globalStyles.inputStyl}
+            autoFocus={true}
+          />
+        </View>
+        <AppButton
+          isLoading={loading}
+          title="Verify"
+          loaderSize={Size22}
+          onPress={handleVerify}
+          isButtonDisabled={isButtonDisabled}
+          buttonStyle={[
+            styles.button,
+            isButtonDisabled ? styles.buttonDisabled : styles.buttonEnabled,
+          ]}
+          textStyle={[
+            styles.buttonText,
+            isButtonDisabled
+              ? styles.buttonTextDisabled
+              : styles.buttonTextEnabled,
+          ]}
+        />
+
+        {/* Error Message - Now positioned before spacer */}
+        {alreadyExists && (
+          <View style={styles.alreadyExistsContainer}>
+            <Image
+              source={require('../assets/images/crossred.png')}
+              style={styles.crossIcon}
+            />
+            <AppText
+              text="User not found. Please register"
+              textStyle={styles.alreadyExistsText}
+            />
+            <AppButton
+              title="Register"
+              loaderSize={Size22}
+              onPress={() => navigation.navigate('Register')}
+              isButtonDisabled={false}
+              buttonStyle={[styles.button, styles.registerButton]}
+              textStyle={[styles.buttonText, styles.registerButtonText]}
+            />
+          </View>
+        )}
+
+        {/* Spacer */}
+        <View style={styles.spacer} />
+
+        {/* Info */}
+        <View style={styles.infoContainer}>
+          <AppText
+            text="We'll send you a verification code via SMS"
+            textStyle={styles.infoText}
+          />
+        </View>
+      </View>
+    </ScrollView>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+      {isIOS ? (
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior="padding"
+          keyboardVerticalOffset={0}
         >
-          <View style={styles.content}>
-            <View style={styles.headerSection}>
-              <AppText text="Phone number" textStyle={styles.title} />
-              <AppText text="Enter Mobile Number" textStyle={styles.subtitle} />
-            </View>
-            <View style={globalStyles.inputContainer}>
-              <Image
-                source={require('../assets/images/india.png')}
-                style={styles.phoneIcon}
-              />
-              <AppText text="+91" textStyle={styles.phoneCode} />
-
-              {/* Phone Number Input */}
-              <TextInput
-                value={phoneNumber}
-                onChangeText={handlePhoneNumberChange}
-                placeholder="Phone number"
-                keyboardType="phone-pad"
-                autoComplete="tel"
-                maxLength={10}
-                style={globalStyles.inputStyl}
-                autoFocus={true}
-              />
-            </View>
-            <AppButton
-              isLoading={loading}
-              title="Verify"
-              loaderSize={Size22}
-              onPress={handleVerify}
-              isButtonDisabled={isButtonDisabled}
-              buttonStyle={[
-                styles.button,
-                isButtonDisabled ? styles.buttonDisabled : styles.buttonEnabled,
-              ]}
-              textStyle={[
-                styles.buttonText,
-                isButtonDisabled
-                  ? styles.buttonTextDisabled
-                  : styles.buttonTextEnabled,
-              ]}
-            />
-
-            {/* Error Message - Now positioned before spacer */}
-            {alreadyExists && (
-              <View style={styles.alreadyExistsContainer}>
-                <Image
-                  source={require('../assets/images/crossred.png')}
-                  style={styles.crossIcon}
-                />
-                <AppText
-                  text="User not found. Please register"
-                  textStyle={styles.alreadyExistsText}
-                />
-                <AppButton
-                  title="Register"
-                  loaderSize={Size22}
-                  onPress={() => navigation.navigate('Register')}
-                  isButtonDisabled={false}
-                  buttonStyle={[styles.button, styles.registerButton]}
-                  textStyle={[styles.buttonText, styles.registerButtonText]}
-                />
-              </View>
-            )}
-
-            {/* Spacer */}
-            <View style={styles.spacer} />
-
-            {/* Info */}
-            <View style={styles.infoContainer}>
-              <AppText
-                text="We'll send you a verification code via SMS"
-                textStyle={styles.infoText}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          {content}
+        </KeyboardAvoidingView>
+      ) : (
+        <View style={styles.keyboardView}>{content}</View>
+      )}
     </SafeAreaView>
   );
 };

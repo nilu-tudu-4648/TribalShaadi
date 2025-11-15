@@ -56,6 +56,8 @@ const UploadImageScreen = () => {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [isAIViewing, setIsAIViewing] = useState(false);
   const [isImageValid, setIsImageValid] = useState(true);
+  const [isImageValid2, setIsImageValid2] = useState(true);
+
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -111,7 +113,7 @@ const UploadImageScreen = () => {
                 true,
                 setIsImageValid,
                 setIsAIViewing,
-                handleRemoveImage,
+                // handleRemoveImage,
               );
             } else {
               // Second and third image format - only call API when both images are selected
@@ -130,7 +132,15 @@ const UploadImageScreen = () => {
                     `data:image/jpeg;base64,${updatedImages[2].base64}`,
                   ],
                 };
-                await uploadImage(requestBody, dispatch);
+                setIsAIViewing(true);
+                await uploadImage(
+                  requestBody,
+                  dispatch,
+                  false,
+                  setIsImageValid2,
+                  setIsAIViewing,
+                  // handleRemoveImage,
+                );
               } else {
                 // Only one image selected, don't make API call yet
                 console.log(
@@ -152,14 +162,13 @@ const UploadImageScreen = () => {
       }
     });
   };
-
+  console.log(isImageValid, isImageValid2, 'isImageValid, isImageValid2');
   const handleRemoveImage = (index: number) => {
     console.log(index, 'index');
     const newImages = [...selectedImages];
     newImages[index] = { uri: '', base64: '' };
     setSelectedImages(newImages);
   };
-
   const handleContinue = async () => {
     try {
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -225,7 +234,7 @@ const UploadImageScreen = () => {
       )}
     </TouchableOpacity>
   );
-  const isButtonDisabled = !isImageValid || getValidImageCount() !== 3;
+  const isButtonDisabled = !isImageValid || !isImageValid2 || getValidImageCount() !== 3;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -280,7 +289,7 @@ const UploadImageScreen = () => {
         )}
         {/* Spacer */}
         <View style={styles.spacer} />
-        {!isImageValid && (
+        {(!isImageValid || !isImageValid2) && (
           <Image
             source={require('../assets/images/imagevalid.png')}
             style={styles.image}
@@ -291,7 +300,7 @@ const UploadImageScreen = () => {
           title="Continue"
           onPress={handleContinue}
           isLoading={loader}
-          // isButtonDisabled={isButtonDisabled}
+          isButtonDisabled={isButtonDisabled}
           buttonStyle={[
             globalStyles.continueButton,
             isButtonDisabled

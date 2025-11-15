@@ -301,10 +301,10 @@ const HomeScreen = () => {
                     annualIncome={currentMatchedUser?.annualIncome}
                     partnerExpectation={currentMatchedUser?.about_lifepartener}
                     employedIn={currentMatchedUser?.employmentType}
-                    occupation={currentMatchedUser?.occupation}
+                    occupation={currentMatchedUser?.occupationCategoryName}
                     organizationName={currentMatchedUser?.companyName}
                     settlingTime={currentMatchedUser?.planingto_settle}
-                    highestQualification={currentMatchedUser?.educationType}
+                    highestQualification={currentMatchedUser?.education}
                     college={currentMatchedUser?.college_name}
                     eatingHabits={currentMatchedUser?.diet}
                     drinkingHabits={currentMatchedUser?.drinking}
