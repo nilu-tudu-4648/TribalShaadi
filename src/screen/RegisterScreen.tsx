@@ -112,6 +112,8 @@ const RegisterScreen: React.FC = () => {
             maxLength={10}
             style={globalStyles.inputStyl}
             autoFocus={true}
+            placeholderTextColor={COLORS.greyText}
+            
           />
         </View>
         <AppButton

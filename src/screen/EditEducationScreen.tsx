@@ -147,7 +147,7 @@ const EditEducationScreen = () => {
 
     buildSections();
   }, [showJobRolePicker, occupationsByEmploymentType]);
-
+  console.log(user,'user')
   // Initialize form data from user profile
   useEffect(() => {
     if (user) {
@@ -160,7 +160,7 @@ const EditEducationScreen = () => {
         collegeName: user.college_name || '',
         employmentTypeId: user.employmentTypeId || '1',
         companyTypeName: user.employmentType || '',
-        jobRoleName: user.occupation || '',
+        jobRoleName: user.occupationCategoryName || '',
         companyName: user.companyName || '',
         salaryId: user.annualIncomeId || '',
         salaryName: user.annualIncome || '',
@@ -169,8 +169,13 @@ const EditEducationScreen = () => {
         occupationCategoryName: user.occupationCategoryName || '',
         occupationCategoryId: user.occupationCategoryId || '',
       });
+      dispatch(
+        getOccupationsByEmploymentType(
+          getOccupationByEmploymentTypeUrl + user.employmentTypeId,
+        ),
+      );
     }
-  }, [user]);
+  }, [user, dispatch]);
 
   // Handle education selection from sectioned picker
   const handleEducationSelection = useCallback((item: any, section: any) => {

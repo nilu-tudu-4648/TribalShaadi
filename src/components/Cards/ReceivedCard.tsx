@@ -53,7 +53,7 @@ const ReceivedCard = ({
               height={item.height}
               religion={item.religion}
               caste={item.community}
-              districtName={item.city ?? ''}
+              districtName={item.districts ?? ''}
               stateName={item.state ?? ''}
             />
           ) : (

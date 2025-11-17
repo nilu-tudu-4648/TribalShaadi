@@ -184,17 +184,27 @@ const QualificationScreen = () => {
       navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES);
     }
   };
+  const isWorking = selectedWorkExperience?.name !== 'Not Working';
+  const isFormValid = (() => {
+    if (
+      !selectedQualification ||
+      !selectedWorkExperience ||
+      !selectedOccupation ||
+      !collegeName.trim()
+    ) {
+      return false;
+    }
 
-  const isFormValid =
-    selectedQualification &&
-    collegeName &&
-    organizationName &&
-    selectedWorkExperience &&
-    selectedOccupation &&
-    (selectedWorkExperience?.name !== 'Not Working'
-      ? selectedIncome // Only check income and organization name if working
-      : true); // If not working, these fields are not required
+    if (!isWorking) {
+      return true;
+    }
 
+    return (
+      !!selectedOccupationCategory &&
+      !!selectedIncome &&
+      !!organizationName.trim()
+    );
+  })();
   return (
     <AppSafeView style={styles.container}>
       <ScrollView

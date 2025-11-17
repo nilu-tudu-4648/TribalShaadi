@@ -24,7 +24,7 @@ const RefundScreen = () => {
       >
         <View style={styles.contentWrapper}>
           <AppText
-            text="Effective Date: [Date]"
+            text="Effective Date: 13/11/2025"
             textStyle={styles.effectiveDate}
           />
 

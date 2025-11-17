@@ -36,10 +36,8 @@ import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { InfinityIcon } from '../components/svg/SvgIcons2';
 import {
-  formatDateShort,
   generateRazorPayOrderIdUrl,
   getPackageByUserIdUrl,
-  getPackageListUrl,
   getPaymentGatewaysUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
@@ -48,7 +46,6 @@ import {
   setReducerLoadingfalse,
 } from '../constants/functions';
 import {
-  getPackageListApi,
   getPaymentGatewaysApi,
   generateRazorPayOrderIdApi,
   insertPaymentApi,
@@ -70,10 +67,9 @@ const UpgradeScreen = () => {
     packageByUserId,
   } = useSelector((state: any) => state.entities.paymentReducer);
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const [selectedPlan, setSelectedPlan] = useState(1);
+  const [selectedPlan, setSelectedPlan] = useState(packageList[0]?.packageId);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
-  console.log(user,'user')
   const features = [
     {
       icon: <InfinityIcon color={COLORS.white} />,
@@ -84,14 +80,6 @@ const UpgradeScreen = () => {
       title: 'See All Received Interests',
     },
   ];
-
-  const calculateEndDate = useCallback((months: number) => {
-    const currentDate = new Date();
-    const endDate = new Date(currentDate);
-    endDate.setMonth(currentDate.getMonth() + months);
-    return endDate.toISOString();
-  }, []);
-
   const handlePlanSelect = (planId: number) => {
     setSelectedPlan(planId);
   };
@@ -102,7 +90,7 @@ const UpgradeScreen = () => {
         dispatch(
           insertPaymentApi(insertPaymentUrl, {
             paymentReference: data.razorpay_payment_id,
-            amount: selectedPackage.package[0].baseAmount,
+            amount: selectedPackage.price,
             currency: 'INR',
             paymentStatus: 'Success',
             signature: data.razorpay_signature,
@@ -115,12 +103,9 @@ const UpgradeScreen = () => {
       } finally {
         dispatch(
           savePremiumAccountApi(savePremiumAccountUrl, {
-            packageId: selectedPackage.id,
-            packageDurationId: selectedPackage.package[0].packageDurationId,
-            startDate: new Date().toISOString(),
-            endate: calculateEndDate(selectedPackage.package[0].value),
-            netAmount: selectedPackage.package[0].baseAmount,
-            purchaseDate: new Date().toISOString(),
+            packageId: selectedPackage.packageId,
+            packageDurationId: selectedPackage.durations[0].packageDurationId,
+            netAmount: selectedPackage.price,
           }),
         );
         setReducerLoadingfalse(dispatch, () => {
@@ -128,7 +113,7 @@ const UpgradeScreen = () => {
         });
       }
     },
-    [dispatch, calculateEndDate, user.id, navigation],
+    [dispatch, user.id, navigation],
   );
   const openRazorpayCheckout = () => {
     if (!paymentGateways) {
@@ -136,7 +121,7 @@ const UpgradeScreen = () => {
       return;
     }
 
-    const selectedPackage = packageList.find((p: any) => p.id === selectedPlan);
+    const selectedPackage = packageList.find((p: any) => p.packageId === selectedPlan);
     console.log('selectedPackage found:', selectedPackage);
 
     if (!selectedPackage) {
@@ -148,7 +133,7 @@ const UpgradeScreen = () => {
     setCheckoutInProgress(true);
 
     const paymentData = {
-      amount: selectedPackage.package[0].baseAmount,
+      amount: selectedPackage.price,
       currency: 'INR',
     };
 
@@ -159,7 +144,7 @@ const UpgradeScreen = () => {
   useEffect(() => {
     if (checkoutInProgress && razorPayOrderId) {
       const selectedPackage = packageList.find(
-        (p: any) => p.id === selectedPlan,
+        (p: any) => p.packageId === selectedPlan,
       );
 
       if (!selectedPackage) {
@@ -169,10 +154,10 @@ const UpgradeScreen = () => {
 
       const options = {
         key: paymentGateways.jsonData.apiKey,
-        amount: selectedPackage.package[0].baseAmount * 100,
+        amount: selectedPackage.price * 100,
         currency: 'INR',
         name: 'TribalShaadi',
-        description: `${selectedPackage.package[0].value} Months Premium Subscription`,
+        description: `${selectedPackage.duration} Months Premium Subscription`,
         order_id: razorPayOrderId.id,
         handler: function (response: any) {
           console.log('Payment handler response:', response);
@@ -257,7 +242,6 @@ const UpgradeScreen = () => {
   ]);
 
   useEffect(() => {
-    dispatch(getPackageListApi(getPackageListUrl));
     dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
     dispatch(getPackageByUserIdApi(getPackageByUserIdUrl, { userId: user.id }));
   }, [dispatch, user.id]);
@@ -266,11 +250,11 @@ const UpgradeScreen = () => {
     <>
       <AppSafeView style={styles.container}>
         {/* If user is female, always show as premium */}
-        {user.gender === "Female" ? (
+        {user.gender === 'Female' ? (
           <PremiumCard
             packageData={{
-              netAmount:1500,
-              endDate:"Till Marriage",
+              netAmount: 1500,
+              endDate: 'Till Marriage',
             }}
             features={features}
             endDateText={`Lifetime Access`}
@@ -296,9 +280,18 @@ const UpgradeScreen = () => {
                 />
               </Pressable>
               <View style={styles.interestContainer}>
-                <Image source={require('../assets/images/upgradeblur.png')} style={styles.interestImage} />
-                <AppText text="See who’s interested in you" textStyle={styles.title} />
-                <AppText text="Turn interests into conversations—faster" textStyle={styles.subtitle} />
+                <Image
+                  source={require('../assets/images/upgradeblur.png')}
+                  style={styles.interestImage}
+                />
+                <AppText
+                  text="See who’s interested in you"
+                  textStyle={styles.title}
+                />
+                <AppText
+                  text="Turn interests into conversations—faster"
+                  textStyle={styles.subtitle}
+                />
               </View>
 
               <View style={styles.featuresContainer}>
@@ -321,29 +314,29 @@ const UpgradeScreen = () => {
                 <View style={styles.pricingContainer}>
                   {packageList.map((option: any) => (
                     <TouchableOpacity
-                      key={option.id}
+                      key={option.packageId}
                       style={[
                         styles.pricingOption,
-                        selectedPlan === option.id &&
+                        selectedPlan === option.packageId &&
                           styles.selectedPricingOption,
                       ]}
-                      onPress={() => handlePlanSelect(option.id)}
+                      onPress={() => handlePlanSelect(option.packageId)}
                     >
                       <View style={styles.pricingLeft}>
                         <View
                           style={[
                             styles.radioButton,
-                            selectedPlan === option.id &&
+                            selectedPlan === option.packageId &&
                               styles.selectedRadioButton,
                           ]}
                         >
-                          {selectedPlan === option.id && (
+                          {selectedPlan === option.packageId && (
                             <View style={styles.radioButtonInner} />
                           )}
                         </View>
                         <View style={styles.pricingTextContainer}>
                           <AppText
-                            text={`${option.package[0].value} Months`}
+                            text={`${option.title}`}
                             textStyle={styles.pricingDuration}
                           />
                           {option.badge && (
@@ -358,14 +351,11 @@ const UpgradeScreen = () => {
                       </View>
                       <View style={styles.pricingRight}>
                         <AppText
-                          text={`₹${option.package[0].baseAmount}`}
+                          text={`₹${option.price}`}
                           textStyle={styles.pricingPrice}
                         />
                         <AppText
-                          text={`₹${Math.floor(
-                            option.package[0].baseAmount /
-                              option.package[0].value,
-                          )} per month`}
+                          text={`${option.tag || ''}`}
                           textStyle={styles.pricingSubtext}
                         />
                       </View>
@@ -375,11 +365,11 @@ const UpgradeScreen = () => {
               </ScrollView>
               <AppLinearButton
                 title={`Get ${
-                  packageList.find((p: any) => p.id === selectedPlan)
-                    ?.package[0].value
-                } Months for ₹${
-                  packageList.find((p: any) => p.id === selectedPlan)
-                    ?.package[0].baseAmount
+                  packageList.find((p: any) => p.packageId === selectedPlan)
+                    ?.title
+                } for ₹${
+                  packageList.find((p: any) => p.packageId === selectedPlan)
+                    ?.price
                 }`}
                 onPress={openRazorpayCheckout}
                 linearGradientColors={['#21BEFE', '#EE50C1']}
@@ -395,10 +385,10 @@ const UpgradeScreen = () => {
           <PremiumCard
             packageData={{
               netAmount: packageByUserId[0].netAmount,
-              endDate: packageByUserId[0].endDate,
+              endDate: packageByUserId[0].title,
             }}
             features={features}
-            endDateText={`Ends on ${formatDateShort(packageByUserId[0].endDate)}`}
+            endDateText={`Ends on ${new Date(packageByUserId[0].endDate).toLocaleDateString('en-GB', {day: '2-digit', month: 'long', year: 'numeric'})}`}
           />
         )}
       </AppSafeView>

@@ -70,13 +70,19 @@ const PremiumCard: React.FC<PremiumCardProps> = ({
             textStyle={styles.offerPriceWhite}
           />
           <View style={styles.weekContainer}>
-            <AppText text={packageData.endDate} textStyle={styles.offerContainerText} />
+            <AppText
+              text={packageData.endDate}
+              textStyle={styles.offerContainerText}
+            />
           </View>
         </View>
         <View style={styles.offerBadge}>
           <AppText
             text={endDateText}
-            textStyle={styles.offerContainerText}
+            textStyle={[
+              styles.offerContainerText,
+              { color: COLORS.offerBg, fontStyle: 'italic' },
+            ]}
           />
         </View>
       </View>
@@ -151,13 +157,13 @@ const styles = StyleSheet.create({
   priceRow: {
     flexDirection: 'row',
     gap: Size4,
+    bottom: Size8 * 0.6,
   },
   offerPriceWhite: {
     fontSize: fontSize20,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
     textAlign: 'center',
     color: COLORS.white,
-    fontStyle: 'italic',
     fontWeight: '700',
   },
   weekContainer: {
@@ -171,9 +177,8 @@ const styles = StyleSheet.create({
   offerContainerText: {
     fontSize: fontSize12,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.offerBg,
+    color: COLORS.white,
     textAlign: 'center',
-    fontStyle: 'italic',
     fontWeight: '700',
   },
   offerBadge: {

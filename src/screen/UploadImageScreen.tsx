@@ -113,7 +113,7 @@ const UploadImageScreen = () => {
                 true,
                 setIsImageValid,
                 setIsAIViewing,
-                // handleRemoveImage,
+                handleRemoveImage,
               );
             } else {
               // Second and third image format - only call API when both images are selected
@@ -139,7 +139,7 @@ const UploadImageScreen = () => {
                   false,
                   setIsImageValid2,
                   setIsAIViewing,
-                  // handleRemoveImage,
+                  handleRemoveImage2,
                 );
               } else {
                 // Only one image selected, don't make API call yet
@@ -167,6 +167,12 @@ const UploadImageScreen = () => {
     console.log(index, 'index');
     const newImages = [...selectedImages];
     newImages[index] = { uri: '', base64: '' };
+    setSelectedImages(newImages);
+  };
+  const handleRemoveImage2 = () => {
+    const newImages = [...selectedImages];
+    newImages[1] = { uri: '', base64: '' };
+    newImages[2] = { uri: '', base64: '' };
     setSelectedImages(newImages);
   };
   const handleContinue = async () => {

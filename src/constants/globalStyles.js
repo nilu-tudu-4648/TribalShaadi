@@ -13,6 +13,7 @@ import {
   inputHeight,
   Size4,
 } from './Sizes';
+import FONT_FAMILY from './Fonts';
 
 export const globalStyles = StyleSheet.create({
   container: {
@@ -87,5 +88,7 @@ export const globalStyles = StyleSheet.create({
     paddingLeft: Size8 * 2,
     fontSize: fontSize16,
     height: inputHeight * 0.8,
+    fontWeight: '500',
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
 });
