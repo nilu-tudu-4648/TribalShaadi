@@ -50,7 +50,6 @@ import {
   getProposalsGotByMeApi,
   getProposalsSendByMeApi,
   sentProposalApi,
-  setMatchedUserApi,
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
 import {
@@ -73,14 +72,14 @@ import { ASYNC_VARIBLES } from '../constants/data';
 // keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
   const {
-    matchedUsers,
+    // matchedUsers,
     currentMatchedUser,
     currentMatchedUserGalleryImageList,
   } = useSelector((state: any) => state.entities.userReducer);
   const { currentUserPackage } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
-  // console.log(matchedUsers, 'matchedUsers ');
+  const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -236,9 +235,9 @@ const HomeScreen = () => {
         event.velocityX > velocityThreshold;
 
       if (shouldSwipeLeft) {
-        startTransition('left');
+        runOnJS(startTransition)('left');
       } else if (shouldSwipeRight) {
-        startTransition('right');
+        runOnJS(startTransition)('right');
       } else {
         // Return to original position
         if (activeCard === 1) {
@@ -299,7 +298,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
+      // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
         setActionInProgress(false);
     }
   };
@@ -339,7 +338,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
+      // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
         setActionInProgress(false);
     }
   };
@@ -378,6 +377,18 @@ const HomeScreen = () => {
     },
     [galleryCache],
   );
+  const fetchMatchedUsers = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+      if (!token) return;
+      const resp = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, { headers: { Authorization: `Bearer ${token}` } });
+      const list = resp?.data?.recordList ?? [];
+      setMatchedUsers(list);
+    } catch (e) {}
+  }, []);
+  useEffect(() => {
+    fetchMatchedUsers();
+  }, [fetchMatchedUsers]);
   // Helper: fetch package silently
   const fetchPackageSilently = useCallback(
     async (userId: number) => {
@@ -417,7 +428,7 @@ const HomeScreen = () => {
     const fetchChatHistory = async () => {
       console.log(user?.id, 'user?.id fetchChatHistory');
       try {
-        dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+        // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
         dispatch(
           getAcceptedProposalByIdApi(
             `${getAcceptedProposalByIdUrl}/${user?.id}`,

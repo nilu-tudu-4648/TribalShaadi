@@ -133,8 +133,10 @@ const styles = StyleSheet.create({
   },
   aiVerifiedIcon: {
     width: '80%',
-    height: Size25 * 1.8,
+    height: Size25 * 1.5,
     resizeMode: 'contain',
+    alignSelf: 'flex-start',
+    left: -Size25,
   },
   homeIconContainer: {
     flexDirection: 'row',

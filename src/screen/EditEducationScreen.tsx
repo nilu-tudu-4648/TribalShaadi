@@ -416,7 +416,7 @@ const EditEducationScreen = () => {
           showJobRolePicker && formData.companyTypeName !== 'Not Working'
         }
         sections={sectionedOccupationOptions}
-        selectedItemId={undefined}
+        selectedItemId={formData.occupationCategoryId || undefined}
         onSelect={handleJobRoleSelection}
         onClose={() => setShowJobRolePicker(false)}
        title="Select Occupation"

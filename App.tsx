@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, View, Image, StyleSheet, AppState } from 'react-native';
+import { StatusBar, View, Image, StyleSheet, AppState, Alert, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -49,6 +49,7 @@ import { PostHogProvider } from 'posthog-react-native';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import TermScreen from './src/screen/TermScreen';
 import PrivacyScreen from './src/screen/PrivacyScreen';
+import VersionCheck from 'react-native-version-check';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -198,6 +199,47 @@ const MainApp = () => {
       }
     };
   }, [dispatch]);
+  useEffect(() => {
+    const checkAppVersion = async () => {
+      try {
+        const latestVersion = await VersionCheck.getLatestVersion({
+          packageName: 'com.tribalshaadi',
+          ignoreErrors: true,
+        });
+
+        const currentVersion = VersionCheck.getCurrentVersion();
+        console.log(latestVersion, currentVersion, "latestVersion, currentVersion");
+
+        // Compare versions as floats for cases like 1.9 < 1.12
+        const latest = parseFloat(latestVersion);
+        const current = parseFloat(currentVersion);
+
+        if (latest > current) {
+          Alert.alert(
+            'Update Required',
+            'A new version of the app is available. Please update to continue using the app.',
+            [
+              {
+                text: 'Update Now',
+                onPress: async () => {
+                  const url = await VersionCheck.getPlayStoreUrl({ packageName: 'com.tribalshaadi' });
+                  Linking.openURL(url);
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+        } else {
+          // App is up-to-date, proceed with the app
+        }
+      } catch (error) {
+        // Handle error while checking app version
+        console.error('Error checking app version:', error);
+      }
+    };
+
+    checkAppVersion();
+  }, []);
 
   if (showSplash || !isInitialized) {
     return <SplashScreen />;
