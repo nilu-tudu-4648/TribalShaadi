@@ -233,15 +233,15 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
+  alreadyExistsText: {
+    fontSize: fontSize14,
+    right: 10,
+  },
   alreadyExistsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: lignHeight24,
-  },
-  alreadyExistsText: {
-    fontSize: fontSize14,
-    textAlign: 'center',
   },
 
   phoneIcon: {

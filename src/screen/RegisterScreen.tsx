@@ -118,7 +118,7 @@ const RegisterScreen: React.FC = () => {
         </View>
         <AppButton
           isLoading={loading}
-          title="Verifyhh"
+          title="Verify"
           loaderSize={Size22}
           onPress={handleVerify}
           isButtonDisabled={isButtonDisabled}
@@ -134,13 +134,13 @@ const RegisterScreen: React.FC = () => {
           ]}
         />
         {/* Spacer */}
-        {true && (
+        {alreadyExists && (
           <View style={styles.alreadyExistsContainer}>
             <Image
               source={require('../assets/images/crossred.png')}
               style={styles.crossIcon}
             />
-            <AppText text="Phone number already exists." />
+            <AppText textStyle={styles.alreadyExistsText} text="Phone number already exists." />
             <AppButton
               title="Log In"
               loaderSize={Size22}
@@ -193,6 +193,10 @@ const styles = StyleSheet.create({
     fontSize: fontSize14,
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  alreadyExistsText: {
+    fontSize: fontSize14,
+    right: 10,
   },
   alreadyExistsContainer: {
     flexDirection: 'row',
