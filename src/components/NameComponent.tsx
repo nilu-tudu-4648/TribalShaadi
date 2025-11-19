@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     height: Size25 * 1.5,
     resizeMode: 'contain',
     alignSelf: 'flex-start',
-    left: -Size25,
+    left: -2,
   },
   homeIconContainer: {
     flexDirection: 'row',

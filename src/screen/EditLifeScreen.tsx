@@ -453,7 +453,7 @@ const EditLifeScreen = () => {
 
       <AppPickerModal
         visible={showTimelinePicker}
-        items={SETTLING_DOWN_OPTIONS.map((item, index) => ({
+        items={SETTLING_DOWN_OPTIONS.filter(item=>item!=='Any').map((item, index) => ({
           id: index,
           name: item,
         }))}

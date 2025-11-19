@@ -204,7 +204,7 @@ const InterestScreen = () => {
                 onDecline={() => handleRejectProposal(item.senderUserId)}
                 onConnect={() => handleAcceptProposal(item)}
                 onPress={() => {
-                  if (packageByUserId.length > 0) {
+                  if (packageByUserId.length > 0 || user?.gender === "Female") {
                     handleCardPress(item.senderUserId);
                   } else {
                     (navigation as any).navigate(ROUTES.STACK, {
@@ -212,7 +212,7 @@ const InterestScreen = () => {
                     });
                   }
                 }}
-                planPurchased={packageByUserId.length > 0 || user.gender === "Female"}
+                planPurchased={packageByUserId.length > 0 || user?.gender === "Female"}
               />
             )}
             keyExtractor={(item, index) => index.toString()}

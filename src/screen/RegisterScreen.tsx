@@ -118,7 +118,7 @@ const RegisterScreen: React.FC = () => {
         </View>
         <AppButton
           isLoading={loading}
-          title="Verify"
+          title="Verifyhh"
           loaderSize={Size22}
           onPress={handleVerify}
           isButtonDisabled={isButtonDisabled}
@@ -134,8 +134,7 @@ const RegisterScreen: React.FC = () => {
           ]}
         />
         {/* Spacer */}
-        <View style={styles.spacer} />
-        {alreadyExists && (
+        {true && (
           <View style={styles.alreadyExistsContainer}>
             <Image
               source={require('../assets/images/crossred.png')}
@@ -158,6 +157,8 @@ const RegisterScreen: React.FC = () => {
             />
           </View>
         )}
+        {/* Spacer */}
+        <View style={styles.spacer} />
 
         {/* Info */}
         <View style={styles.infoContainer}>
