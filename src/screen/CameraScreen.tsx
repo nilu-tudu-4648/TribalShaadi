@@ -17,9 +17,16 @@ import { COLORS } from '../constants/AppColors';
 import { Size20, Size25, SIZES } from '../constants/Sizes';
 import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
-import { getUserDetailsApi, getUserDetailsUrl, verifySelfieApi } from '../constants/functions';
+import {
+  getUserDetailsApi,
+  getUserDetailsUrl,
+  verifySelfieApi,
+} from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoaderPayment, setSelfieVerify } from '../store/reducers/paymentReducer';
+import {
+  setLoaderPayment,
+  setSelfieVerify,
+} from '../store/reducers/paymentReducer';
 import { ROUTES } from '../constants/data';
 import AppToast from '../components/AppToast';
 
@@ -109,6 +116,8 @@ const CameraScreen = () => {
       }
     } catch (error) {
       console.log(error, 'error handleSubmit');
+    } finally {
+      dispatch(setLoaderPayment(false));
     }
   };
 

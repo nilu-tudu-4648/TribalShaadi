@@ -76,12 +76,12 @@ const NameComponent: React.FC<NameComponentProps> = ({
             />
           </View>
           <View style={styles.aiVerifiedContainer}>
-          {isVerified && (
-            <Image
-            source={require('./../assets/images/aiverified.png')}
-            style={styles.aiVerifiedIcon}
-            />
-          )}
+            {isVerified && (
+              <Image
+                source={require('./../assets/images/aiverified.png')}
+                style={styles.aiVerifiedIcon}
+              />
+            )}
           </View>
         </View>
       )}
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   nameMainContainer: {
     top: '10%',
-    gap: SIZES.base*.8,
+    gap: SIZES.base * 0.8,
   },
   name: {
     fontSize: fontSize24,
@@ -132,11 +132,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   aiVerifiedIcon: {
-    width: '80%',
+    width: SIZES.width * 0.5,
     height: Size25 * 1.5,
     resizeMode: 'contain',
-    alignSelf: 'flex-start',
-    left: -2,
   },
   homeIconContainer: {
     flexDirection: 'row',
@@ -181,6 +179,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiVerifiedContainer: {
-    width: "100%",
+    width: '100%',
   },
 });

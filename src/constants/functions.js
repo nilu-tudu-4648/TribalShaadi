@@ -847,8 +847,6 @@ export const verifySelfieApi = async (data, dispatch) => {
     console.log(error.response.data, 'verifySelfieApi Error');
     dispatch(setSelfieVerify(false));
     return [];
-  } finally {
-    dispatch(setLoaderPayment(false));
   }
 };
 

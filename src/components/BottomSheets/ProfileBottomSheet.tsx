@@ -88,7 +88,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   const handleClose = () => {
     bottomSheetRef.current?.close();
   };
-  console.log(selectedUser, 'selectedUser.imageUrl');
   return (
     <>
       <BottomSheet

@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
@@ -20,6 +21,7 @@ import {
   sendProposalUrl,
   getReligionUrl,
   getMaritalStatusUrl,
+  getCommunityUrl,
   getHeightUrl,
   getDietUrl,
   getPassedUsersUrl,
@@ -27,11 +29,9 @@ import {
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   insertUserNotificationsUrl,
-  delay,
   getProposalsGotByMeUrl,
   getChatHistoryByUserId,
   getAcceptedProposalByIdUrl,
-  getPackageListUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -44,178 +44,346 @@ import {
   getProposalsGotByMeApi,
   getProposalsSendByMeApi,
   sentProposalApi,
-  setMatchedUserApi,
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
 import {
+  getCommunity,
   getDiet,
   getHeight,
   getMaritalStatus,
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import {
-  getCurrentUserPackageApi,
-  getPackageListApi,
-} from '../store/reducers/paymentReducer';
+import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
 } from '../store/reducers/chatReducer';
-import BottomSheet from '@gorhom/bottom-sheet';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES } from '../constants/data';
 import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
 import SelfieBottomSheet from '../components/BottomSheets/SelfieBottomSheet';
-import { NOTIFICATION_MESSAGES } from '../constants/data';
+import BottomSheet from '@gorhom/bottom-sheet';
 
-const { width } = Dimensions.get('window');
+// keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
-  const {
-    matchedUsers,
-    currentMatchedUser,
-    currentMatchedUserGalleryImageList,
-  } = useSelector((state: any) => state.entities.userReducer);
+  const { currentMatchedUser, currentMatchedUserGalleryImageList } =
+    useSelector((state: any) => state.entities.userReducer);
   const { currentUserPackage } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
+  const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [nameLoading, setNameLoading] = useState(false);
-  const [displayName, setDisplayName] = useState('');
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
-
-  const translateX = useSharedValue(0);
+  const [actionInProgress, setActionInProgress] = useState(false);
+  const [detailsCache, setDetailsCache] = useState<Record<number, any>>({});
+  const [galleryCache, setGalleryCache] = useState<Record<number, any[]>>({});
+  const [packageCache, setPackageCache] = useState<Record<number, any[]>>({});
+  const [currentProfileId, setCurrentProfileId] = useState<number | null>(null);
+  const [lockedNextProfileId, setLockedNextProfileId] = useState<number | null>(
+    null,
+  );
+  const [processedCount, setProcessedCount] = useState(0);
+  const latestMatchedUsersRef = useRef(matchedUsers);
+  const reportBottomSheetRef = useRef<BottomSheet | null>(null);
+  const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
+  const nextVisualIndex = React.useMemo(() => {
+    if (!matchedUsers || matchedUsers.length === 0) {
+      return -1;
+    }
+    if (matchedUsers.length === 1) {
+      return 0;
+    }
+    const next = currentIndex + 1;
+    return next < matchedUsers.length ? next : 0;
+  }, [matchedUsers, currentIndex]);
 
   /* 1️⃣  keep a stable screen-width value */
   const screenWidth = useRef(Dimensions.get('window').width).current;
-
-  const opacity = useSharedValue(1);
-
-  const reportBottomSheetRef = useRef<BottomSheet | null>(null);
-  const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
   };
   const openSelfie = () => {
     selfieBottomSheetRef?.current?.expand();
   };
-  const animatedCardStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-    opacity: opacity.value,
+  // double-buffered cards for seamless transitions
+  const card1X = useSharedValue(0);
+  const card2X = useSharedValue(screenWidth);
+  const [activeCard, setActiveCard] = useState<1 | 2>(1);
+
+  const card1Style = useAnimatedStyle(() => ({
+    transform: [{ translateX: card1X.value }],
+  }));
+  const card2Style = useAnimatedStyle(() => ({
+    transform: [{ translateX: card2X.value }],
   }));
 
-  const animateToNext = (direction: 'left' | 'right', callback: () => void) => {
-    // Slide + fade out
-    translateX.value = withTiming(
-      direction === 'left' ? -screenWidth : screenWidth,
-      {
-        duration: 350,
-        easing: Easing.out(Easing.cubic),
-      },
-    );
-    opacity.value = withTiming(0, { duration: 300 }, () => {
-      runOnJS(callback)();
+  useEffect(() => {
+    latestMatchedUsersRef.current = matchedUsers;
+  }, [matchedUsers]);
 
-      // Prepare new card off-screen and hidden
-      translateX.value = direction === 'left' ? screenWidth : -screenWidth;
-      opacity.value = 0;
+  const handleTransitionComplete = useCallback(
+    (nextActive: 1 | 2, targetIdx: number) => {
+      setActiveCard(nextActive);
+      setCurrentIndex(targetIdx);
+      const targetUser = latestMatchedUsersRef.current?.[targetIdx];
+      if (targetUser?.id) {
+        setCurrentProfileId(targetUser.id);
+      }
+      setLockedNextProfileId(null);
+    },
+    [],
+  );
+  const startTransition = (direction: 'left' | 'right') => {
+    const hasMatches = matchedUsers && matchedUsers.length > 0;
+    const resolvedNext =
+      nextVisualIndex === -1 || !hasMatches ? currentIndex : nextVisualIndex;
 
-      // Slide + fade in new card
-      translateX.value = withTiming(0, {
-        duration: 350,
-        easing: Easing.out(Easing.cubic),
+    if (!matchedUsers || matchedUsers.length === 0) {
+      console.log('No matched users available for transition');
+      return;
+    }
+
+    const targetIdx = resolvedNext < matchedUsers.length ? resolvedNext : 0;
+    const targetId = matchedUsers[targetIdx]?.id ?? null;
+    setLockedNextProfileId(targetId);
+
+    const inFrom = direction === 'right' ? screenWidth : -screenWidth;
+    const outTo = direction === 'right' ? -screenWidth : screenWidth;
+
+    if (activeCard === 1) {
+      // Position card 2 off-screen
+      card2X.value = inFrom;
+
+      // Animate both cards simultaneously for smoother transition
+      card1X.value = withTiming(outTo, {
+        duration: 400, // Slightly longer for smoother feel
+        easing: Easing.inOut(Easing.cubic),
       });
-      opacity.value = withTiming(1, { duration: 300 });
-    });
+
+      card2X.value = withTiming(
+        0,
+        {
+          duration: 400,
+          easing: Easing.inOut(Easing.cubic),
+        },
+        () => {
+          // Reset card 1 position after animation completes
+          card1X.value = screenWidth;
+          runOnJS(handleTransitionComplete)(2, targetIdx);
+        },
+      );
+    } else {
+      // Position card 1 off-screen
+      card1X.value = inFrom;
+
+      // Animate both cards simultaneously
+      card2X.value = withTiming(outTo, {
+        duration: 400,
+        easing: Easing.inOut(Easing.cubic),
+      });
+
+      card1X.value = withTiming(
+        0,
+        {
+          duration: 400,
+          easing: Easing.inOut(Easing.cubic),
+        },
+        () => {
+          // Reset card 2 position after animation completes
+          card2X.value = screenWidth;
+          runOnJS(handleTransitionComplete)(1, targetIdx);
+        },
+      );
+    }
   };
 
   const handleSendProposal = async (id: string) => {
     try {
-      setIsLoading(true);
-      dispatch(
-        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
-          proposalUserId: id,
-        }),
-      );
-      await delay();
-      dispatch(
-        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-      );
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-      dispatch(
-        insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-          title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
-          message: `${user.firstName} ${user.lastName ?? ''} ${
-            NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
-          }`,
-          receiverUserId: id,
-        }),
-      );
+      setActionInProgress(true);
 
-      animateToNext('right', () => {
-        setCurrentIndex(0);
+      if (!matchedUsers || matchedUsers.length === 0) {
+        setActionInProgress(false);
+        return;
+      }
+
+      const currentUserId =
+        matchedUsers && matchedUsers[currentIndex]
+          ? matchedUsers[currentIndex].id
+          : id;
+      if (!currentUserId) {
+        setActionInProgress(false);
+        return;
+      }
+
+      // Fire requests in background (don't wait for them)
+      Promise.all([
+        dispatch(
+          sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+            proposalUserId: currentUserId,
+          }),
+        ),
+        dispatch(
+          getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+        ),
+
+        dispatch(
+          insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+            title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
+            message: `${user.firstName} ${user.lastName ?? ''} ${
+              NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+            }`,
+            receiverUserId: currentUserId,
+          }),
+        )
+      ]).catch(error => {
+        console.log('Background API error:', error);
       });
+      // Start animation immediately for better UX
+      startTransition('right');
+      // Increment processed count
+      setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
+      setActionInProgress(false);
     }
   };
 
   const handleCancelProposal = async (id: string) => {
     try {
-      setIsLoading(true);
-      dispatch(
-        cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
-          proposalUserId: id,
-        }),
-      );
-      await delay();
-      dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
-      dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+      setActionInProgress(true);
 
-      animateToNext('left', () => {
-        setCurrentIndex(0);
+      if (!matchedUsers || matchedUsers.length === 0) {
+        setActionInProgress(false);
+        return;
+      }
+
+      const currentUserId =
+        matchedUsers && matchedUsers[currentIndex]
+          ? matchedUsers[currentIndex].id
+          : id;
+      if (!currentUserId) {
+        setActionInProgress(false);
+        return;
+      }
+
+      // Start animation immediately
+      startTransition('left');
+
+      // Fire requests in background
+      Promise.all([
+        dispatch(
+          cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
+            proposalUserId: currentUserId,
+          }),
+        ),
+        dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
+      ]).catch(error => {
+        console.log('Background API error:', error);
       });
+
+      // Increment processed count
+      setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
+      setActionInProgress(false);
     }
   };
+  // Helper: fetch user details silently (no redux)
+  const fetchDetailSilently = useCallback(
+    async (userId: number) => {
+      try {
+        if (!userId || detailsCache[userId]) return;
+        const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+        if (!token) return;
+        const resp = await axios.get(
+          `${baseUrl}/${getUserDetailsUrl}id=${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const record = resp?.data?.recordList?.[0];
+        if (record) setDetailsCache(prev => ({ ...prev, [userId]: record }));
+      } catch (e) {}
+    },
+    [detailsCache],
+  );
+  // Helper: fetch gallery silently
+  const fetchGallerySilently = useCallback(
+    async (userId: number) => {
+      try {
+        if (!userId || galleryCache[userId]) return;
+        const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+        if (!token) return;
+        const resp = await axios.post(
+          `${baseUrl}/${getGalleryImageListUrl}`,
+          { userId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const list = resp?.data?.recordList ?? [];
+        setGalleryCache(prev => ({ ...prev, [userId]: list }));
+      } catch (e) {}
+    },
+    [galleryCache],
+  );
+  const fetchMatchedUsers = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+      if (!token) return;
+
+      const { data } = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Use map + filter only once for better perf
+      const list = Array.isArray(data?.recordList) ? data.recordList : [];
+      const filtered = list.length
+        ? list.filter((item: any) => !item?.message)
+        : [];
+
+      setMatchedUsers(filtered);
+      setProcessedCount(0);
+    } catch (e) {
+      // Log the error for debugging
+      if (__DEV__) {
+        console.error('fetchMatchedUsers error:', e);
+      }
+    }
+  }, []);
   useEffect(() => {
-    dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
+    fetchMatchedUsers();
+  }, [fetchMatchedUsers]);
+  // Helper: fetch package silently
+  const fetchPackageSilently = useCallback(
+    async (userId: number) => {
+      try {
+        if (!userId || packageCache[userId]) return;
+        const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+        if (!token) return;
+        const resp = await axios.post(
+          `${baseUrl}/${getPackageByUserIdUrl}`,
+          { userId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const list = resp?.data?.recordList ?? [];
+        setPackageCache(prev => ({ ...prev, [userId]: list }));
+      } catch (e) {}
+    },
+    [packageCache],
+  );
+
+  useEffect(() => {
+    const id =
+      user?.pReligionId !== 'any' && user?.pReligionId?.[0]
+        ? user?.pReligionId?.[0]
+        : user?.religionId;
+    dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
     setHasRequestedMatches(true);
   }, [dispatch, user?.pReligionId, user?.religionId]);
-
-  useEffect(() => {
-    if (matchedUsers.length > 0 && currentIndex >= matchedUsers.length) {
-      setCurrentIndex(0);
-    }
-  }, [matchedUsers.length, currentIndex]);
-
-  // Handle name loading delay
-  useEffect(() => {
-    if (
-      matchedUsers &&
-      matchedUsers.length > 0 &&
-      currentIndex < matchedUsers.length
-    ) {
-      setNameLoading(true);
-      setDisplayName('');
-
-      const timer = setTimeout(() => {
-        const currentUser = matchedUsers[currentIndex];
-        const fullName =
-          currentUser?.firstName + ' ' + (currentUser?.lastName ?? '');
-        setDisplayName(fullName);
-        setNameLoading(false);
-      }, 1500); // 1.5 second delay
-
-      return () => clearTimeout(timer);
-    }
-  }, [matchedUsers, currentIndex]);
 
   useEffect(() => {
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -227,7 +395,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        dispatch(getPackageListApi(getPackageListUrl));
+        // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
         dispatch(
           getAcceptedProposalByIdApi(
             `${getAcceptedProposalByIdUrl}/${user?.id}`,
@@ -269,60 +437,253 @@ const HomeScreen = () => {
       );
     }
   }, [dispatch, matchedUsers, currentIndex]);
-  // console.log(matchedUsers, 'matchedUsers');
+  // Cache redux-fetched current data into local caches keyed by user id
+  useEffect(() => {
+    const curId = currentMatchedUser?.id;
+    if (!curId) return;
+    setDetailsCache(prev => ({ ...prev, [curId]: currentMatchedUser }));
+  }, [currentMatchedUser]);
+
+  useEffect(() => {
+    const curId = currentMatchedUser?.id;
+    if (!curId) return;
+    if (!Array.isArray(currentMatchedUserGalleryImageList)) return;
+    setGalleryCache(prev => ({
+      ...prev,
+      [curId]: currentMatchedUserGalleryImageList,
+    }));
+  }, [currentMatchedUser?.id, currentMatchedUserGalleryImageList]);
+
+  useEffect(() => {
+    const curId = currentMatchedUser?.id;
+    if (!curId) return;
+    if (!Array.isArray(currentUserPackage)) return;
+    setPackageCache(prev => ({ ...prev, [curId]: currentUserPackage }));
+  }, [currentMatchedUser?.id, currentUserPackage]);
+  // Prefetch previous, current, and next-next users in background for smoothness
+  useEffect(() => {
+    if (!matchedUsers || matchedUsers.length === 0) return;
+    const prevIdx = currentIndex > 0 ? currentIndex - 1 : -1;
+    const nextIdx =
+      currentIndex + 1 < matchedUsers.length ? currentIndex + 1 : -1;
+    const nextNextIdx =
+      currentIndex + 2 < matchedUsers.length ? currentIndex + 2 : -1;
+    const prevId = prevIdx >= 0 ? matchedUsers[prevIdx]?.id : undefined;
+    const nextId = nextIdx >= 0 ? matchedUsers[nextIdx]?.id : undefined;
+    const nextNextId =
+      nextNextIdx >= 0 ? matchedUsers[nextNextIdx]?.id : undefined;
+
+    const currentCardImageUrl = matchedUsers[currentIndex]?.imageUrl;
+    if (currentCardImageUrl) Image.prefetch(currentCardImageUrl);
+    const prevCardImageUrl = matchedUsers[prevIdx]?.imageUrl;
+    if (prevCardImageUrl) Image.prefetch(prevCardImageUrl);
+    const nextCardImageUrl = matchedUsers[nextIdx]?.imageUrl;
+    if (nextCardImageUrl) Image.prefetch(nextCardImageUrl);
+    const nextNextCardImageUrl = matchedUsers[nextNextIdx]?.imageUrl;
+    if (nextNextCardImageUrl) Image.prefetch(nextNextCardImageUrl);
+
+    if (prevId) {
+      fetchDetailSilently(prevId);
+      fetchGallerySilently(prevId);
+      fetchPackageSilently(prevId);
+    }
+    if (nextId) {
+      fetchDetailSilently(nextId);
+      fetchGallerySilently(nextId);
+      fetchPackageSilently(nextId);
+    }
+    if (nextNextId) {
+      fetchDetailSilently(nextNextId);
+      fetchGallerySilently(nextNextId);
+      fetchPackageSilently(nextNextId);
+    }
+  }, [
+    matchedUsers,
+    currentIndex,
+    fetchDetailSilently,
+    fetchGallerySilently,
+    fetchPackageSilently,
+  ]);
+  // Keep carousel index aligned with the currently visible user even if the list updates
+  useEffect(() => {
+    if (!matchedUsers || matchedUsers.length === 0) {
+      if (currentIndex !== 0) {
+        setCurrentIndex(0);
+      }
+      if (currentProfileId !== null) {
+        setCurrentProfileId(null);
+      }
+      if (lockedNextProfileId !== null) {
+        setLockedNextProfileId(null);
+      }
+      setActiveCard(1);
+      card1X.value = 0;
+      card2X.value = screenWidth;
+      return;
+    }
+
+    const safeIndex =
+      currentIndex < matchedUsers.length
+        ? currentIndex
+        : matchedUsers.length - 1;
+    if (safeIndex !== currentIndex) {
+      setCurrentIndex(safeIndex);
+      return;
+    }
+
+    const desiredId =
+      currentProfileId ?? matchedUsers[safeIndex]?.id ?? matchedUsers[0]?.id;
+    if (!desiredId) {
+      return;
+    }
+
+    const alignedIndex = matchedUsers.findIndex(
+      (matchedUser: { id?: number }) => matchedUser?.id === desiredId,
+    );
+    if (alignedIndex === -1) {
+      const fallbackId = matchedUsers[0]?.id ?? null;
+      if (fallbackId !== currentProfileId) {
+        setCurrentProfileId(fallbackId);
+      }
+      if (lockedNextProfileId !== null) {
+        setLockedNextProfileId(null);
+      }
+      if (currentIndex !== 0) {
+        setCurrentIndex(0);
+      }
+      return;
+    }
+
+    if (alignedIndex !== currentIndex) {
+      setCurrentIndex(alignedIndex);
+      return;
+    }
+
+    const actualId = matchedUsers[alignedIndex]?.id ?? null;
+    if (actualId !== currentProfileId) {
+      setCurrentProfileId(actualId);
+    }
+  }, [
+    matchedUsers,
+    currentIndex,
+    currentProfileId,
+    lockedNextProfileId,
+    setCurrentIndex,
+    setCurrentProfileId,
+    card1X,
+    card2X,
+    screenWidth,
+  ]);
+
+  const resolvedNextIndex = React.useMemo(() => {
+    if (!matchedUsers || matchedUsers.length === 0) {
+      return -1;
+    }
+    if (lockedNextProfileId) {
+      const lockedIdx = matchedUsers.findIndex(
+        (matchedUser: { id?: number }) =>
+          matchedUser?.id === lockedNextProfileId,
+      );
+      if (lockedIdx !== -1) {
+        return lockedIdx;
+      }
+    }
+    return nextVisualIndex;
+  }, [matchedUsers, lockedNextProfileId, nextVisualIndex]);
+  const renderCardContent = (cardIndex: number) => {
+    if (
+      !matchedUsers ||
+      matchedUsers.length === 0 ||
+      cardIndex === -1 ||
+      !matchedUsers[cardIndex]
+    ) {
+      return null;
+    }
+
+    const curId = matchedUsers[cardIndex]?.id;
+    const cachedDetail = curId ? detailsCache[curId] : null;
+    const cachedGallery = curId ? galleryCache[curId] : null;
+    const cachedPackage = curId ? packageCache[curId] : null;
+
+    const baseUser = matchedUsers[cardIndex] || {};
+    const finalDetail = { ...baseUser, ...cachedDetail };
+    const galleryList =
+      (cachedGallery as any)?.length > 0
+        ? cachedGallery
+        : baseUser.galleryImageList || [];
+    const isPremium = (cachedPackage?.length ?? 0) > 0;
+
+    return (
+      <ProfileCard
+        name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
+        isNameLoading={false}
+        age={finalDetail?.age}
+        height={finalDetail?.height}
+        religion={finalDetail?.religion}
+        caste={finalDetail?.community}
+        districtName={finalDetail?.districtName}
+        stateName={finalDetail?.stateName}
+        bio={finalDetail?.aboutMe}
+        image={finalDetail?.imageUrl || ''}
+        galleryImageList={galleryList}
+        isLoading={false}
+        maritalStatus={finalDetail?.maritalStatus}
+        dob={finalDetail?.birthDate}
+        motherTongue={finalDetail?.motherTongue}
+        annualIncome={finalDetail?.annualIncome}
+        partnerExpectation={finalDetail?.about_lifepartener}
+        employedIn={finalDetail?.employmentType}
+        occupation={finalDetail?.occupation}
+        organizationName={finalDetail?.companyName}
+        settlingTime={finalDetail?.planingto_settle}
+        highestQualification={finalDetail?.educationType}
+        college={finalDetail?.college_name}
+        eatingHabits={finalDetail?.diet}
+        drinkingHabits={finalDetail?.drinking}
+        smokingHabits={finalDetail?.smoking}
+        kids={finalDetail?.kids}
+        interests={finalDetail?.intrests}
+        isVerified={finalDetail?.isVerified}
+        isPremium={isPremium}
+        openReport={openReport}
+      />
+    );
+  };
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <AppSafeView style={styles.container}>
         <>
-          {/* show shimmer on first render and while fetching */}
-          {!hasRequestedMatches || isLoading ? (
+          {/* show shimmer only on first load */}
+          {!hasRequestedMatches || (isLoading && matchedUsers.length === 0) ? (
             <ProfileCardShimmer />
-          ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
+          ) : matchedUsers.length > 0 &&
+            processedCount < matchedUsers.length ? (
             <>
               <View style={styles.carouselContainer}>
-                <Animated.View
-                  style={[styles.profileCardContainer, animatedCardStyle]}
-                >
-                  <ProfileCard
-                    name={nameLoading ? 'Loading...' : displayName}
-                    isNameLoading={nameLoading}
-                    age={matchedUsers[currentIndex]?.age}
-                    height={currentMatchedUser?.height}
-                    religion={currentMatchedUser?.religion}
-                    caste={currentMatchedUser?.community}
-                    districtName={currentMatchedUser?.districtName}
-                    stateName={currentMatchedUser?.stateName}
-                    bio={matchedUsers[currentIndex]?.aboutMe}
-                    image={matchedUsers[currentIndex]?.imageUrl || ''}
-                    galleryImageList={
-                      currentMatchedUserGalleryImageList ||
-                      matchedUsers[currentIndex]?.galleryImageList ||
-                      []
-                    }
-                    isLoading={isLoading}
-                    maritalStatus={currentMatchedUser?.maritalStatus}
-                    dob={currentMatchedUser?.birthDate}
-                    motherTongue={currentMatchedUser?.motherTongue}
-                    annualIncome={currentMatchedUser?.annualIncome}
-                    partnerExpectation={currentMatchedUser?.about_lifepartener}
-                    employedIn={currentMatchedUser?.employmentType}
-                    occupation={currentMatchedUser?.occupationCategoryName}
-                    organizationName={currentMatchedUser?.companyName}
-                    settlingTime={currentMatchedUser?.planingto_settle}
-                    highestQualification={currentMatchedUser?.education}
-                    college={currentMatchedUser?.college_name}
-                    eatingHabits={currentMatchedUser?.diet}
-                    drinkingHabits={currentMatchedUser?.drinking}
-                    smokingHabits={currentMatchedUser?.smoking}
-                    kids={currentMatchedUser?.kids}
-                    interests={currentMatchedUser?.intrests}
-                    isVerified={currentMatchedUser?.isVerified}
-                    isPremium={currentUserPackage.length > 0}
-                    openReport={openReport}
-                  />
+                {/* <GestureDetector gesture={panGesture}> */}
+                <Animated.View style={styles.cardsWrapper}>
+                  {/* Card 1 */}
+                  <Animated.View
+                    style={[styles.profileCardContainer, card1Style]}
+                  >
+                    {renderCardContent(
+                      activeCard === 1 ? currentIndex : resolvedNextIndex,
+                    )}
+                  </Animated.View>
+
+                  {/* Card 2 */}
+                  <Animated.View
+                    style={[styles.profileCardContainer, card2Style]}
+                  >
+                    {renderCardContent(
+                      activeCard === 2 ? currentIndex : resolvedNextIndex,
+                    )}
+                  </Animated.View>
                 </Animated.View>
+                {/* </GestureDetector> */}
               </View>
-              {/* Optional: Keep buttons for users who prefer tapping */}
+
+              {/* Buttons */}
               <View style={styles.floatingButtonContainer}>
                 <AppButton
                   title="Decline"
@@ -331,7 +692,7 @@ const HomeScreen = () => {
                   }
                   buttonStyle={styles.declineButton}
                   textStyle={styles.declineButtonText}
-                  isButtonDisabled={isLoading}
+                  isButtonDisabled={actionInProgress}
                   pressable={true}
                 />
                 <AppButton
@@ -343,7 +704,7 @@ const HomeScreen = () => {
                   }
                   buttonStyle={styles.connectButton}
                   textStyle={styles.connectButtonText}
-                  isButtonDisabled={isLoading}
+                  isButtonDisabled={actionInProgress}
                   pressable={true}
                 />
               </View>
@@ -370,11 +731,10 @@ const HomeScreen = () => {
         bottomSheetRef={reportBottomSheetRef}
         onReport={(reportReason: string) => {
           console.log('Profile reported for:', reportReason);
-          // Add your report logic here
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
-    </View>
+    </GestureHandlerRootView>
   );
 };
 
@@ -385,26 +745,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     padding: 0,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-    paddingVertical: SIZES.padding,
-    paddingHorizontal: SIZES.padding,
-    gap: SIZES.base,
-  },
-  logo: {
-    width: SIZES.h4,
-    height: SIZES.h4,
-    resizeMode: 'contain',
-  },
-  topBarTitle: {
-    fontSize: fontSize20,
-    fontWeight: '700',
-    color: COLORS.textBlack,
   },
   floatingButtonContainer: {
     position: 'absolute',
@@ -436,17 +776,23 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     flex: 1,
+    position: 'relative',
     overflow: 'hidden',
   },
-  flexContainer: {
+  cardsWrapper: {
     flex: 1,
+    position: 'relative',
   },
   profileCardContainer: {
-    flex: 1,
-    width: width,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
   },
   exhaustedContainer: {
     flex: 1,

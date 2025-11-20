@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { COLORS } from './AppColors';
 import {
-  fontSize36,
   fontSize20,
   fontSize18,
   Size8,
@@ -12,6 +11,7 @@ import {
   fontSize16,
   inputHeight,
   Size4,
+  fontSize34,
 } from './Sizes';
 import FONT_FAMILY from './Fonts';
 
@@ -34,14 +34,13 @@ export const globalStyles = StyleSheet.create({
     paddingTop: lignHeight72,
   },
   title: {
-    fontSize: fontSize36,
+    fontSize: fontSize34,
     fontWeight: '500',
     color: COLORS.black,
   },
   subtitle: {
     fontSize: fontSize20,
     color: COLORS.greyText2,
-    fontWeight: '400',
   },
   continueButton: {
     width: '100%',

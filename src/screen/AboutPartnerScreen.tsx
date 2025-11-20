@@ -3,7 +3,7 @@ import {
   View,
   SafeAreaView,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import {
   fontSize16,
@@ -12,8 +12,8 @@ import {
   Size20,
   Size8,
   lignHeight72,
-  Size12,
   Size16,
+  Size4,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -32,12 +32,14 @@ import { globalStyles } from '../constants/globalStyles';
 interface Question {
   id: string;
   question: string;
+  subtitle: string;
   options: string[];
 }
 
 const question: Question = {
   id: 'values',
-  question: 'What values are most important to you in a life partner?',
+  question: 'Values that matter most in a life partner',
+  subtitle: "Select the value that best describe what you look for in a life partner.",
   options: [
     'Kindness and empathy',
     'Respect for culture and traditions',
@@ -94,12 +96,12 @@ const AboutPartnerScreen = () => {
         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} />
 
         {/* Question Title */}
-        <AppText text={question.question} textStyle={styles.title} />
-
+        <AppText text={question.question} textStyle={globalStyles.title}  />
+        <AppText text={question.subtitle} textStyle={globalStyles.subtitle} />
         {/* Options */}
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => (
-            <TouchableOpacity
+            <Pressable
               key={index}
               style={[
                 styles.optionItem,
@@ -111,25 +113,10 @@ const AboutPartnerScreen = () => {
               <AppText
                 textStyle={[
                   styles.optionText,
-                  answers[question.id] === option &&
-                    styles.optionTextSelected,
                 ]}
                 text={option}
               />
-              <View style={styles.radioContainer}>
-                <View
-                  style={[
-                    styles.radioOuter,
-                    answers[question.id] === option &&
-                      styles.radioOuterSelected,
-                  ]}
-                >
-                  {answers[question.id] === option && (
-                    <View style={styles.radioInner} />
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -183,44 +170,22 @@ const styles = StyleSheet.create({
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Size16,
-    paddingHorizontal: Size8,
-    borderRadius: Size8,
-    borderBottomWidth: 1,
-    borderColor: COLORS.borderGrey,
-    gap: Size12,
+    justifyContent: 'center',
+    paddingVertical: Size16*1.2,
+    paddingHorizontal: Size8*2,
+    borderRadius: Size4,
+    borderWidth: 1,
+    borderColor: COLORS.lightGrey2,
+    backgroundColor: COLORS.lightGrey,
   },
   optionItemSelected: {
-    borderColor: COLORS.textBlack,
-  },
-  radioContainer: {
-  },
-  radioOuter: {
-    width: Size20,
-    height: Size20,
-    borderRadius: Size20 / 2,
-    borderWidth: 2,
-    borderColor: COLORS.borderGrey,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioOuterSelected: {
     borderColor: COLORS.violet,
-  },
-  radioInner: {
-    width: Size8,
-    height: Size8,
-    borderRadius: Size8 / 2,
-    backgroundColor: COLORS.violet,
+    backgroundColor: COLORS.lightViolet2,
   },
   optionText: {
     fontSize: fontSize16,
     color: COLORS.black,
     flex: 1,
-    lineHeight: 24,
-  },
-  optionTextSelected: {
-    fontWeight: '600',
   },
   spacer: {
     flex: 1,

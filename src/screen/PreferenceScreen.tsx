@@ -38,6 +38,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Loader from '../components/loader/Loader';
 import { setMatchedUserApi } from '../store/reducers/userReducer';
+import { ROUTES } from '../constants/data';
 
 const PreferenceCard = ({
   title,
@@ -308,7 +309,20 @@ const PreferenceScreen = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      navigation.goBack();
+      (navigation as any).reset({
+        index: 0,
+        routes: [
+          { 
+            name: ROUTES.MAIN_TABS as never,
+            state: {
+              routes: [
+                { name: ROUTES.ACCOUNT_TAB as never }
+              ],
+              index: 0,
+            }
+          }
+        ],
+      });
     }
   }, [dispatch, navigation]);
   useEffect(() => {

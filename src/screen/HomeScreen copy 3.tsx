@@ -4,15 +4,10 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSpring,
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
-import {
-  GestureHandlerRootView,
-  GestureDetector,
-  Gesture,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
@@ -71,11 +66,8 @@ import { ASYNC_VARIBLES } from '../constants/data';
 
 // keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
-  const {
-    // matchedUsers,
-    currentMatchedUser,
-    currentMatchedUserGalleryImageList,
-  } = useSelector((state: any) => state.entities.userReducer);
+  const { currentMatchedUser, currentMatchedUserGalleryImageList } =
+    useSelector((state: any) => state.entities.userReducer);
   const { currentUserPackage } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
@@ -93,6 +85,7 @@ const HomeScreen = () => {
   const [lockedNextProfileId, setLockedNextProfileId] = useState<number | null>(
     null,
   );
+  const [processedCount, setProcessedCount] = useState(0);
   const latestMatchedUsersRef = useRef(matchedUsers);
   const nextVisualIndex = React.useMemo(() => {
     if (!matchedUsers || matchedUsers.length === 0) {
@@ -150,10 +143,6 @@ const HomeScreen = () => {
     const targetId = matchedUsers[targetIdx]?.id ?? null;
     setLockedNextProfileId(targetId);
 
-    console.log(
-      `startTransition: currentIndex=${currentIndex}, targetIdx=${targetIdx}, direction=${direction}`,
-    );
-
     const inFrom = direction === 'right' ? screenWidth : -screenWidth;
     const outTo = direction === 'right' ? -screenWidth : screenWidth;
 
@@ -204,50 +193,6 @@ const HomeScreen = () => {
     }
   };
 
-  // Add gesture handler for swipe
-  const gestureX = useSharedValue(0);
-  const currentOffset = useSharedValue(0);
-
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      currentOffset.value = activeCard === 1 ? card1X.value : card2X.value;
-    })
-    .onUpdate(event => {
-      gestureX.value = event.translationX;
-      const newX = currentOffset.value + event.translationX;
-
-      if (activeCard === 1) {
-        card1X.value = newX;
-      } else {
-        card2X.value = newX;
-      }
-    })
-    .onEnd(event => {
-      const swipeThreshold = screenWidth * 0.2;
-      const velocityThreshold = 500;
-
-      const shouldSwipeLeft =
-        event.translationX < -swipeThreshold ||
-        event.velocityX < -velocityThreshold;
-
-      const shouldSwipeRight =
-        event.translationX > swipeThreshold ||
-        event.velocityX > velocityThreshold;
-
-      if (shouldSwipeLeft) {
-        runOnJS(startTransition)('left');
-      } else if (shouldSwipeRight) {
-        runOnJS(startTransition)('right');
-      } else {
-        // Return to original position
-        if (activeCard === 1) {
-          card1X.value = withSpring(0, { damping: 20, stiffness: 300 });
-        } else {
-          card2X.value = withSpring(0, { damping: 20, stiffness: 300 });
-        }
-      }
-    });
-
   const handleSendProposal = async (id: string) => {
     try {
       setActionInProgress(true);
@@ -266,7 +211,6 @@ const HomeScreen = () => {
         return;
       }
 
-      console.log(currentUserId, 'currentUserId send proposal');
       // Fire requests in background (don't wait for them)
       Promise.all([
         dispatch(
@@ -295,11 +239,12 @@ const HomeScreen = () => {
       });
       // Start animation immediately for better UX
       startTransition('right');
+      // Increment processed count
+      setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
-      // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
-        setActionInProgress(false);
+      setActionInProgress(false);
     }
   };
 
@@ -335,11 +280,13 @@ const HomeScreen = () => {
       ]).catch(error => {
         console.log('Background API error:', error);
       });
+
+      // Increment processed count
+      setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
-      // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`)),
-        setActionInProgress(false);
+      setActionInProgress(false);
     }
   };
   // Helper: fetch user details silently (no redux)
@@ -381,9 +328,12 @@ const HomeScreen = () => {
     try {
       const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
       if (!token) return;
-      const resp = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, { headers: { Authorization: `Bearer ${token}` } });
+      const resp = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const list = resp?.data?.recordList ?? [];
       setMatchedUsers(list);
+      setProcessedCount(0); // Reset processed count when new matches are fetched
     } catch (e) {}
   }, []);
   useEffect(() => {
@@ -409,7 +359,7 @@ const HomeScreen = () => {
   );
 
   useEffect(() => {
- const id =
+    const id =
       user?.pReligionId !== 'any' && user?.pReligionId?.[0]
         ? user?.pReligionId?.[0]
         : user?.religionId;
@@ -426,7 +376,6 @@ const HomeScreen = () => {
   }, [dispatch]);
   useEffect(() => {
     const fetchChatHistory = async () => {
-      console.log(user?.id, 'user?.id fetchChatHistory');
       try {
         // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
         dispatch(
@@ -623,7 +572,6 @@ const HomeScreen = () => {
     }
     return nextVisualIndex;
   }, [matchedUsers, lockedNextProfileId, nextVisualIndex]);
-  // console.log(matchedUsers, 'matchedUsers');
   const renderCardContent = (cardIndex: number) => {
     if (
       !matchedUsers ||
@@ -690,30 +638,31 @@ const HomeScreen = () => {
           {/* show shimmer only on first load */}
           {!hasRequestedMatches || (isLoading && matchedUsers.length === 0) ? (
             <ProfileCardShimmer />
-          ) : matchedUsers.length > 0 && currentIndex < matchedUsers.length ? (
+          ) : matchedUsers.length > 0 &&
+            processedCount < matchedUsers.length ? (
             <>
               <View style={styles.carouselContainer}>
-                <GestureDetector gesture={panGesture}>
-                  <Animated.View style={styles.cardsWrapper}>
-                    {/* Card 1 */}
-                    <Animated.View
-                      style={[styles.profileCardContainer, card1Style]}
-                    >
-                      {renderCardContent(
-                        activeCard === 1 ? currentIndex : resolvedNextIndex,
-                      )}
-                    </Animated.View>
-
-                    {/* Card 2 */}
-                    <Animated.View
-                      style={[styles.profileCardContainer, card2Style]}
-                    >
-                      {renderCardContent(
-                        activeCard === 2 ? currentIndex : resolvedNextIndex,
-                      )}
-                    </Animated.View>
+                {/* <GestureDetector gesture={panGesture}> */}
+                <Animated.View style={styles.cardsWrapper}>
+                  {/* Card 1 */}
+                  <Animated.View
+                    style={[styles.profileCardContainer, card1Style]}
+                  >
+                    {renderCardContent(
+                      activeCard === 1 ? currentIndex : resolvedNextIndex,
+                    )}
                   </Animated.View>
-                </GestureDetector>
+
+                  {/* Card 2 */}
+                  <Animated.View
+                    style={[styles.profileCardContainer, card2Style]}
+                  >
+                    {renderCardContent(
+                      activeCard === 2 ? currentIndex : resolvedNextIndex,
+                    )}
+                  </Animated.View>
+                </Animated.View>
+                {/* </GestureDetector> */}
               </View>
 
               {/* Buttons */}
