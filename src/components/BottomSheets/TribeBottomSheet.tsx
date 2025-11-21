@@ -13,7 +13,6 @@ import {
   Size12,
   Size14,
   Size16,
-  Size20,
   Size25,
 } from '../../constants/Sizes';
 import Fonts from '../../constants/Fonts';
@@ -29,6 +28,7 @@ import {
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 // Workaround: Defining Checkbox component locally due to issues with SvgIcons.jsx
 const Checkbox = ({
@@ -87,7 +87,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
   bottomSheetRef,
   tribeOptions,
 }) => {
-  const snapPoints = ['70%', '80%'];
+  const snapPoints = ['80%'];
   const [localSelectedTribes, setLocalSelectedTribes] =
     useState<string[]>();
   const [localSelectedTribeId, setLocalSelectedTribeId] = useState<string[]>(
@@ -208,8 +208,8 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
       enablePanDownToClose
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
       {/* header stays outside the list */}
       <View style={styles.headerContainer}>
@@ -235,21 +235,6 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
 export default React.memo(TribeBottomSheet);
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: {
-    backgroundColor: COLORS.divider,
-    width: 40,
-    height: 8,
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-  },
   headerContainer: {
     alignItems: 'flex-start',
     paddingHorizontal: Size16,

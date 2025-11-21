@@ -12,7 +12,6 @@ import {
   fontSize18,
   Size12,
   Size14,
-  Size16,
   Size20,
   Size8,
 } from '../../constants/Sizes';
@@ -23,6 +22,7 @@ import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface SettleDownBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -105,10 +105,10 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
           disappearsOnIndex={-1}
         />
       )}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
-      <BottomSheetView style={styles.contentContainer}>
+      <BottomSheetView style={[globalStyles.contentContainer,{gap: Size20}]}>
         <View style={styles.headerContainer}>
           <AppText text="Planning to Settle Down" textStyle={styles.headerTitle} />
           <AppText
@@ -135,18 +135,6 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
 export default SettleDownBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: { backgroundColor: COLORS.divider, width: 40, height: 4 },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    gap: Size20,
-  },
   headerContainer: { alignItems: 'flex-start', gap: Size12 },
   headerTitle: {
     fontSize: fontSize18,

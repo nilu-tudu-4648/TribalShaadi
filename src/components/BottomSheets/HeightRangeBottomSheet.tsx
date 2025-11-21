@@ -16,9 +16,7 @@ import { COLORS } from '../../constants/AppColors';
 import {
   fontSize16,
   fontSize20,
-  Size12,
   Size16,
-  Size20,
   Size25,
   Size8,
 } from '../../constants/Sizes';
@@ -35,6 +33,7 @@ import {
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface HeightRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -216,10 +215,10 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
           disappearsOnIndex={-1}
         />
       )}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
-      <BottomSheetView style={styles.contentContainer}>
+      <BottomSheetView style={[globalStyles.contentContainer,{gap: Size25}]}>
         <View style={styles.headerContainer}>
           <AppText text="Height" textStyle={styles.headerTitle} />
         </View>
@@ -253,23 +252,6 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
 export default HeightRangeBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: {
-    backgroundColor: COLORS.divider,
-    width: 40,
-    height: 8,
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    justifyContent: 'space-between',
-    gap: Size25,
-  },
   headerContainer: {
     alignItems: 'flex-start',
     gap: Size8,

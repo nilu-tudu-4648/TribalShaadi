@@ -12,7 +12,6 @@ import {
   Size10,
   Size12,
   Size16,
-  Size20,
   Size25,
   Size4,
 } from '../../constants/Sizes';
@@ -24,6 +23,7 @@ import {
   MailIcon,
   UserIcon,
 } from '../svg/SvgIcons2';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface AccountBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -55,10 +55,10 @@ const AccountBottomSheet: React.FC<AccountBottomSheetProps> = ({
             disappearsOnIndex={-1}
           />
         )}
-        handleIndicatorStyle={styles.handleIndicator}
-        backgroundStyle={styles.bottomSheetBackground}
+        handleIndicatorStyle={globalStyles.handleIndicator}
+        backgroundStyle={globalStyles.bottomSheetBackground}
       >
-        <BottomSheetView style={styles.contentContainer}>
+        <BottomSheetView style={[globalStyles.contentContainer,{gap: Size25}]}>
           <View>
             <AppText text="Account details" textStyle={styles.headerTitle} />
             <View style={styles.accountDetailsContainer}>
@@ -107,18 +107,6 @@ const AccountBottomSheet: React.FC<AccountBottomSheetProps> = ({
 export default AccountBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: { backgroundColor: COLORS.divider, width: 40, height: 4 },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    gap: Size25,
-  },
   headerTitle: {
     fontSize: fontSize20,
     fontFamily: Fonts.PRODUCT_SANS_BOLD,

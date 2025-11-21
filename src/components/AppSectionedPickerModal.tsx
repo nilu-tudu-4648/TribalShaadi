@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     fontSize: fontSize16,
-    color: COLORS.primaryBlue,
+    color: COLORS.violet,
   },
   modalButtonPlaceholder: {
     width: lignHeight60,

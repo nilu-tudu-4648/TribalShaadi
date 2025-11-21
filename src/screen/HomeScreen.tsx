@@ -32,6 +32,7 @@ import {
   getProposalsGotByMeUrl,
   getChatHistoryByUserId,
   getAcceptedProposalByIdUrl,
+  getPackageListUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import AppText from '../components/AppText';
@@ -54,7 +55,7 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import { getCurrentUserPackageApi } from '../store/reducers/paymentReducer';
+import { getCurrentUserPackageApi, getPackageListApi } from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
@@ -391,6 +392,7 @@ const HomeScreen = () => {
     dispatch(getHeight(getHeightUrl));
     dispatch(getDiet(getDietUrl));
     dispatch(getStates(getStatesUrl));
+    dispatch(getPackageListApi(getPackageListUrl));
   }, [dispatch]);
   useEffect(() => {
     const fetchChatHistory = async () => {

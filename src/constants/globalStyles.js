@@ -12,6 +12,9 @@ import {
   inputHeight,
   Size4,
   fontSize34,
+  Size20,
+  Size16,
+  Size12,
 } from './Sizes';
 import FONT_FAMILY from './Fonts';
 
@@ -89,5 +92,20 @@ export const globalStyles = StyleSheet.create({
     height: inputHeight * 0.8,
     fontWeight: '500',
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
+  },
+  handleIndicator: {
+    backgroundColor: COLORS.divider,
+    width: 40,
+    height: 8,
+  },
+  bottomSheetBackground: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: Size20,
+    borderTopRightRadius: Size20,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: Size16,
+    paddingVertical: Size12,
   },
 });

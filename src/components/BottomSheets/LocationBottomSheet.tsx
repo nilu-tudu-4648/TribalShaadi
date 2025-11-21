@@ -32,6 +32,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SearchIcon, InfoIcon, ChipCloseIcon } from '../svg/SvgIcons2';
 import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface LocationBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -202,10 +203,10 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
           disappearsOnIndex={-1}
         />
       )}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
-      <BottomSheetView style={styles.contentContainer}>
+      <BottomSheetView style={[globalStyles.contentContainer,{gap: Size16}]}>
         <View
           style={[
             styles.searchContainer,
@@ -340,18 +341,6 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
 export default LocationBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: { backgroundColor: COLORS.divider, width: 40, height: 4 },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    gap: Size16,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

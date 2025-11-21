@@ -8,8 +8,6 @@ import AppText from '../AppText';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
-  Size16,
-  Size20,
   Size25,
   Size8,
   Size12,
@@ -32,6 +30,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 // Backdrop component definition outside render
 const renderBackdrop = (props: any) => (
@@ -132,10 +131,10 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
       enablePanDownToClose={true}
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
-      <BottomSheetView style={styles.contentContainer}>
+      <BottomSheetView style={[globalStyles.contentContainer,{gap: Size25}]}>
         <View style={styles.headerContainer}>
           <AppText text="Religion" textStyle={styles.headerTitle} />
           <AppText
@@ -165,23 +164,6 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
 export default ReligionBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: {
-    backgroundColor: COLORS.divider,
-    width: 40,
-    height: 4,
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: Size16,
-    paddingVertical: Size12,
-    justifyContent: 'space-between',
-    gap: Size25,
-  },
   headerContainer: {
     alignItems: 'flex-start',
     gap: Size8,

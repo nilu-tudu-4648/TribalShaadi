@@ -13,7 +13,6 @@ import {
   Size12,
   Size14,
   Size16,
-  Size20,
   Size25,
   Size8,
 } from '../../constants/Sizes';
@@ -30,6 +29,7 @@ import { completeUserProfileV2Updated } from '../../store/reducers/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppChip2 from '../chips/AppChip2';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface MaritalStatusBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -175,8 +175,8 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       enablePanDownToClose={true}
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.mainContent}>
@@ -211,16 +211,6 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
 export default React.memo(MaritalStatusBottomSheet);
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: {
-    backgroundColor: COLORS.divider,
-    width: 40,
-    height: 4,
-  },
   contentContainer: {
     flex: 1,
     paddingHorizontal: Size16,

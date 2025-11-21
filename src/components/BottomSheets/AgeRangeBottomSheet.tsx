@@ -18,7 +18,6 @@ import {
   fontSize20,
   Size12,
   Size16,
-  Size20,
   Size25,
   Size8,
 } from '../../constants/Sizes';
@@ -34,6 +33,7 @@ import {
 import { setReducerLoadingfalse } from '../../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMatchedUserApi } from '../../store/reducers/userReducer';
+import { globalStyles } from '../../constants/globalStyles';
 
 interface AgeRangeBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
@@ -179,8 +179,8 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
           disappearsOnIndex={-1}
         />
       )}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.bottomSheetBackground}
+      handleIndicatorStyle={globalStyles.handleIndicator}
+      backgroundStyle={globalStyles.bottomSheetBackground}
     >
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.headerContainer}>
@@ -214,16 +214,6 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
 export default AgeRangeBottomSheet;
 
 const styles = StyleSheet.create({
-  bottomSheetBackground: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: Size20,
-    borderTopRightRadius: Size20,
-  },
-  handleIndicator: {
-    backgroundColor: COLORS.divider,
-    width: 40,
-    height: 8,
-  },
   contentContainer: {
     flex: 1,
     paddingHorizontal: Size16,

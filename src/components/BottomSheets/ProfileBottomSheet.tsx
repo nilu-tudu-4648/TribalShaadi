@@ -49,7 +49,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   currentUserPackage,
   report = true,
 }) => {
-  const snapPoints = ['70%', '80%'];
   const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
     (state: any) => state.entities.userReducer,
   );
@@ -85,19 +84,17 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       bottomSheetRef.current?.close();
     }
   };
-  const handleClose = () => {
-    bottomSheetRef.current?.close();
-  };
   return (
     <>
       <BottomSheet
-        onClose={() => {
-          handleClose();
-        }}
         ref={bottomSheetRef}
-        index={-1} // -1 means hidden
-        snapPoints={snapPoints}
+        index={-1}
+        snapPoints={['80%']}
         enablePanDownToClose={true}
+        enableContentPanningGesture={false}
+        enableOverDrag={false}
+        handleIndicatorStyle={styles.handleIndicator}
+        backgroundStyle={styles.bottomSheetBackground}
         backdropComponent={props => (
           <BottomSheetBackdrop
             {...props}
@@ -105,8 +102,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
             disappearsOnIndex={-1}
           />
         )}
-        handleIndicatorStyle={styles.handleIndicator}
-        backgroundStyle={styles.bottomSheetBackground}
       >
         <BottomSheetScrollView style={styles.contentContainer}>
           {selectedUser && (

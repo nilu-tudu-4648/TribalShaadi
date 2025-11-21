@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     fontSize: fontSize16,
-    color: COLORS.primaryBlue,
+    color: COLORS.violet,
   },
   modalButtonPlaceholder: {
     width: lignHeight60,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     color: COLORS.textBlack,
   },
   modalItemTextSelected: {
-    color: COLORS.primaryBlue,
+    color: COLORS.violet,
     fontWeight: '600',
   },
 });
