@@ -37,6 +37,7 @@ import { CloseIcon } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getUserDetailsApi,
+  getUserImageListApi,
   navigateToLastScreen,
   uploadImage,
 } from '../constants/functions';
@@ -57,6 +58,7 @@ const UploadImageScreen = () => {
   const [isAIViewing, setIsAIViewing] = useState(false);
   const [isImageValid, setIsImageValid] = useState(true);
   const [isImageValid2, setIsImageValid2] = useState(true);
+  const [userImageList, setUserImageList] = useState<any[]>([]);
 
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -72,6 +74,9 @@ const UploadImageScreen = () => {
 
     return unsubscribe;
   }, [navigation]);
+  useEffect(() => {
+    getUserImageListApi(user.id, setUserImageList);
+  }, []);
 
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
@@ -108,45 +113,41 @@ const UploadImageScreen = () => {
               };
               console.log(requestBody, 'requestBody for first image');
               await uploadImage(
-                requestBody,
+                { ...requestBody, imageIndex: index },   // 👈 PASS FAILED INDEX
                 dispatch,
                 true,
                 setIsImageValid,
                 setIsAIViewing,
                 handleRemoveImage,
               );
+              
             } else {
-              // Second and third image format - only call API when both images are selected
-              const updatedImages = [...newImages];
+              // Second and third image format - upload the current image
+              // Gallery images: selectedImages[1] maps to userImageList[0], selectedImages[2] maps to userImageList[1]
+              const galleryIndex = index - 1;
 
-              // Check if both second and third images are now selected
-              const hasSecondImage = updatedImages[1]?.base64;
-              const hasThirdImage = updatedImages[2]?.base64;
-
-              if (hasSecondImage && hasThirdImage) {
-                // Both images are selected, make the API call
                 requestBody = {
                   userId: user.id,
-                  images: [
-                    `data:image/jpeg;base64,${updatedImages[1].base64}`,
-                    `data:image/jpeg;base64,${updatedImages[2].base64}`,
-                  ],
-                };
+                image: `data:image/jpeg;base64,${asset.base64}`,
+              } as any;
+              
+              // Only include operationImageId if editing an existing image
+              if (userImageList[galleryIndex]?.id) {
+                requestBody.operationImageId = userImageList[galleryIndex].id;
+              }
+              
+              console.log(requestBody, `requestBody for gallery image at index ${index}`);
                 setIsAIViewing(true);
                 await uploadImage(
-                  requestBody,
+                  { ...requestBody, imageIndex: index },   // 👈 PASS INDEX 1 or 2
                   dispatch,
                   false,
                   setIsImageValid2,
                   setIsAIViewing,
-                  handleRemoveImage2,
-                );
-              } else {
-                // Only one image selected, don't make API call yet
-                console.log(
-                  'Waiting for both additional images to be selected',
-                );
-              }
+                  handleRemoveImage,   // 👈 use single-image remover
+                  setUserImageList as any,
+                )
+                
             }
           } catch (error) {
             console.log('NETWORK ERROR:', error);
@@ -162,17 +163,9 @@ const UploadImageScreen = () => {
       }
     });
   };
-  console.log(isImageValid, isImageValid2, 'isImageValid, isImageValid2');
   const handleRemoveImage = (index: number) => {
-    console.log(index, 'index');
     const newImages = [...selectedImages];
     newImages[index] = { uri: '', base64: '' };
-    setSelectedImages(newImages);
-  };
-  const handleRemoveImage2 = () => {
-    const newImages = [...selectedImages];
-    newImages[1] = { uri: '', base64: '' };
-    newImages[2] = { uri: '', base64: '' };
     setSelectedImages(newImages);
   };
   const handleContinue = async () => {

@@ -264,6 +264,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </View>
         </View>
         <View style={styles.horizontalLine} />
+        <View style={styles.horizontalLine} />
         {report && (
           <Pressable onPress={openReport} style={styles.reportButtonContainer}>
             <ReportIcon />

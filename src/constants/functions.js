@@ -263,7 +263,6 @@ export const saveUserToStorage = async user => {
 export const sendOTPForLogin = async (url, data, setLoading) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
-    AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
     console.log(error.response.data, 'sendOTPForLogin');
@@ -480,7 +479,7 @@ export const checkAuth = async dispatch => {
     try {
       if (user.intrests) {
         dispatch(setUserRegistrationCompleted(true));
-        return true; 
+        return true;
       }
       if (typeof getLastScreenName === 'function') {
         const lastScreenName = await getLastScreenName();
@@ -532,6 +531,26 @@ export const logoutUser = async dispatch => {
     console.log(error);
   }
 };
+export const getUserImageListApi = async (id,setUserImageList) => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(
+      `${baseUrl}/${getGalleryImageListUrl}`,
+      { userId: id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response.data.recordList, 'response getUserImageListApi');
+    if (setUserImageList) {
+      setUserImageList(response.data.recordList);
+    }
+  } catch (error) {
+    console.log(error, 'getGalleryImageListApi');
+  }
+};
 export const uploadImage = async (
   data,
   dispatch,
@@ -539,26 +558,33 @@ export const uploadImage = async (
   func,
   func2,
   handleRemoveImage,
+  setUserImageList = null
 ) => {
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const url = isProfile ? uploadProfileImageUrl : addEditGalleryImageListUrl;
+    console.log(data, `${baseUrl}/${url}`, 'data uploadImage');
     const response = await axios.post(`${baseUrl}/${url}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(response, 'response uploadImage');
+    if (setUserImageList) {
+      getUserImageListApi(data.userId, setUserImageList);
+    }
     if (func) {
       func(true);
     }
-    console.log(response, 'response uploadImage');
   } catch (error) {
     if (func) {
       func(false);
+      // Remove only the failed image (profile or gallery)
       if (handleRemoveImage) {
-        handleRemoveImage(0);
+        handleRemoveImage(data?.imageIndex);
       }
     }
+    
     console.log(error.response.data, 'uploadImage');
     if (error.response.data.status === 401) {
       logoutUser(dispatch);
@@ -749,7 +775,7 @@ export const getChatHistoryByUserId = async (userId, dispatch) => {
         },
       },
     );
-    const filteredChat =  response.data.recordList.filter(
+    const filteredChat = response.data.recordList.filter(
       chat => chat.userId !== userId && chat.isRead === 0
     );
     dispatch(setUnreadChatHistory(filteredChat));
@@ -889,11 +915,11 @@ export const onAppForeground = async dispatch => {
 };
 
 export const savedLastScreenName = async (screenName) => {
-try {
-  await AsyncStorage.setItem(ASYNC_VARIBLES.LAST_SCREEN_NAME, screenName);
-} catch (error) {
-  console.error('savedLastScreenName error:', error);
-}
+  try {
+    await AsyncStorage.setItem(ASYNC_VARIBLES.LAST_SCREEN_NAME, screenName);
+  } catch (error) {
+    console.error('savedLastScreenName error:', error);
+  }
 };
 
 export const getLastScreenName = async () => {
@@ -904,7 +930,7 @@ export const getLastScreenName = async () => {
     return null;
   }
 };
-export const navigateToLastScreen = async (navigation,ROUTES) => {
+export const navigateToLastScreen = async (navigation, ROUTES) => {
   try {
     navigation.navigate(ROUTES);
     savedLastScreenName(ROUTES);
