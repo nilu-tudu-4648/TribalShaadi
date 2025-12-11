@@ -207,8 +207,6 @@ const AddressScreen = () => {
           />
           </View>
           <View style={{ height: Size16 }} />
- 
-          <View style={{ height: Size16/2 }} />
           {/* Planning to settle down Chips */}
           <View style={styles.chipSection}>
             <AppText
@@ -226,6 +224,7 @@ const AddressScreen = () => {
               ))}
             </View>
           </View>
+          <View style={{ height: Size8/2 }} />
           <View style={styles.chipSection}>
             <AppText
               text="Kids"

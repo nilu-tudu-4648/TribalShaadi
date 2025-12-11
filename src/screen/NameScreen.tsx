@@ -128,14 +128,16 @@ const NameScreen = () => {
           <HeaderBack
             onPress={() => navigateToLastScreen(navigation, ROUTES.GENDER)}
           />
+          <View style={globalStyles.headerSection}>
           <AppText
             text="What should we call you?"
             textStyle={globalStyles.title}
-          />
+            />
           <AppText
             text="Tell us your name and email — it’s how your matches will know the real you."
             textStyle={globalStyles.subtitle}
-          />
+            />
+            </View>
           {/* Text Input */}
           <AppTextInput
             label={false}
@@ -162,7 +164,7 @@ const NameScreen = () => {
           {/* <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} /> */}
           <AppButton
             isLoading={loading}
-            title="Continue"
+            title="Confirm"
             loaderSize={Size22}
             onPress={handleConfirm}
             isButtonDisabled={!isValidEmail || loader}

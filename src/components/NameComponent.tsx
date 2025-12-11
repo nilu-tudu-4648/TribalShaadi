@@ -46,7 +46,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
           </View>
         </View>
       ) : (
-        <View style={styles.nameMainContainer}>
+        <View>
           <View style={styles.nameContainer}>
             <AppText text={`${name}, ${age}`} textStyle={styles.name} />
             {isVerified && (
@@ -94,13 +94,9 @@ export type { NameComponentProps };
 
 const styles = StyleSheet.create({
   cardContent: {
-    padding: SIZES.padding,
-    gap: SIZES.base / 2,
-    paddingBottom: SIZES.mediumTitle,
+    paddingLeft: SIZES.padding,
   },
   nameMainContainer: {
-    top: '10%',
-    gap: SIZES.base * 0.8,
   },
   name: {
     fontSize: fontSize24,
@@ -113,7 +109,7 @@ const styles = StyleSheet.create({
   details: {
     fontSize: fontSize16,
     color: COLORS.white,
-    fontWeight: '400',
+    marginVertical:4
   },
   location: {
     fontSize: fontSize16,
@@ -180,5 +176,6 @@ const styles = StyleSheet.create({
   },
   aiVerifiedContainer: {
     width: '100%',
+    marginVertical:16
   },
 });

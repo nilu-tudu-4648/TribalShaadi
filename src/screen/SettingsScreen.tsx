@@ -64,7 +64,7 @@ const SettingsScreen = () => {
           <View style={styles.iconContainer}>
             <LightBulbIcon />
             <AppText text="Account details" />
-            <AppText text="User ID, Emai" textStyle={styles.subText} />
+            <AppText text="User ID, Email" textStyle={styles.subText} />
           </View>
           <RightArrowIcon />
         </TouchableOpacity>

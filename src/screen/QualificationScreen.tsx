@@ -8,6 +8,7 @@ import {
   lignHeight20,
   Size16,
   screenHeight,
+  Size12,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -269,15 +270,15 @@ const QualificationScreen = () => {
                 onChangeText={setOrganizationName}
                 keyboardType="default"
               />
-              {/* Income Dropdown */}
-              <AppDropdown
-                label="Annual Income"
-                selectedValue={selectedIncome?.value || ''}
-                placeholder="Annual Income"
-                onPress={() => setShowIncomePicker(true)}
-              />
             </View>
           )}
+          {/* Income Dropdown */}
+          <AppDropdown
+            label="Annual Income"
+            selectedValue={selectedIncome?.value || ''}
+            placeholder="Annual Income"
+            onPress={() => setShowIncomePicker(true)}
+          />
         </View>
       </ScrollView>
 
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: lignHeight24,
     paddingVertical: screenHeight(2), // Responsive vertical padding
-    gap: lignHeight20,
+    gap: lignHeight20*1.5,
     paddingTop: screenHeight(1.5), // Responsive top padding
   },
   title: {

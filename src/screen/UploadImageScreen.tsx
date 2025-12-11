@@ -120,34 +120,34 @@ const UploadImageScreen = () => {
                 setIsAIViewing,
                 handleRemoveImage,
               );
-              
+
             } else {
               // Second and third image format - upload the current image
               // Gallery images: selectedImages[1] maps to userImageList[0], selectedImages[2] maps to userImageList[1]
               const galleryIndex = index - 1;
 
-                requestBody = {
-                  userId: user.id,
+              requestBody = {
+                userId: user.id,
                 image: `data:image/jpeg;base64,${asset.base64}`,
               } as any;
-              
+
               // Only include operationImageId if editing an existing image
               if (userImageList[galleryIndex]?.id) {
                 requestBody.operationImageId = userImageList[galleryIndex].id;
               }
-              
+
               console.log(requestBody, `requestBody for gallery image at index ${index}`);
-                setIsAIViewing(true);
-                await uploadImage(
-                  { ...requestBody, imageIndex: index },   // 👈 PASS INDEX 1 or 2
-                  dispatch,
-                  false,
-                  setIsImageValid2,
-                  setIsAIViewing,
-                  handleRemoveImage,   // 👈 use single-image remover
-                  setUserImageList as any,
-                )
-                
+              setIsAIViewing(true);
+              await uploadImage(
+                { ...requestBody, imageIndex: index },   // 👈 PASS INDEX 1 or 2
+                dispatch,
+                false,
+                setIsImageValid2,
+                setIsAIViewing,
+                handleRemoveImage,   // 👈 use single-image remover
+                setUserImageList as any,
+              )
+
             }
           } catch (error) {
             console.log('NETWORK ERROR:', error);
@@ -241,16 +241,19 @@ const UploadImageScreen = () => {
           onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER)}
         />
 
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <AppText
-            text="Pick your best moments"
-            textStyle={globalStyles.title}
-          />
-          <AppText
-            text="Please upload a clear photo of your face, looking at the camera"
-            textStyle={globalStyles.subtitle}
-          />
+        <View style={globalStyles.headerSection}>
+
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <AppText
+              text="Pick your best moments"
+              textStyle={globalStyles.title}
+            />
+            <AppText
+              text="Please upload a clear photo of your face, looking at the camera"
+              textStyle={globalStyles.subtitle}
+            />
+          </View>
         </View>
 
         {/* Image Upload Section */}

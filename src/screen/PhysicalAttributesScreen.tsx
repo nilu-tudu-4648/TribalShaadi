@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: lignHeight24,
     paddingVertical: lignHeight24,
-    gap: lignHeight20,
+    gap: lignHeight20*1.5,
     paddingTop: lignHeight72,
   },
   title: {

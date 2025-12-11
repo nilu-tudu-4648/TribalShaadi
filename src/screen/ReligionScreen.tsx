@@ -121,7 +121,7 @@ const ReligionScreen = () => {
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.BIRTH_DATE)}
         />
-        <View style={{ gap: Size25 }}>
+        <View style={{ gap: Size25*1.5 }}>
           <View style={{ gap: Size8 }}>
             {/* Religion Dropdown */}
             <AppDropdown
@@ -139,7 +139,7 @@ const ReligionScreen = () => {
               onPress={() => setShowTribePicker(true)}
             />
           </View>
-          <View style={{ gap: Size25 }}>
+          <View style={{ gap: Size25 *1.5}}>
             <AppDropdown
               label="Mother Tongue"
               selectedValue={selectedMotherTongue}

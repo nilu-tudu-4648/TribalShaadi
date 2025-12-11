@@ -92,8 +92,10 @@ const RegisterScreen: React.FC = () => {
   return (
     <SafeAreaView style={globalStyles.container}>
       <View style={globalStyles.content}>
+        <View style={globalStyles.headerSection}>
         <AppText text="What’s your phone number?" textStyle={globalStyles.title} />
         <AppText text="A special experience might just be ‘calling‘ !" textStyle={globalStyles.subtitle} />
+        </View>
 
         <View style={globalStyles.inputContainer}>
           <Image

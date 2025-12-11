@@ -17,7 +17,6 @@ import {
   fontSize16,
   Size10,
   Size8,
-  lignHeight57,
   fontWeight700,
   Size14,
   Size4,
@@ -29,17 +28,10 @@ import {
   formatDateShort,
 } from '../../constants/functions';
 import {
-  CalendarIcon,
-  ReligionIcon,
   TribeIcon,
-  EatingIcon,
   KidsIcon,
-  HeightIcon,
   LanguageIcon,
-  RupeesIcon,
-  PublicSectorIcon,
   WorkIcon,
-  DrinkingIcon,
   CigrateIcon,
   HomeWorkOutlineIcon,
   HeartIcon2,
@@ -50,6 +42,7 @@ import AppChip from '../AppChip';
 import NameComponent from '../NameComponent';
 import { CalendarIcon2, ReportIcon } from '../svg/SvgIcons2';
 import TagPill from '../chips/TagPill';
+import AppButton from '../AppButton';
 
 export interface ProfileCardProps {
   name: string;
@@ -84,6 +77,8 @@ export interface ProfileCardProps {
   isNameLoading?: boolean;
   openReport: () => void;
   report?: boolean;
+  isButtonVisible?: boolean;
+  handleSendProposal?: any;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -118,6 +113,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isNameLoading = false,
   openReport,
   report = true,
+  isButtonVisible = false,
+  handleSendProposal,
 }) => {
   return (
     <ScrollView
@@ -161,16 +158,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <View style={styles.horizontalLine} />
         <View style={styles.horizontalLine} />
         <View style={styles.detailRow}>
-          <TagPill icon={<ReligionIcon />} label={religion} />
+          <TagPill icon={<Image source={require('../../assets/images/pray.png')} style={styles.tagPillImage} />}
+            label={religion} />
           <TagPill icon={<TribeIcon />} label={caste} />
           <TagPill
-            icon={<HeightIcon />}
+            icon={<Image source={require('../../assets/images/height.png')} style={styles.tagPillImage} />}
             label={convertCmToReadableHeight(height)}
           />
           <TagPill icon={<HeartIcon2 />} label={maritalStatus} />
-          <TagPill icon={<CalendarIcon />} label={formatDateShort(dob)} />
+          <TagPill icon={<Image source={require('../../assets/images/calendern.png')} style={styles.tagPillImage} />} label={formatDateShort(dob)} />
           <TagPill icon={<LanguageIcon />} label={motherTongue} />
-          <TagPill icon={<RupeesIcon />} label={annualIncome || "Not Applicable"} />
+          <TagPill icon={<Image source={require('../../assets/images/rupees.png')} style={styles.tagPillImage} />} label={annualIncome || "Not Applicable"} />
         </View>
       </View>
 
@@ -187,7 +185,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       </View>
       <View style={styles.section}>
         <AppText text="Career" textStyle={styles.sectionTitle} />
-        <TagPill icon={<PublicSectorIcon />} label={employedIn} />
+        <TagPill icon={<Image source={require('../../assets/images/employe.png')} style={styles.tagPillImage} />}
+          label={employedIn} />
         <TagPill icon={<WorkIcon />} label={occupation} />
         <TagPill
           icon={<HomeWorkOutlineIcon />}
@@ -215,12 +214,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <AppText text="Life Style" textStyle={styles.sectionTitle} />
         <View style={styles.detailRow}>
           <TagPill
-            icon={<EatingIcon />}
+            icon={<Image source={require('../../assets/images/eating.png')} style={styles.tagPillImage} />}
             label={eatingHabits}
             containerStyle={{ width: '48%' }}
           />
           <TagPill
-            icon={<DrinkingIcon />}
+            icon={<Image source={require('../../assets/images/drink.png')} style={styles.tagPillImage} />}
             label={drinkingHabits}
             containerStyle={{ width: '48%' }}
           />
@@ -245,7 +244,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               key={index}
               title={interest}
               style={styles.interestChip}
-              onPress={() => {}}
+              onPress={() => { }}
             />
           ))}
         </View>
@@ -263,13 +262,21 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             </View>
           </View>
         </View>
-        <View style={styles.horizontalLine} />
-        <View style={styles.horizontalLine} />
+        {/* <View style={styles.horizontalLine} />
+        <View style={styles.horizontalLine} /> */}
         {report && (
           <Pressable onPress={openReport} style={styles.reportButtonContainer}>
             <ReportIcon />
             <AppText text="Report" textStyle={styles.reportButtonText} />
           </Pressable>
+        )}
+        {isButtonVisible && (
+          <AppButton
+            title="Connect"
+            onPress={handleSendProposal}
+            textStyle={styles.connectButtonText}
+            buttonStyle={styles.connectButton}
+          />
         )}
       </View>
     </ScrollView>
@@ -360,7 +367,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: lignHeight57,
+    paddingBottom: 200,
   },
   galleryImage: {
     width: '100%',
@@ -381,10 +388,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: SIZES.base,
+    paddingVertical: SIZES.base,
   },
   reportButtonText: {
     color: COLORS.red,
     fontSize: SIZES.font,
     fontWeight: 'bold',
   },
+  actionsContainer: {
+    gap: SIZES.padding * 3,
+    paddingVertical: SIZES.padding * 3,
+  },
+  connectButton: {
+    backgroundColor: COLORS.violet,
+    width: '60%',
+    alignSelf: 'center',
+    borderRadius: SIZES.h5,
+  },
+  connectButtonText: {
+    color: COLORS.white,
+    fontSize: SIZES.font,
+    fontWeight: 'bold',
+  },
+  tagPillImage: {
+    width: 15, height: 15,
+    resizeMode: "contain"
+  }
 });

@@ -143,20 +143,11 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               isPremium={currentUserPackage.length > 0}
               openReport={openReport}
               report={report}
+              isButtonVisible={isButtonVisible}
+              handleSendProposal={() => handleSendProposal(selectedUser?.id)}
             />
           )}
-          <View style={styles.actionsContainer}>
-            {isButtonVisible && (
-              <AppButton
-                title="Connect"
-                onPress={() => {
-                  handleSendProposal(selectedUser?.id);
-                }}
-                textStyle={styles.connectButtonText}
-                buttonStyle={styles.connectButton}
-              />
-            )}
-          </View>
+
         </BottomSheetScrollView>
       </BottomSheet>
       <ReportBottomSheet
@@ -200,10 +191,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize16,
     fontWeight: '600',
     color: COLORS.black,
-  },
-  actionsContainer: {
-    gap: SIZES.padding * 3,
-    paddingVertical: SIZES.padding * 3,
   },
   attributesContainer: {
     flexDirection: 'row',
@@ -263,17 +250,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.font,
     fontWeight: 'bold',
   },
-  connectButton: {
-    backgroundColor: COLORS.violet,
-    width: '60%',
-    alignSelf: 'center',
-    borderRadius: SIZES.h5,
-  },
-  connectButtonText: {
-    color: COLORS.white,
-    fontSize: SIZES.font,
-    fontWeight: 'bold',
-  },
+
   bioSection: {
     // padding: SIZES.padding,
     gap: SIZES.base,

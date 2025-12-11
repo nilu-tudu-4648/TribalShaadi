@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.lightGrey2,
   },
   chipSelected: {
-    backgroundColor: COLORS.violet,
+    borderColor: COLORS.violet,
+    backgroundColor: COLORS.lightViolet2,
   },
   chipDisabled: {
     backgroundColor: COLORS.disabledBG,
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   chipTextSelected: {
-    color: COLORS.white,
+    // color: COLORS.white,
   },
   chipTextDisabled: {
     color: COLORS.placeholderInactive,

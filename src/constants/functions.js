@@ -263,6 +263,7 @@ export const saveUserToStorage = async user => {
 export const sendOTPForLogin = async (url, data, setLoading) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
+    console.log(response.data, 'response sendOTPForLogin');
     return true;
   } catch (error) {
     console.log(error.response.data, 'sendOTPForLogin');

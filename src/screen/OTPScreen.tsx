@@ -23,6 +23,7 @@ import { RootStackParamList } from '../../App';
 import HeaderBack from '../components/HeaderBack';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendOTPForLogin, verifyOTP } from '../constants/functions';
+import { globalStyles } from '../constants/globalStyles';
 
 const OTPScreen = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -124,19 +125,21 @@ const OTPScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <HeaderBack />
-        <AppText text="OTP" textStyle={styles.title} />
-        <AppText
-          text={`4 digit code sent to +91 ${phoneNumber}`}
-          textStyle={styles.subtitle}
-        />
+        <View style={globalStyles.headerSection}>
+          <AppText text="Verification Code" textStyle={globalStyles.title} />
+          <AppText
+            text={`4 digit code sent to +91 ${phoneNumber}`}
+            textStyle={globalStyles.subtitle}
+          />
+        </View>
 
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => {
             const isFocused = focusedIndex === index;
-            const borderColor = error 
-              ? COLORS.red 
-              : isFocused 
-                ? COLORS.violet 
+            const borderColor = error
+              ? COLORS.red
+              : isFocused
+                ? COLORS.violet
                 : COLORS.borderColor;
             const borderWidth = error ? 1 : isFocused ? 1.5 : 0.5;
 
@@ -165,7 +168,7 @@ const OTPScreen = () => {
           })}
         </View>
 
-        <TouchableOpacity onPress={handleResend} disabled={timer > 0 || loader}>
+        <TouchableOpacity style={styles.resendButton} onPress={handleResend} disabled={timer > 0 || loader}>
           <AppText
             text={
               timer > 0
@@ -219,6 +222,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: SIZES.h3,
     color: COLORS.textPrimary,
+  },
+  resendButton: {
+    top:Size10
   },
   resendText: {
     fontWeight: '600',

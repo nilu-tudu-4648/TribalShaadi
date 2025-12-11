@@ -83,7 +83,7 @@ const AboutPartnerScreen = () => {
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
-      } catch (error) {
+    } catch (error) {
       console.log('NETWORK ERROR:', error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE);
@@ -94,10 +94,10 @@ const AboutPartnerScreen = () => {
     <SafeAreaView style={globalStyles.container}>
       <View style={globalStyles.content}>
         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} />
-
-        {/* Question Title */}
-        <AppText text={question.question} textStyle={globalStyles.title}  />
-        <AppText text={question.subtitle} textStyle={globalStyles.subtitle} />
+        <View style={globalStyles.headerSection}>
+          <AppText text={question.question} textStyle={globalStyles.title} />
+          <AppText text={question.subtitle} textStyle={globalStyles.subtitle} />
+        </View>
         {/* Options */}
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => (
@@ -106,7 +106,7 @@ const AboutPartnerScreen = () => {
               style={[
                 styles.optionItem,
                 answers[question.id] === option &&
-                  styles.optionItemSelected,
+                styles.optionItemSelected,
               ]}
               onPress={() => handleOptionSelect(option)}
             >
@@ -171,8 +171,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Size16*1.2,
-    paddingHorizontal: Size8*2,
+    paddingVertical: Size16 * 1.2,
+    paddingHorizontal: Size8 * 2,
     borderRadius: Size4,
     borderWidth: 1,
     borderColor: COLORS.lightGrey2,

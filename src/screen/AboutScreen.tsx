@@ -83,10 +83,10 @@ const AboutScreen = () => {
       >
         <View style={globalStyles.content}>
           <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES)} />
-
-          {/* Title */}
-          <AppText text="What makes you a 11/10?" textStyle={globalStyles.title} />
-          <AppText text="Share a few lines about yourself — honest, simple, and real" textStyle={globalStyles.subtitle} />
+          <View style={globalStyles.headerSection}>
+            <AppText text="What makes you a 11/10?" textStyle={globalStyles.title} />
+            <AppText text="Share a few lines about yourself — honest, simple, and real" textStyle={globalStyles.subtitle} />
+          </View>
           {/* Text Input Area */}
           <View style={styles.textInputContainer}>
             <AppTextInput

@@ -390,7 +390,7 @@ const PreferenceScreen = () => {
               </View>
             </View>
 
-            <View style={styles.section}>
+            <View style={[styles.section,{top:30}]}>
               <AppText
                 text="My secondary preferences"
                 textStyle={styles.sectionTitle}
@@ -400,7 +400,7 @@ const PreferenceScreen = () => {
               secondary preferences"
                 textStyle={styles.sectionDescription}
               />
-              <View style={styles.cardContainer}>
+              <View style={[styles.cardContainer,]}>
                 {secondaryPreferences.map((item, index) => (
                   <PreferenceCard
                     key={index}

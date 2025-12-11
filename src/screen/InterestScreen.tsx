@@ -170,7 +170,7 @@ const InterestScreen = () => {
       );
     }
   };
-
+ console.log({selectedTab})
   return (
     <>
       <AppSafeView style={styles.container}>
@@ -226,9 +226,6 @@ const InterestScreen = () => {
                 />
               </View>
             }
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
           />
         )}
         {selectedTab === 1 && (
@@ -275,7 +272,7 @@ const InterestScreen = () => {
         )}
         <ProfileBottomSheet
           bottomSheetRef={bottomSheetRef}
-          isButtonVisible={selectedTab === 1}
+          isButtonVisible={selectedTab === 1 ? true : false}
           user={user}
           currentUserPackage={currentUserPackage}
         />

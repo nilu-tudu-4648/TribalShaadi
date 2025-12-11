@@ -253,8 +253,8 @@ const UpgradeScreen = () => {
         {user.gender === 'Female' ? (
           <PremiumCard
             packageData={{
-              netAmount: 1500,
-              endDate: 'Till Marriage',
+              netAmount: packageList[2]?.price,
+              endDate: packageList[2]?.title,
             }}
             features={features}
             endDateText={`Lifetime Access`}

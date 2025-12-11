@@ -75,6 +75,19 @@ const GenderSelectionScreen = () => {
         <View style={{ gap: Size10 }}> 
           <AppText text="Select your gender" textStyle={styles.subtitle} />
          <View style={{ gap: Size20 }}> 
+         <Pressable
+            style={[
+              styles.genderOption,
+              selectedGender === 'female' && styles.selectedGender,
+            ]}
+            onPress={() => handleSelect('female')}
+          >
+            <AppText text="Female" textStyle={styles.genderText} />
+            <Image
+              source={require('../assets/images/Female.png')}
+              style={styles.genderImage}
+            />
+          </Pressable>
           <Pressable
             style={[
               styles.genderOption,
@@ -89,19 +102,7 @@ const GenderSelectionScreen = () => {
             />
           </Pressable>
 
-          <Pressable
-            style={[
-              styles.genderOption,
-              selectedGender === 'female' && styles.selectedGender,
-            ]}
-            onPress={() => handleSelect('female')}
-          >
-            <AppText text="Female" textStyle={styles.genderText} />
-            <Image
-              source={require('../assets/images/Female.png')}
-              style={styles.genderImage}
-            />
-          </Pressable>
+      
           </View>
         </View>
         <View style={{ width: '100%', alignItems: 'flex-end', flex: 1 }} />

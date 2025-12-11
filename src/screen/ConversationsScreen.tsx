@@ -297,7 +297,6 @@ const ConversationsScreen = () => {
     return userStatus.data.recordList[0].middleName;
   }, [userDetails.friendId]);
 
-  // Add new message to chat
   const addMessage = useCallback(
     async (message: Omit<Message, 'id' | 'timestamp'>) => {
       const newMessage: Message = {
@@ -313,7 +312,6 @@ const ConversationsScreen = () => {
 
         let updatedMessages = [...currentChatData];
 
-        // Check if we need to add a date header before the new message
         const needsDateHeader =
           !lastMessage ||
           lastMessage.type === 'story_starter' ||
@@ -791,6 +789,7 @@ const styles = StyleSheet.create({
   headerCenter: {
     flex: 1,
     alignItems: 'center',
+    left: Size10,
   },
   connectionStatus: {
     fontSize: fontSize12,

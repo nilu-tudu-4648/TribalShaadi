@@ -55,7 +55,6 @@ const ChatScreen = () => {
   const { loader, acceptedProposalById, unreadChatHistory } = useSelector(
     (state: any) => state.entities.chatReducer,
   );
-  // console.log(acceptedProposalById, 'acceptedProposalById');
   const [lastMessage, setLastMessage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -173,6 +172,13 @@ const ChatScreen = () => {
     });
     return unsubscribe;
   }, [navigation]);
+  const truncateMessage = (message: string, maxLength: number = 35) => {
+    if (!message) return '';
+    return message.length > maxLength
+      ? message.substring(0, maxLength) + '...'
+      : message;
+  };
+
   const renderConversationItem = (item: any) => {
     // Memoize filtered unread chats for this friendId
     const unreadChatsForFriend = unreadChatHistory.filter(
@@ -180,7 +186,6 @@ const ChatScreen = () => {
     );
     const unreadCount = unreadChatsForFriend.length;
     const latestUnreadChat = unreadChatsForFriend[0];
-    // console.log(lastMessage, 'lastMessageArray');
     const latestMessage = lastMessage?.find(
       (message: any) => message.friendId === item.friendId,
     );
@@ -207,7 +212,7 @@ const ChatScreen = () => {
             textStyle={styles.userName}
           />
           <AppText
-            text={
+            text={truncateMessage(
               latestMessage?.message
                 ? latestMessage?.message
                 : unreadCount > 0
@@ -215,7 +220,7 @@ const ChatScreen = () => {
                 : item.isNewStatus !== 1
                 ? item.message
                 : 'Send a message'
-            }
+            )}
             textStyle={styles.messageText}
           />
         </Pressable>

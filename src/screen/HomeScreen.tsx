@@ -75,6 +75,7 @@ const HomeScreen = () => {
     (state: any) => state.entities.paymentReducer,
   );
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
+  console.log(matchedUsers, 'matchedUsers');
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -245,7 +246,7 @@ const HomeScreen = () => {
         console.log('Background API error:', error);
       });
       // Start animation immediately for better UX
-      startTransition('right');
+      startTransition('left');
       // Increment processed count
       setProcessedCount(prev => prev + 1);
     } catch (error) {
@@ -274,7 +275,7 @@ const HomeScreen = () => {
       }
 
       // Start animation immediately
-      startTransition('left');
+      startTransition('right');
 
       // Fire requests in background
       Promise.all([
@@ -397,8 +398,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        // dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
-        dispatch(
+       dispatch(
           getAcceptedProposalByIdApi(
             `${getAcceptedProposalByIdUrl}/${user?.id}`,
           ),

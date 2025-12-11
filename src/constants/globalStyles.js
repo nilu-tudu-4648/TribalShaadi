@@ -15,6 +15,7 @@ import {
   Size20,
   Size16,
   Size12,
+  Size14,
 } from './Sizes';
 import FONT_FAMILY from './Fonts';
 
@@ -29,6 +30,10 @@ export const globalStyles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
+  headerSection: {
+    paddingBottom: Size8,
+    gap: Size8*1.2
+  },
   content: {
     flex: 1,
     paddingHorizontal: lignHeight24,
@@ -40,14 +45,16 @@ export const globalStyles = StyleSheet.create({
     fontSize: fontSize34,
     fontWeight: '500',
     color: COLORS.black,
+    lineHeight:36
   },
   subtitle: {
     fontSize: fontSize20,
     color: COLORS.greyText2,
+    // paddingTop:Size12
   },
   continueButton: {
     width: '100%',
-    borderRadius: Size8*0.8,
+    borderRadius: Size8 * 0.8,
   },
   continueButtonActive: {
     backgroundColor: COLORS.violet,

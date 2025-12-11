@@ -115,12 +115,13 @@ const BirthDateScreen = () => {
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)}
         />
-        <AppText text="When were you born?" textStyle={globalStyles.title} />
-
-        <AppText
-          text="Tell us your birth date — it helps us find matches closer to your preference"
-          textStyle={globalStyles.subtitle}
-        />
+        <View style={globalStyles.headerSection}>
+          <AppText text="When were you born?" textStyle={globalStyles.title} />
+          <AppText
+            text="Tell us your birth date — it helps us find matches closer to your preference"
+            textStyle={globalStyles.subtitle}
+          />
+        </View>
 
         <TouchableOpacity
           style={[
@@ -137,10 +138,10 @@ const BirthDateScreen = () => {
             text={
               dateOfBirth
                 ? new Date(dateOfBirth).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                  })
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                })
                 : 'DD/MM/YYYY'
             }
             textStyle={styles.dateInput}

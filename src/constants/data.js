@@ -229,7 +229,7 @@ export const NOTIFICATION_MESSAGES = {
     message: `has accepted your interest. It's time to start a conversation and get to know each other better.`,
   },
   TESTING: {
-    title: 'testing',
+    title: 'New Notification',
     message: 'new message',
   },
 };
