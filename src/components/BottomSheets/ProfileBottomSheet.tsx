@@ -68,9 +68,8 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
           title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
-          message: `${user.firstName} ${user.lastName ?? ''} ${
-            NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
-          }`,
+          message: `${user.firstName} ${user.lastName ?? ''} ${NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+            }`,
           receiverUserId: id,
         }),
       );

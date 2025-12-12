@@ -733,6 +733,7 @@ const ConversationsScreen = () => {
               multiline
               maxLength={500}
               keyboardType="default"
+              label={false}
             />
           </View>
           <TouchableOpacity
@@ -788,7 +789,6 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
     left: Size10,
   },
   connectionStatus: {
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
     paddingTop: Size4,
   },
   headerSpacer: {
-    flex: 1,
+    width: fontSize30,
   },
   messagesContainer: {
     flex: 1,
@@ -885,14 +885,13 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: Size16,
     paddingVertical: Size12,
     borderTopWidth: 1,
     borderTopColor: COLORS.borderLight2,
     gap: Size12,
     backgroundColor: COLORS.white,
-    minHeight: Size40 + Size12 * 2,
   },
   textInputContainer: {
     flex: 1,
@@ -902,22 +901,22 @@ const styles = StyleSheet.create({
     borderColor: COLORS.violet,
     paddingHorizontal: Size16,
     paddingVertical: Size10,
-    minHeight: Size40,
-    maxHeight: Size40 * 3,
+    height: Size40 + Size12,
+    justifyContent: 'center',
   },
   textInput: {
     fontSize: fontSize14,
     color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     textAlignVertical: 'top',
-    minHeight: Size20,
-    maxHeight: fontSize14 * 1.4 * 4, // Approximately 4 lines
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    height: Size40,
     borderWidth: 0,
     borderBottomWidth: 0,
   },
   sendButton: {
     backgroundColor: COLORS.transparent,
-    paddingBottom: Size14,
   },
   failedMessage: {
     color: COLORS.red,

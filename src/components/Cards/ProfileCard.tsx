@@ -173,10 +173,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       </View>
 
       <View style={styles.horizontalLine} />
-      <Image
-        source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
-        style={styles.galleryImage}
-      />
+      {galleryImageList && galleryImageList[0]?.imageUrl && (
+        <Image
+          key={galleryImageList[0]?.id}
+          source={{ uri: imageUrl + galleryImageList[0]?.imageUrl }}
+          style={styles.galleryImage}
+          resizeMode="cover"
+          onError={(error) => console.log('Image 0 load error:', error)}
+        />
+      )}
       <View style={styles.horizontalLine} />
       <View style={styles.section}>
         <AppText text="Education" textStyle={styles.sectionTitle} />
@@ -203,12 +208,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </View>
       </View>
       <View style={styles.horizontalLine} />
-      <View style={styles.imageWrapper}>
-        <Image
-          source={{ uri: imageUrl + galleryImageList[1]?.imageUrl }}
-          style={styles.galleryImage}
-        />
-      </View>
+      {galleryImageList && galleryImageList[1]?.imageUrl && (
+        <View style={styles.imageWrapper}>
+          <Image
+            key={galleryImageList[1]?.id}
+            source={{ uri: imageUrl + galleryImageList[1]?.imageUrl }}
+            style={styles.galleryImage}
+            resizeMode="cover"
+            onError={(error) => console.log('Image 1 load error:', error)}
+          />
+        </View>
+      )}
       <View style={styles.horizontalLine} />
       <View style={styles.section}>
         <AppText text="Life Style" textStyle={styles.sectionTitle} />
@@ -262,8 +272,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             </View>
           </View>
         </View>
-        {/* <View style={styles.horizontalLine} />
-        <View style={styles.horizontalLine} /> */}
         {report && (
           <Pressable onPress={openReport} style={styles.reportButtonContainer}>
             <ReportIcon />

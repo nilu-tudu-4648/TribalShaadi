@@ -223,7 +223,7 @@ const HomeScreen = () => {
       }
 
       // Fire requests in background (don't wait for them)
-      Promise.all([
+      // Promise.all([
         dispatch(
           sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
             proposalUserId: currentUserId,
@@ -242,9 +242,9 @@ const HomeScreen = () => {
             receiverUserId: currentUserId,
           }),
         )
-      ]).catch(error => {
-        console.log('Background API error:', error);
-      });
+      // ]).catch(error => {
+      //   console.log('Background API error:', error);
+      // });
       // Start animation immediately for better UX
       startTransition('left');
       // Increment processed count
@@ -278,16 +278,16 @@ const HomeScreen = () => {
       startTransition('right');
 
       // Fire requests in background
-      Promise.all([
+      // Promise.all([
         dispatch(
           cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
             proposalUserId: currentUserId,
           }),
         ),
         dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
-      ]).catch(error => {
-        console.log('Background API error:', error);
-      });
+      // ]).catch(error => {
+      //   console.log('Background API error:', error);
+      // });
 
       // Increment processed count
       setProcessedCount(prev => prev + 1);
@@ -614,7 +614,6 @@ const HomeScreen = () => {
         ? cachedGallery
         : baseUser.galleryImageList || [];
     const isPremium = (cachedPackage?.length ?? 0) > 0;
-
     return (
       <ProfileCard
         name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
@@ -638,7 +637,7 @@ const HomeScreen = () => {
         occupation={finalDetail?.occupation}
         organizationName={finalDetail?.companyName}
         settlingTime={finalDetail?.planingto_settle}
-        highestQualification={finalDetail?.educationType}
+        highestQualification={finalDetail?.education}
         college={finalDetail?.college_name}
         eatingHabits={finalDetail?.diet}
         drinkingHabits={finalDetail?.drinking}
@@ -662,7 +661,6 @@ const HomeScreen = () => {
             processedCount < matchedUsers.length ? (
             <>
               <View style={styles.carouselContainer}>
-                {/* <GestureDetector gesture={panGesture}> */}
                 <Animated.View style={styles.cardsWrapper}>
                   {/* Card 1 */}
                   <Animated.View
@@ -682,7 +680,6 @@ const HomeScreen = () => {
                     )}
                   </Animated.View>
                 </Animated.View>
-                {/* </GestureDetector> */}
               </View>
 
               {/* Buttons */}

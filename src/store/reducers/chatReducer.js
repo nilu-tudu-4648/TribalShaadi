@@ -33,7 +33,6 @@ const chatReducer = createSlice({
       chatReducer.insertUserNotifications = action.payload;
     },
     setUnreadChatHistory: (chatReducer, action) => {
-      console.log(payload, 'payload addUnreadChatForeground');
       chatReducer.unreadChatHistory = action.payload;
     },
     addUnreadChatForeground: (chatReducer, action) => {

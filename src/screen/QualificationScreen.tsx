@@ -8,7 +8,6 @@ import {
   lignHeight20,
   Size16,
   screenHeight,
-  Size12,
 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import HeaderBack from '../components/HeaderBack';
@@ -262,6 +261,7 @@ const QualificationScreen = () => {
             />
           </View>
           {selectedWorkExperience?.name !== 'Not Working' && (
+            <>
             <View style={{ gap: Size8 }}>
               {/* Organization Name Text Input */}
               <AppTextInput
@@ -271,7 +271,6 @@ const QualificationScreen = () => {
                 keyboardType="default"
               />
             </View>
-          )}
           {/* Income Dropdown */}
           <AppDropdown
             label="Annual Income"
@@ -279,6 +278,8 @@ const QualificationScreen = () => {
             placeholder="Annual Income"
             onPress={() => setShowIncomePicker(true)}
           />
+          </>
+          )}
         </View>
       </ScrollView>
 

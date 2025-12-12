@@ -69,7 +69,6 @@ const ForegroundHandler = params => {
               try {
                 if (Platform.OS === 'android') {
                   const { title, body } = remoteMessage?.notification || {};
-                  console.log(title, body, 'title, body');
                   const userDataString = await AsyncStorage.getItem(
                     ASYNC_VARIBLES.USER,
                   );
@@ -90,22 +89,21 @@ const ForegroundHandler = params => {
                   );
                   await getChatHistoryByUserId(user.id, store.dispatch);
 
-                  // mark foreground unread in reducer (robust sender id detection)
-                  // try {
-                  //   const data = remoteMessage?.data || {};
-                  //   const idCandidate = data.from || data.senderId || data.sender_id || data.userId || data.user_id || data.friendId || data.friend_id;
-                  //   const parsed = idCandidate !== undefined && idCandidate !== null ? Number(idCandidate) : NaN;
-                  //   const senderId = !Number.isNaN(parsed) ? parsed : null;
-                  //   if (senderId && senderId !== user.id) {
-                  //     store.dispatch(
-                  //       addUnreadChatForeground({
-                  //         userId: senderId,
-                  //         content: body || '',
-                  //         created_at: new Date().toISOString(),
-                  //       })
-                  //     );
-                  //   }
-                  // } catch (_) {}
+                  try {
+                    const data = remoteMessage?.data || {};
+                    const idCandidate = data.from || data.senderId || data.sender_id || data.userId || data.user_id || data.friendId || data.friend_id;
+                    const parsed = idCandidate !== undefined && idCandidate !== null ? Number(idCandidate) : NaN;
+                    const senderId = !Number.isNaN(parsed) ? parsed : null;
+                    if (senderId && senderId !== user.id) {
+                      store.dispatch(
+                        addUnreadChatForeground({
+                          userId: senderId,
+                          content: body || '',
+                          created_at: new Date().toISOString(),
+                        })
+                      );
+                    }
+                  } catch (_) { }
                   if (!title || !body || title === NOTIFICATION_MESSAGES.TESTING.title) return;
 
                   // Wrap schedulePushNotification in try-catch to prevent crashes

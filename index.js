@@ -14,6 +14,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   try {
     const { title, body } = remoteMessage?.notification || {};
     if (!title || !body || title === NOTIFICATION_MESSAGES.TESTING.title) return;
+    console.log(title, body, 'title, body background');
     // Intentionally do not show local notifications in background/quit; OS handles notification payloads
   } catch (_) {}
 });

@@ -367,6 +367,7 @@ const styles = StyleSheet.create({
   conversationContent: {
     gap: Size4,
     width: '75%',
+    left:10
   },
   userName: {
     fontSize: fontSize16,

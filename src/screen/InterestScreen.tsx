@@ -170,7 +170,7 @@ const InterestScreen = () => {
       );
     }
   };
- console.log({selectedTab})
+  
   return (
     <>
       <AppSafeView style={styles.container}>
