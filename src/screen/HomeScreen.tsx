@@ -8,6 +8,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../constants/AppColors';
 import { SIZES, fontSize16, fontSize20, Size10 } from '../constants/Sizes';
 import AppSafeView from '../components/AppSafeView';
@@ -21,7 +22,6 @@ import {
   sendProposalUrl,
   getReligionUrl,
   getMaritalStatusUrl,
-  getCommunityUrl,
   getHeightUrl,
   getDietUrl,
   getPassedUsersUrl,
@@ -48,7 +48,6 @@ import {
 } from '../store/reducers/userReducer';
 import AppButton from '../components/AppButton';
 import {
-  getCommunity,
   getDiet,
   getHeight,
   getMaritalStatus,
@@ -69,13 +68,13 @@ import BottomSheet from '@gorhom/bottom-sheet';
 
 // keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
+  const navigation = useNavigation();
   const { currentMatchedUser, currentMatchedUserGalleryImageList } =
     useSelector((state: any) => state.entities.userReducer);
   const { currentUserPackage } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
-  console.log(matchedUsers, 'matchedUsers');
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -222,37 +221,28 @@ const HomeScreen = () => {
         return;
       }
 
-      // Fire requests in background (don't wait for them)
-      // Promise.all([
-        dispatch(
-          sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
-            proposalUserId: currentUserId,
-          }),
-        ),
-        dispatch(
-          getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-        ),
-
+      dispatch(
+        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+          proposalUserId: currentUserId,
+        }),
+      ),
+      dispatch(
+        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+      ),
         dispatch(
           insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
             title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
-            message: `${user.firstName} ${user.lastName ?? ''} ${
-              NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
-            }`,
+            message: `${user.firstName} ${user.lastName ?? ''} ${NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+              }`,
             receiverUserId: currentUserId,
           }),
         )
-      // ]).catch(error => {
-      //   console.log('Background API error:', error);
-      // });
-      // Start animation immediately for better UX
       startTransition('left');
-      // Increment processed count
       setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
-      setActionInProgress(false);
+      setActionInProgress(false); 
     }
   };
 
@@ -274,23 +264,14 @@ const HomeScreen = () => {
         return;
       }
 
-      // Start animation immediately
       startTransition('right');
-
-      // Fire requests in background
-      // Promise.all([
-        dispatch(
-          cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
-            proposalUserId: currentUserId,
-          }),
-        ),
+      dispatch(
+        cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
+          proposalUserId: currentUserId,
+        }),
+      ),
         dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
-      // ]).catch(error => {
-      //   console.log('Background API error:', error);
-      // });
-
-      // Increment processed count
-      setProcessedCount(prev => prev + 1);
+        setProcessedCount(prev => prev + 1);
     } catch (error) {
       console.log(error);
     } finally {
@@ -310,7 +291,7 @@ const HomeScreen = () => {
         );
         const record = resp?.data?.recordList?.[0];
         if (record) setDetailsCache(prev => ({ ...prev, [userId]: record }));
-      } catch (e) {}
+      } catch (e) { }
     },
     [detailsCache],
   );
@@ -328,7 +309,7 @@ const HomeScreen = () => {
         );
         const list = resp?.data?.recordList ?? [];
         setGalleryCache(prev => ({ ...prev, [userId]: list }));
-      } catch (e) {}
+      } catch (e) { }
     },
     [galleryCache],
   );
@@ -359,6 +340,25 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchMatchedUsers();
   }, [fetchMatchedUsers]);
+
+  // Refetch current user's data when screen is focused to fix gallery mismatch
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]) {
+        const currentUserId = matchedUsers[currentIndex].id;
+        // Refetch gallery for the current user
+        dispatch(
+          getCurrentMatchedUserGalleryImageListApi(
+            `${baseUrl}/${getGalleryImageListUrl}`,
+            {
+              userId: currentUserId,
+            },
+          ),
+        );
+      }
+    });
+    return unsubscribe;
+  }, [navigation, matchedUsers, currentIndex, dispatch]);
   // Helper: fetch package silently
   const fetchPackageSilently = useCallback(
     async (userId: number) => {
@@ -373,19 +373,14 @@ const HomeScreen = () => {
         );
         const list = resp?.data?.recordList ?? [];
         setPackageCache(prev => ({ ...prev, [userId]: list }));
-      } catch (e) {}
+      } catch (e) { }
     },
     [packageCache],
   );
 
   useEffect(() => {
-    const id =
-      user?.pReligionId !== 'any' && user?.pReligionId?.[0]
-        ? user?.pReligionId?.[0]
-        : user?.religionId;
-    dispatch(getCommunity(`${getCommunityUrl}religionId=${id}`));
     setHasRequestedMatches(true);
-  }, [dispatch, user?.pReligionId, user?.religionId]);
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -398,7 +393,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-       dispatch(
+        dispatch(
           getAcceptedProposalByIdApi(
             `${getAcceptedProposalByIdUrl}/${user?.id}`,
           ),
@@ -443,25 +438,34 @@ const HomeScreen = () => {
   useEffect(() => {
     const curId = currentMatchedUser?.id;
     if (!curId) return;
-    setDetailsCache(prev => ({ ...prev, [curId]: currentMatchedUser }));
-  }, [currentMatchedUser]);
+    // Only update cache if the details belong to the current matched user
+    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
+      setDetailsCache(prev => ({ ...prev, [curId]: currentMatchedUser }));
+    }
+  }, [currentMatchedUser, matchedUsers, currentIndex]);
 
   useEffect(() => {
     const curId = currentMatchedUser?.id;
     if (!curId) return;
     if (!Array.isArray(currentMatchedUserGalleryImageList)) return;
-    setGalleryCache(prev => ({
-      ...prev,
-      [curId]: currentMatchedUserGalleryImageList,
-    }));
-  }, [currentMatchedUser?.id, currentMatchedUserGalleryImageList]);
+    // Only update cache if the gallery belongs to the current matched user
+    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
+      setGalleryCache(prev => ({
+        ...prev,
+        [curId]: currentMatchedUserGalleryImageList,
+      }));
+    }
+  }, [currentMatchedUser?.id, currentMatchedUserGalleryImageList, matchedUsers, currentIndex]);
 
   useEffect(() => {
     const curId = currentMatchedUser?.id;
     if (!curId) return;
     if (!Array.isArray(currentUserPackage)) return;
-    setPackageCache(prev => ({ ...prev, [curId]: currentUserPackage }));
-  }, [currentMatchedUser?.id, currentUserPackage]);
+    // Only update cache if the package belongs to the current matched user
+    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
+      setPackageCache(prev => ({ ...prev, [curId]: currentUserPackage }));
+    }
+  }, [currentMatchedUser?.id, currentUserPackage, matchedUsers, currentIndex]);
   // Prefetch previous, current, and next-next users in background for smoothness
   useEffect(() => {
     if (!matchedUsers || matchedUsers.length === 0) return;
@@ -634,7 +638,7 @@ const HomeScreen = () => {
         annualIncome={finalDetail?.annualIncome}
         partnerExpectation={finalDetail?.about_lifepartener}
         employedIn={finalDetail?.employmentType}
-        occupation={finalDetail?.occupation}
+        occupation={finalDetail?.occupationCategoryName}
         organizationName={finalDetail?.companyName}
         settlingTime={finalDetail?.planingto_settle}
         highestQualification={finalDetail?.education}

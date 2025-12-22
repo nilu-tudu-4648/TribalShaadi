@@ -122,7 +122,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 currentMatchedUserGalleryImageList
               }
               isLoading={false}
-              maritalStatus={user.maritalStatus}
+              maritalStatus={selectedUser.maritalStatus}
               dob={selectedUser.birthDate}
               motherTongue={selectedUser.motherTongue}
               annualIncome={selectedUser.annualIncome}

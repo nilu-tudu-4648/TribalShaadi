@@ -34,7 +34,7 @@ const NameScreen = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -126,7 +126,7 @@ const NameScreen = () => {
       >
         <View style={styles.content}>
           <HeaderBack
-            onPress={() => navigateToLastScreen(navigation, ROUTES.GENDER)}
+            onPress={() => navigation.navigate(ROUTES.GENDER)}
           />
           <View style={globalStyles.headerSection}>
           <AppText

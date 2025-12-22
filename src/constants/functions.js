@@ -909,7 +909,7 @@ export const onAppForeground = async dispatch => {
     // console.log('requestBody onAppForeground', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
-      getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      getUserDetailsApi(`${getUserDetailsUrl}id=${user?.id}`, dispatch);
     });
   } catch (error) {
     console.error('onAppForeground error:', error);
