@@ -13,7 +13,6 @@ import {
   Size5,
   SIZES,
 } from '../../constants/Sizes';
-import AppButton from '../AppButton';
 import { useDispatch, useSelector } from 'react-redux';
 import ReportBottomSheet from './ReportBottomSheet';
 import {
@@ -83,6 +82,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       bottomSheetRef.current?.close();
     }
   };
+  console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet
@@ -128,7 +128,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               annualIncome={selectedUser.annualIncome}
               partnerExpectation={selectedUser.about_lifepartener}
               employedIn={selectedUser.employmentType}
-              occupation={selectedUser.occupationCategoryName}
+              occupation={selectedUser.occupationCategoryName ? selectedUser.occupationCategoryName : selectedUser.occupation}
               organizationName={selectedUser.companyName}
               settlingTime={selectedUser.planingto_settle}
               highestQualification={selectedUser.education}

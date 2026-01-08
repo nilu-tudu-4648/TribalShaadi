@@ -185,14 +185,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       <View style={styles.horizontalLine} />
       <View style={styles.section}>
         <AppText text="Education" textStyle={styles.sectionTitle} />
-        <TagPill icon={<DegreeIcon />} label={highestQualification} />
+        {highestQualification &&
+          <TagPill icon={<DegreeIcon />} label={highestQualification} />
+        }
         {college && <TagPill icon={<EducationIcon2 />} label={college} />}
       </View>
       <View style={styles.section}>
         <AppText text="Career" textStyle={styles.sectionTitle} />
-        <TagPill icon={<Image source={require('../../assets/images/employe.png')} style={styles.tagPillImage} />}
-          label={employedIn} />
-        <TagPill icon={<WorkIcon />} label={occupation} />
+        {employedIn && <TagPill icon={<Image source={require('../../assets/images/employe.png')} style={styles.tagPillImage} />}
+          label={employedIn} />}
+        {
+          occupation &&
+          <TagPill icon={<WorkIcon />} label={occupation} />
+        }
         <TagPill
           icon={<HomeWorkOutlineIcon />}
           label={organizationName || 'Not applicable'}

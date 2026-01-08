@@ -70,7 +70,6 @@ const EditEducationScreen = () => {
     annualIncomeId: '',
     occupationId: '',
     occupationName: '',
-    occupationCategoryName: '',
     occupationCategoryId: '',
   });
 
@@ -160,13 +159,12 @@ const EditEducationScreen = () => {
         collegeName: user.college_name || '',
         employmentTypeId: user.employmentTypeId || '1',
         companyTypeName: user.employmentType || '',
-        jobRoleName: user.occupationCategoryName || '',
+        jobRoleName: user.occupationCategoryName ? user.occupationCategoryName : user.occupation || '',
         companyName: user.companyName || '',
         salaryId: user.annualIncomeId || '',
         salaryName: user.annualIncome || '',
         annualIncome: user.annualIncome || '',
         annualIncomeId: user.annualIncomeId || '',
-        occupationCategoryName: user.occupationCategoryName || '',
         occupationCategoryId: user.occupationCategoryId || '',
       });
       dispatch(
@@ -196,7 +194,6 @@ const EditEducationScreen = () => {
         employmentTypeId: selectedCompanyType.id,
         companyTypeName: selectedCompanyType.name,
         jobRoleName: '',
-        occupationCategoryName:""
       }));
       dispatch(
         getOccupationsByEmploymentType(
@@ -216,12 +213,10 @@ const EditEducationScreen = () => {
       ...prev,
       jobRoleName: section?.title || '',
       occupationId: section?.id || '',
-      occupationCategoryName: category?.name || '',
       occupationCategoryId: category?.id || '',
     }));
     setShowJobRolePicker(false);
   }, []);
-  console.log(formData, 'formData.jobRoleName');
   // Handle salary selection
   const handleSalarySelection = useCallback((selectedSalary: any) => {
     setFormData(prev => ({
@@ -320,7 +315,7 @@ const EditEducationScreen = () => {
           <AppDropdown
             label=""
             selectedValue={
-              formData.occupationCategoryName || formData.jobRoleName
+               formData.jobRoleName
             }
             placeholder="Select Job Role"
             onPress={() => setShowJobRolePicker(true)}

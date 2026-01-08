@@ -226,9 +226,9 @@ const HomeScreen = () => {
           proposalUserId: currentUserId,
         }),
       ),
-      dispatch(
-        getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-      ),
+        dispatch(
+          getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+        ),
         dispatch(
           insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
             title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
@@ -242,7 +242,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      setActionInProgress(false); 
+      setActionInProgress(false);
     }
   };
 
@@ -638,7 +638,7 @@ const HomeScreen = () => {
         annualIncome={finalDetail?.annualIncome}
         partnerExpectation={finalDetail?.about_lifepartener}
         employedIn={finalDetail?.employmentType}
-        occupation={finalDetail?.occupationCategoryName}
+        occupation={finalDetail?.occupationCategoryName ? finalDetail?.occupationCategoryName : finalDetail?.occupation}
         organizationName={finalDetail?.companyName}
         settlingTime={finalDetail?.planingto_settle}
         highestQualification={finalDetail?.education}

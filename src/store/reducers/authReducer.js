@@ -70,59 +70,59 @@ const authReducer = createSlice({
     },
     getReligionDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.religion = action.payload.recordList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+      reducer.religion = action.payload.recordList.filter(item => item.isActive === 1).sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     },
     getCommunityDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.community = action.payload.recordList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));;
+      reducer.community = action.payload.recordList.filter(item => item.isActive === 1).sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));;
     },
     getStatesDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.states = action.payload.recordList;
+      reducer.states = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getCitiesDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.cities = action.payload.recordList;
+      reducer.cities = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getAllCitiesDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.allCities = action.payload.recordList;
+      reducer.allCities = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getMaritalStatusDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.maritalStatuses = action.payload.recordList;
+      reducer.maritalStatuses = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getEducationTypesDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.educationTypes = action.payload.recordList;
+      reducer.educationTypes = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getOccupationDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.occupations = action.payload.recordList;
+      reducer.occupations = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getIncomeDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.income = action.payload.recordList;
+      reducer.income = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getHeightDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.height = action.payload.recordList;
+      reducer.height = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getDietDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.diet = action.payload.recordList;
+      reducer.diet = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getEmploymentTypesDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.employmentTypes = action.payload.recordList;
+      reducer.employmentTypes = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getOccupationsByEmploymentTypeDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.occupationsByEmploymentType = action.payload.recordList;
+      reducer.occupationsByEmploymentType = action.payload.recordList.filter(item => item.isActive === 1);
     },
     getOccupationCategoriesByOccupationIdDataReceived: (reducer, action) => {
       reducer.loader = false;
-      reducer.occupationCategories = action.payload.recordList;
+      reducer.occupationCategories = action.payload.recordList.filter(item => item.isActive === 1);
     },
     completeUserProfileV2UpdatedDataReceived: (reducer, action) => {
       reducer.updatedUser = action.payload;
@@ -267,14 +267,14 @@ export const getIncome = url =>
     onSuccess: getIncomeDataReceived.type,
     onError: authReducerDataRequestFailed.type,
   });
-  export const getEmploymentTypes = url =>
-    apiCallBegan({
-      method: 'get',
-      url,
-      onStart: authReducerDataRequested.type,
-      onSuccess: getEmploymentTypesDataReceived.type,
-      onError: authReducerDataRequestFailed.type,
-    });
+export const getEmploymentTypes = url =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onStart: authReducerDataRequested.type,
+    onSuccess: getEmploymentTypesDataReceived.type,
+    onError: authReducerDataRequestFailed.type,
+  });
 export const getOccupationsByEmploymentType = url =>
   apiCallBegan({
     method: 'get',

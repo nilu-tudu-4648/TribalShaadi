@@ -72,6 +72,7 @@ const SelfieBottomSheet = ({
             (navigation as any).navigate(ROUTES.STACK, {
               screen: ROUTES.SELFIE_VERIFY,
             });
+            bottomSheetRef.current?.close();
           }}
           buttonStyle={[globalStyles.continueButton,{backgroundColor: COLORS.violet,bottom:0}]}
           textStyle={[globalStyles.continueButtonText,{color: COLORS.white}]}
