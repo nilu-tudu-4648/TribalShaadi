@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import React, { useRef } from 'react';
 import BottomSheet, {
   BottomSheetBackdrop,

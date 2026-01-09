@@ -59,7 +59,7 @@ function BottomNavigation() {
     (state: any) => state.entities.userReducer,
   );
   const { unreadChatHistory, newUserNumber } = useSelector((state: any) => state.entities.chatReducer);
-  console.log(unreadChatHistory, 'unreadChatHistory');
+
   const dispatch = useDispatch();
   return (
     <Tab.Navigator

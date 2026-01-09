@@ -202,44 +202,33 @@ const MainApp = () => {
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
-        const latestVersion = await VersionCheck.getLatestVersion({
+        const update = await VersionCheck.needUpdate({
           packageName: 'com.tribalshaadi',
-          ignoreErrors: true,
         });
-
-        const currentVersion = VersionCheck.getCurrentVersion();
-        console.log(latestVersion, currentVersion, "latestVersion, currentVersion");
-
-        // Compare versions as floats for cases like 1.9 < 1.12
-        const latest = parseFloat(latestVersion);
-        const current = parseFloat(currentVersion);
-
-        if (latest > current) {
+  
+        if (update?.isNeeded) {
           Alert.alert(
             'Update Required',
             'A new version of the app is available. Please update to continue using the app.',
             [
               {
                 text: 'Update Now',
-                onPress: async () => {
-                  const url = await VersionCheck.getPlayStoreUrl({ packageName: 'com.tribalshaadi' });
-                  Linking.openURL(url);
+                onPress: () => {
+                  Linking.openURL(update.storeUrl);
                 },
               },
             ],
             { cancelable: false }
           );
-        } else {
-          // App is up-to-date, proceed with the app
         }
-      } catch (error) {
-        // Handle error while checking app version
-        console.error('Error checking app version:', error);
+      } catch (e) {
+        console.log('Version check error:', e);
       }
     };
-
+  
     checkAppVersion();
   }, []);
+  
 
   if (showSplash || !isInitialized) {
     return <SplashScreen />;

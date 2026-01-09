@@ -52,7 +52,8 @@ const paymentReducer = createSlice({
     },
     paymentReducerPackageByUserIdReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      paymentReducer.packageByUserId = action.payload.recordList;
+      const filteredPackages = action.payload.recordList.filter(item => item.status === "Active");
+      paymentReducer.packageByUserId = filteredPackages.length > 0 ? filteredPackages : [];
     },
     paymentReducerCurrentUserPackageReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
