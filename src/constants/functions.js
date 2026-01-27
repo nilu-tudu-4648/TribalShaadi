@@ -882,7 +882,21 @@ export const verifySelfieApi = async (data, dispatch) => {
 export const onAppClose = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+    
+    // Check if user data exists before parsing
+    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
+      console.log('No user data available in onAppClose');
+      return;
+    }
+    
     const user = JSON.parse(userDataString);
+    
+    // Check if user object and id exist
+    if (!user || !user.id) {
+      console.log('Invalid user data in onAppClose');
+      return;
+    }
+    
     const requestBody = {
       id: user.id,
       middleName: 'offline',
@@ -901,7 +915,21 @@ export const onAppClose = async dispatch => {
 export const onAppForeground = async dispatch => {
   try {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
+    
+    // Check if user data exists before parsing
+    if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
+      console.log('No user data available in onAppForeground');
+      return;
+    }
+    
     const user = JSON.parse(userDataString);
+    
+    // Check if user object and id exist
+    if (!user || !user.id) {
+      console.log('Invalid user data in onAppForeground');
+      return;
+    }
+    
     const requestBody = {
       id: user.id,
       middleName: 'online',
@@ -909,7 +937,7 @@ export const onAppForeground = async dispatch => {
     // console.log('requestBody onAppForeground', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
-      getUserDetailsApi(`${getUserDetailsUrl}id=${user?.id}`, dispatch);
+      getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     });
   } catch (error) {
     console.error('onAppForeground error:', error);

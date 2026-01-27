@@ -49,6 +49,7 @@ import {
 import DeviceInfo from 'react-native-device-info';
 import AppSafeView from '../components/AppSafeView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NLogoComponent from '../components/NLogoComponent';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -260,10 +261,8 @@ const AccountScreen = () => {
             })}
           </View>
           <View style={styles.logoContainer}>
-            <Image
-              source={require('../assets/images/newlogo.png')}
-              style={styles.logo}
-            />
+          <NLogoComponent
+           width={200} height={25} />
             <AppText
               text={`Version ${DeviceInfo.getVersion()}`}
               textStyle={styles.logoutText}

@@ -28,6 +28,7 @@ import AppText from '../components/AppText';
 import ErrorBoundary from '../components/ErrorBoundary';
 import OnboardingButton from '../components/buttons/OnboardingButton';
 import { ROUTES } from '../constants/data';
+import NLogoComponent from '../components/NLogoComponent';
 
 type RootStackParamList = {
   Login: undefined;
@@ -69,7 +70,7 @@ const WelcomeScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Header */}
           <View style={styles.header}>
-            <Image source={require('../assets/images/nlogo.png')} style={styles.logo} />
+            <NLogoComponent width={260} height={30} />
           </View>
 
           {/* Profile Circle Section */}
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     paddingTop: Size16,
   },
   header: {
+    paddingTop: Size16*2,
     alignItems: 'center',
   },
   logo: {

@@ -683,7 +683,7 @@ const ConversationsScreen = () => {
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : Size20}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -710,6 +710,7 @@ const ConversationsScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.messagesContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
         >
           {chatData.map(renderMessage)}
         </ScrollView>
@@ -806,7 +807,8 @@ const styles = StyleSheet.create({
   messagesContent: {
     padding: Size16,
     gap: Size22,
-    paddingBottom: Size20,
+    paddingBottom: Size20 + Size40,
+    flexGrow: 1,
   },
   storyStarterContainer: {
     alignItems: 'center',
@@ -892,6 +894,12 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.borderLight2,
     gap: Size12,
     backgroundColor: COLORS.white,
+    minHeight: Size40 + Size40,
+    elevation: 8,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   textInputContainer: {
     flex: 1,

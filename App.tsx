@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar, View, Image, StyleSheet, AppState, Alert, Linking } from 'react-native';
+import LogoComponent from './src/components/LogoComponent';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -76,11 +77,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const SplashScreen = () => (
   <View style={styles.splashContainer}>
-    <Image
-      source={require('./src/assets/images/textlogo.png')}
-      style={styles.logo}
-      resizeMode="contain"
-    />
+    <LogoComponent width={200} height={200} />
   </View>
 );
 
@@ -357,7 +354,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.violet,
+    backgroundColor: COLORS.white,
   },
   logo: {
     width: 200,

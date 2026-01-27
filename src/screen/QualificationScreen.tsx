@@ -96,7 +96,7 @@ const QualificationScreen = () => {
       id: type.id,
       title: type.name,
       data: Array.isArray(type.educations)
-        ? type.educations.map((e: any) => ({
+        ? type.educations.filter((item :any)=> item.isActive === 1).map((e: any) => ({
             id: e.id,
             name: e.name,
             educationTypeId: type.id,
