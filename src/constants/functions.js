@@ -17,7 +17,6 @@ import { navigate } from '../navigation/NavigationRef';
 import { ROUTES } from './data';
 import {
   getPackageByUserIdApi,
-  setLoaderPayment,
   setSelfieVerify,
 } from '../store/reducers/paymentReducer';
 import { setUnreadChatHistory } from '../store/reducers/chatReducer';
@@ -37,7 +36,9 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const baseUrl = 'https://api.tribalshaadi.co.in/api';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
 export const getReligionUrl = 'admin/religion/getReligion';
@@ -303,7 +304,6 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
       await delay(500);
       try {
         const authResult = await checkAuth(dispatch);
-        console.log(authResult, 'authResult');
         // If profile is complete but checkAuth didn't navigate, navigate to main tabs
         if (authResult === true) {
           console.log(

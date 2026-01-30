@@ -48,6 +48,7 @@ import {
   updateChatIsReadUrl,
   baseUrl,
   insertUserNotificationsUrl,
+  apiUrl,
 } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
@@ -356,7 +357,7 @@ const ConversationsScreen = () => {
   // Initialize socket connection with fallback URLs
   const initializeSocket = useCallback(
     (attempt: number = 0) => {
-      const serverUrls = ['https://api.tribalshaadi.co.in'];
+      const serverUrls = [apiUrl];
 
       if (attempt >= serverUrls.length) {
         console.error('❌ All connection attempts failed');

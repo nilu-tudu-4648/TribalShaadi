@@ -74,7 +74,7 @@ export const insertUserNotificationsApi = (url, data = {}) =>
     method: 'post',
     url,
     data,
-    onStart: chatReducerDataRequestFailed.type,
+    onStart: chatReducerDataRequested.type,
     onSuccess: chatReducerInsertUserNotificationsReceived.type,
     onError: chatReducerDataRequestFailed.type,
   });

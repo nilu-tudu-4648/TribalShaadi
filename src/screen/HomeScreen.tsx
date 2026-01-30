@@ -331,10 +331,7 @@ const HomeScreen = () => {
       setMatchedUsers(filtered);
       setProcessedCount(0);
     } catch (e) {
-      // Log the error for debugging
-      if (__DEV__) {
-        console.error('fetchMatchedUsers error:', e);
-      }
+      console.log(e, 'error');
     }
   }, []);
   useEffect(() => {

@@ -82,7 +82,7 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       bottomSheetRef.current?.close();
     }
   };
-  console.log(selectedUser, 'selectedUser');
+  // console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet

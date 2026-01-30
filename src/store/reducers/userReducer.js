@@ -33,6 +33,7 @@ const userReducer = createSlice({
     },
     userReducerDataRequestFailed: (userReducer, action) => {
       userReducer.loader = false;
+      console.log(action.payload, 'action.payload');
       if (action.payload.message === 'No Matches Found') {
         userReducer.matchedUsers = [];
       }
@@ -156,7 +157,7 @@ export const sentProposalApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: sentProposalDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -166,7 +167,7 @@ export const getProposalsSendByMeApi = (url, data = {}) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setProposalsSendByMeDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -185,7 +186,7 @@ export const cancelProposalRequestApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setCancelProposalRequestDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -204,7 +205,7 @@ export const getCurrentMatchedApi = url =>
   apiCallBegan({
     method: 'get',
     url,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setCurrentMatchedDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -213,7 +214,7 @@ export const getCurrentMatchedUserGalleryImageListApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setCurrentMatchedUserGalleryImageList.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -222,7 +223,7 @@ export const getSelectedUserPackageApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setCurrentUserPackage.type,
     onError: userReducerDataRequestFailed.type,
   });
@@ -247,7 +248,7 @@ export const getGalleryImageListApi = (url, data) =>
     method: 'post',
     url,
     data,
-    onStart: userReducerDataRequestFailed.type,
+    onStart: userReducerDataRequested.type,
     onSuccess: setGalleryImageDataReceived.type,
     onError: userReducerDataRequestFailed.type,
   });
