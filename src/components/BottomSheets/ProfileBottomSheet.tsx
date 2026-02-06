@@ -153,7 +153,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
         bottomSheetRef={reportBottomSheetRef}
         onReport={(reportReason: string) => {
           console.log('Profile reported for:', reportReason);
-          // Add your report logic here
         }}
       />
     </>
@@ -165,7 +164,7 @@ export default React.memo(ProfileBottomSheet);
 const styles = StyleSheet.create({
   bottomSheetBackground: {
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius, // Larger radius for the top corners
+    borderRadius: SIZES.radius
   },
   profileImage: {
     width: '100%',
@@ -175,12 +174,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   handleIndicator: {
-    backgroundColor: COLORS.grey, // Style the grabber handle
+    backgroundColor: COLORS.grey, 
   },
   contentContainer: {
     flex: 1,
     gap: SIZES.base * 2,
-    // paddingHorizontal: SIZES.padding,
   },
   headerLabel: {
     fontSize: SIZES.font,

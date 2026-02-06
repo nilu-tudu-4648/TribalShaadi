@@ -61,7 +61,7 @@ export const getDietUrl = 'admin/diet/getDiet';
 export const uploadProfileImageUrl = 'app/users/updateUserProfilePic';
 export const addEditGalleryImageListUrl = 'app/users/addEditGalleryImageList';
 export const deleteUserUrl = 'admin/users/deleteUser';
-export const imageUrl = 'https://api.tribalshaadi.co.in/';
+export const imageUrl = apiUrl + '/';
 
 // Home Screen API
 export const getMatchedUsersUrl = 'app/users/getAllUsers';
@@ -511,8 +511,16 @@ export const checkAuth = async dispatch => {
     return false;
   }
 };
-export const logoutUser = async dispatch => {
+export const logoutUser = async (dispatch,userId) => {
   try {
+    if(userId){
+      dispatch(
+        completeUserProfileV2Updated(updateUrl, {
+          id: userId,
+          fcmToken:"null",
+        }),
+      );
+    }
     dispatch(setUserRegistrationCompleted(false));
     await AsyncStorage.removeItem(ASYNC_VARIBLES.USER);
     await AsyncStorage.removeItem(ASYNC_VARIBLES.USER_TOKEN);

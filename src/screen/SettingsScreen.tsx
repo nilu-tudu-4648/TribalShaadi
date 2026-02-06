@@ -27,7 +27,7 @@ const SettingsScreen = () => {
       return deleteUserApi(user.id, dispatch);
     }
     setIsLogoutDialogVisible(false);
-    logoutUser(dispatch);
+    logoutUser(dispatch,user?.id);
   };
   const navigation = useNavigation();
   const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
