@@ -330,17 +330,20 @@ export default function App() {
                 setIsReady();
               }}
             >
-              {/* <PostHogProvider
-                apiKey="phc_FZlVdA1quicCaena9xRegG6Xd7s6sEIC8jLLZ1LqmBy"
-                autocapture={false}
+              <PostHogProvider
+                apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
                 options={{ 
                   host: 'https://us.i.posthog.com'
                 }}
-              > */}
+                autocapture={{
+                  captureTouches: true,
+                  captureScreens:true,
+                }}
+              >
                 <ErrorBoundary>
                   <MainApp />
                 </ErrorBoundary>
-              {/* </PostHogProvider> */}
+              </PostHogProvider>
             </NavigationContainer>
           </SafeAreaProvider>
         </GestureHandlerRootView>

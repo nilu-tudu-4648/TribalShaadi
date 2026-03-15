@@ -265,7 +265,7 @@ export const sendOTPForLogin = async (url, data, setLoading) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
     console.log(response.data, 'response sendOTPForLogin');
-    AppToast(`${response.data.otp} is your OTP`);
+    // AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
     console.log(error.response.data, 'sendOTPForLogin');
@@ -975,4 +975,42 @@ export const navigateToLastScreen = async (navigation, ROUTES) => {
   } catch (error) {
     console.error('navigateToLastScreen error:', error);
   }
+};
+/**
+ * Returns true if the user has set at least one mandatory preference (marital status, age, religion, height)
+ * to something other than default/Any. Used to decide whether to show the preference prompt dialog.
+ */
+export const isPreferencesSetByUser = (user) => {
+  if (!user) return false;
+
+  const hasMarital =
+    user.pMaritalStatusId != null &&
+    user.pMaritalStatusId !== '' &&
+    user.pMaritalStatusId !== 'any' &&
+    (Array.isArray(user.pMaritalStatusId)
+      ? user.pMaritalStatusId.length > 0
+      : true);
+
+  const hasAge =
+    user.pFromAge != null &&
+    user.pToAge != null &&
+    user.pFromAge !== 'any' &&
+    user.pToAge !== 'any' &&
+    user.pFromAge !== '18' &&
+    user.pToAge !== '65';
+
+  const hasReligion =
+    user.pReligionId != null &&
+    user.pReligionId !== '' &&
+    user.pReligionId !== 'any';
+
+  const hasHeight =
+    user.pFromHeight != null &&
+    user.pToHeight != null &&
+    user.pFromHeight !== 'any' &&
+    user.pToHeight !== 'any' &&
+    user.pFromHeight !== '123' &&
+    user.pToHeight !== '214';
+
+  return hasMarital || hasAge || hasReligion || hasHeight;
 };

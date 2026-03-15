@@ -61,10 +61,19 @@ import {
 } from '../store/reducers/chatReducer';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES } from '../constants/data';
+import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES, ROUTES } from '../constants/data';
 import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
 import SelfieBottomSheet from '../components/BottomSheets/SelfieBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
+import NotificationEnableDialog from '../components/dialogs/NotificationEnableDialog';
+import {
+  checkNotificationPermission,
+  openAppSettings,
+  requestAndroidNotificationPermission,
+  requestUserPermission,
+} from '../notification/notifications';
+import PreferenceDialog from '../components/dialogs/PreferenceDialog';
+import { isPreferencesSetByUser } from '../constants/functions';
 
 // keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
@@ -92,6 +101,8 @@ const HomeScreen = () => {
   const latestMatchedUsersRef = useRef(matchedUsers);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
+  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
+  const [showPreferenceDialog, setShowPreferenceDialog] = useState(false);
   const nextVisualIndex = React.useMemo(() => {
     if (!matchedUsers || matchedUsers.length === 0) {
       return -1;
@@ -110,6 +121,17 @@ const HomeScreen = () => {
   };
   const openSelfie = () => {
     selfieBottomSheetRef?.current?.expand();
+  };
+
+  const handleEnableNotification = async () => {
+  try {
+    await requestAndroidNotificationPermission();
+    await requestUserPermission();
+    openAppSettings();
+    setShowNotificationDialog(false);
+  } catch (error) {
+    console.log(error,"error");
+  }
   };
   // double-buffered cards for seamless transitions
   const card1X = useSharedValue(0);
@@ -353,9 +375,21 @@ const HomeScreen = () => {
           ),
         );
       }
+      // Check notification permission and show dialog if not enabled
+      checkNotificationPermission().then((enabled) => {
+        if (!enabled) {
+          setShowNotificationDialog(true);
+        }
+      });
+      // Show preference dialog only when user has not set mandatory preferences; hide it when they have
+      if (isPreferencesSetByUser(user)) {
+        setShowPreferenceDialog(false);
+      } else {
+        setShowPreferenceDialog(true);
+      }
     });
     return unsubscribe;
-  }, [navigation, matchedUsers, currentIndex, dispatch]);
+  }, [navigation, matchedUsers, currentIndex, dispatch, user]);
   // Helper: fetch package silently
   const fetchPackageSilently = useCallback(
     async (userId: number) => {
@@ -734,6 +768,21 @@ const HomeScreen = () => {
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
+      <NotificationEnableDialog
+        isVisible={showNotificationDialog}
+        onDismiss={() => setShowNotificationDialog(false)}
+        onEnable={handleEnableNotification}
+      />
+      <PreferenceDialog
+        isVisible={showPreferenceDialog}
+        onDismiss={() => setShowPreferenceDialog(false)}
+        onSetPreference={() => {
+          setShowPreferenceDialog(false);
+          (navigation as any).navigate(ROUTES.STACK, {
+            screen: ROUTES.PREFERENCE,
+          });
+        }}
+      />
     </GestureHandlerRootView>
   );
 };

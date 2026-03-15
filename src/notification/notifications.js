@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl, delay, getProposalsGotByMeUrl, updateUrl } from '../constants/functions';
 import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES, ROUTES } from '../constants/data';
 import axios from 'axios';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform, Linking } from 'react-native';
 import { navigate } from '../navigation/NavigationRef';
 import { store } from '../store/configureStore';
 import { getProposalsGotByMeApi } from '../store/reducers/userReducer';
@@ -124,6 +124,41 @@ export const requestAndroidNotificationPermission = async () => {
       console.warn('Failed to request notification permission', err);
     }
   }
+};
+
+/**
+ * Check if notifications are enabled in system settings.
+ * Android 13+: checks POST_NOTIFICATIONS. iOS: checks Firebase messaging authorization.
+ */
+export const checkNotificationPermission = async () => {
+  if (Platform.OS === 'android') {
+    if (Platform.Version >= 33) {
+      try {
+        const granted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        return granted;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  }
+  // iOS: check via Firebase messaging
+  if (!isFirebaseReady()) return true;
+  try {
+    const hasPermission = await messaging().hasPermission();
+    return !!hasPermission;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Open app settings so user can enable notifications.
+ */
+export const openAppSettings = () => {
+  Linking.openSettings();
 };
 export const requestUserPermission = async () => {
   if (!isFirebaseReady()) {
@@ -587,4 +622,6 @@ export default {
   schedulePushNotification,
   configurePushNotification,
   refreshFCMToken,
+  checkNotificationPermission,
+  openAppSettings,
 };

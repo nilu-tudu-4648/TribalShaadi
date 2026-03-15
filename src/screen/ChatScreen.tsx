@@ -48,6 +48,7 @@ import {
   getSelectedUserPackageApi,
 } from '../store/reducers/userReducer';
 import { SIZES } from '../constants/Sizes';
+import DefenceBottomSheet from '../components/BottomSheets/DefenceBottomSheet';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -59,6 +60,7 @@ const ChatScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const profileBottomSheetRef = useRef<BottomSheet>(null);
+  const defenceBottomSheetRef = useRef<BottomSheet>(null);
   const { packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
@@ -90,6 +92,7 @@ const ChatScreen = () => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       profileBottomSheetRef.current?.close();
+      defenceBottomSheetRef.current?.close();
     });
 
     return unsubscribe;
@@ -266,12 +269,16 @@ const ChatScreen = () => {
           {/* Fixed Header */}
           <View style={styles.header}>
             <AppText text="Connections" textStyle={styles.headerTitle} />
+            <Pressable onPress={() => defenceBottomSheetRef.current?.snapToIndex(0)}>
+            <Image source={require('../assets/images/defence.png')} style={styles.icon} />
+            </Pressable>
           </View>
 
           {/* Fixed Conversations Section Header */}
           <View style={styles.conversationHeader}>
             <ConversationIcon width={24} height={24} color={COLORS.black} />
             <AppText text="Conversations" textStyle={styles.sectionTitle} />
+            <Image source={require('../assets/images/freechat.png')} style={[styles.icon,{width:70}]} />
           </View>
 
           {/* Scrollable Conversations List */}
@@ -303,6 +310,9 @@ const ChatScreen = () => {
           <Loader />
         </View>
       )}
+      <DefenceBottomSheet
+        bottomSheetRef={defenceBottomSheetRef}
+      />
     </>
   );
 };
@@ -316,12 +326,20 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingVertical: Size16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     fontSize: fontSize28,
     fontWeight: '800',
     color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BLACK,
+  },
+  icon: {
+    width: Size25 * 1.5,
+    height: Size25 * 1.5,
+    resizeMode: 'contain',
   },
   conversationsSection: {
     flex: 1,
