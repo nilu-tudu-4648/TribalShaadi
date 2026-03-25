@@ -727,7 +727,6 @@ const HomeScreen = () => {
                   buttonStyle={styles.declineButton}
                   textStyle={styles.declineButtonText}
                   isButtonDisabled={actionInProgress}
-                  pressable={true}
                 />
                 <AppButton
                   title="Connect"
@@ -739,7 +738,6 @@ const HomeScreen = () => {
                   buttonStyle={styles.connectButton}
                   textStyle={styles.connectButtonText}
                   isButtonDisabled={actionInProgress}
-                  pressable={true}
                 />
               </View>
             </>

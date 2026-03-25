@@ -700,8 +700,12 @@ const ConversationsScreen = () => {
               text={`${userDetails.firstName} ${userDetails.lastName ?? ''}`}
               textStyle={styles.headerTitle}
             />
+            <Image source={require('../assets/images/safechat.png')} style={{width: Size40*3, height: Size25/2}} />
           </View>
-          <View style={styles.headerSpacer} />
+          <View style={styles.headerIcons}>
+            <Image source={require('../assets/images/whatsapp.png')} style={styles.icon} />
+            <Image source={require('../assets/images/call.png')} style={styles.icon} />
+          </View>
         </View>
 
         {/* Messages */}
@@ -800,6 +804,15 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: fontSize30,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    gap: Size10,
+  },
+  icon: {
+    width: Size25,
+    height: Size25,
+    marginRight: Size10/2,
   },
   messagesContainer: {
     flex: 1,

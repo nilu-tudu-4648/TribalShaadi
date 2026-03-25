@@ -10,6 +10,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage
+import com.facebook.appevents.AppEventsLogger
 
 class MainApplication : Application(), ReactApplication {
 
@@ -35,6 +36,7 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    AppEventsLogger.activateApp(this)
     loadReactNative(this)
   }
 }

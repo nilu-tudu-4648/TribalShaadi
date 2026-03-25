@@ -2,15 +2,23 @@ import {
   StyleProp,
   StyleSheet,
   TextStyle,
-  TouchableOpacity,
   ViewStyle,
   Pressable,
 } from 'react-native';
-import React from 'react';
+import React, {useCallback} from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import AppText from './AppText';
 import GradientLoader from './GradientLoader';
-import { Size12, Size25, Size4 } from '../constants/Sizes';
-import { fontSize16 } from '../constants/Sizes';
+import {Size12, Size25, Size4} from '../constants/Sizes';
+import {fontSize16} from '../constants/Sizes';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const SPRING_CONFIG = {damping: 15, stiffness: 300};
 
 const AppButton = ({
   title,
@@ -20,7 +28,6 @@ const AppButton = ({
   textStyle,
   isLoading,
   loaderSize,
-  pressable = false,
 }: {
   title: string;
   onPress: () => void;
@@ -29,12 +36,27 @@ const AppButton = ({
   textStyle?: StyleProp<TextStyle>;
   isLoading?: boolean;
   loaderSize?: number;
-  pressable?: boolean;
 }) => {
-  return pressable ? (
-    <Pressable
-      style={[styles.button, buttonStyle]}
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{scale: scale.value}],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(0.95, SPRING_CONFIG);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, SPRING_CONFIG);
+  }, [scale]);
+
+  return (
+    <AnimatedPressable
+      style={[styles.button, buttonStyle, animatedStyle]}
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={isButtonDisabled || isLoading}
     >
       {isLoading ? (
@@ -42,20 +64,7 @@ const AppButton = ({
       ) : (
         <AppText text={title} textStyle={[styles.text, textStyle]} />
       )}
-    </Pressable>
-  ) : (
-    <TouchableOpacity
-      style={[styles.button, buttonStyle]}
-      onPress={onPress}
-      disabled={isButtonDisabled || isLoading}
-      activeOpacity={0.8}
-    >
-      {isLoading ? (
-        <GradientLoader size={loaderSize || Size25} />
-      ) : (
-        <AppText text={title} textStyle={[styles.text, textStyle]} />
-      )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 };
 

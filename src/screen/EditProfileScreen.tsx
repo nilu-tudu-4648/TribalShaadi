@@ -68,8 +68,6 @@ const EditProfileScreen = () => {
     {
       id: 1,
       title: 'Personal Details',
-      // description:
-      //   'Update your basic information that helps others understand who you are',
       icon: UserProfileIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -80,7 +78,6 @@ const EditProfileScreen = () => {
     {
       id: 2,
       title: "Lifestyle & Hometown",
-      // description: 'Define your lifestyle choices and where you are based',
       icon: SlidersIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -91,7 +88,6 @@ const EditProfileScreen = () => {
     {
       id: 3,
       title: 'Education & Career',
-      // description: 'Showcase your academic background and professional journey',
       icon: EducationIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -102,8 +98,6 @@ const EditProfileScreen = () => {
     {
       id: 4,
       title: 'Personality & Preferences',
-      // description:
-      //   'Share more about yourself, your values, and what you seek in a life partner',
       icon: PersonalityIcon,
       onPress: () => {
         (navigation.navigate as any)(ROUTES.STACK, {
@@ -199,6 +193,10 @@ const EditProfileScreen = () => {
                 />
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleImageUpload(1)}
+              style={styles.profileImageWrapper}
+            >
             <View style={styles.profileImage}>
               <View style={styles.profileImagePlaceholder}>
                 {galleryImageList && galleryImageList[0]?.imageUrl ? (
@@ -212,7 +210,11 @@ const EditProfileScreen = () => {
                 )}
               </View>
             </View>
-
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleImageUpload(2)}
+              style={styles.profileImageWrapper}
+            >
             <View style={styles.profileImage}>
               <View style={styles.profileImagePlaceholder}>
                 {galleryImageList && galleryImageList[1]?.imageUrl ? (
@@ -226,6 +228,7 @@ const EditProfileScreen = () => {
                 )}
               </View>
             </View>
+            </TouchableOpacity>
           </View>
           {/* Menu Items */}
           <View style={styles.menuContainer}>

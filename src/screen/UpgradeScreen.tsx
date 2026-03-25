@@ -34,7 +34,7 @@ import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
-import { InfinityIcon } from '../components/svg/SvgIcons2';
+import { BellIcon, InfinityIcon } from '../components/svg/SvgIcons2';
 import {
   generateRazorPayOrderIdUrl,
   getPackageByUserIdUrl,
@@ -72,12 +72,12 @@ const UpgradeScreen = () => {
   const dispatch = useDispatch();
   const features = [
     {
-      icon: <InfinityIcon color={COLORS.white} />,
-      title: 'Unlimited Chat Access',
-    },
-    {
       icon: <HeartIcon2 color={COLORS.white} />,
       title: 'See All Received Interests',
+    },
+    {
+      icon: <BellIcon color={COLORS.white} />,
+      title: 'Unlock all Connections',
     },
   ];
   const handlePlanSelect = (planId: number) => {
@@ -318,7 +318,7 @@ const UpgradeScreen = () => {
                       style={[
                         styles.pricingOption,
                         selectedPlan === option.packageId &&
-                          styles.selectedPricingOption,
+                        styles.selectedPricingOption,
                       ]}
                       onPress={() => handlePlanSelect(option.packageId)}
                     >
@@ -327,7 +327,7 @@ const UpgradeScreen = () => {
                           style={[
                             styles.radioButton,
                             selectedPlan === option.packageId &&
-                              styles.selectedRadioButton,
+                            styles.selectedRadioButton,
                           ]}
                         >
                           {selectedPlan === option.packageId && (
@@ -364,13 +364,11 @@ const UpgradeScreen = () => {
                 </View>
               </ScrollView>
               <AppLinearButton
-                title={`Get ${
-                  packageList.find((p: any) => p.packageId === selectedPlan)
+                title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
                     ?.title
-                } for ₹${
-                  packageList.find((p: any) => p.packageId === selectedPlan)
+                  } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
                     ?.price
-                }`}
+                  }`}
                 onPress={openRazorpayCheckout}
                 linearGradientColors={['#21BEFE', '#EE50C1']}
                 textStyle={styles.continueButtonText}
@@ -388,7 +386,7 @@ const UpgradeScreen = () => {
               endDate: packageByUserId[0].title,
             }}
             features={features}
-            endDateText={`Ends on ${new Date(packageByUserId[0].endDate).toLocaleDateString('en-GB', {day: '2-digit', month: 'long', year: 'numeric'})}`}
+            endDateText={`Ends on ${new Date(packageByUserId[0].endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`}
           />
         )}
       </AppSafeView>

@@ -86,22 +86,12 @@ const MathcingScreen = () => {
 
   return (
     <ImageBackground
-      source={require('../assets/images/Matchbanner.png')}
+      source={require('../assets/images/Matchbanner3.png')}
       style={styles.image}
     >
-      <View />
-      <View style={{ gap: Size25, alignItems: 'center' }}>
-        <Animated.View
-          style={[
-            {
-              opacity: textOpacity,
-              transform: [{ translateY: textTranslateY }],
-            },
-          ]}
-        >
-          <AppText text="Its Match" textStyle={styles.text} />
-        </Animated.View>
-
+      {/* <View /> */}
+      <View style={{ alignItems: 'center' }}>
+        <Image source={require('../assets/images/itsmatch.png')} style={styles.matchText} />
         <Animated.View
           style={[
             styles.matchContainer,
@@ -113,8 +103,8 @@ const MathcingScreen = () => {
         >
           <Image
             source={{ uri: `${imageUrl + acceptedUser.profileImage}` }}
+            // source={require('../assets/images/selfieImage.png')}
             style={styles.matchImage}
-            resizeMode="contain"
           />
         </Animated.View>
 
@@ -128,7 +118,6 @@ const MathcingScreen = () => {
           <AppButton
             title="Start Conversation"
             onPress={() => {
-              // Navigate back to the main tab navigator and then to Chat tab
               (navigation as any).navigate(ROUTES.MAIN_TABS, {
                 screen: ROUTES.CHAT,
               });
@@ -148,7 +137,7 @@ const MathcingScreen = () => {
         ]}
         onPress={() => {
           dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-  
+
           (navigation as any).navigate(ROUTES.MAIN_TABS, {
             screen: ROUTES.INTEREST,
           });
@@ -165,7 +154,6 @@ export default MathcingScreen;
 const styles = StyleSheet.create({
   image: {
     flex: 1,
-    resizeMode: 'cover',
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: COLORS.matchBg,
@@ -177,20 +165,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   matchContainer: {
-    width: SIZES.width * 0.6,
-    height: SIZES.height * 0.3,
-    borderRadius: SIZES.radius,
-    overflow: 'hidden',
-    backgroundColor: COLORS.transparent,
+    width: SIZES.width * .6,
+    height: SIZES.width * .6,
+    borderRadius: (SIZES.width * .6) / 2,
+    backgroundColor: COLORS.white,
+    padding: 6,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    marginBottom:Size25*2
   },
   matchImage: {
-    width: SIZES.width * 0.6,
+    width: '100%',
+    height: '100%',
+    borderRadius: (SIZES.width * .6 - 12) / 2,
+    resizeMode: 'cover',
+  },
+  matchText: {
+    width: SIZES.width ,
     height: SIZES.height * 0.3,
+    resizeMode: 'contain',
   },
   connectButton: {
     backgroundColor: COLORS.white,
     borderRadius: SIZES.radius,
     width: SIZES.width * 0.8,
+    // top:Size12
   },
   connectButtonText: {
     color: COLORS.black,

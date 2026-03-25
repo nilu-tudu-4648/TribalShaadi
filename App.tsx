@@ -51,6 +51,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import TermScreen from './src/screen/TermScreen';
 import PrivacyScreen from './src/screen/PrivacyScreen';
 import VersionCheck from 'react-native-version-check';
+import { initFacebook } from './src/utils/FacebookEvents';
 
 export type RootStackParamList = {
   [ROUTES.WELCOME]: undefined;
@@ -202,7 +203,7 @@ const MainApp = () => {
         const update = await VersionCheck.needUpdate({
           packageName: 'com.tribalshaadi',
         });
-  
+
         if (update?.isNeeded) {
           Alert.alert(
             'Update Required',
@@ -222,10 +223,10 @@ const MainApp = () => {
         console.log('Version check error:', e);
       }
     };
-  
+
     checkAppVersion();
   }, []);
-  
+
 
   if (showSplash || !isInitialized) {
     return <SplashScreen />;
@@ -312,6 +313,8 @@ const MainApp = () => {
     </>
   );
 };
+// Initialize once when JS bundle loads
+initFacebook();
 
 export default function App() {
   return (
@@ -332,12 +335,20 @@ export default function App() {
             >
               <PostHogProvider
                 apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
-                options={{ 
-                  host: 'https://us.i.posthog.com'
+                options={{
+                  host: 'https://us.i.posthog.com',
+                  enableSessionReplay: true,
+                  sessionReplayConfig: {
+                    maskAllTextInputs: true,
+                    maskAllImages: false,
+                    captureLog: true,
+                    captureNetworkTelemetry: true,
+                    androidDebouncerDelayMs: 1000,
+                  },
                 }}
                 autocapture={{
                   captureTouches: true,
-                  captureScreens:true,
+                  captureScreens: true,
                 }}
               >
                 <ErrorBoundary>
