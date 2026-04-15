@@ -3,7 +3,7 @@ import {
   View,
   TouchableOpacity,
   Modal,
-  ScrollView,
+  FlatList,
   StyleSheet,
   StyleProp,
   TextStyle,
@@ -53,13 +53,14 @@ const AppPickerModal: React.FC<AppPickerModalProps> = ({
             <AppText text={title} textStyle={[styles.modalTitle,modalTitleStyle]} />
             <View style={styles.modalButtonPlaceholder} />
           </View>
-          <ScrollView style={styles.modalList}>
-            {items.map(item => {
+          <FlatList
+            data={items}
+            keyExtractor={item => String(isObjects ? item.id : item)}
+            style={styles.modalList}
+            renderItem={({item}) => {
               const displayName = isObjects ? item[displayProperty] : item;
-              const itemKey = isObjects ? item.id : item;
               return (
                 <TouchableOpacity
-                  key={itemKey}
                   style={[
                     styles.modalItem,
                     selectedValue === displayName && styles.modalItemSelected,
@@ -79,8 +80,8 @@ const AppPickerModal: React.FC<AppPickerModalProps> = ({
                   />
                 </TouchableOpacity>
               );
-            })}
-          </ScrollView>
+            }}
+          />
         </View>
       </View>
     </Modal>
@@ -121,6 +122,7 @@ const styles = StyleSheet.create({
     width: lignHeight60,
   },
   modalList: {
+    // flex: 1,
     paddingHorizontal: Size20,
   },
   modalItem: {

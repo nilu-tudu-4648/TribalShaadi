@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Modal,
-  ScrollView,
+  SectionList,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -59,38 +59,41 @@ const AppSectionedPickerModal: React.FC<Props> = ({
             <View style={styles.modalButtonPlaceholder} />
           </View>
 
-          <ScrollView style={styles.modalList}>
-            {sections.map(section => (
-              <View key={section.id} style={styles.sectionContainer}>
+          <SectionList
+            sections={sections.map(s => ({...s, key: String(s.id)}))}
+            keyExtractor={item => String(item.id)}
+            style={styles.modalList}
+            renderSectionHeader={({section}) => (
+              <View style={styles.sectionContainer}>
                 <AppText text={section.title} textStyle={styles.sectionTitle} />
-                {section.data.map(item => {
-                  const isSelected = selectedItemId === item.id;
-                  return (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={styles.itemRow}
-                      onPress={() => {
-                        onSelect(item, section);
-                        onClose();
-                      }}
-                    >
-                      <View style={{ width: '90%' }}>
-                        <AppText text={item.name} textStyle={styles.itemText} />
-                      </View>
-                      <View
-                        style={[
-                          styles.radioOuter,
-                          isSelected && styles.radioOuterSelected,
-                        ]}
-                      >
-                        {isSelected && <View style={styles.radioInner} />}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
               </View>
-            ))}
-          </ScrollView>
+            )}
+            renderItem={({item, section}) => {
+              const isSelected = selectedItemId === item.id;
+              return (
+                <TouchableOpacity
+                  style={styles.itemRow}
+                  onPress={() => {
+                    onSelect(item, section);
+                    onClose();
+                  }}
+                >
+                  <View style={{width: '90%'}}>
+                    <AppText text={item.name} textStyle={styles.itemText} />
+                  </View>
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      isSelected && styles.radioOuterSelected,
+                    ]}
+                  >
+                    {isSelected && <View style={styles.radioInner} />}
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+            stickySectionHeadersEnabled={false}
+          />
         </View>
       </View>
     </Modal>
@@ -134,7 +137,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Size20,
   },
   sectionContainer: {
-    paddingVertical: Size12,
+    paddingTop: Size12,
+    backgroundColor: COLORS.white,
   },
   sectionTitle: {
     fontSize: fontSize16,

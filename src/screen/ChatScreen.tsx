@@ -17,6 +17,7 @@ import {
   Size4,
   fontSize12,
   fontSize24,
+  fontSize20,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import { ConversationIcon } from '../components/svg/SvgIcons2';
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
     left:10
   },
   userName: {
-    fontSize: fontSize16,
+    fontSize: fontSize20,
     fontWeight: '600',
     color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,

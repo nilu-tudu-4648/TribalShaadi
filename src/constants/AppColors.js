@@ -64,5 +64,7 @@ COLORS = {
   lightGrey:"#FBFBFB",
   lightGrey2:"#DCDCDC",
   chipBg:"#F6F6F6",
-  greyText3:"#8F8F8F"
+  greyText3:"#8F8F8F",
+  messageBubble:"#E3CCFF",
+  messageBubbleRecieved:"#EEEEEE"
 };

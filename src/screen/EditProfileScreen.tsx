@@ -41,6 +41,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getUserDetailsApi,
   getUserDetailsUrl,
+  getUserImageListApi,
   imageUrl,
   setReducerLoadingfalse,
   uploadImage,
@@ -124,34 +125,55 @@ const EditProfileScreen = () => {
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
         if (asset.uri && asset.base64) {
-          // Update the selected images first
           const newImages = [...selectedImages];
           newImages[index] = { uri: asset.uri, base64: asset.base64 };
           setSelectedImages(newImages);
           dispatch(setLoadingTrue(true));
-          // Upload the image immediately
           try {
-            let requestBody;
             setLoading(true);
             if (index === 0) {
-              // First image format
-              requestBody = {
+              const requestBody = {
                 id: user.id,
                 image: `data:image/jpeg;base64,${asset.base64}`,
               };
-              console.log(requestBody, 'requestBody for first image');
-              await uploadImage(requestBody, dispatch, true, setIsImageValid);
+              await uploadImage(
+                { ...requestBody, imageIndex: index },
+                dispatch,
+                true,
+                setIsImageValid,
+              );
               setReducerLoadingfalse(dispatch, () => {
                 getUserDetailsApi(
                   `${getUserDetailsUrl}id=${user.id}`,
                   dispatch,
                 );
               });
+            } else {
+              const galleryIndex = index - 1;
+              const requestBody: any = {
+                userId: user.id,
+                image: `data:image/jpeg;base64,${asset.base64}`,
+              };
+              if (galleryImageList?.[galleryIndex]?.id) {
+                requestBody.operationImageId = galleryImageList[galleryIndex].id;
+              }
+              await uploadImage(
+                { ...requestBody, imageIndex: index },
+                dispatch,
+                false,
+                setIsImageValid,
+              );
+              setReducerLoadingfalse(dispatch, () => {
+                getUserDetailsApi(
+                  `${getUserDetailsUrl}id=${user.id}`,
+                  dispatch,
+                );
+                getUserImageListApi(user.id, null);
+              });
             }
           } catch (error) {
             console.log('NETWORK ERROR:', error);
             AppToast('Failed to upload image. Please try again.');
-            // Remove the image from state if upload failed
             const failedImages = [...selectedImages];
             failedImages[index] = { uri: '', base64: '' };
             setSelectedImages(failedImages);

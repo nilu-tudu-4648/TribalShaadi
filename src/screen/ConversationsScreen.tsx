@@ -8,6 +8,7 @@ import {
   Image,
   Pressable,
   BackHandler,
+  Linking,
 } from 'react-native';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import AppSafeView from '../components/AppSafeView';
@@ -28,10 +29,10 @@ import {
   Size10,
   fontSize30,
   Size25,
-  Size14,
+  fontSize20,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
-import { ArrowIosBackSvg, SendIcon } from '../components/svg/SvgIcons2';
+import { SendIcon } from '../components/svg/SvgIcons2';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -141,6 +142,12 @@ const ConversationsScreen = () => {
     },
     [user.id, dispatch],
   );
+  const onPressWhatsapp = () => {
+    Linking.openURL(`https://wa.me/${userDetails.contactNo}`)
+  }
+  const onPressCall = () => {
+    Linking.openURL(`tel:${userDetails.contactNo}`)
+  }
 
   const loadChatMessages = useCallback(async () => {
     if (!user?.id || !userDetails?.friendId) {
@@ -622,12 +629,12 @@ const ConversationsScreen = () => {
       );
     }
 
-    if (item.type === 'received') {
+    if (item.type === "received") {
       return (
         <View key={item?.id} style={styles.messageContainer}>
-          <View style={styles.timeContainerEnd}>
+          {/* <View style={styles.timeContainerEnd}>
             <AppText text={item.time} textStyle={styles.timeText} />
-          </View>
+          </View> */}
           <View style={styles.receivedMessageBubble}>
             <AppText
               text={item.message}
@@ -641,6 +648,7 @@ const ConversationsScreen = () => {
     if (item.type === 'sent') {
       return (
         <View key={item?.id} style={styles.messageContainer}>
+         {(item.status === 'sending' || item.status === 'failed') && (
           <View style={styles.timeContainer}>
             <AppText
               text={
@@ -648,7 +656,7 @@ const ConversationsScreen = () => {
                   ? 'sending...'
                   : item.status === 'failed'
                   ? 'Failed'
-                  : item.time
+                  : ''
               }
               textStyle={[
                 styles.timeText,
@@ -656,6 +664,7 @@ const ConversationsScreen = () => {
               ]}
             />
           </View>
+        )}
           <View style={styles.sentMessageBubble}>
             <AppText text={item.message} textStyle={styles.sentMessageText} />
           </View>
@@ -688,23 +697,23 @@ const ConversationsScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={handleBack}>
-            <ArrowIosBackSvg
-              color={COLORS.black}
-              width={Size25}
-              height={Size25}
-            />
+          <Pressable onPress={handleBack}>
+            <Image source={require("../assets/images/back.png")} style={styles.backButton} />
           </Pressable>
           <View style={styles.headerCenter}>
             <AppText
               text={`${userDetails.firstName} ${userDetails.lastName ?? ''}`}
               textStyle={styles.headerTitle}
             />
-            <Image source={require('../assets/images/safechat.png')} style={{width: Size40*3, height: Size25/2}} />
+            <Image source={require('../assets/images/safechat.png')} style={{ width: Size40 * 3, height: Size25 / 2, top: 4 }} />
           </View>
           <View style={styles.headerIcons}>
-            <Image source={require('../assets/images/whatsapp.png')} style={styles.icon} />
-            <Image source={require('../assets/images/call.png')} style={styles.icon} />
+            <Pressable onPress={onPressWhatsapp}>
+              <Image source={require('../assets/images/whatsapp.png')} style={styles.icon} />
+            </Pressable>
+            <Pressable onPress={onPressCall}>
+              <Image source={require('../assets/images/call.png')} style={styles.icon} />
+            </Pressable>
           </View>
         </View>
 
@@ -725,8 +734,7 @@ const ConversationsScreen = () => {
           <View style={styles.textInputContainer}>
             <AppTextInput
               textInputStyle={styles.textInput}
-              placeholder="Type a message"
-              placeholderTextColor={COLORS.placeholderText}
+              placeholder=""
               value={messageText}
               onChangeText={text => {
                 // Prevent input if the text is only numbers
@@ -772,7 +780,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Size16,
     paddingVertical: Size12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight2,
@@ -780,15 +787,11 @@ const styles = StyleSheet.create({
   },
   backButton: {
     width: fontSize30,
-    height: fontSize30,
-    borderRadius: fontSize30 / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.black,
+    height: fontSize30 / 1.2,
+    resizeMode: "contain"
   },
   headerTitle: {
-    fontSize: fontSize16,
+    fontSize: fontSize20,
     fontWeight: '600',
     color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
@@ -812,7 +815,7 @@ const styles = StyleSheet.create({
   icon: {
     width: Size25,
     height: Size25,
-    marginRight: Size10/2,
+    marginRight: Size10 / 2,
   },
   messagesContainer: {
     flex: 1,
@@ -869,11 +872,11 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   receivedMessageBubble: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.messageBubbleRecieved,
     paddingHorizontal: Size16,
     paddingVertical: Size12,
-    borderRadius: Size10,
-    borderTopLeftRadius: Size4 / 2,
+    borderRadius: Size10 * 2,
+    borderBottomLeftRadius: Size4 / 2,
     maxWidth: '80%',
     alignSelf: 'flex-start',
     borderWidth: 1,
@@ -885,17 +888,17 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
   },
   sentMessageBubble: {
-    backgroundColor: COLORS.recivedBackground,
+    backgroundColor: COLORS.messageBubble,
     paddingHorizontal: Size16,
     paddingVertical: Size12,
-    borderRadius: Size10,
-    borderTopRightRadius: Size4 / 2,
+    borderRadius: Size10 * 2,
+    borderBottomRightRadius: Size4 / 2,
     maxWidth: '80%',
     alignSelf: 'flex-end',
   },
   sentMessageText: {
     fontSize: fontSize14,
-    color: COLORS.white,
+    color: COLORS.black,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
     lineHeight: 20,
   },
@@ -904,24 +907,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Size16,
     paddingVertical: Size12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderLight2,
     gap: Size12,
     backgroundColor: COLORS.white,
     minHeight: Size40 + Size40,
-    elevation: 8,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
   },
   textInputContainer: {
     flex: 1,
-    backgroundColor: COLORS.lightgrey,
     borderRadius: Size20,
     borderWidth: 1,
     borderColor: COLORS.violet,
-    paddingHorizontal: Size16,
+    paddingHorizontal: Size16/2,
     paddingVertical: Size10,
     height: Size40 + Size12,
     justifyContent: 'center',
@@ -936,6 +931,7 @@ const styles = StyleSheet.create({
     height: Size40,
     borderWidth: 0,
     borderBottomWidth: 0,
+    backgroundColor:COLORS.white
   },
   sendButton: {
     backgroundColor: COLORS.transparent,

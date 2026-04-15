@@ -298,12 +298,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     alignItems: 'center',
     gap: Sizes.Size16,
-    paddingTop: '100%',
   },
   profileContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: Sizes.Size8,
+    paddingTop:Sizes.Size16*3
   },
   profileImage: {
     width: 100,

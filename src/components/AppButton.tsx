@@ -4,6 +4,8 @@ import {
   TextStyle,
   ViewStyle,
   Pressable,
+  Platform,
+  Vibration,
 } from 'react-native';
 import React, {useCallback} from 'react';
 import Animated, {
@@ -20,6 +22,23 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const SPRING_CONFIG = {damping: 15, stiffness: 300};
 
+type AppButtonProps = {
+  title: string;
+  onPress: () => void;
+  isButtonDisabled?: boolean;
+  buttonStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  isLoading?: boolean;
+  loaderSize?: number;
+};
+
+const triggerAndroidPressFeedback = () => {
+  if (Platform.OS === 'android') {
+    // 50ms is more reliable; some devices ignore vibrations shorter than 40-50ms due to motor spin-up time
+    Vibration.vibrate(50);
+  }
+};
+
 const AppButton = ({
   title,
   onPress,
@@ -28,22 +47,14 @@ const AppButton = ({
   textStyle,
   isLoading,
   loaderSize,
-}: {
-  title: string;
-  onPress: () => void;
-  isButtonDisabled?: boolean;
-  buttonStyle?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  isLoading?: boolean;
-  loaderSize?: number;
-}) => {
+}: AppButtonProps) => {
   const scale = useSharedValue(1);
-
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{scale: scale.value}],
+    transform: [{ scale: scale.value }],
   }));
 
   const handlePressIn = useCallback(() => {
+    triggerAndroidPressFeedback();
     scale.value = withSpring(0.95, SPRING_CONFIG);
   }, [scale]);
 
@@ -55,6 +66,7 @@ const AppButton = ({
     <AnimatedPressable
       style={[styles.button, buttonStyle, animatedStyle]}
       onPress={onPress}
+      android_ripple={{ color: 'rgba(0,0,0,0.12)', borderless: false }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={isButtonDisabled || isLoading}

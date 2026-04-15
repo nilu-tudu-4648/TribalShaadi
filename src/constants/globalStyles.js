@@ -99,6 +99,7 @@ export const globalStyles = StyleSheet.create({
     height: inputHeight * 0.8,
     fontWeight: '500',
     fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
+    color: COLORS.black,
   },
   handleIndicator: {
     backgroundColor: COLORS.divider,
