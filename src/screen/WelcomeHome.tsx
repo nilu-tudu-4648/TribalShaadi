@@ -27,13 +27,32 @@ import {
 import { setUserRegistrationCompleted } from '../store/reducers/userReducer';
 import { ROUTES } from '../constants/data';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const WelcomeHome = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  console.log(user, 'user');
+  const posthog = usePostHog();
   const getUserDetails = async () => {
     try {
+      const distinctId = user?.id ? String(user.id) : undefined;
+      const name = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
+      const mobileNumber = user?.contactNo ?? user?.mobileNumber ?? user?.phoneNumber;
+
+      if (distinctId) {
+        posthog.identify(distinctId, {
+          name,
+          gender: user?.gender,
+          mobile_number: mobileNumber,
+          age:user?.age,
+          city:user.districtName,
+          tribe:user.community
+        });
+      }
+
+      posthog.capture('registration_completed');
       setIsLoading(true);
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     } catch (error) {

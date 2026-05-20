@@ -46,7 +46,7 @@ import { onAppClose, onAppForeground } from './src/constants/functions';
 import ForegroundHandler from './src/notification/ForegroundHandler';
 import NetworkAlert from './src/components/NetworkAlert';
 import RegisterScreen from './src/screen/RegisterScreen';
-import { PostHogProvider } from 'posthog-react-native';
+import { PostHogProvider, usePostHog } from 'posthog-react-native';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import TermScreen from './src/screen/TermScreen';
 import PrivacyScreen from './src/screen/PrivacyScreen';
@@ -96,6 +96,23 @@ const MainApp = () => {
       state?.entities?.userReducer || { userRegistrationCompleted: false },
   );
   const dispatch = useDispatch();
+  const posthog = usePostHog();
+
+  // Capture initial app open
+  useEffect(() => {
+    if (posthog) {
+      console.log('[PostHog] Capturing initial Application Opened');
+      posthog.capture('Application Opened', {
+        source: 'initial_app_launch',
+        timestamp: new Date().toISOString(),
+      });
+      // Flush to ensure event is sent immediately
+      posthog.flush();
+    } else {
+      console.log('[PostHog] PostHog not available yet');
+    }
+  }, [posthog]);
+
   // Initialize app with error handling
   useEffect(() => {
     const initializeApp = async () => {
@@ -182,6 +199,14 @@ const MainApp = () => {
             await onAppClose(dispatch);
           } else if (nextState === 'active') {
             await onAppForeground(dispatch);
+            if (posthog) {
+              console.log('[PostHog] Capturing Application Opened from background');
+              posthog.capture('Application Opened', {
+                source: 'app_foreground',
+                timestamp: new Date().toISOString(),
+              });
+              posthog.flush();
+            }
           }
         } catch (error) {
           console.error('Error in AppState change handler:', error);
@@ -196,7 +221,7 @@ const MainApp = () => {
         // no-op
       }
     };
-  }, [dispatch]);
+  }, [dispatch, posthog]);
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
@@ -338,6 +363,8 @@ export default function App() {
                 options={{
                   host: 'https://us.i.posthog.com',
                   enableSessionReplay: true,
+                  flushAt: 1,
+                  flushInterval: 0,
                   sessionReplayConfig: {
                     maskAllTextInputs: true,
                     maskAllImages: false,

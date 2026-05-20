@@ -38,6 +38,7 @@ import AppText from '../components/AppText';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 const BirthDateScreen = () => {
   const [dateOfBirth, setDateOfBirth] = useState(null as any);
   const [showPicker, setShowPicker] = useState(false);
@@ -48,6 +49,7 @@ const BirthDateScreen = () => {
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   // Function to calculate age and validate if user is 18+
   const validateAge = (selectedDate: Date) => {
     const today = new Date();
@@ -92,7 +94,7 @@ const BirthDateScreen = () => {
       AppToast('You must be at least 18 years old to continue.');
       return;
     }
-
+    posthog.capture('dob_selected')
     try {
       const requestBody = {
         id: user.id,

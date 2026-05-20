@@ -59,6 +59,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES } from '../constants/data';
 import axios from 'axios';
+import { usePostHog } from 'posthog-react-native';
 
 // Message type definitions
 interface Message {
@@ -82,6 +83,7 @@ const INITIAL_STORY_STARTER: Message = {
 
 const ConversationsScreen = () => {
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const [messageText, setMessageText] = useState('');
   const [chatData, setChatData] = useState<Message[]>([INITIAL_STORY_STARTER]);
   const { user } = useSelector((state: any) => state.entities.authReducer);
@@ -143,9 +145,11 @@ const ConversationsScreen = () => {
     [user.id, dispatch],
   );
   const onPressWhatsapp = () => {
+    posthog.capture('whatsapp_opened')
     Linking.openURL(`https://wa.me/${userDetails.contactNo}`)
   }
   const onPressCall = () => {
+    posthog.capture('call_started')
     Linking.openURL(`tel:${userDetails.contactNo}`)
   }
 
@@ -555,6 +559,7 @@ const ConversationsScreen = () => {
   };
 
   const handleSendMessage = () => {
+    posthog.capture('Chat_message_sent')
     if (!socket.current?.connected) {
       console.error('❌ Cannot send message: Not connected to server');
       return;

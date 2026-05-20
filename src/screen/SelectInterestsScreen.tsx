@@ -28,6 +28,7 @@ import { completeUserProfileV2Interests } from '../store/reducers/authReducer';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES, INTERESTS } from '../constants/data';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const SelectInterestsScreen = () => {
   const [selected, setSelected] = useState<string[]>([]);
@@ -37,6 +38,7 @@ const SelectInterestsScreen = () => {
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const toggleInterest = (item: string) => {
     if (selected.includes(item)) {
       setSelected(selected.filter(i => i !== item));
@@ -56,6 +58,7 @@ const SelectInterestsScreen = () => {
       .map(item => item.split(' ').slice(1).join(' '))
       .join(',');
     try {
+      posthog.capture('interests_selected')
       const requestBody = {
         id: user.id,
         intrests: selectedInterests,

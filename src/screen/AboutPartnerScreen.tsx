@@ -28,6 +28,7 @@ import AppToast from '../components/AppToast';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 interface Question {
   id: string;
@@ -53,6 +54,7 @@ const AboutPartnerScreen = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -74,6 +76,7 @@ const AboutPartnerScreen = () => {
     }
 
     try {
+      posthog.capture('values_selected')
       const requestBody = {
         id: user.id,
         about_lifepartener: answers.values,

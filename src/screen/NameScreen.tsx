@@ -28,12 +28,15 @@ import AppText from '../components/AppText';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const NameScreen = () => {
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
+
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const navigation = useNavigation<any>();
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -43,8 +46,9 @@ const NameScreen = () => {
   const validateAndSetName = (text: string) => {
     // Remove any numbers and special characters, keep only letters and spaces
     const filteredText = text.replace(/[^a-zA-Z\s]/g, '');
-    setFullName(filteredText);
+    setFirstName(filteredText);
   };
+  const [lastName, setLastName] = useState('');
   const [isValidEmail, setIsValidEmail] = useState(false);
 
   // Email validation regex
@@ -66,13 +70,14 @@ const NameScreen = () => {
 
   const handleConfirm = async () => {
     try {
-      if (!fullName.trim()) {
+      posthog.capture('name_entered')
+      if (!firstName.trim()) {
         AppToast('Please enter your full name');
         return;
       }
 
       // Validate that name contains only letters and spaces
-      if (!isValidName(fullName.trim())) {
+      if (!isValidName(firstName.trim())) {
         AppToast('Name should contain only letters and spaces');
         return;
       }
@@ -88,20 +93,15 @@ const NameScreen = () => {
         return;
       }
 
-      // Split full name into firstName and lastName
-      const nameParts = fullName.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-
-      if (!firstName) {
+      if (!firstName.trim()) {
         AppToast('Please enter at least a first name');
         return;
       }
       setLoading(true);
       const requestBody = {
         id: user.id,
-        firstName: firstName,
-        lastName: lastName,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: email.trim(),
       };
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
@@ -138,15 +138,26 @@ const NameScreen = () => {
             textStyle={globalStyles.subtitle}
             />
             </View>
-          {/* Text Input */}
+            <View style={styles.inputContainer}>
           <AppTextInput
             label={false}
-            placeholder="Full Name"
+            placeholder="First Name"
             placeholderTextColor={COLORS.placeholderText}
-            value={fullName}
+            value={firstName}
             onChangeText={validateAndSetName}
             keyboardType="default"
+            style={styles.inputField}
           />
+          <AppTextInput
+            label={false}
+            placeholder="Last Name"
+            placeholderTextColor={COLORS.placeholderText}
+            value={lastName}
+            onChangeText={setLastName}
+            keyboardType="default"
+            style={styles.inputField}
+          /> 
+          </View>
           <AppTextInput
             label={false}
             placeholder="Email"
@@ -200,6 +211,16 @@ const styles = StyleSheet.create({
     height: Size40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Size10,
+    width: '100%',
+  },
+  inputField: {
+    flex: 1,
   },
   backButtonText: {
     fontSize: fontSize24,

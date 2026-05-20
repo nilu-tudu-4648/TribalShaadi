@@ -46,6 +46,7 @@ import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const QualificationScreen = () => {
   const [selectedQualification, setSelectedQualification] = useState<any>(null);
@@ -78,6 +79,7 @@ const QualificationScreen = () => {
   } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const incomeList = income || [];
   useEffect(() => {
     dispatch(getEducationTypes(getEducationUrl));
@@ -156,7 +158,7 @@ const QualificationScreen = () => {
       AppToast('Please select all required fields');
       return false;
     }
-
+    posthog.capture('qualification_selected')
     setLoading(true);
 
     try {

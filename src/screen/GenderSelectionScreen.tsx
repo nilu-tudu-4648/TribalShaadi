@@ -31,6 +31,8 @@ import {
 import { ROUTES } from '../constants/data';
 import AppText from '../components/AppText';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
+
 const GenderSelectionScreen = () => {
   const { user, loader, userProfileGenderUpdated } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -38,6 +40,7 @@ const GenderSelectionScreen = () => {
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const handleSelect = (gender: string) => {
     setSelectedGender(gender);
   };
@@ -48,6 +51,7 @@ const GenderSelectionScreen = () => {
   }, [userProfileGenderUpdated, navigation]);
   const handleSubmit = async () => {
     try {
+      posthog.capture('gender_selected')
       if (!selectedGender) {
         AppToast('Please select a gender');
         return;

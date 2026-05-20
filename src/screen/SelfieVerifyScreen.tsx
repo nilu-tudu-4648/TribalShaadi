@@ -31,14 +31,17 @@ import GradientLoader from '../components/GradientLoader';
 import AppButton from '../components/AppButton';
 import { setSelfieVerify } from '../store/reducers/paymentReducer';
 import { delay } from '../constants/functions';
+import { usePostHog } from 'posthog-react-native';
 
 const SelfieVerifyScreen = () => {
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const { loader, selfieVerify } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
   const dispatch = useDispatch();
   const handleTakePhoto = () => {
+    posthog.capture('retry_verification');
     (navigation as any).navigate(ROUTES.STACK, {
       screen: ROUTES.CAMERA,
     });
@@ -48,6 +51,7 @@ const SelfieVerifyScreen = () => {
   };
 
   const handleMaybeLater = () => {
+    posthog.capture('discarded_verification');
     (navigation.navigate as any)(ROUTES.MAIN_TABS, {
       screen: ROUTES.ACCOUNT_TAB,
     });

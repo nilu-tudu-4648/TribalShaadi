@@ -57,6 +57,7 @@ import AppToast from '../components/AppToast';
 import RazorpayCheckout from 'react-native-razorpay';
 import Loader from '../components/loader/Loader';
 import PremiumCard from '../components/Cards/PremiumCard';
+import { usePostHog } from 'posthog-react-native';
 const UpgradeScreen = () => {
   const navigation = useNavigation();
   const {
@@ -70,6 +71,7 @@ const UpgradeScreen = () => {
   const [selectedPlan, setSelectedPlan] = useState(packageList[0]?.packageId);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const features = [
     {
       icon: <HeartIcon2 color={COLORS.white} />,
@@ -369,7 +371,11 @@ const UpgradeScreen = () => {
                   } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
                     ?.price
                   }`}
-                onPress={openRazorpayCheckout}
+                onPress={() => {
+                  posthog.capture('premium_plan_selected')
+                  openRazorpayCheckout();
+                }}
+           
                 linearGradientColors={['#21BEFE', '#EE50C1']}
                 textStyle={styles.continueButtonText}
               />

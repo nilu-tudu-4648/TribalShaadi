@@ -29,9 +29,11 @@ import {
 } from '../store/reducers/paymentReducer';
 import { ROUTES } from '../constants/data';
 import AppToast from '../components/AppToast';
+import { usePostHog } from 'posthog-react-native';
 
 const CameraScreen = () => {
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const base64Image = useRef<string | null>(null); // Store base64 image
@@ -101,6 +103,7 @@ const CameraScreen = () => {
     dispatch(setLoaderPayment(true));
     navigation.goBack();
     try {
+      posthog.capture('submitted_selfie')
       const requestBody = {
         userId: user.id,
         selfieBase64: `${base64Image.current}`,

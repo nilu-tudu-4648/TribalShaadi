@@ -49,6 +49,7 @@ import AppSafeView from '../components/AppSafeView';
 import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 import Loader from '../components/loader/Loader';
 import FONT_FAMILY from '../constants/Fonts';
+import { usePostHog } from 'posthog-react-native';
 
 const InterestScreen = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Set "Recent Passes" as default
@@ -59,6 +60,7 @@ const InterestScreen = () => {
   );
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const {
@@ -91,6 +93,7 @@ const InterestScreen = () => {
 
   const handleCardPress = async (id: string) => {
     try {
+      posthog.capture('Received_interest_opened')
       setIsLoading(true);
       dispatch(getSelectedUserApi(`${baseUrl}/${getSelectedUserUrl}?id=${id}`));
       dispatch(
@@ -116,6 +119,7 @@ const InterestScreen = () => {
   };
   const handleRejectProposal = async (id: string) => {
     try {
+      posthog.capture('interest_declined')
       setIsLoading(true);
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {
@@ -134,6 +138,7 @@ const InterestScreen = () => {
   const handleAcceptProposal = async (item: any) => {
     console.log('handleAcceptProposal', item.senderUserId);
     try {
+      posthog.capture('interest_accepted')
       setIsLoading(true);
       dispatch(
         acceptRejectProposalApi(`${baseUrl}/${acceptRejectProposalUrl}`, {

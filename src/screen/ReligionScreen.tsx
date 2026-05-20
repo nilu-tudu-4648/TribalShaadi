@@ -29,6 +29,7 @@ import AppToast from '../components/AppToast';
 import { MOTHER_TONGUE, ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const ReligionScreen = () => {
   const [selectedReligion, setSelectedReligion] = useState('');
@@ -48,6 +49,7 @@ const ReligionScreen = () => {
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   useEffect(() => {
     dispatch(getReligion(getReligionUrl));
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -89,7 +91,7 @@ const ReligionScreen = () => {
       AppToast('Please select all required fields');
       return;
     }
-
+    posthog.capture('religion_selected')
     try {
       const requestBody = {
         id: user.id,

@@ -34,7 +34,7 @@ import AppToast from '../components/AppToast';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../constants/data';
 import { globalStyles } from '../constants/globalStyles';
-
+import { usePostHog } from 'posthog-react-native';
 const AddressScreen = () => {
   const [selectedState, setSelectedState] = useState<any>(null);
   const [selectedCity, setSelectedCity] = useState<any>(null);
@@ -49,6 +49,7 @@ const AddressScreen = () => {
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   useEffect(() => {
     dispatch(getStates(getStatesUrl));
   }, [dispatch]);
@@ -108,7 +109,7 @@ const AddressScreen = () => {
       AppToast('Please select all required fields');
       return false;
     }
-
+    posthog.capture('hometown_selected')
     try {
       const requestBody = {
         id: user.id,

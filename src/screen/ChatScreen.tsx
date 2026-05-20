@@ -50,9 +50,10 @@ import {
 } from '../store/reducers/userReducer';
 import { SIZES } from '../constants/Sizes';
 import DefenceBottomSheet from '../components/BottomSheets/DefenceBottomSheet';
-
+import { usePostHog } from 'posthog-react-native';
 const ChatScreen = () => {
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const { loader, acceptedProposalById, unreadChatHistory } = useSelector(
     (state: any) => state.entities.chatReducer,
@@ -101,6 +102,7 @@ const ChatScreen = () => {
   const acceptFriendRequest = async (item: any) => {
     try {
       if (item.isNewStatus === 1) {
+        posthog.capture('chat_opened')
         await updateProposalIsNewApi(updateProposalIsNewUrl, {
           proposalId: item.friendId,
           isNew: false,

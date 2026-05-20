@@ -27,6 +27,7 @@ import {
 import { ROUTES } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const AboutScreen = () => {
   const [aboutText, setAboutText] = useState('');
@@ -36,6 +37,7 @@ const AboutScreen = () => {
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const MAX_WORDS = 35;
   // Count words in the text
   const getWordCount = (text: string) => {
@@ -54,8 +56,8 @@ const AboutScreen = () => {
       AppToast(`Please keep your description within ${MAX_WORDS} words`);
       return false;
     }
-
     try {
+      posthog.capture('bio_submitted')
       const requestBody = {
         aboutMe: aboutText,
       };

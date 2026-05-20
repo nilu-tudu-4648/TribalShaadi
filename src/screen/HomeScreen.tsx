@@ -74,9 +74,12 @@ import {
 } from '../notification/notifications';
 import PreferenceDialog from '../components/dialogs/PreferenceDialog';
 import { isPreferencesSetByUser } from '../constants/functions';
+import { usePostHog } from 'posthog-react-native';
 
 // keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
+
+  const posthog = usePostHog();
   const navigation = useNavigation();
   const { currentMatchedUser, currentMatchedUserGalleryImageList } =
     useSelector((state: any) => state.entities.userReducer);
@@ -228,7 +231,7 @@ const HomeScreen = () => {
   const handleSendProposal = async (id: string) => {
     try {
       setActionInProgress(true);
-
+      posthog.capture('Sent_Interest')
       if (!matchedUsers || matchedUsers.length === 0) {
         setActionInProgress(false);
         return;
@@ -721,8 +724,10 @@ const HomeScreen = () => {
               <View style={styles.floatingButtonContainer}>
                 <AppButton
                   title="Decline"
-                  onPress={() =>
+                  onPress={() =>{
                     handleCancelProposal(matchedUsers[currentIndex].id)
+                    posthog.capture('declined_match')
+                  }
                   }
                   buttonStyle={styles.declineButton}
                   textStyle={styles.declineButtonText}

@@ -32,6 +32,7 @@ import {
   validateIndianPhoneNumber,
 } from '../constants/functions';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 type RootStackParamList = {
   Login: undefined;
@@ -47,7 +48,7 @@ const LoginScreen: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const isIOS = Platform.OS === 'ios';
-
+  const posthog = usePostHog();
   // Memoize phone validation to avoid recalculating on every render
   const phoneValidation = useMemo(() => {
     return validateIndianPhoneNumber(phoneNumber);
@@ -63,8 +64,8 @@ const LoginScreen: React.FC = () => {
       AppToast(validation.message);
       return false;
     }
-
     try {
+      posthog.capture('otp_verify_tapped')
       setLoading(true);
       const requestBody: any = {
         contactNo: '+91' + validation.cleanedNumber,

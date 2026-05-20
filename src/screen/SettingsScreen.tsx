@@ -14,20 +14,24 @@ import { useNavigation } from '@react-navigation/native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import DeleteBottomSheet from '../components/BottomSheets/DeleteBottomSheet';
 import AccountBottomSheet from '../components/BottomSheets/AccountBottomSheet';
+import { usePostHog } from 'posthog-react-native';
 
 const SettingsScreen = () => {
   const dispatch = useDispatch();
-
+  const posthog = usePostHog();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const accountBottomSheetRef = useRef<BottomSheet | null>(null);
   const handleLogout = () => {
     if (isDeleteDialogVisible) {
+      posthog.capture('tap_delete_account');
+      setIsDeleteDialogVisible(false);
       return deleteUserApi(user.id, dispatch);
     }
+    posthog.capture('tap_logout_account');
     setIsLogoutDialogVisible(false);
-    logoutUser(dispatch,user?.id);
+    logoutUser(dispatch, user?.id);
   };
   const navigation = useNavigation();
   const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
@@ -45,7 +49,7 @@ const SettingsScreen = () => {
     deleteBottomSheetRef?.current?.expand();
   };
   const handleDelete = (reason: string) => {
-    console.log('reason', reason);
+   
   };
   const onDismiss = () => {
     setIsDeleteDialogVisible(false);

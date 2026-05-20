@@ -29,6 +29,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import OnboardingButton from '../components/buttons/OnboardingButton';
 import { ROUTES } from '../constants/data';
 import NLogoComponent from '../components/NLogoComponent';
+import { usePostHog } from 'posthog-react-native';
 
 type RootStackParamList = {
   Login: undefined;
@@ -42,6 +43,7 @@ type RootStackParamList = {
 const WelcomeScreen = () => {
   const [imageError, setImageError] = useState(false);
 
+  const posthog = usePostHog();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -54,6 +56,7 @@ const WelcomeScreen = () => {
   const handleNavigation = (route: 'Login' | 'Register') => {
     try {
       navigation.navigate(route);
+      posthog.capture(route==='Login'?'Login_button_tapped':'registration_started')
     } catch (error) {
       console.error(`Error navigating to ${route}:`, error);
     }

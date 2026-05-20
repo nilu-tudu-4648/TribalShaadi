@@ -49,6 +49,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ASYNC_VARIBLES, ROUTES } from '../constants/data';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const UploadImageScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
@@ -66,6 +67,7 @@ const UploadImageScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const posthog = usePostHog();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
@@ -170,6 +172,7 @@ const UploadImageScreen = () => {
   };
   const handleContinue = async () => {
     try {
+      posthog.capture('photos_uploaded')
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       await AsyncStorage.setItem(ASYNC_VARIBLES.ALL_IMAGES_UPLOADED, 'true');
     } catch (error) {

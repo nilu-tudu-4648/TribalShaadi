@@ -50,6 +50,7 @@ import DeviceInfo from 'react-native-device-info';
 import AppSafeView from '../components/AppSafeView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NLogoComponent from '../components/NLogoComponent';
+import { usePostHog } from 'posthog-react-native';
 
 type AccountScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, typeof ROUTES.ACCOUNT>,
@@ -103,6 +104,7 @@ const AccountScreen = () => {
     }
   };
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const profileBottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -216,6 +218,12 @@ const AccountScreen = () => {
                     navigation.navigate(ROUTES.STACK, {
                       screen: badge.route,
                     } as never);
+                    if (badge.route === ROUTES.SELFIE_VERIFY) {
+                      posthog.capture('selfie_verification_started')
+                    }
+                    if (badge.route === ROUTES.UPGRADE) {
+                      posthog.capture('upgrade_started')
+                    }
                   }}
                   disabled={!badge.route}
                 >

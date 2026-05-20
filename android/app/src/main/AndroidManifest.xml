@@ -5,6 +5,9 @@
     <!-- Remove READ_PHONE_STATE permission if added by dependencies -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
     
+    <!-- Required for advertising ID on Android 13+ (API 33) -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    
     <!-- Push notification permissions -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />

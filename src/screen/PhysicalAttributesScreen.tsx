@@ -34,6 +34,7 @@ import AppToast from '../components/AppToast';
 import { DRINKING_OPTIONS, ROUTES, SMOKING_OPTIONS } from '../constants/data';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../constants/globalStyles';
+import { usePostHog } from 'posthog-react-native';
 
 const PhysicalAttributesScreen = () => {
   const [selectedHeight, setSelectedHeight] = useState('');
@@ -46,6 +47,7 @@ const PhysicalAttributesScreen = () => {
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const posthog = usePostHog();
   const { user, loader, height, diet } = useSelector(
     (state: any) => state.entities.authReducer,
   );
@@ -69,6 +71,7 @@ const PhysicalAttributesScreen = () => {
       AppToast('Please select all required fields');
       return;
     }
+    posthog.capture('height_selected')
 
     try {
       const requestBody = {
