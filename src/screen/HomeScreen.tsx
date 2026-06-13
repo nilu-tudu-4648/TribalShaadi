@@ -1,4 +1,5 @@
 import { StyleSheet, View, Image, Dimensions } from 'react-native';
+import EmptyStateHomeScreen from '../assets/images/EmptyStateHomeScreen.svg';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Animated, {
   useSharedValue,
@@ -748,18 +749,7 @@ const HomeScreen = () => {
             </>
           ) : (
             <View style={styles.exhaustedContainer}>
-              <Image
-                source={require('../assets/images/ExhaustedImage.png')}
-                style={styles.exhaustedImage}
-              />
-              <AppText
-                text="All matches exhausted"
-                textStyle={styles.exhaustedTitle}
-              />
-              <AppText
-                text="Come back and check tomorrow for more matches"
-                textStyle={styles.exhaustedSubtitle}
-              />
+              <EmptyStateHomeScreen width={SIZES.width} height={SIZES.height * 0.75} />
             </View>
           )}
         </>
