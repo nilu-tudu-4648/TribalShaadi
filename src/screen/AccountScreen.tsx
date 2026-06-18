@@ -128,7 +128,7 @@ const AccountScreen = () => {
       label: 'Crown\nbadge',
       color:
         (packageByUserId && packageByUserId.length > 0) ||
-        user.gender === 'Female'
+        user?.gender === 'Female'
           ? '#FFD600'
           : COLORS.grey,
       icon: CrownIcon,
@@ -152,7 +152,7 @@ const AccountScreen = () => {
     {
       key: 'plan',
       label:
-        packageByUserId.length > 0 || user.gender === 'Female'
+        packageByUserId.length > 0 || user?.gender === 'Female'
           ? 'My Plan'
           : 'Upgrade',
       icon: RocketIcon,

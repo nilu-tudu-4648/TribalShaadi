@@ -35,7 +35,7 @@ const AppHeader = ({
     <View
       style={[
         styles.container,
-        { paddingHorizontal: rightButton ? Size10 : 0 },
+        { paddingRight: rightButton ? Size10 : 0 },
         style,
       ]}
     >

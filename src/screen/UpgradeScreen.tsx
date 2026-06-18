@@ -34,7 +34,7 @@ import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
 import AppSafeView from '../components/AppSafeView';
 import { ROUTES } from '../constants/data';
-import { BellIcon, InfinityIcon } from '../components/svg/SvgIcons2';
+import { BellIcon } from '../components/svg/SvgIcons2';
 import {
   generateRazorPayOrderIdUrl,
   getPackageByUserIdUrl,
@@ -314,7 +314,7 @@ const UpgradeScreen = () => {
             <View style={styles.bottomContainer}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.pricingContainer}>
-                  {packageList.map((option: any) => (
+                  {packageList.filter((option:any)=>option.isActive===1).map((option: any) => (
                     <TouchableOpacity
                       key={option.packageId}
                       style={[
@@ -364,6 +364,7 @@ const UpgradeScreen = () => {
                     </TouchableOpacity>
                   ))}
                 </View>
+              <Image source={require('../assets/images/lifetime.png')} style={styles.lifeTimeImage} />
               </ScrollView>
               <AppLinearButton
                 title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
@@ -592,5 +593,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
+  },
+  lifeTimeImage: {
+    width: '100%',
+    height: Size40 * 3,
+    top: Size40,
+    resizeMode: 'contain',
   },
 });

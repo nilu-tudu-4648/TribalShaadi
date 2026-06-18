@@ -4,10 +4,12 @@ import {
   Pressable,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AppSafeView from '../components/AppSafeView';
 import AppHeader from '../components/AppHeader';
 import AppText from '../components/AppText';
+import AppButton from '../components/AppButton';
 import { COLORS } from '../constants/AppColors';
 import * as Sizes from '../constants/Sizes';
 import { LightBulbIcon, RightArrowIcon } from '../components/svg/SvgIcons';
@@ -22,9 +24,35 @@ import {
   TermsIcon,
   WarningIcon,
 } from '../components/svg/SvgIcons2';
+import BottomSheet from '@gorhom/bottom-sheet';
+import DeleteBottomSheet from '../components/BottomSheets/DeleteBottomSheet';
+import LogoutDialog from '../components/dialogs/LogoutDialog';
+import { deleteUserApi } from '../constants/functions';
+import { usePostHog } from 'posthog-react-native';
 
 const HelpScreen = () => {
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch();
+  const posthog = usePostHog();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const deleteBottomSheetRef = useRef<BottomSheet | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      deleteBottomSheetRef.current?.close();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const handleDelete = (reason: string) => {};
+
+  const handleDeleteAccount = () => {
+    posthog.capture('tap_delete_account');
+    setIsDeleteDialogVisible(false);
+    deleteUserApi(user.id, dispatch);
+  };
   const menuItems = [
     {
       id: 'support',
@@ -88,7 +116,17 @@ const HelpScreen = () => {
 
   return (
     <AppSafeView style={styles.container}>
-      <AppHeader title="Help" />
+      <AppHeader
+        title="Help"
+        rightButton={
+          <AppButton
+            title="Delete"
+            onPress={() => deleteBottomSheetRef?.current?.expand()}
+            buttonStyle={styles.deleteButton}
+            textStyle={styles.deleteButtonText}
+          />
+        }
+      />
 
       <View style={styles.content}>
         {/* Menu Items */}
@@ -126,6 +164,19 @@ const HelpScreen = () => {
           />
         </View>
       </View>
+      <LogoutDialog
+        isVisible={isDeleteDialogVisible}
+        onDismiss={() => setIsDeleteDialogVisible(false)}
+        onLogout={handleDeleteAccount}
+        isDelete={true}
+      />
+      <DeleteBottomSheet
+        bottomSheetRef={deleteBottomSheetRef}
+        onReport={handleDelete}
+        onPressYes={() => {
+          setIsDeleteDialogVisible(true);
+        }}
+      />
     </AppSafeView>
   );
 };
@@ -140,6 +191,17 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  deleteButton: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.red,
+    borderRadius: Sizes.Size25,
+    paddingVertical: Sizes.Size8,
+    // width: Sizes.Size20,
+  },
+  deleteButtonText: {
+    color: COLORS.red,
   },
   menuContainer: {
     gap: Sizes.Size4,

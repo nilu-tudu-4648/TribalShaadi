@@ -724,7 +724,7 @@ const HomeScreen = () => {
               {/* Buttons */}
               <View style={styles.floatingButtonContainer}>
                 <AppButton
-                  title="Decline"
+                  title="Skip"
                   onPress={() =>{
                     handleCancelProposal(matchedUsers[currentIndex].id)
                     posthog.capture('declined_match')
@@ -735,7 +735,7 @@ const HomeScreen = () => {
                   isButtonDisabled={actionInProgress}
                 />
                 <AppButton
-                  title="Connect"
+                  title="Send Interest"
                   onPress={() =>
                     user.isVerified
                       ? handleSendProposal(matchedUsers[currentIndex].id)

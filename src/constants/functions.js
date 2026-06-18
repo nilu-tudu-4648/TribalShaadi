@@ -28,16 +28,16 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'birthDate', screen: ROUTES.BIRTH_DATE },
   { field: 'motherTongue', screen: ROUTES.RELIGION },
   { field: 'planingto_settle', screen: ROUTES.ADDRESS },
-  { field: 'occupationId', screen: ROUTES.QUALIFICATION },
+  // { field: 'occupationId', screen: ROUTES.QUALIFICATION },
   { field: 'smoking', screen: ROUTES.PHYSICAL_ATTRIBUTES },
-  { field: 'aboutMe', screen: ROUTES.ABOUT },
+  // { field: 'aboutMe', screen: ROUTES.ABOUT },
   { field: 'about_lifepartener', screen: ROUTES.ABOUT_PARTNER },
   { field: 'image', screen: ROUTES.UPLOAD_IMAGE },
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const apiUrl = 'https://api.tribalshaadi.co.in';
-// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';

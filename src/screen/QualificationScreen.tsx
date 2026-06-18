@@ -218,6 +218,10 @@ const QualificationScreen = () => {
         <View style={styles.content}>
           <HeaderBack
             onPress={() => navigateToLastScreen(navigation, ROUTES.ADDRESS)}
+            onSkip={() => {
+              posthog.capture('qualification_skipped');
+              navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES);
+            }}
           />
           {/* Highest Qualification Dropdown */}
           <View style={{ gap: Size8 }}>

@@ -72,7 +72,11 @@ const SelfieVerifyScreen = () => {
       ) : (
         <AppSafeView style={styles.container}>
           {!selfieVerify ? (
-            <View style={[styles.content, styles.unverifiedContent]}>
+            <ScrollView
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.unverifiedScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
               <View style={styles.unverifiedImageContainer}>
                 <Image
                   source={require('../assets/images/unverify.png')}
@@ -97,11 +101,17 @@ const SelfieVerifyScreen = () => {
                   </Pressable>
                 </View>
               </View>
-              <Image
-                source={require('../assets/images/keepinmind.png')}
-                style={styles.verifyImage}
-              />
-            </View>
+              <View style={styles.errorImagesContainer}>
+                <Image
+                  source={require('../assets/images/photoerror1.png')}
+                  style={styles.photoError1}
+                />
+                <Image
+                  source={require('../assets/images/photoerror2.png')}
+                  style={styles.photoError2}
+                />
+              </View>
+            </ScrollView>
           ) : (
             <ScrollView 
               style={styles.scrollContainer}
@@ -302,16 +312,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SIZES.padding,
   },
-  unverifiedContent: {
+  unverifiedScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: lignHeight24,
+    paddingTop: lignHeight24,
+    paddingBottom: lignHeight24,
     justifyContent: 'space-between',
-    paddingVertical: lignHeight72,
+    gap: Size20,
   },
   unverifiedImageContainer: {
-    gap: Size20 * 3,
+    gap: Size20 * 1.5,
     alignItems: 'center',
+    paddingTop:lignHeight24*3
   },
   unverifiedImageHeight: {
-    height: '20%',
+    height: 120,
   },
   buttonContainer: {
     justifyContent: 'center',
@@ -320,5 +335,22 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginBottom: Size20,
+  },
+  errorImagesContainer: {
+    width: '100%',
+    gap: Size12,
+    alignItems: 'center',
+  },
+  photoError1: {
+    width: screenWidth('100%'),
+    height: 60,
+    resizeMode: 'contain',
+    alignSelf: 'flex-end',
+  },
+  photoError2: {
+    width: screenWidth('85%'),
+    height: 70,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
 });
