@@ -36,7 +36,6 @@ import {
   getPackageListUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
-import AppText from '../components/AppText';
 import ProfileCardShimmer from '../components/ProfileCardShimmer';
 import {
   cancelProposalRequestApi,
@@ -55,7 +54,7 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import { getCurrentUserPackageApi, getPackageListApi } from '../store/reducers/paymentReducer';
+import { getCurrentUserPackageApi, getPackageByUserIdApi, getPackageListApi } from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
@@ -65,6 +64,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ASYNC_VARIBLES, NOTIFICATION_MESSAGES, ROUTES } from '../constants/data';
 import ReportBottomSheet from '../components/BottomSheets/ReportBottomSheet';
 import SelfieBottomSheet from '../components/BottomSheets/SelfieBottomSheet';
+import TwoConnectsBottomSheet from '../components/BottomSheets/TwoConnectsBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
 import NotificationEnableDialog from '../components/dialogs/NotificationEnableDialog';
 import {
@@ -77,19 +77,17 @@ import PreferenceDialog from '../components/dialogs/PreferenceDialog';
 import { isPreferencesSetByUser } from '../constants/functions';
 import { usePostHog } from 'posthog-react-native';
 
-// keep for reference: full-screen card uses width/height percentages
 const HomeScreen = () => {
-
   const posthog = usePostHog();
   const navigation = useNavigation();
-  const { currentMatchedUser, currentMatchedUserGalleryImageList } =
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: any) => state.entities.authReducer);
+  const { currentMatchedUser, currentMatchedUserGalleryImageList, proposalsSendByMe } =
     useSelector((state: any) => state.entities.userReducer);
-  const { currentUserPackage } = useSelector(
+  const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
+  const { currentUserPackage, packageByUserId } = useSelector(
     (state: any) => state.entities.paymentReducer,
   );
-  const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
-  const { user } = useSelector((state: any) => state.entities.authReducer);
-  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
@@ -105,6 +103,7 @@ const HomeScreen = () => {
   const latestMatchedUsersRef = useRef(matchedUsers);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
+  const twoConnectsBottomSheetRef = useRef<BottomSheet | null>(null);
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [showPreferenceDialog, setShowPreferenceDialog] = useState(false);
   const nextVisualIndex = React.useMemo(() => {
@@ -128,14 +127,14 @@ const HomeScreen = () => {
   };
 
   const handleEnableNotification = async () => {
-  try {
-    await requestAndroidNotificationPermission();
-    await requestUserPermission();
-    openAppSettings();
-    setShowNotificationDialog(false);
-  } catch (error) {
-    console.log(error,"error");
-  }
+    try {
+      await requestAndroidNotificationPermission();
+      await requestUserPermission();
+      openAppSettings();
+      setShowNotificationDialog(false);
+    } catch (error) {
+      console.log(error, "error");
+    }
   };
   // double-buffered cards for seamless transitions
   const card1X = useSharedValue(0);
@@ -228,47 +227,53 @@ const HomeScreen = () => {
       );
     }
   };
-
   const handleSendProposal = async (id: string) => {
-    try {
-      setActionInProgress(true);
-      posthog.capture('Sent_Interest')
-      if (!matchedUsers || matchedUsers.length === 0) {
-        setActionInProgress(false);
-        return;
-      }
+    const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
+    const isFemale = user?.gender === 'Female';
+    if (proposalsSendByMe?.length >= 2 && !hasActivePlan && !isFemale) {
+      twoConnectsBottomSheetRef?.current?.expand();
+    }
+    else {
+      try {
+        setActionInProgress(true);
+        posthog.capture('Sent_Interest')
+        if (!matchedUsers || matchedUsers.length === 0) {
+          setActionInProgress(false);
+          return;
+        }
 
-      const currentUserId =
-        matchedUsers && matchedUsers[currentIndex]
-          ? matchedUsers[currentIndex].id
-          : id;
-      if (!currentUserId) {
-        setActionInProgress(false);
-        return;
-      }
+        const currentUserId =
+          matchedUsers && matchedUsers[currentIndex]
+            ? matchedUsers[currentIndex].id
+            : id;
+        if (!currentUserId) {
+          setActionInProgress(false);
+          return;
+        }
 
-      dispatch(
-        sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
-          proposalUserId: currentUserId,
-        }),
-      ),
         dispatch(
-          getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-        ),
-        dispatch(
-          insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-            title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
-            message: `${user.firstName} ${user.lastName ?? ''} ${NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
-              }`,
-            receiverUserId: currentUserId,
+          sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+            proposalUserId: currentUserId,
           }),
-        )
-      startTransition('left');
-      setProcessedCount(prev => prev + 1);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setActionInProgress(false);
+        ),
+          dispatch(
+            getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+          ),
+          dispatch(
+            insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
+              title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
+              message: `${user.firstName} ${user.lastName ?? ''} ${NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+                }`,
+              receiverUserId: currentUserId,
+            }),
+          )
+        startTransition('left');
+        setProcessedCount(prev => prev + 1);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setActionInProgress(false);
+      }
     }
   };
 
@@ -356,6 +361,7 @@ const HomeScreen = () => {
 
       setMatchedUsers(filtered);
       setProcessedCount(0);
+      dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     } catch (e) {
       console.log(e, 'error');
     }
@@ -424,6 +430,9 @@ const HomeScreen = () => {
     dispatch(getDiet(getDietUrl));
     dispatch(getStates(getStatesUrl));
     dispatch(getPackageListApi(getPackageListUrl));
+    if (user?.id) {
+      dispatch(getPackageByUserIdApi(`${baseUrl}/${getPackageByUserIdUrl}`, { userId: user.id }));
+    }
   }, [dispatch]);
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -657,7 +666,13 @@ const HomeScreen = () => {
       <ProfileCard
         name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
         isNameLoading={false}
+        freeConnect={
+          Array.isArray(packageByUserId) && packageByUserId.length === 0
+            ? `${Math.min(proposalsSendByMe?.length ?? 0, 2)}/2`
+            : ''
+        }
         age={finalDetail?.age}
+        gender={finalDetail?.gender}
         height={finalDetail?.height}
         religion={finalDetail?.religion}
         caste={finalDetail?.community}
@@ -725,7 +740,7 @@ const HomeScreen = () => {
               <View style={styles.floatingButtonContainer}>
                 <AppButton
                   title="Skip"
-                  onPress={() =>{
+                  onPress={() => {
                     handleCancelProposal(matchedUsers[currentIndex].id)
                     posthog.capture('declined_match')
                   }
@@ -737,7 +752,7 @@ const HomeScreen = () => {
                 <AppButton
                   title="Send Interest"
                   onPress={() =>
-                    user.isVerified
+                    !user.isVerified
                       ? handleSendProposal(matchedUsers[currentIndex].id)
                       : openSelfie()
                   }
@@ -761,6 +776,7 @@ const HomeScreen = () => {
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
+      <TwoConnectsBottomSheet bottomSheetRef={twoConnectsBottomSheetRef} />
       <NotificationEnableDialog
         isVisible={showNotificationDialog}
         onDismiss={() => setShowNotificationDialog(false)}

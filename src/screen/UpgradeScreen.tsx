@@ -29,6 +29,7 @@ import {
   Size10,
   fontSize20,
   fontWeight500,
+  fontWeight700,
 } from '../constants/Sizes';
 import FONT_FAMILY from '../constants/Fonts';
 import AppLinearButton from '../components/AppLinearButton';
@@ -314,7 +315,7 @@ const UpgradeScreen = () => {
             <View style={styles.bottomContainer}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.pricingContainer}>
-                  {packageList.filter((option:any)=>option.isActive===1).map((option: any) => (
+                  {packageList.filter((option: any) => option.isActive === 1).map((option: any) => (
                     <TouchableOpacity
                       key={option.packageId}
                       style={[
@@ -341,6 +342,12 @@ const UpgradeScreen = () => {
                             text={`${option.title}`}
                             textStyle={styles.pricingDuration}
                           />
+                          <View style={{ backgroundColor: "#34C759", paddingHorizontal: Size4 * 1.4, paddingVertical: Size4 / 2, borderRadius: Size4 }}>
+                            <AppText
+                              text={`${option.tag || ''}`}
+                              textStyle={styles.pricingSubtext}
+                            />
+                          </View>
                           {option.badge && (
                             <View style={styles.badgeContainer}>
                               <AppText
@@ -356,19 +363,16 @@ const UpgradeScreen = () => {
                           text={`₹${option.price}`}
                           textStyle={styles.pricingPrice}
                         />
-                        <AppText
-                          text={`${option.tag || ''}`}
-                          textStyle={styles.pricingSubtext}
-                        />
+
                       </View>
                     </TouchableOpacity>
                   ))}
                 </View>
-              <Image source={require('../assets/images/lifetime.png')} style={styles.lifeTimeImage} />
+                <Image source={require('../assets/images/lifetime.png')} style={styles.lifeTimeImage} />
               </ScrollView>
               <AppLinearButton
                 title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
-                    ?.title
+                  ?.title
                   } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
                     ?.price
                   }`}
@@ -376,7 +380,7 @@ const UpgradeScreen = () => {
                   posthog.capture('premium_plan_selected')
                   openRazorpayCheckout();
                 }}
-           
+
                 linearGradientColors={['#21BEFE', '#EE50C1']}
                 textStyle={styles.continueButtonText}
               />
@@ -507,7 +511,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: Size12,
     padding: Size10,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: COLORS.borderLight,
   },
   selectedPricingOption: {
@@ -546,7 +550,7 @@ const styles = StyleSheet.create({
   },
   pricingSubtext: {
     fontSize: fontSize14,
-    color: COLORS.black,
+    color: COLORS.white,
   },
   pricingRight: {
     alignItems: 'flex-end',
@@ -575,6 +579,8 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: fontSize18,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
+    fontStyle:'italic',
+    fontWeight:fontWeight700,
   },
   disclaimerText: {
     textAlign: 'center',

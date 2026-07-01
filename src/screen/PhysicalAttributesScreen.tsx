@@ -88,7 +88,7 @@ const PhysicalAttributesScreen = () => {
     } catch (error) {
       console.error('Error submitting physical attributes:', error);
     } finally {
-      navigateToLastScreen(navigation, ROUTES.ABOUT);
+      navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER);
     }
   };
 

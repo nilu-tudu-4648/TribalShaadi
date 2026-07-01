@@ -47,6 +47,7 @@ import AppButton from '../AppButton';
 export interface ProfileCardProps {
   name: string;
   age: number;
+  gender: string;
   height: string;
   religion: string;
   caste: string;
@@ -79,11 +80,13 @@ export interface ProfileCardProps {
   report?: boolean;
   isButtonVisible?: boolean;
   handleSendProposal?: any;
+  freeConnect: string;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
   name,
   age,
+  gender,
   height,
   religion,
   caste,
@@ -115,6 +118,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   report = true,
   isButtonVisible = false,
   handleSendProposal,
+  freeConnect,
 }) => {
   return (
     <ScrollView
@@ -139,6 +143,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             style={styles.imageOverlay}
           />
           <NameComponent
+            freeConnect={gender !== 'Male' ? freeConnect : ''}
             name={name}
             age={age}
             isVerified={isVerified}
@@ -153,9 +158,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </ImageBackground>
       </View>
       <View style={styles.bioSection}>
-        <View style={styles.horizontalLine} />
-        <AppText text={bio} textStyle={styles.bio} />
-        <View style={styles.horizontalLine} />
+        {/* <View style={styles.horizontalLine} /> */}
+        {
+          bio &&
+          <AppText text={bio} textStyle={styles.bio} />
+        }
+        {/* <View style={styles.horizontalLine} /> */}
         <View style={styles.horizontalLine} />
         <View style={styles.detailRow}>
           <TagPill icon={<Image source={require('../../assets/images/pray.png')} style={styles.tagPillImage} />}
@@ -182,14 +190,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           onError={(error) => console.log('Image 0 load error:', error)}
         />
       )}
-      <View style={styles.horizontalLine} />
-      <View style={styles.section}>
-        <AppText text="Education" textStyle={styles.sectionTitle} />
-        {highestQualification &&
-          <TagPill icon={<DegreeIcon />} label={highestQualification} />
-        }
-        {college && <TagPill icon={<EducationIcon2 />} label={college} />}
-      </View>
+      {/* <View style={styles.horizontalLine} /> */}
+      {highestQualification &&
+        <View style={styles.section}>
+          <>
+            <AppText text="Education" textStyle={styles.sectionTitle} />
+            <TagPill icon={<DegreeIcon />} label={highestQualification} />
+          </>
+          {college && <TagPill icon={<EducationIcon2 />} label={college} />}
+        </View>
+      }
       <View style={styles.section}>
         <AppText text="Career" textStyle={styles.sectionTitle} />
         {employedIn && <TagPill icon={<Image source={require('../../assets/images/employe.png')} style={styles.tagPillImage} />}

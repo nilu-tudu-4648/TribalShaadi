@@ -352,37 +352,37 @@ export default function App() {
               backgroundColor={COLORS.white}
               translucent={false}
             />
-            <NavigationContainer
-              ref={navigationRef}
-              onReady={() => {
-                setIsReady();
+            <PostHogProvider
+              apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
+              options={{
+                host: 'https://us.i.posthog.com',
+                enableSessionReplay: true,
+                flushAt: 1,
+                flushInterval: 0,
+                sessionReplayConfig: {
+                  maskAllTextInputs: true,
+                  maskAllImages: false,
+                  captureLog: true,
+                  captureNetworkTelemetry: true,
+                  androidDebouncerDelayMs: 1000,
+                },
+              }}
+              autocapture={{
+                captureTouches: true,
+                captureScreens: true,
               }}
             >
-              <PostHogProvider
-                apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
-                options={{
-                  host: 'https://us.i.posthog.com',
-                  enableSessionReplay: true,
-                  flushAt: 1,
-                  flushInterval: 0,
-                  sessionReplayConfig: {
-                    maskAllTextInputs: true,
-                    maskAllImages: false,
-                    captureLog: true,
-                    captureNetworkTelemetry: true,
-                    androidDebouncerDelayMs: 1000,
-                  },
-                }}
-                autocapture={{
-                  captureTouches: true,
-                  captureScreens: true,
+              <NavigationContainer
+                ref={navigationRef}
+                onReady={() => {
+                  setIsReady();
                 }}
               >
                 <ErrorBoundary>
                   <MainApp />
                 </ErrorBoundary>
-              </PostHogProvider>
             </NavigationContainer>
+            </PostHogProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </Provider>

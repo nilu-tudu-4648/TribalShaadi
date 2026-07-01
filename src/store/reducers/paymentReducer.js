@@ -22,7 +22,7 @@ const paymentReducer = createSlice({
     },
     paymentReducerDataReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      paymentReducer.packageList = action.payload.recordList;
+      paymentReducer.packageList = action.payload.recordList.filter(item => item.isActive===1);
     },
     paymentReducerDataRequestFailed: (paymentReducer, action) => {
       paymentReducer.loader = false;
@@ -47,7 +47,6 @@ const paymentReducer = createSlice({
     },
     paymentReducerSavePremiumAccountReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      console.log(action.payload, 'reducer save premium account');
       paymentReducer.savePremiumAccount = action.payload.recordList;
     },
     paymentReducerPackageByUserIdReceived: (paymentReducer, action) => {

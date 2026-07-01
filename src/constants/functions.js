@@ -304,12 +304,12 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
       await delay(500);
       try {
         const authResult = await checkAuth(dispatch);
-        // If profile is complete but checkAuth didn't navigate, navigate to main tabs
         if (authResult === true) {
           console.log(
             'Navigating to main tabs after successful OTP verification',
           );
-          navigate(ROUTES.MAIN_TABS);
+          // Only navigate to MainTabs if registration is completed, otherwise checkAuth handles the step navigation
+          navigation.navigate(ROUTES.MAIN_TABS);
         }
       } catch (navError) {
         console.error('Error during post-OTP navigation:', navError);

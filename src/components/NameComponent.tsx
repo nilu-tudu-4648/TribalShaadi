@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image } from 'react-native';
 import React from 'react';
 import AppText from './AppText';
-import { fontSize24, SIZES, Size25, fontSize16 } from '../constants/Sizes';
+import { fontSize24, SIZES, Size25, fontSize16, fontSize12, Size4, fontSize14 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { HomeIcon2 } from './svg/SvgIcons';
 import { convertCmToReadableHeight } from '../constants/functions';
@@ -17,6 +17,7 @@ interface NameComponentProps {
   districtName: string;
   stateName: string;
   isNameLoading?: boolean;
+  freeConnect: string;
 }
 
 const NameComponent: React.FC<NameComponentProps> = ({
@@ -30,6 +31,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
   districtName,
   stateName,
   isNameLoading = false,
+  freeConnect,
 }) => {
   return (
     <View style={styles.cardContent}>
@@ -68,20 +70,34 @@ const NameComponent: React.FC<NameComponentProps> = ({
             )} · ${religion} · ${caste}`}
             textStyle={styles.details}
           />
-          <View style={styles.homeIconContainer}>
-            <HomeIcon2 color={COLORS.white} />
-            <AppText
-              text={`${districtName}, ${stateName}`}
-              textStyle={styles.location}
-            />
+          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingRight: Size4 * 3 }}>
+            <View style={styles.homeIconContainer}>
+              <HomeIcon2 color={COLORS.white} />
+              <AppText
+                text={`${districtName}, ${stateName}`}
+                textStyle={styles.location}
+              />
+            </View>
+
           </View>
           <View style={styles.aiVerifiedContainer}>
-            {isVerified && (
-              <Image
-                source={require('./../assets/images/aiverified.png')}
-                style={styles.aiVerifiedIcon}
-              />
-            )}
+            <View>
+              {isVerified && (
+                <Image
+                  source={require('./../assets/images/aiverified.png')}
+                  style={styles.aiVerifiedIcon}
+                />
+              )}
+            </View>
+            {
+              freeConnect &&
+              <View style={styles.pillContainer}>
+                <AppText
+                  text={`${freeConnect} Free Connect`}
+                  textStyle={styles.pillText}
+                />
+              </View>
+            }
           </View>
         </View>
       )}
@@ -109,12 +125,17 @@ const styles = StyleSheet.create({
   details: {
     fontSize: fontSize16,
     color: COLORS.white,
-    marginVertical:4
+    marginVertical: 4
   },
   location: {
     fontSize: fontSize16,
     color: COLORS.white,
     fontWeight: '400',
+  },
+  pillText: {
+    fontSize: fontSize14,
+    color: "#570660",
+    fontWeight: 'bold',
   },
 
   nameContainer: {
@@ -175,7 +196,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   aiVerifiedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     width: '100%',
-    marginVertical:16
+    marginVertical: Size4 * 2.5,
+    justifyContent: 'space-between',
+  },
+  pillContainer: {
+    backgroundColor: COLORS.pill,
+    borderRadius: Size4 * 5,
+    paddingHorizontal: Size4 * 2.5,
+    height: Size25 * .8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    right: Size4 * 3,
   },
 });

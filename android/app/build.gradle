@@ -92,8 +92,8 @@ android {
         applicationId "com.tribalshaadi"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 48
-        versionName "1.0.47"
+        versionCode 50
+        versionName "1.0.49"
     }
     signingConfigs {
         debug {

@@ -66,5 +66,7 @@ COLORS = {
   chipBg:"#F6F6F6",
   greyText3:"#8F8F8F",
   messageBubble:"#E3CCFF",
-  messageBubbleRecieved:"#EEEEEE"
+  messageBubbleRecieved:"#EEEEEE",
+  darkBlue:"#1F1A37",
+  pill:"#E96EF6"
 };
