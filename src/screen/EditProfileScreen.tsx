@@ -203,7 +203,7 @@ const EditProfileScreen = () => {
               <View style={styles.profileImage}>
                 <View style={styles.profileImagePlaceholder}>
                   <Image
-                    source={{ uri: imageUrl + user.image }}
+                    source={{ uri: imageUrl + user?.image }}
                     style={styles.placeholderImage}
                     resizeMode="cover"
                   />

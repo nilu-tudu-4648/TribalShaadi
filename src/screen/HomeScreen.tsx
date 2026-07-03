@@ -672,7 +672,7 @@ const HomeScreen = () => {
             : ''
         }
         age={finalDetail?.age}
-        gender={finalDetail?.gender}
+        gender={user?.gender}
         height={finalDetail?.height}
         religion={finalDetail?.religion}
         caste={finalDetail?.community}
@@ -752,7 +752,7 @@ const HomeScreen = () => {
                 <AppButton
                   title="Send Interest"
                   onPress={() =>
-                    !user.isVerified
+                    user.isVerified
                       ? handleSendProposal(matchedUsers[currentIndex].id)
                       : openSelfie()
                   }

@@ -143,7 +143,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             style={styles.imageOverlay}
           />
           <NameComponent
-            freeConnect={gender !== 'Male' ? freeConnect : ''}
+            freeConnect={gender === 'Male' ? freeConnect : ''}
             name={name}
             age={age}
             isVerified={isVerified}
@@ -190,7 +190,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           onError={(error) => console.log('Image 0 load error:', error)}
         />
       )}
-      {/* <View style={styles.horizontalLine} /> */}
       {highestQualification &&
         <View style={styles.section}>
           <>

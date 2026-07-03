@@ -73,6 +73,7 @@ const UpgradeScreen = () => {
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
   const posthog = usePostHog();
+  console.log('packageList', packageList);
   const features = [
     {
       icon: <HeartIcon2 color={COLORS.white} />,
@@ -256,8 +257,8 @@ const UpgradeScreen = () => {
         {user.gender === 'Female' ? (
           <PremiumCard
             packageData={{
-              netAmount: packageList[2]?.price,
-              endDate: packageList[2]?.title,
+              netAmount: packageList[0]?.price,
+              endDate: packageList[0]?.name,
             }}
             features={features}
             endDateText={`Lifetime Access`}
@@ -339,12 +340,12 @@ const UpgradeScreen = () => {
                         </View>
                         <View style={styles.pricingTextContainer}>
                           <AppText
-                            text={`${option.title}`}
+                            text={`${option.name}`}
                             textStyle={styles.pricingDuration}
                           />
                           <View style={{ backgroundColor: "#34C759", paddingHorizontal: Size4 * 1.4, paddingVertical: Size4 / 2, borderRadius: Size4 }}>
                             <AppText
-                              text={`${option.tag || ''}`}
+                              text={`${'One Time Payment'}`}
                               textStyle={styles.pricingSubtext}
                             />
                           </View>
@@ -372,7 +373,7 @@ const UpgradeScreen = () => {
               </ScrollView>
               <AppLinearButton
                 title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
-                  ?.title
+                  ?.name
                   } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
                     ?.price
                   }`}
@@ -394,7 +395,7 @@ const UpgradeScreen = () => {
           <PremiumCard
             packageData={{
               netAmount: packageByUserId[0].netAmount,
-              endDate: packageByUserId[0].title,
+              endDate: packageByUserId[0].name,
             }}
             features={features}
             endDateText={`Ends on ${new Date(packageByUserId[0].endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`}
