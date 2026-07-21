@@ -27,20 +27,19 @@ import {
   getDietUrl,
   getPassedUsersUrl,
   getStatesUrl,
-  getGalleryImageListUrl,
   getPackageByUserIdUrl,
   insertUserNotificationsUrl,
   getProposalsGotByMeUrl,
   getChatHistoryByUserId,
   getAcceptedProposalByIdUrl,
   getPackageListUrl,
+  getPopupContent,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileCardShimmer from '../components/ProfileCardShimmer';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
-  getCurrentMatchedUserGalleryImageListApi,
   getPassedUsersApi,
   getProposalsGotByMeApi,
   getProposalsSendByMeApi,
@@ -82,7 +81,7 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  const { currentMatchedUser, currentMatchedUserGalleryImageList, proposalsSendByMe } =
+  const { currentMatchedUser, proposalsSendByMe ,passedUsers} =
     useSelector((state: any) => state.entities.userReducer);
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
   const { currentUserPackage, packageByUserId } = useSelector(
@@ -93,8 +92,8 @@ const HomeScreen = () => {
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
   const [detailsCache, setDetailsCache] = useState<Record<number, any>>({});
-  const [galleryCache, setGalleryCache] = useState<Record<number, any[]>>({});
   const [packageCache, setPackageCache] = useState<Record<number, any[]>>({});
+  const [popupContent, setPopupContent] = useState<any>(null);
   const [currentProfileId, setCurrentProfileId] = useState<number | null>(null);
   const [lockedNextProfileId, setLockedNextProfileId] = useState<number | null>(
     null,
@@ -230,7 +229,8 @@ const HomeScreen = () => {
   const handleSendProposal = async (id: string) => {
     const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
     const isFemale = user?.gender === 'Female';
-    if (proposalsSendByMe?.length >= 2 && !hasActivePlan && !isFemale) {
+    const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
+    if (totalUsed >= 2 && !hasActivePlan && !isFemale) {
       twoConnectsBottomSheetRef?.current?.expand();
     }
     else {
@@ -278,35 +278,43 @@ const HomeScreen = () => {
   };
 
   const handleCancelProposal = async (id: string) => {
-    try {
-      setActionInProgress(true);
+    const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
+    const isFemale = user?.gender === 'Female';
+    const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
+    if (totalUsed >= 2 && !hasActivePlan && !isFemale) {
+      twoConnectsBottomSheetRef?.current?.expand();
+    }
+    else {
+      try {
+        setActionInProgress(true);
 
-      if (!matchedUsers || matchedUsers.length === 0) {
+        if (!matchedUsers || matchedUsers.length === 0) {
+          setActionInProgress(false);
+          return;
+        }
+
+        const currentUserId =
+          matchedUsers && matchedUsers[currentIndex]
+            ? matchedUsers[currentIndex].id
+            : id;
+        if (!currentUserId) {
+          setActionInProgress(false);
+          return;
+        }
+
+        startTransition('right');
+        dispatch(
+          cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
+            proposalUserId: currentUserId,
+          }),
+        ),
+          dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
+          setProcessedCount(prev => prev + 1);
+      } catch (error) {
+        console.log(error);
+      } finally {
         setActionInProgress(false);
-        return;
       }
-
-      const currentUserId =
-        matchedUsers && matchedUsers[currentIndex]
-          ? matchedUsers[currentIndex].id
-          : id;
-      if (!currentUserId) {
-        setActionInProgress(false);
-        return;
-      }
-
-      startTransition('right');
-      dispatch(
-        cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
-          proposalUserId: currentUserId,
-        }),
-      ),
-        dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
-        setProcessedCount(prev => prev + 1);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setActionInProgress(false);
     }
   };
   // Helper: fetch user details silently (no redux)
@@ -326,24 +334,7 @@ const HomeScreen = () => {
     },
     [detailsCache],
   );
-  // Helper: fetch gallery silently
-  const fetchGallerySilently = useCallback(
-    async (userId: number) => {
-      try {
-        if (!userId || galleryCache[userId]) return;
-        const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
-        if (!token) return;
-        const resp = await axios.post(
-          `${baseUrl}/${getGalleryImageListUrl}`,
-          { userId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        const list = resp?.data?.recordList ?? [];
-        setGalleryCache(prev => ({ ...prev, [userId]: list }));
-      } catch (e) { }
-    },
-    [galleryCache],
-  );
+
   const fetchMatchedUsers = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
@@ -352,7 +343,8 @@ const HomeScreen = () => {
       const { data } = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      const popupContent = await getPopupContent();
+      setPopupContent(popupContent);
       // Use map + filter only once for better perf
       const list = Array.isArray(data?.recordList) ? data.recordList : [];
       const filtered = list.length
@@ -373,18 +365,6 @@ const HomeScreen = () => {
   // Refetch current user's data when screen is focused to fix gallery mismatch
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]) {
-        const currentUserId = matchedUsers[currentIndex].id;
-        // Refetch gallery for the current user
-        dispatch(
-          getCurrentMatchedUserGalleryImageListApi(
-            `${baseUrl}/${getGalleryImageListUrl}`,
-            {
-              userId: currentUserId,
-            },
-          ),
-        );
-      }
       // Check notification permission and show dialog if not enabled
       checkNotificationPermission().then((enabled) => {
         if (!enabled) {
@@ -467,15 +447,6 @@ const HomeScreen = () => {
           userId: currentUserId,
         }),
       );
-
-      dispatch(
-        getCurrentMatchedUserGalleryImageListApi(
-          `${baseUrl}/${getGalleryImageListUrl}`,
-          {
-            userId: currentUserId,
-          },
-        ),
-      );
     }
   }, [dispatch, matchedUsers, currentIndex]);
   // Cache redux-fetched current data into local caches keyed by user id
@@ -488,18 +459,6 @@ const HomeScreen = () => {
     }
   }, [currentMatchedUser, matchedUsers, currentIndex]);
 
-  useEffect(() => {
-    const curId = currentMatchedUser?.id;
-    if (!curId) return;
-    if (!Array.isArray(currentMatchedUserGalleryImageList)) return;
-    // Only update cache if the gallery belongs to the current matched user
-    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
-      setGalleryCache(prev => ({
-        ...prev,
-        [curId]: currentMatchedUserGalleryImageList,
-      }));
-    }
-  }, [currentMatchedUser?.id, currentMatchedUserGalleryImageList, matchedUsers, currentIndex]);
 
   useEffect(() => {
     const curId = currentMatchedUser?.id;
@@ -534,24 +493,20 @@ const HomeScreen = () => {
 
     if (prevId) {
       fetchDetailSilently(prevId);
-      fetchGallerySilently(prevId);
       fetchPackageSilently(prevId);
     }
     if (nextId) {
       fetchDetailSilently(nextId);
-      fetchGallerySilently(nextId);
       fetchPackageSilently(nextId);
     }
     if (nextNextId) {
       fetchDetailSilently(nextNextId);
-      fetchGallerySilently(nextNextId);
       fetchPackageSilently(nextNextId);
     }
   }, [
     matchedUsers,
     currentIndex,
     fetchDetailSilently,
-    fetchGallerySilently,
     fetchPackageSilently,
   ]);
   // Keep carousel index aligned with the currently visible user even if the list updates
@@ -652,23 +607,18 @@ const HomeScreen = () => {
 
     const curId = matchedUsers[cardIndex]?.id;
     const cachedDetail = curId ? detailsCache[curId] : null;
-    const cachedGallery = curId ? galleryCache[curId] : null;
     const cachedPackage = curId ? packageCache[curId] : null;
 
     const baseUser = matchedUsers[cardIndex] || {};
     const finalDetail = { ...baseUser, ...cachedDetail };
-    const galleryList =
-      (cachedGallery as any)?.length > 0
-        ? cachedGallery
-        : baseUser.galleryImageList || [];
     const isPremium = (cachedPackage?.length ?? 0) > 0;
     return (
       <ProfileCard
         name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
         isNameLoading={false}
         freeConnect={
-          Array.isArray(packageByUserId) && packageByUserId.length === 0
-            ? `${Math.min(proposalsSendByMe?.length ?? 0, 2)}/2`
+          Array.isArray(packageByUserId) && packageByUserId.length === 0 && user?.gender !== 'Female'
+            ? `${Math.min((proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0), 2)}/2`
             : ''
         }
         age={finalDetail?.age}
@@ -680,7 +630,6 @@ const HomeScreen = () => {
         stateName={finalDetail?.stateName}
         bio={finalDetail?.aboutMe}
         image={finalDetail?.imageUrl || ''}
-        galleryImageList={galleryList}
         isLoading={false}
         maritalStatus={finalDetail?.maritalStatus}
         dob={finalDetail?.birthDate}
@@ -776,7 +725,7 @@ const HomeScreen = () => {
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
-      <TwoConnectsBottomSheet bottomSheetRef={twoConnectsBottomSheetRef} />
+      <TwoConnectsBottomSheet bottomSheetRef={twoConnectsBottomSheetRef} popupContent={popupContent} />
       <NotificationEnableDialog
         isVisible={showNotificationDialog}
         onDismiss={() => setShowNotificationDialog(false)}

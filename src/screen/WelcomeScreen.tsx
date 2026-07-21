@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
+import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/AppColors';
 import {
@@ -22,6 +23,9 @@ import {
   fontSize20,
   fontSize14,
   Size4,
+  fontSize24,
+  Size20,
+  fontSize26,
 } from '../constants/Sizes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppText from '../components/AppText';
@@ -72,24 +76,23 @@ const WelcomeScreen = () => {
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Header */}
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <NLogoComponent width={260} height={30} />
-          </View>
+          </View> */}
 
           {/* Profile Circle Section */}
-          {!imageError ? (
-            <Image
-              source={require('../assets/images/welcomeImage.png')}
-              style={styles.profileSection}
-              onError={handleImageError}
-              defaultSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/59/AwYDAQEA' }}
-            />
-          ) : (
-            <View style={[styles.profileSection, styles.imagePlaceholder]}>
-              <AppText text="📱" textStyle={styles.placeholderEmoji} />
-            </View>
-          )}
+          <Video
+            source={require('../assets/video/matrimony-app.mp4')}
+            style={styles.profileSection}
+            resizeMode="contain"
+            repeat={true}
+            muted={true}
+            paused={false}
+            playInBackground={false}
+            playWhenInactive={false}
+          />
 
+            <AppText textStyle={styles.titleText} text="Tribal Matchmaking made, safe, with AI "/>
           {/* CTA Section */}
           <View style={styles.ctaSection}>
             <OnboardingButton 
@@ -146,11 +149,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   profileSection: {
-    width: screenWidth('90%'),
-    height: screenHeight('50%'),
+    width: screenWidth('100%'),
+    height: screenHeight('60%'),
     alignSelf: 'center',
     justifyContent: 'center',
-    resizeMode: 'contain',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   imagePlaceholder: {
     backgroundColor: COLORS.lightgrey,
@@ -167,13 +171,11 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: COLORS.black,
-    fontSize: fontSize36,
-    textAlign: 'left',
-  },
-  tribeText: {
-    fontFamily: 'Brush Script MT',
-    fontStyle: 'italic',
-    fontWeight: '700',
+    fontSize: fontSize26,
+    textAlign: 'center',
+    fontFamily:"product-sans-medium",
+    fontWeight: '800',
+    marginHorizontal: Size20,
   },
   ctaSection: {
     backgroundColor: COLORS.white,
@@ -189,7 +191,6 @@ const styles = StyleSheet.create({
   orText: {
     color: COLORS.black,
     fontSize: fontSize20,
-  
   },
   loginLink: {
     color: COLORS.violet,

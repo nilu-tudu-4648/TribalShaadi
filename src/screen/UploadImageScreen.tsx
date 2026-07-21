@@ -37,7 +37,6 @@ import { CloseIcon } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getUserDetailsApi,
-  getUserImageListApi,
   navigateToLastScreen,
   uploadImage,
 } from '../constants/functions';
@@ -58,8 +57,6 @@ const UploadImageScreen = () => {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [isAIViewing, setIsAIViewing] = useState(false);
   const [isImageValid, setIsImageValid] = useState(true);
-  const [isImageValid2, setIsImageValid2] = useState(true);
-  const [userImageList, setUserImageList] = useState<any[]>([]);
 
   const { user, loader } = useSelector(
     (state: any) => state.entities.authReducer,
@@ -76,10 +73,6 @@ const UploadImageScreen = () => {
 
     return unsubscribe;
   }, [navigation]);
-  useEffect(() => {
-    getUserImageListApi(user.id, setUserImageList);
-  }, []);
-
   const handleImageUpload = async (index: number) => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
@@ -106,51 +99,20 @@ const UploadImageScreen = () => {
             setUploadingIndex(index);
             let requestBody;
 
-            if (index === 0) {
-              setIsAIViewing(true);
-              // First image format
-              requestBody = {
-                id: user.id,
-                image: `data:image/jpeg;base64,${asset.base64}`,
-              };
-              console.log(requestBody, 'requestBody for first image');
-              await uploadImage(
-                { ...requestBody, imageIndex: index },   // 👈 PASS FAILED INDEX
-                dispatch,
-                true,
-                setIsImageValid,
-                setIsAIViewing,
-                handleRemoveImage,
-              );
-
-            } else {
-              // Second and third image format - upload the current image
-              // Gallery images: selectedImages[1] maps to userImageList[0], selectedImages[2] maps to userImageList[1]
-              const galleryIndex = index - 1;
-
-              requestBody = {
-                userId: user.id,
-                image: `data:image/jpeg;base64,${asset.base64}`,
-              } as any;
-
-              // Only include operationImageId if editing an existing image
-              if (userImageList[galleryIndex]?.id) {
-                requestBody.operationImageId = userImageList[galleryIndex].id;
-              }
-
-              console.log(requestBody, `requestBody for gallery image at index ${index}`);
-              setIsAIViewing(true);
-              await uploadImage(
-                { ...requestBody, imageIndex: index },   // 👈 PASS INDEX 1 or 2
-                dispatch,
-                false,
-                setIsImageValid2,
-                setIsAIViewing,
-                handleRemoveImage,   // 👈 use single-image remover
-                setUserImageList as any,
-              )
-
-            }
+            setIsAIViewing(true);
+            requestBody = {
+              id: user.id,
+              image: `data:image/jpeg;base64,${asset.base64}`,
+            };
+            console.log(requestBody, 'requestBody for profile image');
+            await uploadImage(
+              { ...requestBody, imageIndex: index },
+              dispatch,
+              true,
+              setIsImageValid,
+              setIsAIViewing,
+              handleRemoveImage,
+            );
           } catch (error) {
             console.log('NETWORK ERROR:', error);
             AppToast('Failed to upload image. Please try again.');
@@ -173,7 +135,7 @@ const UploadImageScreen = () => {
   const handleContinue = async () => {
     try {
       posthog.capture('photos_uploaded')
-      await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
+      await getUserDetailsApi(`${getUserDetailsUrl}id=${user?.id}`, dispatch);
       await AsyncStorage.setItem(ASYNC_VARIBLES.ALL_IMAGES_UPLOADED, 'true');
     } catch (error) {
       console.log('NETWORK ERROR:', error);
@@ -181,11 +143,6 @@ const UploadImageScreen = () => {
     } finally {
       navigateToLastScreen(navigation, ROUTES.SELECT_INTERESTS);
     }
-  };
-
-  // Helper function to count valid images
-  const getValidImageCount = () => {
-    return selectedImages.filter(img => img?.uri && img.uri !== '').length;
   };
 
   const renderImageSlot = (index: number) => (
@@ -222,21 +179,27 @@ const UploadImageScreen = () => {
           </ImageBackground>
         </>
       ) : (
-        <View style={styles.cameraIcon}>
+        <>
+          <View style={styles.cameraIcon}>
+            <Image
+              source={require('../assets/images/plus.png')}
+              style={styles.cameraIconImage}
+            />
+            {uploadingIndex === index && (
+              <View style={styles.uploadingOverlay}>
+                <GradientLoader size={20} />
+              </View>
+            )}
+          </View>
           <Image
-            source={require('../assets/images/plus.png')}
-            style={styles.cameraIconImage}
+            source={require('../assets/images/profileframe.png')}
+            style={styles.profileFrame}
           />
-          {uploadingIndex === index && (
-            <View style={styles.uploadingOverlay}>
-              <GradientLoader size={20} />
-            </View>
-          )}
-        </View>
+        </>
       )}
     </TouchableOpacity>
   );
-  const isButtonDisabled = !isImageValid || !isImageValid2 || getValidImageCount() !== 3;
+  const isButtonDisabled = !isImageValid || !selectedImages[0]?.uri;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -260,11 +223,11 @@ const UploadImageScreen = () => {
         </View>
 
         {/* Image Upload Section */}
-        <View style={styles.imageSection}>
-          <View style={styles.imageGrid}>
-            {[0, 1, 2].map(index => renderImageSlot(index))}
+          <View style={styles.imageSection}>
+            <View style={styles.imageGrid}>
+              {renderImageSlot(0)}
+            </View>
           </View>
-        </View>
 
         {/* Photo Verification Warning */}
         <View style={styles.descriptionBox}>
@@ -294,7 +257,7 @@ const UploadImageScreen = () => {
         )}
         {/* Spacer */}
         <View style={styles.spacer} />
-        {(!isImageValid || !isImageValid2) && (
+        {!isImageValid && (
           <Image
             source={require('../assets/images/imagevalid.png')}
             style={styles.image}
@@ -354,18 +317,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   imageSlot: {
-    width: SIZES.width * 0.26,
-    height: SIZES.width * 0.26,
+    width: SIZES.width * 0.42,
+    height: SIZES.width * 0.42,
     borderRadius: Size12,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.lightGreyBackground,
-    overflow: 'visible',
+    overflow: 'hidden',
   },
   imageSlotWithImage: {
     borderWidth: 0,
@@ -455,6 +417,13 @@ const styles = StyleSheet.create({
     width: Size18 * 2,
     height: Size18 * 2,
     resizeMode: 'contain',
+  },
+  profileFrame: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '55%',
+    height: '55%',
   },
   bannerOverlay: {
     position: 'absolute',

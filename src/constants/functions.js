@@ -36,8 +36,8 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const apiUrl = 'https://api.tribalshaadi.co.in';
-// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
@@ -976,7 +976,32 @@ export const navigateToLastScreen = async (navigation, ROUTES) => {
     console.error('navigateToLastScreen error:', error);
   }
 };
-/**
+
+export const getPopupContent = async () => {
+  try {
+    const token =(await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN));
+    if (!token || token === 'null' || token === 'undefined') {
+      console.log('No valid token found for getPopupContent');
+      return null;
+    }
+
+    const response = await axios.get(
+      `${baseUrl}/app/membershipPopupContents/getMembershipPopupContent`,
+      {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000,
+      }
+    );
+
+    return response.data.recordList;
+  } catch (error) {
+    console.error('getPopupContent error:', error);
+    return null;
+  }
+};/**
  * Returns true if the user has set at least one mandatory preference (marital status, age, religion, height)
  * to something other than default/Any. Used to decide whether to show the preference prompt dialog.
  */

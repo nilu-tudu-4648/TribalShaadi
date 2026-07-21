@@ -215,7 +215,7 @@ const EditProfileScreen = () => {
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => handleImageUpload(1)}
               style={styles.profileImageWrapper}
             >
@@ -232,8 +232,8 @@ const EditProfileScreen = () => {
                 )}
               </View>
             </View>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity> */}
+            {/* <TouchableOpacity
               onPress={() => handleImageUpload(2)}
               style={styles.profileImageWrapper}
             >
@@ -250,7 +250,7 @@ const EditProfileScreen = () => {
                 )}
               </View>
             </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           {/* Menu Items */}
           <View style={styles.menuContainer}>

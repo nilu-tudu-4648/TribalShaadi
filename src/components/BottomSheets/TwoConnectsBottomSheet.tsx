@@ -21,7 +21,7 @@ import Animated, {
 
 const BUTTON_HEIGHT = 56;
 
-const ShineButton = ({ onPress }: { onPress: () => void }) => {
+const ShineButton = ({ onPress, popupContent }: { onPress: () => void, popupContent: any }) => {
   const shimmerX = useSharedValue(-SIZES.width);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const ShineButton = ({ onPress }: { onPress: () => void }) => {
             style={styles.shimmerGradient}
           />
         </Animated.View>
-        <AppText text="Get Lifetime Free" textStyle={styles.ctaButtonText} />
+        <AppText text={popupContent?.button_text} textStyle={styles.ctaButtonText} />
       </LinearGradient>
     </Pressable>
   );
@@ -74,8 +74,10 @@ const ShineButton = ({ onPress }: { onPress: () => void }) => {
 
 const TwoConnectsBottomSheet = ({
   bottomSheetRef,
+  popupContent,
 }: {
   bottomSheetRef: React.RefObject<BottomSheet | null>;
+  popupContent: any;
 }) => {
   const snapPoints = ['65%', '65%'];
   const navigation = useNavigation();
@@ -98,11 +100,11 @@ const TwoConnectsBottomSheet = ({
     >
       <BottomSheetView style={styles.contentContainer}>
         <AppText
-          text="You've used your 2 free Connect Requests."
+          text={popupContent?.title}
           textStyle={styles.title}
         />
         <AppText
-          text="Find the right person without limits"
+          text={popupContent?.subtitle}
           textStyle={styles.subtitle}
         />
 
@@ -113,12 +115,13 @@ const TwoConnectsBottomSheet = ({
         />
 
         <View style={styles.benefitsList}>
-          <AppText text="✓  Unlimited Connect Requests" textStyle={styles.benefit} />
-          <AppText text="✓  See Who's Interested In You" textStyle={styles.benefit} />
-          <AppText text="✓  Complete Contact Access" textStyle={styles.benefit} />
+          <AppText text={"✓ " + popupContent?.feature_1} textStyle={styles.benefit} />
+          <AppText text={"✓ " +  popupContent?.feature_2} textStyle={styles.benefit} />
+          <AppText text={"✓ " + popupContent?.feature_3} textStyle={styles.benefit} />
         </View>
 
         <ShineButton
+          popupContent={popupContent}
           onPress={() => {
             (navigation as any).navigate(ROUTES.STACK, {
               screen: ROUTES.UPGRADE,
