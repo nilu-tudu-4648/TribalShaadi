@@ -85,7 +85,7 @@ const SelectInterestsScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
-        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE)} />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE)} progress={1.0} />
 
         <View style={styles.headerRow}>
           <AppText text="Select interests" textStyle={styles.title} />

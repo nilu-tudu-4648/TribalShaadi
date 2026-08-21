@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
+    maxWidth: '100%',
     paddingHorizontal: Size14,
     paddingVertical: Size8,
     borderRadius: Size14,
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
+    flexShrink: 1,
     fontSize: fontSize16,
     color: COLORS.navBarInactive,
     fontWeight: fontWeight500,

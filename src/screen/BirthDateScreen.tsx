@@ -116,6 +116,7 @@ const BirthDateScreen = () => {
       <View style={styles.content}>
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.NAME)}
+          progress={0.2}
         />
         <View style={globalStyles.headerSection}>
           <AppText text="When were you born?" textStyle={globalStyles.title} />

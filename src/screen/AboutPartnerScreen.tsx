@@ -96,7 +96,7 @@ const AboutPartnerScreen = () => {
   return (
     <SafeAreaView style={globalStyles.container}>
       <View style={globalStyles.content}>
-        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} />
+        <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT)} progress={0.8} />
         <View style={globalStyles.headerSection}>
           <AppText text={question.question} textStyle={globalStyles.title} />
           <AppText text={question.subtitle} textStyle={globalStyles.subtitle} />

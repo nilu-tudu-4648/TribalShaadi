@@ -1,8 +1,9 @@
 
 // Interest Tabs
 export const INTEREST_TABS = [
+  { label: 'Profile View' },
   { label: 'Received' },
-  { label: 'Recent Passes' },
+  { label: 'Skipped' },
   { label: 'Sent' },
 ];
 // Async Variables

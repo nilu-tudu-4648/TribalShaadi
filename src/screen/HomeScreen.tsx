@@ -37,6 +37,7 @@ import {
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileCardShimmer from '../components/ProfileCardShimmer';
+import AnimatedToast from '../components/AnimatedToast';
 import {
   cancelProposalRequestApi,
   getCurrentMatchedApi,
@@ -91,6 +92,7 @@ const HomeScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
+  const [showInterestToast, setShowInterestToast] = useState(false);
   const [detailsCache, setDetailsCache] = useState<Record<number, any>>({});
   const [packageCache, setPackageCache] = useState<Record<number, any[]>>({});
   const [popupContent, setPopupContent] = useState<any>(null);
@@ -230,7 +232,7 @@ const HomeScreen = () => {
     const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
     const isFemale = user?.gender === 'Female';
     const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
-    if (totalUsed >= 2 && !hasActivePlan && !isFemale) {
+    if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
       twoConnectsBottomSheetRef?.current?.expand();
     }
     else {
@@ -269,6 +271,7 @@ const HomeScreen = () => {
           )
         startTransition('left');
         setProcessedCount(prev => prev + 1);
+        setShowInterestToast(true);
       } catch (error) {
         console.log(error);
       } finally {
@@ -281,7 +284,7 @@ const HomeScreen = () => {
     const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
     const isFemale = user?.gender === 'Female';
     const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
-    if (totalUsed >= 2 && !hasActivePlan && !isFemale) {
+    if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
       twoConnectsBottomSheetRef?.current?.expand();
     }
     else {
@@ -354,6 +357,7 @@ const HomeScreen = () => {
       setMatchedUsers(filtered);
       setProcessedCount(0);
       dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
+      dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (e) {
       console.log(e, 'error');
     }
@@ -618,7 +622,7 @@ const HomeScreen = () => {
         isNameLoading={false}
         freeConnect={
           Array.isArray(packageByUserId) && packageByUserId.length === 0 && user?.gender !== 'Female'
-            ? `${Math.min((proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0), 2)}/2`
+            ? `${Math.min((proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0), 5)}/5`
             : ''
         }
         age={finalDetail?.age}
@@ -656,6 +660,12 @@ const HomeScreen = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <AppSafeView style={styles.container}>
+        <AnimatedToast
+          visible={showInterestToast}
+          message="Interest Sent Successfully"
+          duration={2000}
+          onHide={() => setShowInterestToast(false)}
+        />
         <>
           {/* show shimmer only on first load */}
           {!hasRequestedMatches || (isLoading && matchedUsers.length === 0) ? (
@@ -725,7 +735,11 @@ const HomeScreen = () => {
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />
-      <TwoConnectsBottomSheet bottomSheetRef={twoConnectsBottomSheetRef} popupContent={popupContent} />
+      <TwoConnectsBottomSheet 
+        bottomSheetRef={twoConnectsBottomSheetRef} 
+        popupContent={popupContent} 
+        matchedUser={matchedUsers} 
+      />
       <NotificationEnableDialog
         isVisible={showNotificationDialog}
         onDismiss={() => setShowNotificationDialog(false)}

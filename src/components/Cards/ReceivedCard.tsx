@@ -25,8 +25,8 @@ const ReceivedCard = ({
   planPurchased,
 }: {
   item: any;
-  onDecline: () => void;
-  onConnect: (item: any) => void;
+  onDecline?: () => void;
+  onConnect?: (item: any) => void;
   onPress: () => void;
   planPurchased: boolean;
 }) => {
@@ -34,7 +34,7 @@ const ReceivedCard = ({
     <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={{ uri: `${imageUrl + item.profileImage}` }}
+          source={{ uri: `${imageUrl + (item.profileImage || item.image)}` }}
           style={styles.profileImage}
           blurRadius={planPurchased ? 0 : 50}
         >
@@ -53,14 +53,22 @@ const ReceivedCard = ({
               height={item.height}
               religion={item.religion}
               caste={item.community}
-              districtName={item.districts ?? ''}
+              districtName={(item.districts || item.district) ?? ''}
               stateName={item.state ?? ''}
+              freeConnect={item.freeConnect}
             />
           ) : (
-            <View style={styles.whiteLineContainer}>
-              <View style={{ ...styles.whiteLine, width: '60%' }} />
-              <View style={styles.whiteLine} />
-            </View>
+            <NameComponent
+              name={`${item.firstName} ${item.lastName ?? ''}`}
+              isVerified={false}
+              isPremium={false}
+              height={"0"}
+              religion={""}
+              caste={""}
+              districtName={(item.districts || item.district) ?? ''}
+              stateName={item.state ?? ''}
+              freeConnect={item.freeConnect}
+            />
           )}
         </ImageBackground>
       </View>
@@ -68,7 +76,7 @@ const ReceivedCard = ({
         <View style={styles.buttonRow}>
           <AppButton
             title="Decline"
-            onPress={onDecline}
+            onPress={onDecline ?? (() => {})}
             isButtonDisabled={false}
             isLoading={false}
             buttonStyle={styles.declineButton}
@@ -76,7 +84,7 @@ const ReceivedCard = ({
           />
           <AppButton
             title="Accept"
-            onPress={() => onConnect(item)}
+            onPress={() => onConnect?.(item)}
             isButtonDisabled={false}
             isLoading={false}
             buttonStyle={styles.connectButton}

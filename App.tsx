@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, View, Image, StyleSheet, AppState, Alert, Linking } from 'react-native';
+import { StatusBar, View, StyleSheet, AppState, Alert, Linking } from 'react-native';
 import LogoComponent from './src/components/LogoComponent';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -352,37 +352,39 @@ export default function App() {
               backgroundColor={COLORS.white}
               translucent={false}
             />
-            <PostHogProvider
-              apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
-              options={{
-                host: 'https://us.i.posthog.com',
-                enableSessionReplay: true,
-                flushAt: 1,
-                flushInterval: 0,
-                sessionReplayConfig: {
-                  maskAllTextInputs: true,
-                  maskAllImages: false,
-                  captureLog: true,
-                  captureNetworkTelemetry: true,
-                  androidDebouncerDelayMs: 1000,
-                },
-              }}
-              autocapture={{
-                captureTouches: true,
-                captureScreens: true,
+            <NavigationContainer
+              ref={navigationRef}
+              onReady={() => {
+                setIsReady();
               }}
             >
-              <NavigationContainer
-                ref={navigationRef}
-                onReady={() => {
-                  setIsReady();
+              <PostHogProvider
+                apiKey="phc_hzf2ffl8p76r9RC3vhi50NK9CRXKOG4Z4gyrhJ5ngo"
+                options={{
+                  host: 'https://us.i.posthog.com',
+                  enableSessionReplay: true,
+                  flushAt: 1,
+                  flushInterval: 0,
+                  sessionReplayConfig: {
+                    maskAllTextInputs: true,
+                    maskAllImages: false,
+                    captureLog: true,
+                    captureNetworkTelemetry: true,
+                    androidDebouncerDelayMs: 1000,
+                  },
+                }}
+                autocapture={{
+                  captureTouches: true,
+                  // PostHog's automatic screen tracker calls React Navigation
+                  // hooks outside a navigator with React Navigation 7.
+                  captureScreens: false,
                 }}
               >
                 <ErrorBoundary>
                   <MainApp />
                 </ErrorBoundary>
+              </PostHogProvider>
             </NavigationContainer>
-            </PostHogProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </Provider>

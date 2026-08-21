@@ -84,7 +84,7 @@ const AboutScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={globalStyles.content}>
-          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES)} />
+          <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES)} progress={0.7} />
           <View style={globalStyles.headerSection}>
             <AppText text="What makes you a 11/10?" textStyle={globalStyles.title} />
             <AppText text="Share a few lines about yourself — honest, simple, and real" textStyle={globalStyles.subtitle} />

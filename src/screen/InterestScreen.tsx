@@ -31,6 +31,7 @@ import {
   setAcceptedUser,
   getCurrentMatchedUserGalleryImageListApi,
   getSelectedUserPackageApi,
+  getProfileViewedUsersApi,
 } from '../store/reducers/userReducer';
 import {
   acceptRejectProposalUrl,
@@ -39,6 +40,7 @@ import {
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   getPassedUsersUrl,
+  getProfileViewedUsersUrl,
   getProposalsGotByMeUrl,
   getSelectedUserUrl,
   insertUserNotificationsUrl,
@@ -68,10 +70,12 @@ const InterestScreen = () => {
     proposalsGotByMe,
     passedUsers,
     currentUserPackage,
+    profileViewedUsers,
   } = useSelector((state: any) => state.entities.userReducer);
   const fetchData = useCallback(() => {
     dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
     dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
+    dispatch(getProfileViewedUsersApi(`${baseUrl}/${getProfileViewedUsersUrl}`));
     setIsLoading(false);
   }, [dispatch]);
   useEffect(() => {
@@ -136,7 +140,6 @@ const InterestScreen = () => {
     }
   };
   const handleAcceptProposal = async (item: any) => {
-    console.log('handleAcceptProposal', item.senderUserId);
     try {
       posthog.capture('interest_accepted')
       setIsLoading(true);
@@ -202,6 +205,37 @@ const InterestScreen = () => {
         </View>
         {selectedTab === 0 && (
           <FlatList
+            data={profileViewedUsers}
+            renderItem={({ item }) => (
+              <ReceivedCard
+                item={item}
+                onPress={() => {
+                  if (packageByUserId.length > 0 || user?.gender === "Female") {
+                     handleCardPress(item.id);
+                  } else {
+                    (navigation as any).navigate(ROUTES.STACK, {
+                      screen: ROUTES.UPGRADE,
+                    });
+                  }
+                }}
+                planPurchased={packageByUserId.length > 0 || user?.gender === "Female"}
+              />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.gridContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyStateContainer}>
+                <Image
+                  source={require('../assets/images/lonely.png')}
+                  style={styles.heartImage}
+                />
+              </View>
+            }
+          />
+        )}
+        {selectedTab === 1 && (
+          <FlatList
             data={proposalsGotByMe}
             renderItem={({ item }) => (
               <ReceivedCard
@@ -233,7 +267,7 @@ const InterestScreen = () => {
             }
           />
         )}
-        {selectedTab === 1 && (
+        {selectedTab === 2 && (
           <FlatList
             data={passedUsers}
             renderItem={({ item }) => (
@@ -249,7 +283,7 @@ const InterestScreen = () => {
             showsVerticalScrollIndicator={false}
           />
         )}
-        {selectedTab === 2 && (
+        {selectedTab === 3 && (
           <FlatList
             data={proposalsSendByMe}
             renderItem={({ item }) => (

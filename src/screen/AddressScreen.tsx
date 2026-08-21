@@ -188,7 +188,10 @@ const AddressScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={globalStyles.content}>
-         <HeaderBack onPress={() => navigateToLastScreen(navigation, ROUTES.RELIGION)} />
+         <HeaderBack 
+            onPress={() => navigateToLastScreen(navigation, ROUTES.RELIGION)} 
+            progress={0.4}
+          />
           {/* State Dropdown */}
           <View style={{ gap: Size8 }}>
           <AppDropdown

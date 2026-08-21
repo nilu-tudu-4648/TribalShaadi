@@ -137,6 +137,7 @@ const PhysicalAttributesScreen = () => {
       <View style={styles.content}>
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.QUALIFICATION)}
+          progress={0.6}
         />
 
         {/* Height Dropdown */}

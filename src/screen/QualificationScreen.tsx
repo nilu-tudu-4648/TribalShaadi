@@ -222,6 +222,7 @@ const QualificationScreen = () => {
               posthog.capture('qualification_skipped');
               navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES);
             }}
+            progress={0.5}
           />
           {/* Highest Qualification Dropdown */}
           <View style={{ gap: Size8 }}>

@@ -122,6 +122,7 @@ const ReligionScreen = () => {
       <View style={globalStyles.content}>
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.BIRTH_DATE)}
+          progress={0.3}
         />
         <View style={{ gap: Size25*1.5 }}>
           <View style={{ gap: Size8 }}>

@@ -1,14 +1,14 @@
 import { StyleSheet, View, Image } from 'react-native';
 import React from 'react';
 import AppText from './AppText';
-import { fontSize24, SIZES, Size25, fontSize16, fontSize12, Size4, fontSize14 } from '../constants/Sizes';
+import { fontSize24, SIZES, Size25, fontSize16, Size4, fontSize14 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { HomeIcon2 } from './svg/SvgIcons';
 import { convertCmToReadableHeight } from '../constants/functions';
 
 interface NameComponentProps {
   name: string;
-  age: number;
+  age?: number;
   isVerified: boolean;
   isPremium: boolean;
   height: string;
@@ -50,7 +50,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
       ) : (
         <View>
           <View style={styles.nameContainer}>
-            <AppText text={`${name}, ${age}`} textStyle={styles.name} />
+            <AppText text={`${name}, ${age ? age : ""}`} textStyle={styles.name} />
             {isVerified && (
               <Image
                 source={require('./../assets/images/tick.png')}
@@ -64,12 +64,15 @@ const NameComponent: React.FC<NameComponentProps> = ({
               />
             )}
           </View>
-          <AppText
-            text={`${convertCmToReadableHeight(
-              height,
-            )} · ${religion} · ${caste}`}
-            textStyle={styles.details}
-          />
+          {
+            height !== "0" &&
+            <AppText
+              text={`${convertCmToReadableHeight(
+                height,
+              )} · ${religion} · ${caste}`}
+              textStyle={styles.details}
+            />
+          }
           <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingRight: Size4 * 3 }}>
             <View style={styles.homeIconContainer}>
               <HomeIcon2 color={COLORS.white} />

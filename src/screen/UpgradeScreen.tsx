@@ -24,7 +24,6 @@ import {
   Size4,
   Size40,
   SIZES,
-  Size25,
   fontSize36,
   Size10,
   fontSize20,
@@ -72,16 +71,20 @@ const UpgradeScreen = () => {
   const [selectedPlan, setSelectedPlan] = useState(packageList[0]?.packageId);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
+  // console.log('packageList', packageList);
   const posthog = usePostHog();
-  console.log('packageList', packageList);
   const features = [
     {
       icon: <HeartIcon2 color={COLORS.white} />,
-      title: 'See All Received Interests',
+      title: 'Send Unlimited Interests',
     },
     {
       icon: <BellIcon color={COLORS.white} />,
-      title: 'Unlock all Connections',
+      title: 'See Who’s Sent You Interest',
+    },
+    {
+      icon: <BellIcon color={COLORS.white} />,
+      title: 'Complete Contact Access',
     },
   ];
   const handlePlanSelect = (planId: number) => {
@@ -266,129 +269,126 @@ const UpgradeScreen = () => {
         ) : packageByUserId.length === 0 ? (
           <>
             <ImageBackground
-              source={require('../assets/images/update.jpg')}
+              source={require('../assets/images/upgradebg.png')}
               style={styles.backgroundImage}
             >
-              <Pressable
-                onPress={() => navigation.goBack()}
-                style={styles.header}
-              >
-                <View style={styles.backButton}>
-                  <ArrowIosBackSvg color={COLORS.black} />
-                </View>
-
-                <Image
-                  source={require('../assets/images/premiumLogo.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
-              </Pressable>
-              <View style={styles.interestContainer}>
+              <View style={styles.topSection}>
+                <Pressable
+                  onPress={() => navigation.goBack()}
+                  style={styles.header}
+                >
+                  <View style={styles.backButton}>
+                    <ArrowIosBackSvg color={COLORS.white} />
+                  </View>
+  
+                  <Image
+                    source={require('../assets/images/premiumLogo1.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
+                </Pressable>
+  
                 <Image
                   source={require('../assets/images/upgradeblur.png')}
                   style={styles.interestImage}
                 />
-                <AppText
-                  text="See who’s interested in you"
-                  textStyle={styles.title}
-                />
-                <AppText
-                  text="Turn interests into conversations—faster"
-                  textStyle={styles.subtitle}
-                />
+  
+                <View style={styles.featuresContainer}>
+                  {features.map((feature, index) => (
+                    <View key={index} style={styles.featureItem}>
+                      <AppText
+                        text="•"
+                        textStyle={styles.featureBullet}
+                      />
+                      <AppText
+                        text={feature.title}
+                        textStyle={styles.featureTitle}
+                      />
+                    </View>
+                  ))}
+                </View>
               </View>
 
-              <View style={styles.featuresContainer}>
-                {features.map((feature, index) => (
-                  <View key={index} style={styles.featureItem}>
-                    <View style={styles.featureIconContainer}>
-                      {feature.icon}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pricingContainer}
+                bounces={false}
+              >
+                {packageList.filter((option: any) => option.isActive === 1).map((option: any) => (
+                  <TouchableOpacity
+                    key={option.packageId}
+                    style={[
+                      styles.pricingCard,
+                      selectedPlan === option.packageId &&
+                      styles.selectedPricingCard,
+                    ]}
+                    onPress={() => handlePlanSelect(option.packageId)}
+                  >
+                    <View style={styles.cardHeader}>
+                      <View style={styles.durationBadge}>
+                        <AppText
+                          text={option.name === 'Till Marriage' ? 'Lifetime' : option.name}
+                          textStyle={styles.durationText}
+                        />
+                      </View>
+                      <View
+                        style={[
+                          styles.radioButton,
+                          selectedPlan === option.packageId &&
+                          styles.selectedRadioButton,
+                        ]}
+                      >
+                        {selectedPlan === option.packageId && (
+                          <View style={styles.radioButtonInner} />
+                        )}
+                      </View>
                     </View>
-                    <AppText
-                      text={feature.title}
-                      textStyle={styles.featureTitle}
-                    />
-                  </View>
+                    
+                    <View style={[styles.priceContainer, option.name !== 'Till Marriage' && { paddingBottom: Size10 }]}>
+                      <AppText
+                        text={`₹${option.price}`}
+                        textStyle={styles.pricingPrice}
+                      />
+                    </View>
+                    
+                    {option.name === 'Till Marriage' ? (
+                      <View style={styles.bestValueBadge}>
+                        <AppText
+                          text="Best Value"
+                          textStyle={styles.bestValueText}
+                        />
+                      </View>
+                    ) : null}
+                  </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </ImageBackground>
 
             <View style={styles.bottomContainer}>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.pricingContainer}>
-                  {packageList.filter((option: any) => option.isActive === 1).map((option: any) => (
-                    <TouchableOpacity
-                      key={option.packageId}
-                      style={[
-                        styles.pricingOption,
-                        selectedPlan === option.packageId &&
-                        styles.selectedPricingOption,
-                      ]}
-                      onPress={() => handlePlanSelect(option.packageId)}
-                    >
-                      <View style={styles.pricingLeft}>
-                        <View
-                          style={[
-                            styles.radioButton,
-                            selectedPlan === option.packageId &&
-                            styles.selectedRadioButton,
-                          ]}
-                        >
-                          {selectedPlan === option.packageId && (
-                            <View style={styles.radioButtonInner} />
-                          )}
-                        </View>
-                        <View style={styles.pricingTextContainer}>
-                          <AppText
-                            text={`${option.name}`}
-                            textStyle={styles.pricingDuration}
-                          />
-                          <View style={{ backgroundColor: "#34C759", paddingHorizontal: Size4 * 1.4, paddingVertical: Size4 / 2, borderRadius: Size4 }}>
-                            <AppText
-                              text={`${'One Time Payment'}`}
-                              textStyle={styles.pricingSubtext}
-                            />
-                          </View>
-                          {option.badge && (
-                            <View style={styles.badgeContainer}>
-                              <AppText
-                                text={option.badge}
-                                textStyle={styles.badgeText}
-                              />
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                      <View style={styles.pricingRight}>
-                        <AppText
-                          text={`₹${option.price}`}
-                          textStyle={styles.pricingPrice}
-                        />
-
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Image source={require('../assets/images/lifetime.png')} style={styles.lifeTimeImage} />
+              <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+                <Image source={require('../assets/images/PremiumCard.png')} style={styles.lifeTimeImage} />
               </ScrollView>
-              <AppLinearButton
-                title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
-                  ?.name
-                  } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
-                    ?.price
-                  }`}
-                onPress={() => {
-                  posthog.capture('premium_plan_selected')
-                  openRazorpayCheckout();
-                }}
 
-                linearGradientColors={['#21BEFE', '#EE50C1']}
-                textStyle={styles.continueButtonText}
-              />
-              <AppText
-                text="This app can be used without a subscription. With a subscription, you get access to paid features."
-                textStyle={styles.disclaimerText}
-              />
+              <View style={styles.actionContainer}>
+                <AppLinearButton
+                  title={`Get ${packageList.find((p: any) => p.packageId === selectedPlan)
+                    ?.name
+                    } for ₹${packageList.find((p: any) => p.packageId === selectedPlan)
+                      ?.price
+                    }`}
+                  onPress={() => {
+                    posthog.capture('premium_plan_selected')
+                    openRazorpayCheckout();
+                  }}
+                  linearGradientColors={['#21BEFE', '#EE50C1']}
+                  textStyle={styles.continueButtonText}
+                />
+                <AppText
+                  text="This app can be used without a subscription. With a subscription, you get access to paid features."
+                  textStyle={styles.disclaimerText}
+                />
+              </View>
             </View>
           </>
         ) : (
@@ -421,11 +421,13 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    height: SIZES.height * 0.8,
-    paddingTop: Size40,
+    height: SIZES.height * 0.58,
     justifyContent: 'space-between',
-    resizeMode: 'contain',
-    opacity: 0.8,
+    resizeMode: 'cover',
+  },
+  topSection: {
+    paddingTop: Size40/2,
+    gap: Size8,
   },
   header: {
     flexDirection: 'row',
@@ -442,11 +444,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.black,
+    borderColor: COLORS.white,
+    zIndex: 1,
   },
   logo: {
     width: '100%',
-    height: Size40 * 1.2,
+    height: Size40,
     resizeMode: 'contain',
   },
   title: {
@@ -463,104 +466,136 @@ const styles = StyleSheet.create({
     left: Size16,
   },
   interestImage: {
-    width: '30%',
-    height: Size40 * 1.2,
+    width: '40%',
+    height: Size40 * 1.5,
     resizeMode: 'contain',
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
+    marginTop: Size10,
+
   },
   featuresContainer: {
-    paddingVertical: Size40,
     gap: Size8,
     alignItems: 'flex-start',
     alignSelf: 'center',
+    marginVertical: Size10,
   },
   featureItem: {
     flexDirection: 'row',
-    gap: Size12,
-  },
-  featureIconContainer: {
-    width: Size25,
-    height: Size25,
-    borderRadius: Size12,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.violet,
+    gap: Size8,
+  },
+  featureBullet: {
+    fontSize: fontSize20,
+    color: COLORS.white,
+    lineHeight: fontSize20,
   },
   featureTitle: {
-    fontSize: fontSize14,
+    fontSize: fontSize16,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.black,
+    color: COLORS.white,
   },
   bottomContainer: {
     backgroundColor: COLORS.white,
     padding: Size16,
-    paddingBottom: 0,
-    justifyContent: 'space-between',
-    borderTopLeftRadius: Size40,
-    borderTopRightRadius: Size40,
-    bottom: Size25,
-    height: SIZES.height * 0.47,
+    paddingBottom: Size10,
+    flex: .8,
   },
   pricingContainer: {
-    paddingVertical: Size12,
+    paddingHorizontal: Size16,
+    paddingTop: Size20,
+    paddingBottom: Size10,
     gap: Size12,
-  },
-  pricingOption: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  pricingCard: {
     backgroundColor: COLORS.white,
-    borderRadius: Size12,
-    padding: Size10,
-    borderWidth: 2,
-    borderColor: COLORS.borderLight,
-  },
-  selectedPricingOption: {
-    borderColor: COLORS.violet,
-    backgroundColor: COLORS.chipSelected,
-  },
-  pricingLeft: {
-    flexDirection: 'row',
+    borderRadius: Size16,
+    padding: Size12,
+    borderWidth: 3,
+    borderColor: 'transparent',
+    width: SIZES.width * 0.28,
+    minHeight: SIZES.height * 0.15,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: Size12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  pricingTextContainer: {
-    gap: Size4,
+  selectedPricingCard: {
+    borderColor: '#E68A2E', // The orange border color from image
+    borderWidth: 3,
+    transform: [{ scale: 1.05 }, { translateY: -10 }], // Slight scale up and move up for selected card
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: Size8,
+    paddingHorizontal: 2,
+  },
+  durationBadge: {
+    backgroundColor: '#F5EBE1', // Light beige color from image
+    paddingHorizontal: Size8 * 1.2,
+    paddingVertical: Size4 * 1.2,
+    borderRadius: Size12,
+    marginRight: Size4,
+  },
+  durationText: {
+    fontSize: fontSize12 * 0.9,
+    color: '#8B6A47', // Brownish text color from image
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
+  },
+  priceContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: Size4,
   },
   radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
     borderColor: COLORS.grey,
     justifyContent: 'center',
     alignItems: 'center',
   },
   selectedRadioButton: {
-    borderColor: COLORS.violet,
+    borderColor: '#7337BD', // Purple from image
+    borderWidth: 2,
   },
   radioButtonInner: {
-    width: Size12,
-    height: Size12,
-    borderRadius: Size12 / 2,
-    backgroundColor: COLORS.violet,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#7337BD', // Purple from image
   },
   pricingDuration: {
     fontSize: fontSize16,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
-  pricingSubtext: {
-    fontSize: fontSize14,
-    color: COLORS.white,
-  },
-  pricingRight: {
-    alignItems: 'flex-end',
-    gap: Size4,
-  },
   pricingPrice: {
-    fontSize: fontSize18,
+    fontSize: fontSize20 * 1.4,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    color: COLORS.violet,
+    color: COLORS.black, // The price is black in the image
+    fontWeight: '800',
+  },
+  bestValueBadge: {
+    backgroundColor: '#60C46B', // Green from image
+    paddingHorizontal: Size12,
+    paddingVertical: Size4 * 1.2,
+    borderRadius: Size4,
+    marginTop: Size4,
+  },
+  bestValueText: {
+    fontSize: fontSize12,
+    color: COLORS.white,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
   },
   badgeContainer: {
     backgroundColor: COLORS.success,
@@ -580,8 +615,8 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: fontSize18,
     fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
-    fontStyle:'italic',
-    fontWeight:fontWeight700,
+    fontStyle: 'italic',
+    fontWeight: fontWeight700,
   },
   disclaimerText: {
     textAlign: 'center',
@@ -603,8 +638,55 @@ const styles = StyleSheet.create({
   },
   lifeTimeImage: {
     width: '100%',
-    height: Size40 * 3,
-    top: Size40,
+    height: SIZES.height * 0.32,
+    bottom: Size10,
     resizeMode: 'contain',
+  },
+  orText: {
+    textAlign: 'center',
+    fontSize: fontSize16,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
+    color: '#008EFE',
+    fontStyle: 'italic',
+    marginVertical: Size10,
+    fontWeight: fontWeight700,
+  },
+  giftCardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9FB',
+    borderRadius: Size16,
+    padding: Size12,
+    gap: Size16,
+    alignSelf: 'center',
+    width: '95%',
+    marginVertical: Size10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  giftImage: {
+    width: Size40 * 1.5,
+    height: Size40 * 1.5,
+  },
+  giftTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  giftTextTitle: {
+    fontSize: fontSize16,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
+    color: '#1E1B4B',
+    fontWeight: fontWeight700,
+  },
+  giftTextSubtitle: {
+    fontSize: fontSize14,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_BOLD,
+    color: '#4338CA',
+    fontWeight: fontWeight700,
+    marginTop: Size4,
+  },
+  actionContainer: {
+    width: '100%',
+    paddingTop: Size10,
   },
 });

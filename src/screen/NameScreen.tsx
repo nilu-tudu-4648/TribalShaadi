@@ -127,6 +127,7 @@ const NameScreen = () => {
         <View style={styles.content}>
           <HeaderBack
             onPress={() => navigation.navigate(ROUTES.GENDER)}
+            progress={0.1}
           />
           <View style={globalStyles.headerSection}>
           <AppText

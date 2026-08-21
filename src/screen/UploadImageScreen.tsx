@@ -205,6 +205,7 @@ const UploadImageScreen = () => {
       <View style={styles.content}>
         <HeaderBack
           onPress={() => navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER)}
+          progress={0.9}
         />
 
         <View style={globalStyles.headerSection}>

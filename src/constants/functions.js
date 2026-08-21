@@ -36,8 +36,8 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-// export const apiUrl = 'https://api.tribalshaadi.co.in';
-export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+export const apiUrl = 'https://api.tribalshaadi.co.in';
+// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
@@ -70,6 +70,7 @@ export const passUserUrl = 'app/proposals/passUser';
 export const getProposalsSendByMeUrl = 'app/proposals/getProposalsSendByMe';
 export const getProposalsGotByMeUrl = 'app/proposals/getProposalsGotByMe';
 export const getPassedUsersUrl = 'app/proposals/getPassedUsers';
+export const getProfileViewedUsersUrl = 'app/proposals/getCancelledByUsers';
 export const cancelProposalRequestUrl = 'app/proposals/cancelProposalRequest';
 export const acceptRejectProposalUrl = 'app/proposals/acceptRejectProposal';
 export const getSelectedUserUrl = 'app/users/viewUserDetail';
