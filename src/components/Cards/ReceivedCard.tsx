@@ -22,12 +22,14 @@ const ReceivedCard = ({
   onConnect,
   onPress,
   planPurchased,
+  isProfileView,
 }: {
   item: any;
   onDecline?: () => void;
   onConnect?: (item: any) => void;
   onPress: () => void;
   planPurchased: boolean;
+  isProfileView: boolean;
 }) => {
   return (
     <Pressable onPress={onPress} style={styles.card}>
@@ -72,7 +74,7 @@ const ReceivedCard = ({
           )}
         </ImageBackground>
       </View>
-      {planPurchased && (
+      {planPurchased && !isProfileView && (
         <View style={styles.buttonRow}>
           <AppButton
             title="Decline"

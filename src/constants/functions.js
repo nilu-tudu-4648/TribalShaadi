@@ -36,8 +36,8 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const apiUrl = 'https://api.tribalshaadi.co.in';
-// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';

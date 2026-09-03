@@ -223,6 +223,7 @@ const InterestScreen = () => {
                     });
                   }
                 }}
+                isProfileView={true}
                 planPurchased={packageByUserId.length > 0 || user?.gender === "Female"}
               />
             )}
@@ -256,6 +257,7 @@ const InterestScreen = () => {
                     });
                   }
                 }}
+                isProfileView={false}
                 planPurchased={packageByUserId.length > 0 || user?.gender === "Female"}
               />
             )}
