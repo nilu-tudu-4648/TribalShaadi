@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  ScrollView,
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -178,14 +179,18 @@ const InterestScreen = () => {
       );
     }
   };
-  
   return (
     <>
       <AppSafeView style={styles.container}>
           <View style={styles.header}>
             <AppText text="Interests" textStyle={styles.headerTitle} />
           </View>
-         <View style={styles.tabsContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsContainer}
+          style={styles.tabsScroll}
+        >
           {INTEREST_TABS.map((tab, idx) => (
             <TouchableOpacity
               key={tab.label}
@@ -202,7 +207,7 @@ const InterestScreen = () => {
               />
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
         {selectedTab === 0 && (
           <FlatList
             data={profileViewedUsers}
@@ -311,7 +316,7 @@ const InterestScreen = () => {
         )}
         <ProfileBottomSheet
           bottomSheetRef={bottomSheetRef}
-          isButtonVisible={selectedTab === 1 ? true : false}
+          isButtonVisible={selectedTab === 2 ? true : false}
           user={user}
           currentUserPackage={currentUserPackage}
         />
@@ -349,15 +354,22 @@ const styles = StyleSheet.create({
     fontFamily: 'System',
     letterSpacing: -1,
   },
+  tabsScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   tabsContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: SIZES.base,
+    paddingRight: SIZES.padding2,
   },
   tab: {
     paddingVertical: SIZES.base1,
     paddingHorizontal: SIZES.base,
     borderRadius: SIZES.radius * 0.4,
     backgroundColor: '#F4F3F8',
+    flexShrink: 0,
   },
   tabSelected: {
     backgroundColor: '#000',

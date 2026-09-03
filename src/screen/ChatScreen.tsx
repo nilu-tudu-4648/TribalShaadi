@@ -32,7 +32,6 @@ import {
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   getSelectedUserUrl,
-  imageUrl,
   updateProposalIsNewApi,
   updateProposalIsNewUrl,
 } from '../constants/functions';
@@ -204,7 +203,7 @@ const ChatScreen = () => {
       <View key={item.id} style={styles.conversationItem}>
         <Pressable onPress={() => handleCardPress(item.friendId)}>
           <Image
-            source={{ uri: imageUrl + item.image }}
+            source={{ uri: item.image }}
             style={styles.profileImage}
             resizeMode="cover"
           />

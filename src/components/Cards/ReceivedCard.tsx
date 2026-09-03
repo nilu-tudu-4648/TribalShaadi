@@ -13,7 +13,6 @@ import {
   Size20,
   Size25,
 } from '../../constants/Sizes';
-import { imageUrl } from '../../constants/functions';
 import AppButton from '../AppButton';
 import NameComponent from '../NameComponent';
 
@@ -34,7 +33,7 @@ const ReceivedCard = ({
     <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={{ uri: `${imageUrl + (item.profileImage || item.image)}` }}
+          source={{ uri: `${item.profileImage || item.image}` }}
           style={styles.profileImage}
           blurRadius={planPurchased ? 0 : 50}
         >
@@ -50,7 +49,7 @@ const ReceivedCard = ({
               age={item.age}
               isVerified={item.isVerified}
               isPremium={item.isPremium}
-              height={item.height}
+              height={item.height ?? item.heightName ?? ''}
               religion={item.religion}
               caste={item.community}
               districtName={(item.districts || item.district) ?? ''}
@@ -60,9 +59,10 @@ const ReceivedCard = ({
           ) : (
             <NameComponent
               name={`${item.firstName} ${item.lastName ?? ''}`}
+              age={item.age}
               isVerified={false}
               isPremium={false}
-              height={"0"}
+              height={item.height ?? item.heightName ?? ''}
               religion={""}
               caste={""}
               districtName={(item.districts || item.district) ?? ''}

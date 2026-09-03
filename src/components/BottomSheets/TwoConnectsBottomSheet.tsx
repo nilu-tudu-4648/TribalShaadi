@@ -19,7 +19,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-import { imageUrl, convertCmToReadableHeight } from '../../constants/functions';
+import { convertCmToReadableHeight } from '../../constants/functions';
 import { HomeIcon2 } from '../svg/SvgIcons';
 
 const BUTTON_HEIGHT = 56;
@@ -95,7 +95,7 @@ const SwipeableUserCard = ({ users }: { users?: any[] }) => {
         <ImageBackground
           source={
             currentUser?.imageUrl
-              ? { uri: `${imageUrl}${currentUser.imageUrl}` }
+              ? { uri: `${currentUser.imageUrl}` }
               : require('../../assets/images/genuine.png')
           }
           style={styles.swipeCardImage}

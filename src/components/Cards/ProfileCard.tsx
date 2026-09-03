@@ -24,8 +24,8 @@ import {
 } from '../../constants/Sizes';
 import {
   convertCmToReadableHeight,
-  imageUrl,
   formatDateShort,
+  resolveImageUri,
 } from '../../constants/functions';
 import {
   TribeIcon,
@@ -118,6 +118,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   handleSendProposal,
   freeConnect,
 }) => {
+  const profileImageUri = resolveImageUri(image);
+  console.log(profileImageUri, 'profileImageUri');
   return (
     <ScrollView
       style={styles.scrollView}
@@ -131,7 +133,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     >
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={{ uri: `${imageUrl + image}` }}
+          source={{ uri: `${profileImageUri}` }}
           style={styles.profileImage}
         >
           <LinearGradient

@@ -15,7 +15,7 @@ import { CloseIcon } from '../components/svg/SvgIcons2';
 import { useNavigation } from '@react-navigation/native';
 import { ROUTES } from '../constants/data';
 import { useDispatch, useSelector } from 'react-redux';
-import { baseUrl, getProposalsGotByMeUrl, imageUrl } from '../constants/functions';
+import { baseUrl, getProposalsGotByMeUrl } from '../constants/functions';
 import { getProposalsGotByMeApi } from '../store/reducers/userReducer';
 
 const MathcingScreen = () => {
@@ -102,7 +102,7 @@ const MathcingScreen = () => {
           ]}
         >
           <Image
-            source={{ uri: `${imageUrl + acceptedUser.profileImage}` }}
+            source={{ uri: `${acceptedUser.profileImage}` }}
             // source={require('../assets/images/selfieImage.png')}
             style={styles.matchImage}
           />

@@ -3,7 +3,6 @@ import React from 'react';
 import { COLORS } from '../../constants/AppColors';
 import { fontSize14, fontSize16, Size4, Size8, Size12, Size16, fontSize12 } from '../../constants/Sizes';
 import AppText from '../AppText';
-import { imageUrl } from '../../constants/functions';
 
 interface SentCardProps {
   item: {
@@ -24,7 +23,7 @@ const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
   // console.log(item, 'item');
   return (
     <Pressable style={styles.card} onPress={onPress}>
-      <Image  source={{ uri: `${imageUrl + item.image}` }} style={styles.profileImage} />
+      <Image  source={{ uri: `${item.image}` }} style={styles.profileImage} />
       <View style={styles.infoContainer}>
         <AppText
           text={`${item.firstName || ''} ${item.lastName || ''}, ${item.age || ''}`}

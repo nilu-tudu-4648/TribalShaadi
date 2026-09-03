@@ -9,12 +9,11 @@ import {
 } from '../../constants/Sizes';
 import AppText from '../AppText';
 import LinearGradient from 'react-native-linear-gradient';
-import { imageUrl } from '../../constants/functions';
 
 const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
   return (
     <Pressable onPress={onPress} style={styles.profileCard}>
-      <Image source={{uri: imageUrl + item.image}} style={styles.profileImage} />
+      <Image source={{uri: item.image}} style={styles.profileImage} />
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
         start={{ x: 0, y: 0 }}
@@ -23,7 +22,9 @@ const RecentCard = ({ item, onPress }: { item: any; onPress: () => void }) => {
       />
       <View style={styles.profileInfo}>
         <AppText
-          text={item.firstName + ' ' +  `${item.lastName ?? ''}`}
+          text={`${item.firstName} ${item.lastName ?? ''}${
+            item.age != null && item.age !== '' ? `, ${item.age}` : ''
+          }`}
           textStyle={styles.profileName}
         />
         <AppText

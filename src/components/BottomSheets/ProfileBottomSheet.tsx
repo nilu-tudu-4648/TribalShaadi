@@ -48,9 +48,12 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
   currentUserPackage,
   report = true,
 }) => {
-  const { selectedUser, currentMatchedUserGalleryImageList } = useSelector(
-    (state: any) => state.entities.userReducer,
-  );
+  const {
+    selectedUser,
+    currentMatchedUserGalleryImageList,
+    proposalsSendByMe,
+    passedUsers,
+  } = useSelector((state: any) => state.entities.userReducer);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -109,6 +112,18 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
                 selectedUser.firstName + ' ' + (selectedUser.lastName ?? '')
               }
               isNameLoading={false}
+              gender={user?.gender ?? ''}
+              freeConnect={
+                Array.isArray(currentUserPackage) &&
+                currentUserPackage.length === 0 &&
+                user?.gender !== 'Female'
+                  ? `${Math.min(
+                      (proposalsSendByMe?.length ?? 0) +
+                        (passedUsers?.length ?? 0),
+                      5,
+                    )}/5`
+                  : ''
+              }
               age={selectedUser.age}
               height={selectedUser.height}
               religion={selectedUser.religion}
@@ -117,10 +132,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               stateName={selectedUser.stateName}
               bio={selectedUser.aboutMe}
               image={selectedUser.image || selectedUser.imageUrl}
-              galleryImageList={
-                selectedUser.galleryImageList ||
-                currentMatchedUserGalleryImageList
-              }
+              // galleryImageList={
+              //   selectedUser.galleryImageList ||
+              //   currentMatchedUserGalleryImageList
+              // }
               isLoading={false}
               maritalStatus={selectedUser.maritalStatus}
               dob={selectedUser.birthDate}

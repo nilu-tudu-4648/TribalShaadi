@@ -31,7 +31,7 @@ import {
   HeartIcon,
 } from '../components/svg/SvgIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { baseUrl, delay, imageUrl } from '../constants/functions';
+import { baseUrl, delay, resolveImageUri } from '../constants/functions';
 import { PreferenceIcon } from '../components/svg/SvgIcons2';
 import Loader from '../components/loader/Loader';
 import ProfileBottomSheet from '../components/BottomSheets/ProfileBottomSheet';
@@ -174,7 +174,8 @@ const AccountScreen = () => {
       route: ROUTES.SETTINGS,
     },
   ];
-
+  const profileImageUri = resolveImageUri(user?.image);
+  console.log(profileImageUri, 'profileImageUri');
   return (
     <>
       {loader ? (
@@ -189,7 +190,9 @@ const AccountScreen = () => {
               }}
             >
               <Image
-                source={{ uri: imageUrl + user?.image }}
+                source={
+                  profileImageUri ? { uri: profileImageUri } : undefined
+                }
                 style={styles.profileImage}
               />
             </TouchableOpacity>

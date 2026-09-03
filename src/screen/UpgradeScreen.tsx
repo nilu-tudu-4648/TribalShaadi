@@ -163,7 +163,7 @@ const UpgradeScreen = () => {
         key: paymentGateways.jsonData.apiKey,
         amount: selectedPackage.price * 100,
         currency: 'INR',
-        name: 'TribalShaadi',
+        name: 'Tribalshaadi Pvt Ltd',
         description: `${selectedPackage.duration} Months Premium Subscription`,
         order_id: razorPayOrderId.id,
         handler: function (response: any) {

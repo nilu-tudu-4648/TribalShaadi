@@ -43,13 +43,13 @@ import {
   getChatHistoryByUserId,
   getUserDetailsApi,
   getUserDetailsUrl,
-  imageUrl,
   setReducerLoadingfalse,
   updateChatIsReadApi,
   updateChatIsReadUrl,
   baseUrl,
   insertUserNotificationsUrl,
   apiUrl,
+  resolveImageUri,
 } from '../constants/functions';
 import AppTextInput from '../components/AppTextInput';
 import { io, Socket } from 'socket.io-client';
@@ -600,13 +600,13 @@ const ConversationsScreen = () => {
           <View style={styles.userImagesContainer}>
             <View style={styles.userImageWrapper}>
               <Image
-                source={{ uri: imageUrl + user?.image }}
+                source={{ uri: resolveImageUri(user?.image) }}
                 style={styles.userImage}
               />
             </View>
             <View style={[styles.userImageWrapper, styles.overlappingImage]}>
               <Image
-                source={{ uri: imageUrl + userDetails?.image }}
+                source={{ uri: resolveImageUri(userDetails?.image) }}
                 style={styles.userImage}
               />
             </View>

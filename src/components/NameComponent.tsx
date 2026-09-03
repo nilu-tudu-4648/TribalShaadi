@@ -4,7 +4,6 @@ import AppText from './AppText';
 import { fontSize24, SIZES, Size25, fontSize16, Size4, fontSize14 } from '../constants/Sizes';
 import { COLORS } from '../constants/AppColors';
 import { HomeIcon2 } from './svg/SvgIcons';
-import { convertCmToReadableHeight } from '../constants/functions';
 
 interface NameComponentProps {
   name: string;
@@ -33,6 +32,25 @@ const NameComponent: React.FC<NameComponentProps> = ({
   isNameLoading = false,
   freeConnect,
 }) => {
+  const asNumber = Number(height);
+  const heightLabel =
+    Number.isFinite(asNumber) && asNumber > 0
+      ? (() => {
+          let feet = Math.floor(asNumber / 30.48);
+          let inches = Math.round((asNumber / 30.48 - feet) * 12);
+          if (inches >= 12) {
+            feet += 1;
+            inches -= 12;
+          }
+          return `${feet} ft ${inches} in`;
+        })()
+      : height && String(height) !== '0'
+        ? String(height)
+        : '';
+  const detailsParts = [heightLabel, religion, caste].filter(
+    part => part != null && String(part).trim() !== '',
+  );
+
   return (
     <View style={styles.cardContent}>
       {isNameLoading ? (
@@ -48,9 +66,13 @@ const NameComponent: React.FC<NameComponentProps> = ({
           </View>
         </View>
       ) : (
-        <View>
+        <View style={styles.content}>
           <View style={styles.nameContainer}>
-            <AppText text={`${name}, ${age ? age : ""}`} textStyle={styles.name} />
+            <AppText
+              text={`${name}${age ? `, ${age}` : ''}`}
+              textStyle={styles.name}
+              numberOfLines={1}
+            />
             {isVerified && (
               <Image
                 source={require('./../assets/images/tick.png')}
@@ -64,16 +86,13 @@ const NameComponent: React.FC<NameComponentProps> = ({
               />
             )}
           </View>
-          {
-            height !== "0" &&
+          {detailsParts.length > 0 ? (
             <AppText
-              text={`${convertCmToReadableHeight(
-                height,
-              )} · ${religion} · ${caste}`}
-              textStyle={styles.details}
+              text={detailsParts.join(' · ')}
+              textStyle={styles.location}
             />
-          }
-          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingRight: Size4 * 3 }}>
+          ) : null}
+          <View style={styles.locationRow}>
             <View style={styles.homeIconContainer}>
               <HomeIcon2 color={COLORS.white} />
               <AppText
@@ -96,7 +115,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
               freeConnect &&
               <View style={styles.pillContainer}>
                 <AppText
-                  text={`${freeConnect} Free Connect`}
+                  text={`${freeConnect} Free Profiles`}
                   textStyle={styles.pillText}
                 />
               </View>
@@ -114,6 +133,7 @@ export type { NameComponentProps };
 const styles = StyleSheet.create({
   cardContent: {
     paddingLeft: SIZES.padding,
+    width: '100%',
   },
   nameMainContainer: {
   },
@@ -121,14 +141,19 @@ const styles = StyleSheet.create({
     fontSize: fontSize24,
     fontWeight: '700',
     color: COLORS.white,
+    flex: 1,
+    flexShrink: 1,
   },
   age: {
-    fontWeight: '400',
+    fontSize: fontSize24,
+    fontWeight: '700',
+    color: COLORS.white,
+    flexShrink: 0,
   },
   details: {
     fontSize: fontSize16,
     color: COLORS.white,
-    marginVertical: 4
+    marginVertical: 4,
   },
   location: {
     fontSize: fontSize16,
@@ -145,6 +170,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SIZES.base2,
+    width: '100%',
+    paddingRight: Size4 * 3,
+  },
+  content: {
+    width: '100%',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingRight: Size4 * 3,
   },
   verificationIcon: {
     width: Size25,

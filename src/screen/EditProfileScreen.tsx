@@ -42,9 +42,9 @@ import {
   getUserDetailsApi,
   getUserDetailsUrl,
   getUserImageListApi,
-  imageUrl,
   setReducerLoadingfalse,
   uploadImage,
+  resolveImageUri,
 } from '../constants/functions';
 import AppToast from '../components/AppToast';
 import { setLoadingTrue } from '../store/reducers/authReducer';
@@ -56,6 +56,7 @@ import Loader from '../components/loader/Loader';
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
+  console.log(user, 'user');
   const dispatch = useDispatch();
   const [isImageValid, setIsImageValid] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -203,7 +204,7 @@ const EditProfileScreen = () => {
               <View style={styles.profileImage}>
                 <View style={styles.profileImagePlaceholder}>
                   <Image
-                    source={{ uri: imageUrl + user?.image }}
+                    source={{ uri: resolveImageUri(user?.image) }}
                     style={styles.placeholderImage}
                     resizeMode="cover"
                   />

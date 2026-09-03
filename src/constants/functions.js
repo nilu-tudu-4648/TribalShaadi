@@ -63,6 +63,25 @@ export const addEditGalleryImageListUrl = 'app/users/addEditGalleryImageList';
 export const deleteUserUrl = 'admin/users/deleteUser';
 export const imageUrl = apiUrl + '/';
 
+export const resolveImageUri = path => {
+  if (!path || typeof path !== 'string') {
+    return undefined;
+  }
+  const trimmed = path.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (
+    /^https?:\/\//i.test(trimmed) ||
+    trimmed.startsWith('file:') ||
+    trimmed.startsWith('data:')
+  ) {
+    return trimmed;
+  }
+  const relative = trimmed.startsWith('/') ? trimmed.slice(1) : trimmed;
+  return `${imageUrl}${relative}`;
+};
+
 // Home Screen API
 export const getMatchedUsersUrl = 'app/users/getAllUsers';
 export const sendProposalUrl = 'app/proposals/sendProposal';
