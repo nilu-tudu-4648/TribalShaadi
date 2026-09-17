@@ -153,9 +153,8 @@ const InterestScreen = () => {
       dispatch(
         insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
           title: NOTIFICATION_MESSAGES.ACCEPTED_PROPOSAL.title,
-          message: `Great news! ${
-            user.firstName + ' ' + (user.lastName ?? '')
-          } ${NOTIFICATION_MESSAGES.ACCEPTED_PROPOSAL.message}`,
+          message: `Great news! ${user.firstName + ' ' + (user.lastName ?? '')
+            } ${NOTIFICATION_MESSAGES.ACCEPTED_PROPOSAL.message}`,
           receiverUserId: item.senderUserId,
         }),
       );
@@ -182,9 +181,9 @@ const InterestScreen = () => {
   return (
     <>
       <AppSafeView style={styles.container}>
-          <View style={styles.header}>
-            <AppText text="Interests" textStyle={styles.headerTitle} />
-          </View>
+        <View style={styles.header}>
+          <AppText text="Interests" textStyle={styles.headerTitle} />
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -280,7 +279,15 @@ const InterestScreen = () => {
             renderItem={({ item }) => (
               <RecentCard
                 item={item}
-                onPress={() => handleCardPress(item.id)}
+                onPress={() => {
+                  if (packageByUserId.length > 0 || user?.gender === "Female") {
+                    handleCardPress(item.id);
+                  } else {
+                    (navigation as any).navigate(ROUTES.STACK, {
+                      screen: ROUTES.UPGRADE,
+                    });
+                  }
+                }}
               />
             )}
             keyExtractor={(item, index) => index.toString()}

@@ -40,7 +40,6 @@ import ProfileCardShimmer from '../components/ProfileCardShimmer';
 import AnimatedToast from '../components/AnimatedToast';
 import {
   cancelProposalRequestApi,
-  getCurrentMatchedApi,
   getPassedUsersApi,
   getProposalsGotByMeApi,
   getProposalsSendByMeApi,
@@ -54,7 +53,7 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import { getCurrentUserPackageApi, getPackageByUserIdApi, getPackageListApi } from '../store/reducers/paymentReducer';
+import { getPackageByUserIdApi, getPackageListApi } from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
@@ -81,27 +80,36 @@ const HomeScreen = () => {
   const posthog = usePostHog();
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { user } = useSelector((state: any) => state.entities.authReducer);
-  const { currentMatchedUser, proposalsSendByMe ,passedUsers} =
-    useSelector((state: any) => state.entities.userReducer);
+  const user = useSelector((state: any) => state.entities.authReducer.user);
+  const proposalsSendByMe = useSelector(
+    (state: any) => state.entities.userReducer.proposalsSendByMe,
+  );
+  const passedUsers = useSelector(
+    (state: any) => state.entities.userReducer.passedUsers,
+  );
   const [matchedUsers, setMatchedUsers] = useState<any[]>([]);
-  const { currentUserPackage, packageByUserId } = useSelector(
-    (state: any) => state.entities.paymentReducer,
+  const packageByUserId = useSelector(
+    (state: any) => state.entities.paymentReducer.packageByUserId,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
-  const [actionInProgress, setActionInProgress] = useState(false);
   const [showInterestToast, setShowInterestToast] = useState(false);
   const [detailsCache, setDetailsCache] = useState<Record<number, any>>({});
   const [packageCache, setPackageCache] = useState<Record<number, any[]>>({});
   const [popupContent, setPopupContent] = useState<any>(null);
   const [currentProfileId, setCurrentProfileId] = useState<number | null>(null);
-  const [lockedNextProfileId, setLockedNextProfileId] = useState<number | null>(
-    null,
-  );
   const [processedCount, setProcessedCount] = useState(0);
   const latestMatchedUsersRef = useRef(matchedUsers);
+  const actionInProgressRef = useRef(false);
+  const pendingInterestToastRef = useRef(false);
+  const pendingRefreshRef = useRef<'sent' | 'passed' | null>(null);
+  const detailsCacheRef = useRef<Record<number, any>>({});
+  const packageCacheRef = useRef<Record<number, any[]>>({});
+  const detailRequestsRef = useRef(new Set<number>());
+  const packageRequestsRef = useRef(new Set<number>());
+  const isAnimatingRef = useRef(false);
+  const pendingCacheRenderRef = useRef(false);
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const selfieBottomSheetRef = useRef<BottomSheet | null>(null);
   const twoConnectsBottomSheetRef = useRef<BottomSheet | null>(null);
@@ -157,13 +165,35 @@ const HomeScreen = () => {
     (nextActive: 1 | 2, targetIdx: number) => {
       setActiveCard(nextActive);
       setCurrentIndex(targetIdx);
+      setProcessedCount(prev => prev + 1);
+      isAnimatingRef.current = false;
+      if (pendingCacheRenderRef.current) {
+        pendingCacheRenderRef.current = false;
+        setDetailsCache({ ...detailsCacheRef.current });
+        setPackageCache({ ...packageCacheRef.current });
+      }
       const targetUser = latestMatchedUsersRef.current?.[targetIdx];
       if (targetUser?.id) {
         setCurrentProfileId(targetUser.id);
       }
-      setLockedNextProfileId(null);
+      actionInProgressRef.current = false;
+
+      if (pendingInterestToastRef.current) {
+        pendingInterestToastRef.current = false;
+        setShowInterestToast(true);
+      }
+
+      const refreshType = pendingRefreshRef.current;
+      pendingRefreshRef.current = null;
+      if (refreshType === 'sent') {
+        dispatch(
+          getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
+        );
+      } else if (refreshType === 'passed') {
+        dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
+      }
     },
-    [],
+    [dispatch],
   );
   const startTransition = (direction: 'left' | 'right') => {
     const hasMatches = matchedUsers && matchedUsers.length > 0;
@@ -176,8 +206,7 @@ const HomeScreen = () => {
     }
 
     const targetIdx = resolvedNext < matchedUsers.length ? resolvedNext : 0;
-    const targetId = matchedUsers[targetIdx]?.id ?? null;
-    setLockedNextProfileId(targetId);
+    isAnimatingRef.current = true;
 
     const inFrom = direction === 'right' ? screenWidth : -screenWidth;
     const outTo = direction === 'right' ? -screenWidth : screenWidth;
@@ -228,103 +257,98 @@ const HomeScreen = () => {
       );
     }
   };
-  const handleSendProposal = async (id: string) => {
+  const handleSendProposal = (id: string) => {
+    if (actionInProgressRef.current) return;
+
     const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
     const isFemale = user?.gender === 'Female';
     const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
     if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
       twoConnectsBottomSheetRef?.current?.expand();
+      return;
     }
-    else {
-      try {
-        setActionInProgress(true);
-        posthog.capture('Sent_Interest')
-        if (!matchedUsers || matchedUsers.length === 0) {
-          setActionInProgress(false);
-          return;
-        }
 
-        const currentUserId =
-          matchedUsers && matchedUsers[currentIndex]
-            ? matchedUsers[currentIndex].id
-            : id;
-        if (!currentUserId) {
-          setActionInProgress(false);
-          return;
-        }
+    const currentUserId = matchedUsers[currentIndex]?.id ?? id;
+    if (!currentUserId) return;
 
-        dispatch(
-          sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
-            proposalUserId: currentUserId,
-          }),
-        ),
-          dispatch(
-            getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`),
-          ),
-          dispatch(
-            insertUserNotificationsApi(`${baseUrl}/${insertUserNotificationsUrl}`, {
-              title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
-              message: `${user.firstName} ${user.lastName ?? ''} ${NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
-                }`,
-              receiverUserId: currentUserId,
+    actionInProgressRef.current = true;
+    pendingInterestToastRef.current = true;
+    pendingRefreshRef.current = 'sent';
+    startTransition('left');
+
+    requestAnimationFrame(() => {
+      posthog.capture('Sent_Interest');
+      (async () => {
+        try {
+          await dispatch(
+            sentProposalApi(`${baseUrl}/${sendProposalUrl}`, {
+              proposalUserId: currentUserId,
             }),
-          )
-        startTransition('left');
-        setProcessedCount(prev => prev + 1);
-        setShowInterestToast(true);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setActionInProgress(false);
-      }
-    }
+          );
+          dispatch(
+            insertUserNotificationsApi(
+              `${baseUrl}/${insertUserNotificationsUrl}`,
+              {
+                title: NOTIFICATION_MESSAGES.NEW_PROPOSAL.title,
+                message: `${user.firstName} ${user.lastName ?? ''} ${
+                  NOTIFICATION_MESSAGES.NEW_PROPOSAL.message
+                }`,
+                receiverUserId: currentUserId,
+              },
+            ),
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      })();
+    });
   };
 
-  const handleCancelProposal = async (id: string) => {
+  const handleCancelProposal = (id: string) => {
+    if (actionInProgressRef.current) return;
+
     const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
     const isFemale = user?.gender === 'Female';
     const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
     if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
       twoConnectsBottomSheetRef?.current?.expand();
+      return;
     }
-    else {
-      try {
-        setActionInProgress(true);
 
-        if (!matchedUsers || matchedUsers.length === 0) {
-          setActionInProgress(false);
-          return;
+    const currentUserId = matchedUsers[currentIndex]?.id ?? id;
+    if (!currentUserId) return;
+
+    actionInProgressRef.current = true;
+    pendingRefreshRef.current = 'passed';
+    startTransition('right');
+
+    requestAnimationFrame(() => {
+      posthog.capture('declined_match');
+      (async () => {
+        try {
+          await dispatch(
+            cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
+              proposalUserId: currentUserId,
+            }),
+          );
+        } catch (error) {
+          console.log(error);
         }
-
-        const currentUserId =
-          matchedUsers && matchedUsers[currentIndex]
-            ? matchedUsers[currentIndex].id
-            : id;
-        if (!currentUserId) {
-          setActionInProgress(false);
-          return;
-        }
-
-        startTransition('right');
-        dispatch(
-          cancelProposalRequestApi(`${baseUrl}/${passUserUrl}`, {
-            proposalUserId: currentUserId,
-          }),
-        ),
-          dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`)),
-          setProcessedCount(prev => prev + 1);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setActionInProgress(false);
-      }
-    }
+      })();
+    });
   };
   // Helper: fetch user details silently (no redux)
   const fetchDetailSilently = useCallback(
     async (userId: number) => {
+      if (
+        !userId ||
+        detailsCacheRef.current[userId] ||
+        detailRequestsRef.current.has(userId)
+      ) {
+        return;
+      }
+      detailRequestsRef.current.add(userId);
       try {
-        if (!userId || detailsCache[userId]) return;
         const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
         if (!token) return;
         const resp = await axios.get(
@@ -332,10 +356,20 @@ const HomeScreen = () => {
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const record = resp?.data?.recordList?.[0];
-        if (record) setDetailsCache(prev => ({ ...prev, [userId]: record }));
-      } catch (e) { }
+        if (record) {
+          detailsCacheRef.current[userId] = record;
+          if (isAnimatingRef.current) {
+            pendingCacheRenderRef.current = true;
+          } else {
+            setDetailsCache(prev => ({ ...prev, [userId]: record }));
+          }
+        }
+      } catch (e) {
+      } finally {
+        detailRequestsRef.current.delete(userId);
+      }
     },
-    [detailsCache],
+    [],
   );
 
   const fetchMatchedUsers = useCallback(async () => {
@@ -346,8 +380,8 @@ const HomeScreen = () => {
       const { data } = await axios.get(`${baseUrl}/${getMatchedUsersUrl}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const popupContent = await getPopupContent();
-      setPopupContent(popupContent);
+      const fetchedPopupContent = await getPopupContent();
+      setPopupContent(fetchedPopupContent);
       // Use map + filter only once for better perf
       const list = Array.isArray(data?.recordList) ? data.recordList : [];
       const filtered = list.length
@@ -361,7 +395,7 @@ const HomeScreen = () => {
     } catch (e) {
       console.log(e, 'error');
     }
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     fetchMatchedUsers();
   }, [fetchMatchedUsers]);
@@ -383,12 +417,19 @@ const HomeScreen = () => {
       }
     });
     return unsubscribe;
-  }, [navigation, matchedUsers, currentIndex, dispatch, user]);
+  }, [navigation, user]);
   // Helper: fetch package silently
   const fetchPackageSilently = useCallback(
     async (userId: number) => {
+      if (
+        !userId ||
+        packageCacheRef.current[userId] ||
+        packageRequestsRef.current.has(userId)
+      ) {
+        return;
+      }
+      packageRequestsRef.current.add(userId);
       try {
-        if (!userId || packageCache[userId]) return;
         const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
         if (!token) return;
         const resp = await axios.post(
@@ -397,15 +438,23 @@ const HomeScreen = () => {
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const list = resp?.data?.recordList ?? [];
-        setPackageCache(prev => ({ ...prev, [userId]: list }));
-      } catch (e) { }
+        packageCacheRef.current[userId] = list;
+        if (isAnimatingRef.current) {
+          pendingCacheRenderRef.current = true;
+        } else {
+          setPackageCache(prev => ({ ...prev, [userId]: list }));
+        }
+      } catch (e) {
+      } finally {
+        packageRequestsRef.current.delete(userId);
+      }
     },
-    [packageCache],
+    [],
   );
 
   useEffect(() => {
     setHasRequestedMatches(true);
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     dispatch(getMaritalStatus(getMaritalStatusUrl));
@@ -417,7 +466,7 @@ const HomeScreen = () => {
     if (user?.id) {
       dispatch(getPackageByUserIdApi(`${baseUrl}/${getPackageByUserIdUrl}`, { userId: user.id }));
     }
-  }, [dispatch]);
+  }, [dispatch, user?.id]);
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
@@ -438,41 +487,19 @@ const HomeScreen = () => {
 
   useEffect(() => {
     dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-    if (matchedUsers && matchedUsers.length > currentIndex) {
-      const currentUserId = matchedUsers[currentIndex].id;
-      // Only fetch current user data - remove the problematic next user prefetch
-      dispatch(
-        getCurrentMatchedApi(
-          `${baseUrl}/${getUserDetailsUrl}id=${currentUserId}`,
-        ),
-      );
-      dispatch(
-        getCurrentUserPackageApi(`${baseUrl}/${getPackageByUserIdUrl}`, {
-          userId: currentUserId,
-        }),
-      );
-    }
-  }, [dispatch, matchedUsers, currentIndex]);
-  // Cache redux-fetched current data into local caches keyed by user id
-  useEffect(() => {
-    const curId = currentMatchedUser?.id;
-    if (!curId) return;
-    // Only update cache if the details belong to the current matched user
-    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
-      setDetailsCache(prev => ({ ...prev, [curId]: currentMatchedUser }));
-    }
-  }, [currentMatchedUser, matchedUsers, currentIndex]);
-
+  }, [dispatch]);
 
   useEffect(() => {
-    const curId = currentMatchedUser?.id;
-    if (!curId) return;
-    if (!Array.isArray(currentUserPackage)) return;
-    // Only update cache if the package belongs to the current matched user
-    if (matchedUsers && matchedUsers.length > 0 && matchedUsers[currentIndex]?.id === curId) {
-      setPackageCache(prev => ({ ...prev, [curId]: currentUserPackage }));
-    }
-  }, [currentMatchedUser?.id, currentUserPackage, matchedUsers, currentIndex]);
+    const currentUserId = matchedUsers[currentIndex]?.id;
+    if (!currentUserId) return;
+    fetchDetailSilently(currentUserId);
+    fetchPackageSilently(currentUserId);
+  }, [
+    matchedUsers,
+    currentIndex,
+    fetchDetailSilently,
+    fetchPackageSilently,
+  ]);
   // Prefetch previous, current, and next-next users in background for smoothness
   useEffect(() => {
     if (!matchedUsers || matchedUsers.length === 0) return;
@@ -522,9 +549,6 @@ const HomeScreen = () => {
       if (currentProfileId !== null) {
         setCurrentProfileId(null);
       }
-      if (lockedNextProfileId !== null) {
-        setLockedNextProfileId(null);
-      }
       setActiveCard(1);
       card1X.value = 0;
       card2X.value = screenWidth;
@@ -554,9 +578,6 @@ const HomeScreen = () => {
       if (fallbackId !== currentProfileId) {
         setCurrentProfileId(fallbackId);
       }
-      if (lockedNextProfileId !== null) {
-        setLockedNextProfileId(null);
-      }
       if (currentIndex !== 0) {
         setCurrentIndex(0);
       }
@@ -576,7 +597,6 @@ const HomeScreen = () => {
     matchedUsers,
     currentIndex,
     currentProfileId,
-    lockedNextProfileId,
     setCurrentIndex,
     setCurrentProfileId,
     card1X,
@@ -584,21 +604,7 @@ const HomeScreen = () => {
     screenWidth,
   ]);
 
-  const resolvedNextIndex = React.useMemo(() => {
-    if (!matchedUsers || matchedUsers.length === 0) {
-      return -1;
-    }
-    if (lockedNextProfileId) {
-      const lockedIdx = matchedUsers.findIndex(
-        (matchedUser: { id?: number }) =>
-          matchedUser?.id === lockedNextProfileId,
-      );
-      if (lockedIdx !== -1) {
-        return lockedIdx;
-      }
-    }
-    return nextVisualIndex;
-  }, [matchedUsers, lockedNextProfileId, nextVisualIndex]);
+  const resolvedNextIndex = nextVisualIndex;
   const renderCardContent = (cardIndex: number) => {
     if (
       !matchedUsers ||
@@ -699,14 +705,12 @@ const HomeScreen = () => {
               <View style={styles.floatingButtonContainer}>
                 <AppButton
                   title="Skip"
-                  onPress={() => {
+                  onPress={() =>
                     handleCancelProposal(matchedUsers[currentIndex].id)
-                    posthog.capture('declined_match')
-                  }
                   }
                   buttonStyle={styles.declineButton}
                   textStyle={styles.declineButtonText}
-                  isButtonDisabled={actionInProgress}
+                  isButtonDisabled={false}
                 />
                 <AppButton
                   title="Send Interest"
@@ -717,7 +721,7 @@ const HomeScreen = () => {
                   }
                   buttonStyle={styles.connectButton}
                   textStyle={styles.connectButtonText}
-                  isButtonDisabled={actionInProgress}
+                  isButtonDisabled={false}
                 />
               </View>
             </>

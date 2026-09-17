@@ -119,7 +119,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   freeConnect,
 }) => {
   const profileImageUri = resolveImageUri(image);
-  console.log(profileImageUri, 'profileImageUri');
   return (
     <ScrollView
       style={styles.scrollView}

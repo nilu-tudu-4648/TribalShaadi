@@ -36,14 +36,14 @@ const NameComponent: React.FC<NameComponentProps> = ({
   const heightLabel =
     Number.isFinite(asNumber) && asNumber > 0
       ? (() => {
-          let feet = Math.floor(asNumber / 30.48);
-          let inches = Math.round((asNumber / 30.48 - feet) * 12);
-          if (inches >= 12) {
-            feet += 1;
-            inches -= 12;
-          }
-          return `${feet} ft ${inches} in`;
-        })()
+        let feet = Math.floor(asNumber / 30.48);
+        let inches = Math.round((asNumber / 30.48 - feet) * 12);
+        if (inches >= 12) {
+          feet += 1;
+          inches -= 12;
+        }
+        return `${feet} ft ${inches} in`;
+      })()
       : height && String(height) !== '0'
         ? String(height)
         : '';
@@ -112,7 +112,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
               )}
             </View>
             {
-              freeConnect &&
+              !isPremium && freeConnect &&
               <View style={styles.pillContainer}>
                 <AppText
                   text={`${freeConnect} Free Profiles`}
@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize24,
     fontWeight: '700',
     color: COLORS.white,
-    flex: 1,
     flexShrink: 1,
   },
   age: {
@@ -170,8 +169,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SIZES.base2,
-    width: '100%',
-    paddingRight: Size4 * 3,
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   content: {
     width: '100%',
