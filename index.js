@@ -13,7 +13,6 @@ import { NOTIFICATION_MESSAGES } from './src/constants/data';
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   try {
     const { title, body } = remoteMessage?.notification || {};
-    console.log(title, body, 'title, body background');
     if (!title || !body || title === NOTIFICATION_MESSAGES.TESTING.title) return;
     // Intentionally do not show local notifications in background/quit; OS handles notification payloads
   } catch (_) {}

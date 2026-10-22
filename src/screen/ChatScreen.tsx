@@ -85,7 +85,6 @@ const ChatScreen = () => {
       await delay();
       profileBottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +118,6 @@ const ChatScreen = () => {
         },
       });
     } catch (error) {
-      console.log('error', error);
     }
   };
   useEffect(() => {
@@ -141,7 +139,6 @@ const ChatScreen = () => {
         }
         setLastMessage(data);
       } catch (error) {
-        console.log('error', error);
         setLastMessage([]);
       }
     };
@@ -170,7 +167,6 @@ const ChatScreen = () => {
           }
           setLastMessage(data);
         } catch (error) {
-          console.log('error', error);
           setLastMessage([]);
         }
       })();

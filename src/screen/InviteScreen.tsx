@@ -34,9 +34,7 @@ Download TribalShaadi now and start your journey to love!
       };
 
       const result = await Share.open(shareOptions);
-      console.log('Share result:', result);
     } catch (error) {
-      console.log('Error sharing:', error);
       if (error instanceof Error && error.message !== 'User did not share') {
         Alert.alert('Error', 'Unable to share at this time. Please try again.');
       }

@@ -117,7 +117,6 @@ const InterestScreen = () => {
       await delay();
       bottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +134,6 @@ const InterestScreen = () => {
       await delay();
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
     } catch (error) {
-      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -165,7 +163,6 @@ const InterestScreen = () => {
       });
     } catch (error) {
       setIsLoading(false);
-      console.log(error, 'error');
     } finally {
       setIsLoading(false);
       dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));

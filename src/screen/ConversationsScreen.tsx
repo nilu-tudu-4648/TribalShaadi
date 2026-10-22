@@ -239,7 +239,6 @@ const ConversationsScreen = () => {
         setChatData([INITIAL_STORY_STARTER]);
       }
     } catch (error) {
-      console.error('error loading chat messages:', error);
       setChatData([INITIAL_STORY_STARTER]);
     }
   }, [
@@ -284,7 +283,6 @@ const ConversationsScreen = () => {
           JSON.stringify(messagesArray),
         );
       } catch (error) {
-        console.error('error updating last message preview:', error);
       }
     },
     [],
@@ -371,7 +369,6 @@ const ConversationsScreen = () => {
       const serverUrls = [apiUrl];
 
       if (attempt >= serverUrls.length) {
-        console.error('❌ All connection attempts failed');
 
         return;
       }
@@ -401,10 +398,6 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('connect_error', error => {
-        console.error(
-          `❌ Connection attempt ${attempt + 1} failed:`,
-          error.message,
-        );
 
         // Try next URL after a short delay
         setTimeout(() => {
@@ -414,29 +407,22 @@ const ConversationsScreen = () => {
 
       // Handle reconnection events
       socket.current.on('reconnect', attemptNumber => {
-        console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
 
         // Re-register user after reconnection
         if (user?.id) {
-          console.log(
-            `📝 Re-registering user ${user.id} after reconnection...`,
-          );
           socket.current?.emit('register', user.id);
         }
       });
 
       socket.current.on('reconnect_error', error => {
-        console.error('❌ Reconnection failed:', error.message);
       });
 
       socket.current.on('reconnect_failed', () => {
-        console.error('❌ All reconnection attempts failed');
       });
 
       socket.current.on('receive_message', ({ from, content, timestamp }) => {
         // Convert IDs to string for comparison (in case one is number, one is string)
         if (String(from) === String(userDetails?.friendId)) {
-          console.log('✅ Message is from the correct user, adding to chat');
           addMessage({
             type: 'received',
             message: content,
@@ -448,12 +434,10 @@ const ConversationsScreen = () => {
           });
 
         } else {
-          console.log('⚠️ Message from unexpected user, ignoring');
         }
       });
 
       socket.current.on('message_sent', async ({ content }) => {
-        console.log('✅ Message sent confirmation received for:', content);
         setChatData(currentChatData =>
           currentChatData.map(msg =>
             msg.message === content && msg.status === 'sending'
@@ -462,7 +446,6 @@ const ConversationsScreen = () => {
           ),
         );
         const userStatus = await getUserStatus();
-        console.log(userStatus, 'userStatus');
         if (userStatus === 'online') {
           dispatch(
             insertUserNotificationsApi(
@@ -489,7 +472,6 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('error_message', error => {
-        console.error('❌ Socket Error:', error.response.data);
 
         // Update any sending messages to failed status
         setChatData(currentChatData =>
@@ -502,11 +484,9 @@ const ConversationsScreen = () => {
       });
 
       socket.current.on('disconnect', reason => {
-        console.log('🔴 Disconnected from socket server. Reason:', reason);
 
         if (reason === 'io server disconnect') {
           // Server disconnected the socket, it will try to reconnect automatically
-          console.log('🔄 Server disconnected, will attempt to reconnect...');
         }
       });
     },
@@ -561,17 +541,11 @@ const ConversationsScreen = () => {
   const handleSendMessage = () => {
     posthog.capture('Chat_message_sent')
     if (!socket.current?.connected) {
-      console.error('❌ Cannot send message: Not connected to server');
       return;
     }
 
     if (messageText.trim() && user?.id && userDetails?.friendId) {
       const content = messageText.trim();
-      console.log('📤 Sending message:', {
-        from: user?.id,
-        to: userDetails.friendId,
-        content,
-      });
       socket.current?.emit('send_message', {
         from: String(user?.id), // Ensure it's a string
         to: String(userDetails.friendId), // Ensure it's a string
@@ -585,12 +559,6 @@ const ConversationsScreen = () => {
       });
       setMessageText('');
     } else {
-      console.error('❌ Cannot send message:', {
-        messageEmpty: !messageText.trim(),
-        noUserId: !user?.id,
-        noUserDetailsId: !userDetails?.friendId,
-        notConnected: !socket.current?.connected,
-      });
     }
   };
   const renderMessage = (item: Message) => {

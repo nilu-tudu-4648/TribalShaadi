@@ -27,7 +27,6 @@ const AppText = ({ text, children, textStyle, useChildren = false, ...rest }: Ap
       }
       return text || '';
     } catch (error) {
-      console.error('Error rendering text:', error);
       return text || children || '';
     }
   };

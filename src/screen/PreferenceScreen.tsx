@@ -34,7 +34,13 @@ import {
   getEmploymentTypeApi,
   getMatchedUsersUrl,
   resetPreferenceApi,
+  getSecondaryPreferenceUrl,
+  getPreferenceUrl,
 } from '../constants/functions';
+import {
+  getPrimaryPreferenceApi,
+  getSecondaryPreferenceApi,
+} from '../store/reducers/paymentReducer';
 import { useNavigation } from '@react-navigation/native';
 import Loader from '../components/loader/Loader';
 import { setMatchedUserApi } from '../store/reducers/userReducer';
@@ -93,6 +99,10 @@ const PreferenceScreen = () => {
     string | null
   >(null);
   useEffect(() => {
+    dispatch(getPrimaryPreferenceApi(getPreferenceUrl));
+    dispatch(getSecondaryPreferenceApi(getSecondaryPreferenceUrl));
+  }, [dispatch]);
+  useEffect(() => {
     getEmploymentTypeApi().then(res => {
       setJobTypeOptions(res);
     });
@@ -107,7 +117,6 @@ const PreferenceScreen = () => {
           option.name.toLowerCase() === 'any'
         );
         if (anyOption && localSelectedStatuses.length === 0) {
-          console.log(String(anyOption.id), anyOption);
           setLocalSelectedStatuses([String(anyOption.id)]);
         }
       }
@@ -307,7 +316,6 @@ const PreferenceScreen = () => {
     try {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
     } catch (error) {
-      console.log(error);
     } finally {
       (navigation as any).reset({
         index: 0,

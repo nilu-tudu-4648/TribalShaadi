@@ -39,6 +39,7 @@ import {
   generateRazorPayOrderIdUrl,
   getPackageByUserIdUrl,
   getPaymentGatewaysUrl,
+  getPremiumBenefitsUrl,
   getUserDetailsApi,
   getUserDetailsUrl,
   insertPaymentUrl,
@@ -51,6 +52,7 @@ import {
   insertPaymentApi,
   savePremiumAccountApi,
   getPackageByUserIdApi,
+  getPremiumBenefitsApi,
 } from '../store/reducers/paymentReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import AppToast from '../components/AppToast';
@@ -66,27 +68,30 @@ const UpgradeScreen = () => {
     paymentGateways,
     razorPayOrderId,
     packageByUserId,
+    premiumBenefits,
   } = useSelector((state: any) => state.entities.paymentReducer);
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const [selectedPlan, setSelectedPlan] = useState(packageList[0]?.packageId);
   const [checkoutInProgress, setCheckoutInProgress] = useState(false);
   const dispatch = useDispatch();
-  // console.log('packageList', packageList);
   const posthog = usePostHog();
-  const features = [
-    {
-      icon: <HeartIcon2 color={COLORS.white} />,
-      title: 'Send Unlimited Interests',
-    },
-    {
-      icon: <BellIcon color={COLORS.white} />,
-      title: 'See Who’s Sent You Interest',
-    },
-    {
-      icon: <BellIcon color={COLORS.white} />,
-      title: 'Complete Contact Access',
-    },
+  const defaultFeatureTitles = [
+    'Send Unlimited Interests',
+    'See Who’s Sent You Interest',
+    'Complete Contact Access',
   ];
+  const benefit = premiumBenefits?.[0];
+  const featureTitles: string[] =
+    benefit?.points?.length > 0 ? benefit.points.slice(0, 3) : defaultFeatureTitles;
+  const featureIcons = [
+    <HeartIcon2 color={COLORS.white} />,
+    <BellIcon color={COLORS.white} />,
+    <BellIcon color={COLORS.white} />,
+  ];
+  const features = featureTitles.map((title, index) => ({
+    icon: featureIcons[index % featureIcons.length],
+    title,
+  }));
   const handlePlanSelect = (planId: number) => {
     setSelectedPlan(planId);
   };
@@ -106,7 +111,6 @@ const UpgradeScreen = () => {
           }),
         );
       } catch (error) {
-        console.log(error);
       } finally {
         dispatch(
           savePremiumAccountApi(savePremiumAccountUrl, {
@@ -129,14 +133,11 @@ const UpgradeScreen = () => {
     }
 
     const selectedPackage = packageList.find((p: any) => p.packageId === selectedPlan);
-    console.log('selectedPackage found:', selectedPackage);
 
     if (!selectedPackage) {
-      console.log('No selected package found for planId:', selectedPlan);
       return;
     }
 
-    console.log('Setting checkout in progress to true');
     setCheckoutInProgress(true);
 
     const paymentData = {
@@ -167,7 +168,6 @@ const UpgradeScreen = () => {
         description: `${selectedPackage.duration} Months Premium Subscription`,
         order_id: razorPayOrderId.id,
         handler: function (response: any) {
-          console.log('Payment handler response:', response);
         },
         prefill: {
           name: `${user.firstName} ${user.lastName}`,
@@ -184,21 +184,18 @@ const UpgradeScreen = () => {
 
       // Validate Razorpay options before opening
       if (!options.key || options.key.trim() === '') {
-        console.error('Invalid Razorpay key:', options.key);
         AppToast('Payment configuration error: Invalid key');
         setCheckoutInProgress(false);
         return;
       }
 
       if (!options.order_id || options.order_id.trim() === '') {
-        console.error('Invalid order ID:', options.order_id);
         AppToast('Payment configuration error: Invalid order ID');
         setCheckoutInProgress(false);
         return;
       }
 
       if (!options.amount || options.amount < 100) {
-        console.error('Invalid amount (minimum ₹1):', options.amount);
         AppToast('Payment configuration error: Invalid amount');
         setCheckoutInProgress(false);
         return;
@@ -206,34 +203,24 @@ const UpgradeScreen = () => {
 
       RazorpayCheckout.open(options)
         .then((data: any) => {
-          console.log('Razorpay checkout completed successfully:', data);
           paymentSuccessfull(data, selectedPackage);
         })
         .catch((error: any) => {
-          console.log('=== RAZORPAY ERROR DETAILS ===');
-          console.log('Full error object:', JSON.stringify(error, null, 2));
-          console.log('=== END ERROR DETAILS ===');
 
           // Handle specific error cases
           if (error.code === 'payment_cancelled') {
-            console.log('User cancelled payment');
             AppToast('Payment cancelled by user');
           } else if (error.code === 'network_error') {
-            console.log('Network error occurred');
             AppToast('Network error. Please check your internet connection.');
           } else if (error.code === 'invalid_order_id') {
-            console.log('Invalid order ID error');
             AppToast('Payment failed: Invalid order. Please try again.');
           } else if (error.code === 'payment_failed') {
-            console.log('Payment failed');
             AppToast('Payment failed. Please try again.');
           } else {
-            console.log('Unknown error occurred');
             AppToast(`Payment error: ${error.description || 'Unknown error'}`);
           }
         })
         .finally(() => {
-          console.log('Setting checkout in progress to false');
           setCheckoutInProgress(false);
         });
     }
@@ -249,6 +236,7 @@ const UpgradeScreen = () => {
   ]);
 
   useEffect(() => {
+    dispatch(getPremiumBenefitsApi(getPremiumBenefitsUrl));
     dispatch(getPaymentGatewaysApi(getPaymentGatewaysUrl));
     dispatch(getPackageByUserIdApi(getPackageByUserIdUrl, { userId: user.id }));
   }, [dispatch, user.id]);
@@ -367,7 +355,14 @@ const UpgradeScreen = () => {
 
             <View style={styles.bottomContainer}>
               <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-                <Image source={require('../assets/images/PremiumCard.png')} style={styles.lifeTimeImage} />
+                <Image
+                  source={
+                    benefit?.image
+                      ? { uri: benefit.image }
+                      : require('../assets/images/PremiumCard.png')
+                  }
+                  style={styles.lifeTimeImage}
+                />
               </ScrollView>
 
               <View style={styles.actionContainer}>

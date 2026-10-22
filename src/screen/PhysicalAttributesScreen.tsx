@@ -86,7 +86,6 @@ const PhysicalAttributesScreen = () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.error('Error submitting physical attributes:', error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER);
     }
@@ -113,12 +112,6 @@ const PhysicalAttributesScreen = () => {
               key={key}
               title={displayText}
               onPress={() => {
-                console.log(
-                  'Selected option:',
-                  option,
-                  'isObjectArray:',
-                  isObjectArray,
-                );
                 onSelect(isObjectArray ? option : option);
               }}
               isSelected={isSelected}

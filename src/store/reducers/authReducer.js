@@ -38,7 +38,6 @@ const authReducer = createSlice({
     },
     authReducerDataRequestFailed: (authReducer, action) => {
       authReducer.loader = false;
-      console.log(action.payload, 'authreducer Failed');
       if (action.payload.response.status === 401) {
         authReducer.loader = false;
         authReducer.tokenExpired = true;
@@ -47,7 +46,6 @@ const authReducer = createSlice({
     sendOTPDataReceived: (authReducer, action) => {
       authReducer.loader = false;
       authReducer.otpSent = true;
-      console.log(action.payload, 'action.payload');
       // AppToast(`${action.payload.otp} is your OTP`);
     },
     completeUserProfileV2GenderDataReceived: (authReducer, action) => {

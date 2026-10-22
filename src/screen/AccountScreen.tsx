@@ -100,7 +100,6 @@ const AccountScreen = () => {
       await delay();
       profileBottomSheetRef.current?.snapToIndex(0); // Open the bottom sheet at 50%
     } catch (error) {
-      console.log(error, 'error');
     }
   };
   const dispatch = useDispatch();
@@ -116,10 +115,8 @@ const AccountScreen = () => {
   }, [navigation]);
   const comingFromAccount = async () => {
     try {
-      console.log('comingFromAccount');
       await AsyncStorage.setItem(ASYNC_VARIBLES.IS_COMING_FROM_ACCOUNT, 'true');
     } catch (error) {
-      console.log(error, 'error');
     }
   };
   const badgeData: BadgeData[] = [
@@ -175,7 +172,6 @@ const AccountScreen = () => {
     },
   ];
   const profileImageUri = resolveImageUri(user?.image);
-  console.log(profileImageUri, 'profileImageUri');
   return (
     <>
       {loader ? (

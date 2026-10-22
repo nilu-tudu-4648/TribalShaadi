@@ -36,8 +36,8 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const apiUrl = 'https://api.tribalshaadi.co.in';
-// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
@@ -107,6 +107,11 @@ export const verifyPaymentUrl = 'app/paymentGateways/verifyPayment';
 export const insertPaymentUrl = 'app/payment/insertPayment';
 export const savePremiumAccountUrl = 'app/package/savePremiumAccount';
 export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
+export const getPreferenceUrl = 'admin/preferences/getPreference';
+export const getSecondaryPreferenceUrl =
+  'admin/secondaryPreferences/getSecondaryPreference';
+export const getPremiumBenefitsUrl =
+  'admin/premiumBenefits/getPremiumBenefits';
 
 //chatUrl
 export const getAllChatHistoryByUserIdUrl =
@@ -134,7 +139,6 @@ export const formatDateShort = dateString => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   } catch (error) {
-    console.log('Error formatting date:', error);
     return dateString;
   }
 };
@@ -178,7 +182,6 @@ export const formatChatDateHeader = timestamp => {
       return `${day}/${month}/${year}`;
     }
   } catch (error) {
-    console.log('Error formatting chat date header:', error);
     return '';
   }
 };
@@ -196,7 +199,6 @@ export const isDifferentDay = (timestamp1, timestamp2) => {
       date1.getFullYear() !== date2.getFullYear()
     );
   } catch (error) {
-    console.log('Error comparing dates:', error);
     return false;
   }
 };
@@ -212,7 +214,6 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
       userDataString === 'null' ||
       userDataString === 'undefined'
     ) {
-      console.log('No valid user data found in storage');
       navigate(ROUTES.WELCOME);
       return;
     }
@@ -221,10 +222,6 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
     try {
       user = JSON.parse(userDataString);
     } catch (parseError) {
-      console.error(
-        'Error parsing user data in checkUserLoggedIn:',
-        parseError,
-      );
       // Clear corrupted data
       try {
         await AsyncStorage.multiRemove([
@@ -232,21 +229,18 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
           ASYNC_VARIBLES.USER_TOKEN,
         ]);
       } catch (clearError) {
-        console.error('Error clearing corrupted data:', clearError);
       }
       navigate(ROUTES.WELCOME);
       return;
     }
 
     if (!user || typeof user !== 'object' || !user.id) {
-      console.log('User object is invalid - checkUserLoggedIn');
       try {
         await AsyncStorage.multiRemove([
           ASYNC_VARIBLES.USER,
           ASYNC_VARIBLES.USER_TOKEN,
         ]);
       } catch (clearError) {
-        console.error('Error clearing invalid user data:', clearError);
       }
       navigate(ROUTES.WELCOME);
       return;
@@ -264,12 +258,10 @@ export const checkUserLoggedIn = async (dispatch, isInitialLoad = true) => {
       isInitialLoad,
     );
   } catch (error) {
-    console.error('Error in checkUserLoggedIn:', error);
     // Ensure we don't crash the app - navigate to welcome as fallback
     try {
       navigate(ROUTES.WELCOME);
     } catch (navError) {
-      console.error('Error navigating to welcome:', navError);
     }
   }
 };
@@ -278,17 +270,14 @@ export const saveUserToStorage = async user => {
     await AsyncStorage.setItem(ASYNC_VARIBLES.USER, JSON.stringify(user));
     await AsyncStorage.setItem(ASYNC_VARIBLES.USER_TOKEN, user.token);
   } catch (error) {
-    console.log(error);
   }
 };
 export const sendOTPForLogin = async (url, data, setLoading) => {
   try {
     const response = await axios.post(`${baseUrl}/${url}`, data);
-    console.log(response.data, 'response sendOTPForLogin');
     // AppToast(`${response.data.otp} is your OTP`);
     return true;
   } catch (error) {
-    console.log(error.response.data, 'sendOTPForLogin');
     return false;
   } finally {
     setLoading(false);
@@ -325,14 +314,10 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
       try {
         const authResult = await checkAuth(dispatch);
         if (authResult === true) {
-          console.log(
-            'Navigating to main tabs after successful OTP verification',
-          );
           // Only navigate to MainTabs if registration is completed, otherwise checkAuth handles the step navigation
           navigation.navigate(ROUTES.MAIN_TABS);
         }
       } catch (navError) {
-        console.error('Error during post-OTP navigation:', navError);
       }
       return true;
     } else {
@@ -340,7 +325,6 @@ export const verifyOTP = async (url, data, dispatch, navigation, setError) => {
     }
   } catch (error) {
     setError('Incorrect OTP, please enter the valid OTP you received');
-    console.log(error);
   }
 };
 export const getUserDetailsApi = async (
@@ -351,16 +335,13 @@ export const getUserDetailsApi = async (
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     if (!token || token === 'null' || token === 'undefined') {
-      console.log('No valid token found for getUserDetailsApi');
 
       // During initial load, navigate to welcome instead of crashing
       if (isInitialLoad) {
-        console.log('Initial load without token - navigating to welcome');
         navigate(ROUTES.WELCOME);
         return null;
       }
 
-      console.log('No token available - skipping API call');
       return null;
     }
 
@@ -377,7 +358,6 @@ export const getUserDetailsApi = async (
       !response.data.recordList ||
       !response.data.recordList[0]
     ) {
-      console.error('Invalid response structure from getUserDetailsApi');
       return null;
     }
 
@@ -387,7 +367,6 @@ export const getUserDetailsApi = async (
     try {
       await AsyncStorage.setItem(ASYNC_VARIBLES.USER, JSON.stringify(userData));
     } catch (storageError) {
-      console.error('Error saving user data to storage:', storageError);
     }
 
     // Safe dispatch
@@ -410,25 +389,19 @@ export const getUserDetailsApi = async (
         }
       }
     } catch (dispatchError) {
-      console.error('Error dispatching user data:', dispatchError);
     }
 
     return userData;
   } catch (error) {
-    console.error('Error in getUserDetailsApi:', error);
 
     // Handle different error types safely
     if (error.response && error.response.data) {
       const status = error.response.data.status;
 
       if (status === 401) {
-        console.log('Authentication error (401) - token expired or invalid');
 
         // During initial load, don't logout aggressively - just navigate to welcome
         if (isInitialLoad) {
-          console.log(
-            'Initial load with invalid token - clearing storage and navigating to welcome',
-          );
           try {
             await AsyncStorage.multiRemove([
               ASYNC_VARIBLES.USER,
@@ -436,7 +409,6 @@ export const getUserDetailsApi = async (
             ]);
             navigate(ROUTES.WELCOME);
           } catch (clearError) {
-            console.error('Error clearing storage on 401:', clearError);
             navigate(ROUTES.WELCOME);
           }
         } else {
@@ -444,33 +416,24 @@ export const getUserDetailsApi = async (
           try {
             await logoutUser(dispatch);
           } catch (logoutError) {
-            console.error('Error during logout:', logoutError);
             // Fallback navigation
             navigate(ROUTES.WELCOME);
           }
         }
       } else if (status === 400) {
-        console.log('Bad request error (400)');
         if (isInitialLoad) {
           navigate(ROUTES.WELCOME);
         } else {
           try {
             await logoutUser(dispatch);
           } catch (logoutError) {
-            console.error('Error during logout:', logoutError);
           }
         }
       } else {
-        console.error(`API error with status ${status}`);
       }
     } else if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout in getUserDetailsApi');
     } else if (error.message === 'Network Error') {
-      console.error(
-        'Network error in getUserDetailsApi - continuing without crash',
-      );
     } else {
-      console.error('Unexpected error in getUserDetailsApi:', error.message);
     }
 
     return null;
@@ -485,7 +448,6 @@ export const checkAuth = async dispatch => {
     const userDataString = await AsyncStorage.getItem(ASYNC_VARIBLES.USER);
 
     if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
-      console.log('No user data found in storage - checkAuth (skipping)');
       return false;
     }
 
@@ -496,7 +458,6 @@ export const checkAuth = async dispatch => {
       await AsyncStorage.multiRemove([ASYNC_VARIBLES.USER, ASYNC_VARIBLES.USER_TOKEN]);
       return false;
     }
-    // console.log(user, 'user in checkAuth');
     // Last screen check
     try {
       if (user.intrests) {
@@ -506,28 +467,23 @@ export const checkAuth = async dispatch => {
       if (typeof getLastScreenName === 'function') {
         const lastScreenName = await getLastScreenName();
         if (lastScreenName && lastScreenName !== 'null') {
-          console.log(lastScreenName, 'lastScreenName');
           navigate(lastScreenName);
           return false;
         }
 
         for (const step of PROFILE_COMPLETION_STEPS) {
           if (!user[step.field]) {
-            console.log(step.screen, 'step.screen');
             navigate(step.screen);
             return false;
           }
         }
       } else {
-        console.log('getLastScreenName not defined');
         return false;
       }
     } catch (err) {
-      console.error('Error in getLastScreenName:', err);
       return false;
     }
   } catch (error) {
-    console.error('Error in checkAuth:', error?.message, error?.stack);
     return false;
   }
 };
@@ -553,12 +509,9 @@ export const logoutUser = async (dispatch,userId) => {
     try {
       const { refreshFCMToken } = require('../notification/notifications');
       await refreshFCMToken();
-      console.log('FCM token refreshed after logout');
     } catch (fcmError) {
-      console.error('Error refreshing FCM token after logout:', fcmError);
     }
   } catch (error) {
-    console.log(error);
   }
 };
 export const getUserImageListApi = async (id,setUserImageList) => {
@@ -573,12 +526,10 @@ export const getUserImageListApi = async (id,setUserImageList) => {
         },
       }
     );
-    console.log(response.data.recordList, 'response getUserImageListApi');
     if (setUserImageList) {
       setUserImageList(response.data.recordList);
     }
   } catch (error) {
-    console.log(error, 'getGalleryImageListApi');
   }
 };
 export const uploadImage = async (
@@ -593,13 +544,11 @@ export const uploadImage = async (
   try {
     const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
     const url = isProfile ? uploadProfileImageUrl : addEditGalleryImageListUrl;
-    console.log(data, `${baseUrl}/${url}`, 'data uploadImage');
     const response = await axios.post(`${baseUrl}/${url}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response, 'response uploadImage');
     if (setUserImageList) {
       getUserImageListApi(data.userId, setUserImageList);
     }
@@ -615,7 +564,6 @@ export const uploadImage = async (
       }
     }
     
-    console.log(error.response.data, 'uploadImage');
     if (error.response.data.status === 401) {
       logoutUser(dispatch);
     }
@@ -633,11 +581,9 @@ export const deleteUserApi = async (id, dispatch) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response, 'response deleteUser');
     await AsyncStorage.clear();
     logoutUser(dispatch);
   } catch (error) {
-    console.log(error.response, 'deleteUserApi');
   }
 };
 export const setReducerLoadingfalse = async (dispatch, func) => {
@@ -647,7 +593,6 @@ export const setReducerLoadingfalse = async (dispatch, func) => {
       func();
     }
   } catch (error) {
-    console.log(error, 'setReducerLoadingfalse');
   } finally {
     dispatch(setLoadingfalse());
   }
@@ -687,14 +632,12 @@ export const resetPreferenceApi = async (dispatch, func) => {
         },
       },
     );
-    console.log(response.data, 'resetPreferenceApi');
     await getUserDetailsApi(
       `${getUserDetailsUrl}id=${user.id}`,
       dispatch,
       false,
     );
   } catch (error) {
-    console.log(error, 'resetPreferenceApi');
   } finally {
     func();
   }
@@ -709,7 +652,6 @@ export const searchCitiesApi = async data => {
     });
     return response.data.recordList;
   } catch (error) {
-    console.log(error, 'searchCitiesApi');
     return [];
   }
 };
@@ -726,7 +668,6 @@ export const getCitiesByStateIdV2 = async stateId => {
     );
     return response.data.recordList;
   } catch (error) {
-    console.log(error, 'getCitiesByStateIdV2');
     return [];
   }
 };
@@ -787,7 +728,6 @@ export const getEmploymentTypeApi = async dispatch => {
     });
     return response.data.recordList;
   } catch (error) {
-    console.log(error, 'getEmploymentTypeApi');
     return [];
   }
 };
@@ -810,7 +750,6 @@ export const getChatHistoryByUserId = async (userId, dispatch) => {
     );
     dispatch(setUnreadChatHistory(filteredChat));
   } catch (error) {
-    console.log(error.response.data, 'getChatHistoryByUserId');
     return [];
   }
 };
@@ -830,7 +769,6 @@ export const filterChatByUserId = async (userId, friendId) => {
     );
     const data = response.data.recordList;
     if (!Array.isArray(data)) {
-      console.log('No chat data found or invalid format');
       return [];
     }
 
@@ -846,12 +784,10 @@ export const filterChatByUserId = async (userId, friendId) => {
       );
     });
 
-    console.log('filtered chat messages:', filteredChat.length);
     return filteredChat.sort(
       (a, b) => new Date(a.created_at) - new Date(b.created_at),
     );
   } catch (error) {
-    console.log(error, 'filterChatByUserId error');
     return [];
   }
 };
@@ -863,10 +799,8 @@ export const updateProposalIsNewApi = async (url, data) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response, 'response updateProposalIsNewApi');
     return response.data;
   } catch (error) {
-    console.log(error.response.data, 'updateProposalIsNewApi');
     return [];
   }
 };
@@ -878,10 +812,8 @@ export const updateChatIsReadApi = async (url, data) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response, 'response updateChatIsReadApi');
     return response.data;
   } catch (error) {
-    console.log(error.response.data, 'updateChatIsReadApi');
     return [];
   }
 };
@@ -894,13 +826,11 @@ export const verifySelfieApi = async (data, dispatch) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data, 'response verifySelfieApi');
     if (response.data.verified === false) {
       dispatch(setSelfieVerify(false));
     }
     return response.data;
   } catch (error) {
-    console.log(error.response.data, 'verifySelfieApi Error');
     dispatch(setSelfieVerify(false));
     return [];
   }
@@ -913,7 +843,6 @@ export const onAppClose = async dispatch => {
     
     // Check if user data exists before parsing
     if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
-      console.log('No user data available in onAppClose');
       return;
     }
     
@@ -921,7 +850,6 @@ export const onAppClose = async dispatch => {
     
     // Check if user object and id exist
     if (!user || !user.id) {
-      console.log('Invalid user data in onAppClose');
       return;
     }
     
@@ -929,13 +857,11 @@ export const onAppClose = async dispatch => {
       id: user.id,
       middleName: 'offline',
     };
-    // console.log('requestBody onAppClose', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
       getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     });
   } catch (error) {
-    console.error('onAppClose error:', error);
   }
 };
 
@@ -946,7 +872,6 @@ export const onAppForeground = async dispatch => {
     
     // Check if user data exists before parsing
     if (!userDataString || userDataString === 'null' || userDataString === 'undefined') {
-      console.log('No user data available in onAppForeground');
       return;
     }
     
@@ -954,7 +879,6 @@ export const onAppForeground = async dispatch => {
     
     // Check if user object and id exist
     if (!user || !user.id) {
-      console.log('Invalid user data in onAppForeground');
       return;
     }
     
@@ -962,13 +886,11 @@ export const onAppForeground = async dispatch => {
       id: user.id,
       middleName: 'online',
     };
-    // console.log('requestBody onAppForeground', requestBody);
     dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     setReducerLoadingfalse(dispatch, () => {
       getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     });
   } catch (error) {
-    console.error('onAppForeground error:', error);
   }
 };
 
@@ -976,7 +898,6 @@ export const savedLastScreenName = async (screenName) => {
   try {
     await AsyncStorage.setItem(ASYNC_VARIBLES.LAST_SCREEN_NAME, screenName);
   } catch (error) {
-    console.error('savedLastScreenName error:', error);
   }
 };
 
@@ -984,7 +905,6 @@ export const getLastScreenName = async () => {
   try {
     return await AsyncStorage.getItem(ASYNC_VARIBLES.LAST_SCREEN_NAME);
   } catch (error) {
-    console.error('getLastScreenName error:', error);
     return null;
   }
 };
@@ -993,7 +913,6 @@ export const navigateToLastScreen = async (navigation, ROUTES) => {
     navigation.navigate(ROUTES);
     savedLastScreenName(ROUTES);
   } catch (error) {
-    console.error('navigateToLastScreen error:', error);
   }
 };
 
@@ -1001,7 +920,6 @@ export const getPopupContent = async () => {
   try {
     const token =(await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN));
     if (!token || token === 'null' || token === 'undefined') {
-      console.log('No valid token found for getPopupContent');
       return null;
     }
 
@@ -1018,7 +936,6 @@ export const getPopupContent = async () => {
 
     return response.data.recordList;
   } catch (error) {
-    console.error('getPopupContent error:', error);
     return null;
   }
 };/**

@@ -33,7 +33,6 @@ const WelcomeHome = () => {
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  console.log(user, 'user');
   const posthog = usePostHog();
   const getUserDetails = async () => {
     try {
@@ -56,7 +55,6 @@ const WelcomeHome = () => {
       setIsLoading(true);
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       setIsLoading(false);
       dispatch(setUserRegistrationCompleted(true));

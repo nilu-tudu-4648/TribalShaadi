@@ -54,7 +54,6 @@ const PaymentSuccess = () => {
       try {
         await AsyncStorage.removeItem(ASYNC_VARIBLES.IS_COMING_FROM_ACCOUNT);
       } catch (error) {
-        console.log(error, 'error');
       }
     }
   }, [navigation]);

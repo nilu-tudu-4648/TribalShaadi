@@ -31,7 +31,6 @@ export const fontSize32 = resFontSize(3.8);
 export const fontSize34 = resFontSize(4);
 export const fontSize36 = resFontSize(4.3);
 
-// console.log("fontSize1", resFontSize(4.2));
 
 export const compPadding = screenWidth("4%");
 

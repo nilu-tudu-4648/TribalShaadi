@@ -70,9 +70,7 @@ const LoginScreen: React.FC = () => {
       const requestBody: any = {
         contactNo: '+91' + validation.cleanedNumber,
       };
-      console.log('requestBody', requestBody);
       const response = await sendOTPForLogin(url, requestBody, setLoading);
-      console.log('response', response);
       if (response) {
         navigation.navigate('OTP', {
           phoneNumber: validation.cleanedNumber || phoneNumber,
@@ -81,7 +79,6 @@ const LoginScreen: React.FC = () => {
         setAlreadyExists(true);
       }
     } catch (error: any) {
-      console.error(error?.response?.data || error.message);
       AppToast(error?.response?.data?.message || 'Failed to send OTP');
       return false;
     }

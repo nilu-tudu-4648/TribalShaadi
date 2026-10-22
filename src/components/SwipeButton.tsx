@@ -40,7 +40,6 @@ const SwipeButton = React.forwardRef<
       try {
         X.value = withSpring(0);
       } catch (error) {
-        console.error('Error resetting swipe button animation:', error);
       }
     },
   }));
@@ -51,7 +50,6 @@ const SwipeButton = React.forwardRef<
         onToggle();
       }
     } catch (error) {
-      console.error('Error in swipe button completion:', error);
     }
   };
 
@@ -61,7 +59,6 @@ const SwipeButton = React.forwardRef<
       try {
         // No additional logic needed for start
       } catch (error) {
-        console.error('Error in gesture start:', error);
       }
     })
     .onUpdate((e) => {
@@ -69,7 +66,6 @@ const SwipeButton = React.forwardRef<
         const newValue = e.translationX;
         X.value = Math.max(0, Math.min(newValue, H_SWIPE_RANGE));
       } catch (error) {
-        console.error('Error in gesture update:', error);
       }
     })
     .onEnd(() => {
@@ -81,7 +77,6 @@ const SwipeButton = React.forwardRef<
           runOnJS(handleComplete)(true);
         }
       } catch (error) {
-        console.error('Error in gesture end:', error);
       }
     });
 
@@ -92,7 +87,6 @@ const SwipeButton = React.forwardRef<
           transform: [{ translateX: X.value }],
         };
       } catch (error) {
-        console.error('Error in swipeable animation:', error);
         return { transform: [{ translateX: 0 }] };
       }
     }),
@@ -107,7 +101,6 @@ const SwipeButton = React.forwardRef<
           ),
         };
       } catch (error) {
-        console.error('Error in text animation:', error);
         return { opacity: 1 };
       }
     }),
@@ -122,7 +115,6 @@ const SwipeButton = React.forwardRef<
             try {
               return <PhoneSvg />;
             } catch (error) {
-              console.error('Error rendering PhoneSvg:', error);
               return (
                 <View style={styles.svgFallback}>
                   <Animated.Text style={styles.fallbackIcon}>📞</Animated.Text>

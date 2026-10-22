@@ -5,6 +5,8 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -123,13 +125,11 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
         id: user.id,
         pOccupationId: pOccupationIdString,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
@@ -155,6 +155,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
     >
       <BottomSheetView style={[globalStyles.contentContainer,{gap: Size20}]}>
         <View style={styles.headerContainer}>
+          <PremiumCrown />
           <AppText text="Job type" textStyle={styles.headerTitle} />
           <AppText
             text="You can select multiple options"
@@ -173,6 +174,7 @@ const JobTypeBottomSheet: React.FC<JobTypeBottomSheetProps> = ({
           ))}
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="secondary" />
     </BottomSheet>
   );
 };

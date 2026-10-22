@@ -84,7 +84,6 @@ const EditLifeScreen = () => {
           const cities = await getCitiesByStateIdV2(formData.selectedState.id);
           setLocalCities(cities);
         } catch (error) {
-          console.error('Error fetching cities:', error);
           setLocalCities([]);
         } finally {
           setCitiesLoading(false);
@@ -98,20 +97,16 @@ const EditLifeScreen = () => {
   useEffect(() => {
     const initializeFormData = async () => {
       if (user && states && states.length > 0) {
-        console.log('Initializing form data. User stateId:', user.stateId);
-        // console.log('Available states:', states);
 
         // Find state object from the fetched data
         const userState = states.find(
           (state: any) => String(state.name) === String(user.stateName),
         );
-        console.log('Found user state:', userState);
 
         if (userState) {
           setCitiesLoading(true);
           try {
             const cities = await getCitiesByStateIdV2(userState.id);
-            console.log('cities', cities);
             setLocalCities(cities);
 
             // Find user's city from the fetched cities
@@ -134,10 +129,6 @@ const EditLifeScreen = () => {
               districtId: userCity?.id || '',
             }));
           } catch (error) {
-            console.error(
-              'Error fetching cities during initialization:',
-              error,
-            );
           } finally {
             setCitiesLoading(false);
           }
@@ -149,7 +140,6 @@ const EditLifeScreen = () => {
 
   // Handle state selection and reset city when state changes
   const handleStateSelection = useCallback((selectedState: any) => {
-    // console.log('Selected state:', selectedState);
     setFormData(prev => ({
       ...prev,
       selectedState: selectedState,
@@ -171,7 +161,6 @@ const EditLifeScreen = () => {
 
   // Handle diet selection
   const handleDietSelection = useCallback((selectedDiet: any) => {
-    // console.log('selectedDiet', selectedDiet);
     setFormData(prev => ({
       ...prev,
       dietId: selectedDiet.id,
@@ -225,7 +214,6 @@ const EditLifeScreen = () => {
         smoking: formData.smokingName,
         planingto_settle: formData.timelineName,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -234,7 +222,6 @@ const EditLifeScreen = () => {
       AppToast('Profile updated successfully');
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating profile:', error);
       AppToast('Error updating profile. Please try again.');
     }
   }, [formData, user, dispatch, navigation]);
@@ -259,12 +246,9 @@ const EditLifeScreen = () => {
           selectedValue={formData.selectedState?.name || user.stateName}
           placeholder="Select State"
           onPress={() => {
-            console.log('State dropdown pressed, available states:', states);
-            console.log('States is array:', Array.isArray(states));
             if (states && states.length > 0) {
               setShowStatePicker(true);
             } else {
-              console.warn('No states available for selection');
             }
           }}
           disabled={true}
@@ -358,7 +342,6 @@ const EditLifeScreen = () => {
         selectedValue={formData.selectedState?.name || ''}
         onSelect={handleStateSelection}
         onClose={() => {
-          console.log('State picker closed');
           setShowStatePicker(false);
         }}
         title="Select State"

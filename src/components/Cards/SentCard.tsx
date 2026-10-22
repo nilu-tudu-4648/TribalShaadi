@@ -20,7 +20,6 @@ interface SentCardProps {
 }
 
 const SentCard: React.FC<SentCardProps> = ({ item, onPress }) => {
-  // console.log(item, 'item');
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <Image  source={{ uri: `${item.image}` }} style={styles.profileImage} />

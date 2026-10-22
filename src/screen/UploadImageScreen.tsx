@@ -84,9 +84,7 @@ const UploadImageScreen = () => {
 
     launchImageLibrary(options, async response => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
       } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
         AppToast('Failed to select image. Please try again.');
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
@@ -104,7 +102,6 @@ const UploadImageScreen = () => {
               id: user.id,
               image: `data:image/jpeg;base64,${asset.base64}`,
             };
-            console.log(requestBody, 'requestBody for profile image');
             await uploadImage(
               { ...requestBody, imageIndex: index },
               dispatch,
@@ -114,7 +111,6 @@ const UploadImageScreen = () => {
               handleRemoveImage,
             );
           } catch (error) {
-            console.log('NETWORK ERROR:', error);
             AppToast('Failed to upload image. Please try again.');
             // Remove the image from state if upload failed
             const failedImages = [...selectedImages];
@@ -138,7 +134,6 @@ const UploadImageScreen = () => {
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user?.id}`, dispatch);
       await AsyncStorage.setItem(ASYNC_VARIBLES.ALL_IMAGES_UPLOADED, 'true');
     } catch (error) {
-      console.log('NETWORK ERROR:', error);
       AppToast('Failed to update user details. Please try again.');
     } finally {
       navigateToLastScreen(navigation, ROUTES.SELECT_INTERESTS);

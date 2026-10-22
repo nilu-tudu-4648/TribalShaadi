@@ -5,6 +5,8 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -82,33 +84,27 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
   const handleApply = async () => {
     try {
       // Debug: Log the religionOptions array
-      console.log('religionOptions:', religionOptions);
       
       // Find the "Any" option
       const anyOption = religionOptions?.find(option => 
         option.name.toLowerCase() === 'any'
       );
-      console.log('anyOption found:', anyOption);
       
       const anyOptionId = anyOption ? String(anyOption.id) : null;
       // Check if "Any" is selected and convert it to "any" string
       let pReligionIdValue;
       if (anyOptionId && String(localSelectedReligionId) === anyOptionId) {
         pReligionIdValue = 'any';
-        console.log('Setting pReligionIdValue to "any"');
       } else {
         pReligionIdValue = localSelectedReligionId;
-        console.log('Setting pReligionIdValue to localSelectedReligionId:', localSelectedReligionId);
       }
 
       const requestBody = {
         id: user.id,
         pReligionId: pReligionIdValue,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       setReducerLoadingfalse(dispatch, () => {
@@ -136,6 +132,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
     >
       <BottomSheetView style={[globalStyles.contentContainer,{gap: Size25}]}>
         <View style={styles.headerContainer}>
+          <PremiumCrown />
           <AppText text="Religion" textStyle={styles.headerTitle} />
           <AppText
             text="Select one which applies"
@@ -157,6 +154,7 @@ const ReligionBottomSheet: React.FC<ReligionBottomSheetProps> = ({
           ))}
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="primary" />
     </BottomSheet>
   );
 };

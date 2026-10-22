@@ -146,7 +146,6 @@ const EditEducationScreen = () => {
 
     buildSections();
   }, [showJobRolePicker, occupationsByEmploymentType]);
-  console.log(user,'user')
   // Initialize form data from user profile
   useEffect(() => {
     if (user) {
@@ -242,7 +241,6 @@ const EditEducationScreen = () => {
         companyName: !isWorking ? null : formData.companyName,
         annualIncomeId: !isWorking ? null : formData.annualIncomeId,
       };
-      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -251,7 +249,6 @@ const EditEducationScreen = () => {
       AppToast('Education & Career updated successfully');
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating profile:', error);
       AppToast('Error updating profile. Please try again.');
     }
   }, [formData, user, dispatch, navigation]);

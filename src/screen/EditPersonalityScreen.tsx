@@ -115,7 +115,6 @@ const EditPersonalityScreen = () => {
       AppToast('Personality & Preferences updated successfully');
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating profile:', error);
       AppToast('Error updating profile. Please try again.');
     }
   }, [formData, user, dispatch, navigation, selected]);

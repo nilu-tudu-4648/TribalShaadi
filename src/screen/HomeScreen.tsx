@@ -142,7 +142,6 @@ const HomeScreen = () => {
       openAppSettings();
       setShowNotificationDialog(false);
     } catch (error) {
-      console.log(error, "error");
     }
   };
   // double-buffered cards for seamless transitions
@@ -201,7 +200,6 @@ const HomeScreen = () => {
       nextVisualIndex === -1 || !hasMatches ? currentIndex : nextVisualIndex;
 
     if (!matchedUsers || matchedUsers.length === 0) {
-      console.log('No matched users available for transition');
       return;
     }
 
@@ -298,7 +296,6 @@ const HomeScreen = () => {
             ),
           );
         } catch (error) {
-          console.log(error);
         }
       })();
     });
@@ -306,14 +303,6 @@ const HomeScreen = () => {
 
   const handleCancelProposal = (id: string) => {
     if (actionInProgressRef.current) return;
-
-    const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
-    const isFemale = user?.gender === 'Female';
-    const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
-    if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
-      twoConnectsBottomSheetRef?.current?.expand();
-      return;
-    }
 
     const currentUserId = matchedUsers[currentIndex]?.id ?? id;
     if (!currentUserId) return;
@@ -332,7 +321,6 @@ const HomeScreen = () => {
             }),
           );
         } catch (error) {
-          console.log(error);
         }
       })();
     });
@@ -393,7 +381,6 @@ const HomeScreen = () => {
       dispatch(getProposalsSendByMeApi(`${baseUrl}/${getProposalsSendByMeUrl}`));
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (e) {
-      console.log(e, 'error');
     }
   }, [dispatch]);
   useEffect(() => {
@@ -477,7 +464,6 @@ const HomeScreen = () => {
         );
         await getChatHistoryByUserId(user.id, dispatch);
       } catch (error) {
-        console.log(error, 'error');
       } finally {
         setIsLoading(false);
       }
@@ -621,7 +607,8 @@ const HomeScreen = () => {
 
     const baseUser = matchedUsers[cardIndex] || {};
     const finalDetail = { ...baseUser, ...cachedDetail };
-    const isPremium = (cachedPackage?.length ?? 0) > 0;
+    const hasPaidPackage = (cachedPackage?.length ?? 0) > 0;
+    const isPremium = hasPaidPackage || finalDetail?.gender === 'Female';
     return (
       <ProfileCard
         name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
@@ -735,7 +722,6 @@ const HomeScreen = () => {
       <ReportBottomSheet
         bottomSheetRef={reportBottomSheetRef}
         onReport={(reportReason: string) => {
-          console.log('Profile reported for:', reportReason);
         }}
       />
       <SelfieBottomSheet bottomSheetRef={selfieBottomSheetRef} />

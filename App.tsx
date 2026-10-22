@@ -101,7 +101,6 @@ const MainApp = () => {
   // Capture initial app open
   useEffect(() => {
     if (posthog) {
-      console.log('[PostHog] Capturing initial Application Opened');
       posthog.capture('Application Opened', {
         source: 'initial_app_launch',
         timestamp: new Date().toISOString(),
@@ -109,7 +108,6 @@ const MainApp = () => {
       // Flush to ensure event is sent immediately
       posthog.flush();
     } else {
-      console.log('[PostHog] PostHog not available yet');
     }
   }, [posthog]);
 
@@ -121,7 +119,6 @@ const MainApp = () => {
         await checkUserLoggedIn(dispatch, true);
         setIsInitialized(true);
       } catch (error) {
-        console.error('Error during app initialization:', error);
         setIsInitialized(true); // Continue with app flow even if initialization fails
       }
     };
@@ -139,7 +136,6 @@ const MainApp = () => {
       }
       checkAuth(dispatch);
     } catch (error) {
-      console.error('Error in auth check:', error);
     }
   }, [user, dispatch, tokenExpired, isInitialized]);
   useEffect(() => {
@@ -159,7 +155,6 @@ const MainApp = () => {
         // This is safe to call early as it has Firebase checks
         notificationListner();
       } catch (error) {
-        console.error('Error initializing notification system:', error);
       }
     };
 
@@ -174,7 +169,6 @@ const MainApp = () => {
         try {
           await requestUserPermission();
         } catch (error) {
-          console.error('Error setting up FCM permissions:', error);
         }
       }, 1000);
 
@@ -200,7 +194,6 @@ const MainApp = () => {
           } else if (nextState === 'active') {
             await onAppForeground(dispatch);
             if (posthog) {
-              console.log('[PostHog] Capturing Application Opened from background');
               posthog.capture('Application Opened', {
                 source: 'app_foreground',
                 timestamp: new Date().toISOString(),
@@ -209,7 +202,6 @@ const MainApp = () => {
             }
           }
         } catch (error) {
-          console.error('Error in AppState change handler:', error);
         }
       },
     );
@@ -245,7 +237,6 @@ const MainApp = () => {
           );
         }
       } catch (e) {
-        console.log('Version check error:', e);
       }
     };
 
@@ -264,7 +255,6 @@ const MainApp = () => {
         ? ROUTES.MAIN_TABS
         : ROUTES.WELCOME;
     } catch (error) {
-      console.error('Error determining initial route:', error);
       return ROUTES.WELCOME; // Safe fallback
     }
   };

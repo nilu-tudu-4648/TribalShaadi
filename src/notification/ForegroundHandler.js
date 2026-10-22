@@ -27,10 +27,6 @@ const isFirebaseReady = () => {
   try {
     return getApps().length > 0;
   } catch (error) {
-    console.error(
-      'Error checking Firebase status in ForegroundHandler:',
-      error,
-    );
     return false;
   }
 };
@@ -48,9 +44,6 @@ const ForegroundHandler = params => {
         if (isCleanedUp) return;
 
         if (!isFirebaseReady()) {
-          console.warn(
-            'Firebase not initialized. Skipping foreground message handler.',
-          );
           return;
         }
 
@@ -114,27 +107,17 @@ const ForegroundHandler = params => {
                       remoteMessage.data,
                     );
                   } catch (scheduleError) {
-                    console.error(
-                      'Error scheduling push notification:',
-                      scheduleError,
-                    );
                     // Don't re-throw to prevent app crash
                   }
                 }
               } catch (messageError) {
-                console.error(
-                  'Error processing foreground message:',
-                  messageError,
-                );
                 // Don't re-throw to prevent app crash
               }
             });
           } catch (setupError) {
-            console.error('Error in message handler setup:', setupError);
           }
         }, 500); // increased delay to stabilize real devices
       } catch (error) {
-        console.error('Error setting up foreground message handler:', error);
       }
     };
 
@@ -164,10 +147,6 @@ const ForegroundHandler = params => {
         try {
           unsubscribe();
         } catch (unsubscribeError) {
-          console.error(
-            'Error unsubscribing from foreground messages:',
-            unsubscribeError,
-          );
         }
         unsubscribe = null;
       }

@@ -5,6 +5,8 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -50,8 +52,6 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
   setLocalSelectedStatuses,
 }) => {
   const snapPoints = ['30%', '30%'];
-  // console.log('localSelectedStatuses', localSelectedStatuses);
-  // console.log('maritalOptions', maritalOptions);
   const dispatch = useDispatch();
   const { user } = useSelector((state: any) => state.entities.authReducer);
   const handleStatusToggle = (status: string | number) => {
@@ -148,17 +148,14 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
         id: user.id,
         pMaritalStatusId: pMaritalStatusId,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
-      console.log('loading ended');
     }
   };
 
@@ -181,6 +178,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.mainContent}>
           <View style={styles.headerContainer}>
+            <PremiumCrown />
             <AppText text="Marital Status" textStyle={styles.headerTitle} />
             <AppText
               text="You can select multiple options"
@@ -204,6 +202,7 @@ const MaritalStatusBottomSheet: React.FC<MaritalStatusBottomSheetProps> = ({
           </View>
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="primary" />
     </BottomSheet>
   );
 };

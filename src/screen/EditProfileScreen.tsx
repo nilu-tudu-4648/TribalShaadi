@@ -56,7 +56,6 @@ import Loader from '../components/loader/Loader';
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user } = useSelector((state: any) => state.entities.authReducer);
-  console.log(user, 'user');
   const dispatch = useDispatch();
   const [isImageValid, setIsImageValid] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -119,9 +118,7 @@ const EditProfileScreen = () => {
 
     launchImageLibrary(options, async response => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
       } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
         AppToast('Failed to select image. Please try again.');
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
@@ -173,7 +170,6 @@ const EditProfileScreen = () => {
               });
             }
           } catch (error) {
-            console.log('NETWORK ERROR:', error);
             AppToast('Failed to upload image. Please try again.');
             const failedImages = [...selectedImages];
             failedImages[index] = { uri: '', base64: '' };

@@ -7,6 +7,8 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   borderWidth,
@@ -103,7 +105,6 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
         const combinedResults = [...filteredStates, ...filteredCities];
         setSearchResults(combinedResults);
       } catch (error) {
-        console.error('Search error:', error);
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -153,7 +154,6 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
       }
       setSearchQuery('');
     } catch (error) {
-      console.log(error, 'error');
     }
   };
 
@@ -170,13 +170,11 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
             ? selectedCities.map(city => city.name || city).join(',')
             : 'any',
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
@@ -261,6 +259,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
           />
         ) : (
           <View style={styles.selectedLocationsContainer}>
+            <PremiumCrown />
             <AppText
               text="Selected Locations"
               textStyle={styles.sectionTitle}
@@ -334,6 +333,7 @@ const LocationBottomSheet: React.FC<LocationBottomSheetProps> = ({
           </View>
         )}
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="secondary" />
     </BottomSheet>
   );
 };

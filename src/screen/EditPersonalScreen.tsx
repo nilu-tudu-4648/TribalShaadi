@@ -244,7 +244,6 @@ const EditPersonalScreen = () => {
         motherTongue: selectedMotherTongue,
         maritalStatusId: formData.maritalStatusId,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
@@ -253,7 +252,6 @@ const EditPersonalScreen = () => {
       AppToast('Profile updated successfully');
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating profile:', error);
       AppToast('Error updating profile. Please try again.');
     }
   }, [

@@ -80,12 +80,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       );
       dispatch(getPassedUsersApi(`${baseUrl}/${getPassedUsersUrl}`));
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       bottomSheetRef.current?.close();
     }
   };
-  // console.log(selectedUser, 'selectedUser');
   return (
     <>
       <BottomSheet
@@ -167,7 +165,6 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
       <ReportBottomSheet
         bottomSheetRef={reportBottomSheetRef}
         onReport={(reportReason: string) => {
-          console.log('Profile reported for:', reportReason);
         }}
       />
     </>

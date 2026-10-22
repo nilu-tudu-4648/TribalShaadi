@@ -120,13 +120,11 @@ const AddressScreen = () => {
         planingto_settle: selectedSettlingDown,
         kids: selectedKids,
       };
-      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.error('Error submitting address:', error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.QUALIFICATION);
     }

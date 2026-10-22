@@ -174,13 +174,11 @@ const QualificationScreen = () => {
         companyName: !isWorking ? null : organizationName,
         annualIncomeId: !isWorking ? null : selectedIncome.id,
       };
-      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.error('Error submitting qualification:', error);
     } finally {
       setLoading(false);
       navigateToLastScreen(navigation, ROUTES.PHYSICAL_ATTRIBUTES);

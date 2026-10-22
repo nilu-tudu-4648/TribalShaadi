@@ -105,7 +105,6 @@ const BirthDateScreen = () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log(error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.RELIGION);
     }

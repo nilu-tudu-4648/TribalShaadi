@@ -67,7 +67,6 @@ const AboutScreen = () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log(error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.ABOUT_PARTNER);
     }

@@ -64,7 +64,6 @@ const GenderSelectionScreen = () => {
       );
       await getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
     } catch (error) {
-      console.log(error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.NAME);
     }

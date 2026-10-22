@@ -51,10 +51,8 @@ const CameraScreen = () => {
 
     launchCamera(options, async response => {
       if (response.didCancel) {
-        console.log('User cancelled camera');
         navigation.goBack();
       } else if (response.errorMessage) {
-        console.log('Camera Error: ', response.errorMessage);
         Alert.alert('Error', 'Failed to open camera. Please try again.');
         // navigation.goBack();
       } else if (response.assets && response.assets.length > 0) {
@@ -83,17 +81,14 @@ const CameraScreen = () => {
 
     launchCamera(options, response => {
       if (response.didCancel) {
-        console.log('User cancelled camera');
         navigation.goBack();
       } else if (response.errorMessage) {
-        console.log('Camera Error: ', response.errorMessage);
         Alert.alert('Error', 'Failed to open camera. Please try again.');
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
         if (asset.uri) {
           setCapturedImage(asset.uri);
           setShowConfirmation(true);
-          console.log('Photo captured:', asset.uri);
         }
       }
     });
@@ -118,7 +113,6 @@ const CameraScreen = () => {
         dispatch(setSelfieVerify(response.verified));
       }
     } catch (error) {
-      console.log(error, 'error handleSubmit');
     } finally {
       dispatch(setLoaderPayment(false));
     }

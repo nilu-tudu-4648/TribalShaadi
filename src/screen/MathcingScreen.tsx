@@ -31,7 +31,6 @@ const MathcingScreen = () => {
     (state: any) => state.entities.userReducer,
   );
   const dispatch = useDispatch();
-  // console.log(acceptedUser, 'acceptedUser');
   useEffect(() => {
     // Animation sequence
     const animateSequence = () => {

@@ -11,6 +11,10 @@ const initialState = {
   packageByUserId: [],
   currentUserPackage: [],
   selfieVerify: true,
+  premiumBenefits:[],
+  // true => editing that preference group requires a premium package
+  isPrimaryPreferenceEditPaid: true,
+  isSecondaryPreferenceEditPaid: true,
 };
 
 const paymentReducer = createSlice({
@@ -26,7 +30,6 @@ const paymentReducer = createSlice({
     },
     paymentReducerDataRequestFailed: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      console.log(action.payload, 'reducer Failed');
     },
     paymentReducerTimeDurationReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
@@ -42,7 +45,6 @@ const paymentReducer = createSlice({
     },
     paymentReducerPaymentReceived: (paymentReducer, action) => {
       paymentReducer.loader = false;
-      console.log(action.payload, 'reducer payment');
       paymentReducer.payment = action.payload.recordList;
     },
     paymentReducerSavePremiumAccountReceived: (paymentReducer, action) => {
@@ -64,6 +66,19 @@ const paymentReducer = createSlice({
     setSelfieVerify: (paymentReducer, action) => {
       paymentReducer.selfieVerify = action.payload;
     },
+    setPrimaryPreference: (paymentReducer, action) => {
+      paymentReducer.isPrimaryPreferenceEditPaid = Boolean(
+        action.payload.recordList?.[0]?.isActive,
+      );
+    },
+    setSecondaryPreference: (paymentReducer, action) => {
+      paymentReducer.isSecondaryPreferenceEditPaid = Boolean(
+        action.payload.recordList?.[0]?.isActive,
+      );
+    },
+    setpremiumBenefits: (paymentReducer, action) => {
+      paymentReducer.premiumBenefits = action.payload.recordList || [];
+    },
   },
 });
 
@@ -80,6 +95,9 @@ const {
   paymentReducerSavePremiumAccountReceived,
   paymentReducerPackageByUserIdReceived,
   paymentReducerCurrentUserPackageReceived,
+  setpremiumBenefits,
+  setSecondaryPreference,
+  setPrimaryPreference,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -150,5 +168,24 @@ export const getCurrentUserPackageApi = (url, data = {}) =>
     onStart: paymentReducerDataRequested.type,
     onSuccess: paymentReducerCurrentUserPackageReceived.type,
     onError: paymentReducerDataRequestFailed.type,
+  });
+export const getPremiumBenefitsApi = (url) =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onSuccess: setpremiumBenefits.type,
+    onError: paymentReducerDataRequestFailed.type,
+  });
+export const getPrimaryPreferenceApi = (url) =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onSuccess: setPrimaryPreference.type,
+  });
+export const getSecondaryPreferenceApi = (url) =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onSuccess: setSecondaryPreference.type,
   });
 export default paymentReducer.reducer;

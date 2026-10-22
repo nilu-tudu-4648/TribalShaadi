@@ -12,6 +12,8 @@ import Animated, {
   clamp,
 } from 'react-native-reanimated';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay, { useIsPremium } from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize16,
@@ -93,7 +95,9 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     setLocalHeightRange(range);
   };
 
+  const isPremium = useIsPremium('primary');
   const minPanGesture = Gesture.Pan()
+    .enabled(isPremium)
     .onStart(() => {
       startXMin.value = minThumbPosition.value;
     })
@@ -118,6 +122,7 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     });
 
   const maxPanGesture = Gesture.Pan()
+    .enabled(isPremium)
     .onStart(() => {
       startXMax.value = maxThumbPosition.value;
     })
@@ -168,9 +173,6 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
       );
 
       if (!fromOption || !toOption) {
-        console.warn(
-          'Height values not found in options. Using fallback conversion.',
-        );
       }
 
       const requestBody = {
@@ -181,14 +183,12 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
           toOption?.name ?? inchesToCm(localHeightRange.max).toString(),
       };
 
-      console.log('Sending requestBody:', requestBody);
 
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.error('Error in handleApply:', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
         bottomSheetRef.current?.close();
@@ -220,6 +220,7 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
     >
       <BottomSheetView style={[globalStyles.contentContainer,{gap: Size25}]}>
         <View style={styles.headerContainer}>
+          <PremiumCrown />
           <AppText text="Height" textStyle={styles.headerTitle} />
         </View>
 
@@ -245,6 +246,7 @@ const HeightRangeBottomSheet: React.FC<HeightRangeBottomSheetProps> = ({
           />
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="primary" />
     </BottomSheet>
   );
 };

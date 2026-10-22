@@ -109,7 +109,6 @@ const NameScreen = () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log(error);
     } finally {
       setLoading(false);
       navigateToLastScreen(navigation, ROUTES.BIRTH_DATE);

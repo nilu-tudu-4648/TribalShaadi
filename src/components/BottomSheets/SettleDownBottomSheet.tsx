@@ -5,6 +5,8 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -72,13 +74,11 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
         id: user.id,
         psettle_down: formattedSelection.join(','),
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
@@ -110,6 +110,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
     >
       <BottomSheetView style={[globalStyles.contentContainer,{gap: Size20}]}>
         <View style={styles.headerContainer}>
+          <PremiumCrown />
           <AppText text="Planning to Settle Down" textStyle={styles.headerTitle} />
           <AppText
             text="You can select mutiple options"
@@ -128,6 +129,7 @@ const SettleDownBottomSheet: React.FC<SettleDownBottomSheetProps> = ({
           ))}
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="secondary" />
     </BottomSheet>
   );
 };

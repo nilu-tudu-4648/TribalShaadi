@@ -105,7 +105,6 @@ const ReligionScreen = () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log(error, 'error');
     } finally {
       navigateToLastScreen(navigation, ROUTES.ADDRESS);
     }

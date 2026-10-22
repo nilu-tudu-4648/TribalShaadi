@@ -12,6 +12,8 @@ import Animated, {
   clamp,
 } from 'react-native-reanimated';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay, { useIsPremium } from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize16,
@@ -83,7 +85,9 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     setLocalAgeRange(range);
   };
 
+  const isPremium = useIsPremium('primary');
   const minPanGesture = Gesture.Pan()
+    .enabled(isPremium)
     .onStart(() => {
       startXMin.value = minThumbPosition.value;
     })
@@ -106,6 +110,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     });
 
   const maxPanGesture = Gesture.Pan()
+    .enabled(isPremium)
     .onStart(() => {
       startXMax.value = maxThumbPosition.value;
     })
@@ -152,7 +157,6 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
@@ -184,6 +188,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
     >
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.headerContainer}>
+          <PremiumCrown />
           <AppText text="Age" textStyle={styles.headerTitle} />
         </View>
 
@@ -207,6 +212,7 @@ const AgeRangeBottomSheet: React.FC<AgeRangeBottomSheetProps> = ({
           />
         </View>
       </BottomSheetView>
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="primary" />
     </BottomSheet>
   );
 };

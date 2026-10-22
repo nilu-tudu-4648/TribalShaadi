@@ -19,7 +19,6 @@ const isFirebaseReady = () => {
   try {
     return getApps().length > 0;
   } catch (error) {
-    console.error('Error checking Firebase status:', error);
     return false;
   }
 };
@@ -35,7 +34,7 @@ export const createNotificationChannel = () => {
       importance: 4,
       vibrate: true,
     },
-    (created) => console.log(`Notification channel created: ${created}`),
+    (created) => {},
   );
 };
 
@@ -43,16 +42,13 @@ export const configurePushNotification = () => {
   PushNotification.configure({
     // (optional) Called when Token is generated (iOS and Android)
     onRegister: function (token) {
-      console.log('TOKEN:', token);
     },
 
     // (required) Called when a remote is received or opened, or local notification is opened
     onNotification: function (notification) {
-      console.log('LOCAL NOTIFICATION ==>', notification);
 
       if (notification.userInteraction) {
         // notification was opened by user from notification
-        console.log('Notification was tapped by user');
         
         try {
           const userInfo = notification.userInfo || notification.data || {};
@@ -65,10 +61,8 @@ export const configurePushNotification = () => {
               if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
                 navigate(ROUTES.INTEREST, { matchId: userInfo.matchId || null });
               } else {
-                console.error('ROUTES not available or INTEREST route not defined');
               }
             } catch (navError) {
-              console.error('Error navigating to interest screen from local notification:', navError);
             }
           }
           
@@ -76,22 +70,18 @@ export const configurePushNotification = () => {
           // ...
           
         } catch (error) {
-          console.error('Error handling local notification tap:', error);
         }
       }
     },
 
     // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
     onAction: function (notification) {
-      console.log('ACTION:', notification.action);
-      console.log('NOTIFICATION:', notification);
 
       // process the action
     },
 
     // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
     onRegistrationError: function(err) {
-      console.error(err.message, err);
     },
 
     // Android only - iOS permissions not needed
@@ -119,9 +109,7 @@ export const requestAndroidNotificationPermission = async () => {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
-      console.log('Android 13+ notification permission:', granted);
     } catch (err) {
-      console.warn('Failed to request notification permission', err);
     }
   }
 };
@@ -162,9 +150,6 @@ export const openAppSettings = () => {
 };
 export const requestUserPermission = async () => {
   if (!isFirebaseReady()) {
-    console.warn(
-      'Firebase not initialized. Skipping notification permission request.',
-    );
     return;
   }
 
@@ -175,17 +160,14 @@ export const requestUserPermission = async () => {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-      // console.log('Authorization status:', authStatus);
       getfcmToken();
     }
   } catch (error) {
-    console.error('Error requesting user permission:', error);
   }
 };
 
 const getfcmToken = async () => {
   if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping FCM token retrieval.');
     return;
   }
 
@@ -196,12 +178,10 @@ const getfcmToken = async () => {
       try {
         const token = await messaging().getToken();
         if (token && typeof token === 'string') {
-          console.log('FCM Token received:', token.substring(0, 20) + '...');
           
           try {
             await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
           } catch (storageError) {
-            console.error('Error saving FCM token to storage:', storageError);
           }
           
           // Send token to your server
@@ -210,17 +190,14 @@ const getfcmToken = async () => {
           // Subscribe to general topics for all users
           await subscribeToAllUsersTopics();
         } else {
-          console.warn('Invalid or empty FCM token received');
         }
       } catch (tokenError) {
-        console.error('Error getting FCM token:', tokenError);
       }
     } else {
       // Token exists, send to server
       await sendTokenToServer(fcmToken);
     }
   } catch (error) {
-    console.error('Error in getfcmToken:', error);
   }
 };
 
@@ -228,7 +205,6 @@ const getfcmToken = async () => {
 const sendTokenToServer = async token => {
   try {
     if (!token || typeof token !== 'string') {
-      console.log('Invalid FCM token provided');
       return;
     }
 
@@ -245,7 +221,6 @@ const sendTokenToServer = async token => {
           user = null;
         }
       } catch (parseError) {
-        console.log('Error parsing user data in sendTokenToServer:', parseError);
         user = null;
       }
     }
@@ -254,7 +229,6 @@ const sendTokenToServer = async token => {
       try {
         // Additional validation to ensure token is actually valid
         if (userToken.length < 10 || userToken === 'undefined' || userToken === 'null') {
-          console.log('Invalid user token detected, skipping FCM token upload');
           return;
         }
 
@@ -274,40 +248,29 @@ const sendTokenToServer = async token => {
         );
         
         if (response && response.status === 200) {
-          console.log('FCM token saved to server successfully');
         } else {
-          console.log('Failed to send FCM token to server - unexpected response');
         }
       } catch (apiError) {
         // Handle 401 errors gracefully during app initialization
         if (apiError.response && apiError.response.status === 401) {
-          console.log('User not authenticated yet, will retry FCM token upload after login');
         } else {
-          console.error('API error when sending FCM token:', apiError.message);
         }
         // Don't throw - just log and continue
       }
     } else {
       // Log why we are not sending the token
       if (!userDataString || userDataString === 'null') {
-        console.log('User data not found in AsyncStorage');
       } else if (!user || !user.id) {
-        console.log('User data is invalid or missing id');
       } else if (!userToken || userToken === 'null') {
-        console.log('User token not found in AsyncStorage');
       }
     }
   } catch (error) {
-    console.error('Error sending FCM token to server:', error);
     // Don't re-throw to prevent app crashes
   }
 };
 
 export const notificationListner = async () => {
   if (!isFirebaseReady()) {
-    console.warn(
-      'Firebase not initialized. Skipping notification listeners setup.',
-    );
     return;
   }
 
@@ -315,16 +278,13 @@ export const notificationListner = async () => {
     // Handle notification when app is opened from background
     messaging().onNotificationOpenedApp(remoteMessage => {
       try {
-        console.log('Notification caused app to open from background state');
         
         // Add null safety checks
         if (!remoteMessage) {
-          console.log('Background notification: remoteMessage is null or undefined');
           return;
         }
         delay();
         store.dispatch(getProposalsGotByMeApi(`${baseUrl}/${getProposalsGotByMeUrl}`));
-        console.log('Background notification data:', remoteMessage.notification);
         // Handle specific notification types
         if (remoteMessage.notification && remoteMessage.notification.title === NOTIFICATION_MESSAGES.NEW_PROPOSAL.title) {
           try {
@@ -332,17 +292,14 @@ export const notificationListner = async () => {
             if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
               navigate(ROUTES.INTEREST, { matchId: remoteMessage.data?.matchId || null });
             } else {
-              console.error('ROUTES not available or INTEREST route not defined');
             }
           } catch (navError) {
-            console.error('Error navigating to interest screen:', navError);
           }
         }
         
         // Handle notification action here with error handling
         handleNotificationAction(remoteMessage);
       } catch (error) {
-        console.error('Error handling background notification tap:', error);
         // Don't re-throw to prevent crashes
       }
     });
@@ -353,31 +310,25 @@ export const notificationListner = async () => {
       .then(async remoteMessage => {
         try {
           if (remoteMessage) {
-            console.log('Quit state notification data:', remoteMessage.notification);
             if (remoteMessage.notification && remoteMessage.notification.title === NOTIFICATION_MESSAGES.NEW_PROPOSAL.title) {
               try {
                 // Ensure ROUTES is available before using it
                 if (typeof ROUTES !== 'undefined' && ROUTES.INTEREST) {
                   navigate(ROUTES.INTEREST, { matchId: remoteMessage.data?.matchId || null });
                 } else {
-                  console.error('ROUTES not available or INTEREST route not defined');
                 }
               } catch (navError) {
-                console.error('Error navigating to interest screen:', navError);
               }
             }
             // Handle notification action here with error handling
             handleNotificationAction(remoteMessage);
           } else {
-            console.log('No initial notification found');
           }
         } catch (error) {
-          console.error('Error handling quit state notification:', error);
           // Don't re-throw to prevent crashes
         }
       })
       .catch(error => {
-        console.error('Error getting initial notification:', error);
         // Continue app flow even if initial notification check fails
       });
 
@@ -386,36 +337,29 @@ export const notificationListner = async () => {
     // Handle token refresh
     messaging().onTokenRefresh(async token => {
       try {
-        console.log('FCM token refreshed:', token);
         
         // Add validation for token
         if (!token || typeof token !== 'string') {
-          console.error('Invalid FCM token received in refresh:', token);
           return;
         }
 
         // Store token with error handling
         try {
           await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, token);
-          console.log('New FCM token stored successfully');
         } catch (storageError) {
-          console.error('Error storing refreshed FCM token:', storageError);
         }
 
         // Optionally send token to server
         try {
           await sendTokenToServer(token);
         } catch (serverError) {
-          console.error('Error sending refreshed token to server:', serverError);
           // Continue even if server update fails
         }
       } catch (error) {
-        console.error('Error handling token refresh:', error);
         // Don't re-throw to prevent crashes
       }
     });
   } catch (error) {
-    console.error('Error setting up notification listeners:', error);
   }
 };
 
@@ -424,13 +368,11 @@ const handleNotificationAction = remoteMessage => {
   try {
     // Add comprehensive null safety checks
     if (!remoteMessage) {
-      console.log('handleNotificationAction: remoteMessage is null or undefined');
       return;
     }
 
     const data = remoteMessage.data;
     if (!data || typeof data !== 'object') {
-      console.log('handleNotificationAction: No valid data found in notification');
       return;
     }
 
@@ -438,7 +380,6 @@ const handleNotificationAction = remoteMessage => {
 
     // Validate type exists and is string
     if (!type || typeof type !== 'string') {
-      console.log('handleNotificationAction: Invalid or missing notification type');
       return;
     }
 
@@ -446,21 +387,16 @@ const handleNotificationAction = remoteMessage => {
     switch (type) {
       case 'match_update':
         // Navigate to match details
-        console.log('Navigate to match:', params);
         break;
       case 'contest_result':
         // Navigate to contest results
-        console.log('Navigate to contest results:', params);
         break;
       case 'new_contest':
         // Navigate to new contest
-        console.log('Navigate to new contest:', params);
         break;
       default:
-        console.log('Unknown notification type:', type);
     }
   } catch (error) {
-    console.error('Error handling notification action:', error);
     // Don't re-throw to prevent app crashes
   }
 };
@@ -482,21 +418,17 @@ export const schedulePushNotification = async (title, message, notificationData 
   try {
     // Enhanced input validation
     if (!title || !message) {
-      console.log('schedulePushNotification: Missing title or message');
       return;
     }
     if (typeof title !== 'string' || typeof message !== 'string') {
-      console.log('schedulePushNotification: Title and message must be strings');
       return;
     }
     if (!title.trim().length || !message.trim().length) {
-      console.log('schedulePushNotification: Title and message cannot be empty');
       return;
     }
 
     // Suppress test or placeholder notifications universally (foreground/background/quit)
     if (title === NOTIFICATION_MESSAGES.TESTING.title) {
-      console.log("schedulePushNotification: Suppressing notification with title 'testing'");
       return;
     }
 
@@ -507,11 +439,9 @@ export const schedulePushNotification = async (title, message, notificationData 
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
         );
         if (!granted) {
-          console.log('schedulePushNotification: Notification permission not granted, skipping');
           return;
         }
       } catch (permErr) {
-        console.log('schedulePushNotification: Permission check failed, skipping', permErr);
         return;
       }
     }
@@ -523,7 +453,6 @@ export const schedulePushNotification = async (title, message, notificationData 
     ]);
     
     if (!hasChannel) {
-      console.log('Notification channel not ready or timeout — skipping notification');
       return;
     }
 
@@ -544,13 +473,10 @@ export const schedulePushNotification = async (title, message, notificationData 
         },
         // priority and importance are controlled by the channel; avoid passing mismatched types here
       });
-      console.log('Local notification scheduled successfully');
     } catch (notificationError) {
-      console.error('Error showing local notification:', notificationError);
       // Don't re-throw to prevent crashes
     }
   } catch (err) {
-    console.error('Error in schedulePushNotification:', err);
     // Don't re-throw to prevent app crashes
   }
 };
@@ -559,7 +485,6 @@ export const schedulePushNotification = async (title, message, notificationData 
 // Subscribe all users to general topics
 const subscribeToAllUsersTopics = async () => {
   if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping topic subscription.');
     return;
   }
 
@@ -570,34 +495,27 @@ const subscribeToAllUsersTopics = async () => {
     for (const topic of topics) {
       try {
         await messaging().subscribeToTopic(topic);
-        console.log(`Successfully subscribed to topic: ${topic}`);
       } catch (topicError) {
-        console.error(`Error subscribing to topic ${topic}:`, topicError);
         // Continue with other topics even if one fails
       }
     }
   } catch (error) {
-    console.error('Error in subscribeToAllUsersTopics:', error);
   }
 };
 
 // Function to refresh FCM token
 export const refreshFCMToken = async () => {
   if (!isFirebaseReady()) {
-    console.warn('Firebase not initialized. Skipping FCM token refresh.');
     return;
   }
 
   try {
-    console.log('Refreshing FCM token...');
     // Get a new token
     const newToken = await messaging().getToken();
     if (newToken && typeof newToken === 'string') {
-      console.log('New FCM token received:', newToken.substring(0, 20) + '...');
       
       // Store the new token
       await AsyncStorage.setItem(ASYNC_VARIBLES.FCM_TOKEN, newToken);
-      console.log('New FCM token stored successfully');
       
       // Send new token to server
       await sendTokenToServer(newToken);
@@ -607,11 +525,9 @@ export const refreshFCMToken = async () => {
       
       return newToken;
     } else {
-      console.warn('Failed to get new FCM token');
       return null;
     }
   } catch (error) {
-    console.error('Error refreshing FCM token:', error);
     return null;
   }
 };

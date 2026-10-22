@@ -5,6 +5,8 @@ import BottomSheet, {
   BottomSheetFlatList,
 } from '@gorhom/bottom-sheet';
 import AppText from '../AppText';
+import PremiumCrown from '../PremiumCrown';
+import PremiumGateOverlay from '../PremiumGateOverlay';
 import { COLORS } from '../../constants/AppColors';
 import {
   fontSize14,
@@ -167,13 +169,11 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
         id: user.id,
         pCommunityId: pCommunityIdValue,
       };
-      console.log('requestBody', requestBody);
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('error', error);
     } finally {
       dispatch(setMatchedUserApi(`${baseUrl}/${getMatchedUsersUrl}`));
       bottomSheetRef.current?.close();
@@ -213,6 +213,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
     >
       {/* header stays outside the list */}
       <View style={styles.headerContainer}>
+        <PremiumCrown style={{ right: Size16 }} />
         <AppText text="Tribe" textStyle={styles.headerTitle} />
         <AppText
           text="You can select multiple options"
@@ -228,6 +229,7 @@ const TribeBottomSheet: React.FC<TribeBottomSheetProps> = ({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContentContainer}
       />
+      <PremiumGateOverlay bottomSheetRef={bottomSheetRef} group="secondary" />
     </BottomSheet>
   );
 };

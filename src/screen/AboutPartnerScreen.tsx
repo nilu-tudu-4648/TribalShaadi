@@ -71,7 +71,6 @@ const AboutPartnerScreen = () => {
   const handleContinue = async () => {
     if (!isAnswered) {
       AppToast('Please select an answer before continuing');
-      console.log('Please select an answer before continuing');
       return;
     }
 
@@ -81,13 +80,11 @@ const AboutPartnerScreen = () => {
         id: user.id,
         about_lifepartener: answers.values,
       };
-      console.log(requestBody, 'requestBody');
       dispatch(completeUserProfileV2Updated(updateUrl, requestBody));
       setReducerLoadingfalse(dispatch, () => {
         getUserDetailsApi(`${getUserDetailsUrl}id=${user.id}`, dispatch);
       });
     } catch (error) {
-      console.log('NETWORK ERROR:', error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.UPLOAD_IMAGE);
     }

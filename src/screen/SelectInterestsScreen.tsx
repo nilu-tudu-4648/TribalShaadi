@@ -75,7 +75,6 @@ const SelectInterestsScreen = () => {
       };
       dispatch(completeUserProfileV2Interests(updateUrl, requestBody));
     } catch (error) {
-      console.log('error', error);
     } finally {
       navigateToLastScreen(navigation, ROUTES.WELCOME_HOME);
     }

@@ -112,7 +112,7 @@ const NameComponent: React.FC<NameComponentProps> = ({
               )}
             </View>
             {
-              !isPremium && freeConnect &&
+              !!freeConnect &&
               <View style={styles.pillContainer}>
                 <AppText
                   text={`${freeConnect} Free Profiles`}

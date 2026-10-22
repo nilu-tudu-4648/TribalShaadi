@@ -53,7 +53,6 @@ const WelcomeScreen = () => {
 
   React.useEffect(() => {
     // Initialize welcome screen and preload critical resources
-    console.log('WelcomeScreen mounted successfully');
   }, []);
 
 
@@ -62,12 +61,10 @@ const WelcomeScreen = () => {
       navigation.navigate(route);
       posthog.capture(route==='Login'?'Login_button_tapped':'registration_started')
     } catch (error) {
-      console.error(`Error navigating to ${route}:`, error);
     }
   };
 
   const handleImageError = () => {
-    console.warn('Error loading welcome screen images');
     setImageError(true);
   };
 
