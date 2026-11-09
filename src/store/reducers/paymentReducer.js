@@ -14,6 +14,8 @@ const initialState = {
   premiumBenefits:[],
   // true => editing that preference group requires a premium package
   isPrimaryPreferenceEditPaid: true,
+  // daily free skip/send-interest quota for non-subscribed users
+  dailyLimitStatus: null,
   isSecondaryPreferenceEditPaid: true,
 };
 
@@ -66,6 +68,9 @@ const paymentReducer = createSlice({
     setSelfieVerify: (paymentReducer, action) => {
       paymentReducer.selfieVerify = action.payload;
     },
+    setDailyLimitStatus: (paymentReducer, action) => {
+      paymentReducer.dailyLimitStatus = action.payload.recordList?.[0] ?? null;
+    },
     setPrimaryPreference: (paymentReducer, action) => {
       paymentReducer.isPrimaryPreferenceEditPaid = Boolean(
         action.payload.recordList?.[0]?.isActive,
@@ -98,6 +103,7 @@ const {
   setpremiumBenefits,
   setSecondaryPreference,
   setPrimaryPreference,
+  setDailyLimitStatus,
 } = paymentReducer.actions;
 export const getPackageListApi = (url, data = {}) =>
   apiCallBegan({
@@ -175,6 +181,12 @@ export const getPremiumBenefitsApi = (url) =>
     url,
     onSuccess: setpremiumBenefits.type,
     onError: paymentReducerDataRequestFailed.type,
+  });
+export const getDailyLimitStatusApi = (url) =>
+  apiCallBegan({
+    method: 'get',
+    url,
+    onSuccess: setDailyLimitStatus.type,
   });
 export const getPrimaryPreferenceApi = (url) =>
   apiCallBegan({

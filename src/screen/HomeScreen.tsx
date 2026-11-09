@@ -34,6 +34,7 @@ import {
   getAcceptedProposalByIdUrl,
   getPackageListUrl,
   getPopupContent,
+  getDailyLimitStatusUrl,
 } from '../constants/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileCardShimmer from '../components/ProfileCardShimmer';
@@ -53,7 +54,11 @@ import {
   getReligion,
   getStates,
 } from '../store/reducers/authReducer';
-import { getPackageByUserIdApi, getPackageListApi } from '../store/reducers/paymentReducer';
+import {
+  getDailyLimitStatusApi,
+  getPackageByUserIdApi,
+  getPackageListApi,
+} from '../store/reducers/paymentReducer';
 import {
   getAcceptedProposalByIdApi,
   insertUserNotificationsApi,
@@ -91,6 +96,15 @@ const HomeScreen = () => {
   const packageByUserId = useSelector(
     (state: any) => state.entities.paymentReducer.packageByUserId,
   );
+  const dailyLimitStatus = useSelector(
+    (state: any) => state.entities.paymentReducer.dailyLimitStatus,
+  );
+  const refreshDailyLimit = useCallback(() => {
+    dispatch(getDailyLimitStatusApi(getDailyLimitStatusUrl));
+  }, [dispatch]);
+  // Non-subscribed users get a daily quota of free skips/interests (resets at midnight)
+  const isDailyLimitReached =
+    !!dailyLimitStatus?.isLimited && !dailyLimitStatus?.canPerformAction;
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasRequestedMatches, setHasRequestedMatches] = useState(false);
@@ -258,10 +272,7 @@ const HomeScreen = () => {
   const handleSendProposal = (id: string) => {
     if (actionInProgressRef.current) return;
 
-    const hasActivePlan = Array.isArray(packageByUserId) && packageByUserId.length > 0;
-    const isFemale = user?.gender === 'Female';
-    const totalUsed = (proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0);
-    if (totalUsed >= 5 && !hasActivePlan && !isFemale) {
+    if (isDailyLimitReached) {
       twoConnectsBottomSheetRef?.current?.expand();
       return;
     }
@@ -283,6 +294,7 @@ const HomeScreen = () => {
               proposalUserId: currentUserId,
             }),
           );
+          refreshDailyLimit();
           dispatch(
             insertUserNotificationsApi(
               `${baseUrl}/${insertUserNotificationsUrl}`,
@@ -303,6 +315,10 @@ const HomeScreen = () => {
 
   const handleCancelProposal = (id: string) => {
     if (actionInProgressRef.current) return;
+    if (isDailyLimitReached) {
+      twoConnectsBottomSheetRef?.current?.expand();
+      return;
+    }
 
     const currentUserId = matchedUsers[currentIndex]?.id ?? id;
     if (!currentUserId) return;
@@ -320,6 +336,7 @@ const HomeScreen = () => {
               proposalUserId: currentUserId,
             }),
           );
+          refreshDailyLimit();
         } catch (error) {
         }
       })();
@@ -390,6 +407,7 @@ const HomeScreen = () => {
   // Refetch current user's data when screen is focused to fix gallery mismatch
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      refreshDailyLimit();
       // Check notification permission and show dialog if not enabled
       checkNotificationPermission().then((enabled) => {
         if (!enabled) {
@@ -404,7 +422,7 @@ const HomeScreen = () => {
       }
     });
     return unsubscribe;
-  }, [navigation, user]);
+  }, [navigation, user, refreshDailyLimit]);
   // Helper: fetch package silently
   const fetchPackageSilently = useCallback(
     async (userId: number) => {
@@ -614,8 +632,8 @@ const HomeScreen = () => {
         name={`${finalDetail?.firstName ?? ''} ${finalDetail?.lastName ?? ''}`}
         isNameLoading={false}
         freeConnect={
-          Array.isArray(packageByUserId) && packageByUserId.length === 0 && user?.gender !== 'Female'
-            ? `${Math.min((proposalsSendByMe?.length ?? 0) + (passedUsers?.length ?? 0), 5)}/5`
+          dailyLimitStatus?.isLimited
+            ? `${dailyLimitStatus.remainingToday ?? 0}/${dailyLimitStatus.dailyLimit ?? 5}`
             : ''
         }
         age={finalDetail?.age}

@@ -303,53 +303,53 @@ const UpgradeScreen = () => {
                 contentContainerStyle={styles.pricingContainer}
                 bounces={false}
               >
-                {packageList.filter((option: any) => option.isActive === 1).map((option: any) => (
-                  <TouchableOpacity
-                    key={option.packageId}
-                    style={[
-                      styles.pricingCard,
-                      selectedPlan === option.packageId &&
-                      styles.selectedPricingCard,
-                    ]}
-                    onPress={() => handlePlanSelect(option.packageId)}
-                  >
-                    <View style={styles.cardHeader}>
-                      <View style={styles.durationBadge}>
+                {packageList.filter((option: any) => option.isActive === 1).map((option: any) => {
+                  const isSelected = selectedPlan === option.packageId;
+                  return (
+                    <TouchableOpacity
+                      key={option.packageId}
+                      style={[
+                        styles.pricingCard,
+                        isSelected && styles.selectedPricingCard,
+                      ]}
+                      onPress={() => handlePlanSelect(option.packageId)}
+                    >
+                      <View
+                        style={[
+                          styles.durationBadge,
+                          isSelected && styles.selectedDurationBadge,
+                        ]}
+                      >
                         <AppText
                           text={option.name === 'Till Marriage' ? 'Lifetime' : option.name}
                           textStyle={styles.durationText}
                         />
                       </View>
-                      <View
-                        style={[
-                          styles.radioButton,
-                          selectedPlan === option.packageId &&
-                          styles.selectedRadioButton,
-                        ]}
-                      >
-                        {selectedPlan === option.packageId && (
-                          <View style={styles.radioButtonInner} />
-                        )}
-                      </View>
-                    </View>
-                    
-                    <View style={[styles.priceContainer, option.name !== 'Till Marriage' && { paddingBottom: Size10 }]}>
+
                       <AppText
                         text={`₹${option.price}`}
                         textStyle={styles.pricingPrice}
                       />
-                    </View>
-                    
-                    {option.name === 'Till Marriage' ? (
-                      <View style={styles.bestValueBadge}>
+
+                      {!!option.plan_benefits && (
                         <AppText
-                          text="Best Value"
-                          textStyle={styles.bestValueText}
+                          text={option.plan_benefits}
+                          textStyle={styles.planBenefitsText}
+                          numberOfLines={2}
                         />
-                      </View>
-                    ) : null}
-                  </TouchableOpacity>
-                ))}
+                      )}
+
+                      {option.name === 'Till Marriage' ? (
+                        <View style={styles.bestValueBadge}>
+                          <AppText
+                            text="Best Value"
+                            textStyle={styles.bestValueText}
+                          />
+                        </View>
+                      ) : null}
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             </ImageBackground>
 
@@ -509,9 +509,10 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'transparent',
     width: SIZES.width * 0.28,
-    minHeight: SIZES.height * 0.15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: SIZES.height * 0.18,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    gap: Size8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -522,9 +523,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   selectedPricingCard: {
-    borderColor: '#E68A2E', // The orange border color from image
-    borderWidth: 3,
-    transform: [{ scale: 1.05 }, { translateY: -10 }], // Slight scale up and move up for selected card
+    backgroundColor: '#F9CB47',
+    borderColor: COLORS.white,
+  },
+  selectedDurationBadge: {
+    backgroundColor: COLORS.white,
+  },
+  planBenefitsText: {
+    fontSize: fontSize14,
+    fontFamily: FONT_FAMILY.PRODUCT_SANS_REGULAR,
+    color: COLORS.black,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -585,7 +593,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Size12,
     paddingVertical: Size4 * 1.2,
     borderRadius: Size4,
-    marginTop: Size4,
+    marginTop: 'auto',
+    alignSelf: 'center',
   },
   bestValueText: {
     fontSize: fontSize12,

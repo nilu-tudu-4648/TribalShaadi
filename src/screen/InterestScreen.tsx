@@ -10,6 +10,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   fontSize14,
   fontSize16,
+  fontSize22,
   fontSize28,
   Size16,
   SIZES,
@@ -51,6 +52,7 @@ import { useNavigation } from '@react-navigation/native';
 import AppSafeView from '../components/AppSafeView';
 import { insertUserNotificationsApi } from '../store/reducers/chatReducer';
 import Loader from '../components/loader/Loader';
+import NotifiNumberChip from '../components/chips/NotifiNumberChip';
 import FONT_FAMILY from '../constants/Fonts';
 import { usePostHog } from 'posthog-react-native';
 
@@ -201,6 +203,12 @@ const InterestScreen = () => {
                   selectedTab === idx && styles.tabTextSelected,
                 ]}
               />
+              {idx === 1 && proposalsGotByMe.length > 0 && (
+                <NotifiNumberChip
+                  number={proposalsGotByMe.length}
+                  style={styles.tabBadge}
+                />
+              )}
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -369,6 +377,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SIZES.base,
     paddingRight: SIZES.padding2,
+    // Room for the Received badge, which sits half above the tab
+    paddingTop: fontSize22 / 2,
   },
   tab: {
     paddingVertical: SIZES.base1,
@@ -387,6 +397,12 @@ const styles = StyleSheet.create({
   },
   tabTextSelected: {
     color: '#fff',
+  },
+  tabBadge: {
+    top: -fontSize22 / 2,
+    bottom: undefined,
+    left: undefined,
+    alignSelf: 'center',
   },
   gridContainer: {
     paddingTop: SIZES.base1,

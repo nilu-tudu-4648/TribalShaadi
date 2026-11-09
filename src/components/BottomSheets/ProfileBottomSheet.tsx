@@ -54,6 +54,9 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
     proposalsSendByMe,
     passedUsers,
   } = useSelector((state: any) => state.entities.userReducer);
+  const { dailyLimitStatus } = useSelector(
+    (state: any) => state.entities.paymentReducer,
+  );
   const reportBottomSheetRef = useRef<BottomSheet | null>(null);
   const openReport = () => {
     reportBottomSheetRef?.current?.expand();
@@ -112,14 +115,10 @@ const ProfileBottomSheet: React.FC<ProfileBottomSheetProps> = ({
               isNameLoading={false}
               gender={user?.gender ?? ''}
               freeConnect={
-                Array.isArray(currentUserPackage) &&
-                currentUserPackage.length === 0 &&
-                user?.gender !== 'Female'
-                  ? `${Math.min(
-                      (proposalsSendByMe?.length ?? 0) +
-                        (passedUsers?.length ?? 0),
-                      5,
-                    )}/5`
+                dailyLimitStatus?.isLimited
+                  ? `${dailyLimitStatus.remainingToday ?? 0}/${
+                      dailyLimitStatus.dailyLimit ?? 5
+                    }`
                   : ''
               }
               age={selectedUser.age}

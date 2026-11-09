@@ -107,6 +107,8 @@ export const verifyPaymentUrl = 'app/paymentGateways/verifyPayment';
 export const insertPaymentUrl = 'app/payment/insertPayment';
 export const savePremiumAccountUrl = 'app/package/savePremiumAccount';
 export const getPackageByUserIdUrl = 'app/package/getPackageByUserId';
+export const getDailyLimitStatusUrl =
+  'app/notsubscribeProfileCount/getDailyLimitStatus';
 export const getPreferenceUrl = 'admin/preferences/getPreference';
 export const getSecondaryPreferenceUrl =
   'admin/secondaryPreferences/getSecondaryPreference';
