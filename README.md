@@ -1,97 +1,138 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# TribalShaadi
 
-# Getting Started
+Matrimony app for tribal communities, built with React Native 0.80.1 (Android in production).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+> The full step-by-step handover guide is in [`docs/TribalShaadi_Developer_Handover.docx`](docs/TribalShaadi_Developer_Handover.docx). This README is the short version.
 
-## Step 1: Start Metro
+## Tech stack
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+| Area | Technology |
+|---|---|
+| Framework | React Native 0.80.1, React 19.1, TypeScript (mixed .tsx / .js) |
+| Engine | Hermes on, New Architecture **off** |
+| Navigation | React Navigation 7 (native stack + bottom tabs) |
+| State | Redux Toolkit + custom API middleware (axios) |
+| UI | Reanimated 3, Gesture Handler 2, @gorhom/bottom-sheet 5 |
+| Payments | Razorpay |
+| Notifications | Firebase Cloud Messaging + react-native-push-notification |
+| Chat | socket.io-client |
+| Analytics | PostHog, Facebook SDK |
+| Package manager | **pnpm 12** (pinned in `package.json`) |
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Prerequisites
 
-```sh
-# Using npm
-npm start
+- Node.js 22 (`nvm install 22`)
+- pnpm 12: `corepack enable && corepack prepare pnpm@12.15.0 --activate`
+- Watchman: `brew install watchman`
+- JDK 17 (Azul Zulu 17)
+- Android Studio with SDK Platform 36, Build-Tools 35.0.0, NDK 27.1.12297006, CMake
+- `ANDROID_HOME` and `JAVA_HOME` set in your shell profile
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Setup
 
 ```sh
-bundle install
+git clone https://github.com/nilu-tudu-4648/TribalShaadi.git
+cd TribalShaadi
+git checkout prod
+pnpm install
 ```
 
-Then, and every time you update your native dependencies, run:
+Use **pnpm only**. Do not use npm or yarn.
+
+- `pnpm-workspace.yaml` sets `nodeLinker: hoisted`. React Native needs a flat `node_modules`; without it, Android fails with *"Included build …/@react-native/gradle-plugin does not exist"*.
+- The same file sets `allowBuilds` to skip the unneeded install scripts of `@firebase/util` and `protobufjs`.
+
+### Files not in Git (get them from the project owner)
+
+| File | Location |
+|---|---|
+| Release keystore | `android/app/tribalshaadi-release.keystore` |
+| Signing config (passwords) | `android/keystore.properties` (copy from `android/keystore.properties.template`) |
+
+Without these, release builds are silently signed with the debug key and the Play Store will reject them.
+
+## Run in development
 
 ```sh
-bundle exec pod install
+pnpm start          # Metro (add --reset-cache if JS looks stale)
+pnpm android        # build and install the debug app
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### API environment
+
+Set in `src/constants/functions.js`:
+
+```js
+export const apiUrl = 'https://api.tribalshaadi.co.in';      // production
+// export const apiUrl = 'https://devapi.tribalshaadi.co.in'; // development
+```
+
+Switch back to production before building a release.
+
+## Project structure
+
+```
+App.tsx                  Providers, auth bootstrapping, root navigator
+src/navigation/          Bottom tabs, inner stack, navigation ref
+src/screen/              One file per screen
+src/components/          Shared UI, BottomSheets/, PremiumGateOverlay, svg/
+src/constants/           functions.js (API URLs + helpers), data.js (ROUTES), colors, fonts, sizes
+src/store/               Redux slices (auth, user, payment, chat) + apiMiddleware
+src/notification/        FCM setup and handlers
+```
+
+## How API calls work
+
+Dispatch `apiCallBegan` with a relative URL. The middleware adds the base URL and the `Bearer` token from AsyncStorage, then dispatches `onSuccess` / `onError`. A 401 logs the user out. Responses always carry data in `recordList`.
+
+```js
+export const getFooApi = url =>
+  apiCallBegan({ method: 'get', url, onSuccess: setFoo.type });
+```
+
+Only pass `onStart` if your success reducer also sets `loader = false`; otherwise the full-screen loader never goes away.
+
+## Main flows
+
+- **Login:** phone number → OTP → token saved in AsyncStorage → onboarding wizard or Home.
+- **Home:** swipe matches with **Skip** (`passUser`) and **Send Interest** (`sendProposal`, needs selfie verification).
+- **Daily free limit:** `app/notsubscribeProfileCount/getDailyLimitStatus`. The card shows `remainingToday/dailyLimit` Free Profiles (resets at midnight). When `canPerformAction` is false, Skip and Send Interest open the upgrade sheet.
+- **Upgrade:** packages from `admin/package/getpackage` (equal-size cards, the selected one is yellow, shows `plan_benefits`). Benefit points and image come from `admin/premiumBenefits/getPremiumBenefits`. Payment: Razorpay order → checkout → `insertPayment` → `savePremiumAccount`.
+- **Preference paywall:** every preference sheet opens. Admin switches decide whether editing is paid:
+  - `admin/preferences/getPreference` controls Marital Status, Age, Religion, Height
+  - `admin/secondaryPreferences/getSecondaryPreference` controls Tribe, Location, Job type, Settle Down
+
+  `isActive: true` = paid, `false` = free. Users without access are sent to Upgrade on any touch (`PremiumGateOverlay`).
+- **Access rule:** a user with an active package, or any female user, is treated as premium.
+
+## Release (Android)
+
+1. Point `apiUrl` at production.
+2. Bump `versionCode` (must increase) and `versionName` in `android/app/build.gradle`.
+3. Build:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+cd android
+./gradlew bundleRelease    # AAB for Play Store
+./gradlew assembleRelease  # APK for testing
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Outputs: `android/app/build/outputs/bundle/release/app-release.aab` and `android/app/build/outputs/apk/release/app-release.apk`.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Troubleshooting
 
-## Step 3: Modify your app
+| Problem | Fix |
+|---|---|
+| `ERR_PNPM_OTHER_PM_EXPECTED` | Use pnpm 12; `packageManager` in `package.json` must say pnpm |
+| `@react-native/gradle-plugin does not exist` | `nodeLinker: hoisted` missing from `pnpm-workspace.yaml`; delete `node_modules` and reinstall |
+| `ERR_PNPM_IGNORED_BUILDS` | Add the package to `allowBuilds` in `pnpm-workspace.yaml` |
+| Stale JS / red screen | `pnpm start --reset-cache` |
+| Native build errors | `cd android && ./gradlew clean` |
+| Users edit preferences without paying | Admin switches return `isActive: false`; set them to `true` |
 
-Now that you have successfully run the app, let's make changes!
+## Known gaps
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- iOS is not set up for release (template bundle ID, no `GoogleService-Info.plist`, Razorpay/Facebook iOS setup missing).
+- The API environment is switched by editing code.
+- `package-lock.json` is left over from npm and can be deleted.
+- Very few tests.
