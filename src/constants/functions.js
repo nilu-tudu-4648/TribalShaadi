@@ -36,8 +36,8 @@ const PROFILE_COMPLETION_STEPS = [
   { field: 'intrests', screen: ROUTES.SELECT_INTERESTS },
 ];
 
-export const apiUrl = 'https://api.tribalshaadi.co.in';
-// export const apiUrl = 'https://devapi.tribalshaadi.co.in';
+// export const apiUrl = 'https://api.tribalshaadi.co.in';
+export const apiUrl = 'https://devapi.tribalshaadi.co.in';
 export const baseUrl = `${apiUrl}/api`;
 export const updateUrl = 'app/users/completeUserProfileV2';
 export const getUserDetailsUrl = 'app/users/viewUserDetail?';
@@ -751,6 +751,44 @@ export const getChatHistoryByUserId = async (userId, dispatch) => {
       chat => chat.userId !== userId && chat.isRead === 0
     );
     dispatch(setUnreadChatHistory(filteredChat));
+  } catch (error) {
+    return [];
+  }
+};
+// Latest message per conversation, built from the server chat history so the
+// chat list shows previews even before any conversation has been opened.
+export const getLatestMessagesByFriend = async userId => {
+  try {
+    const token = await AsyncStorage.getItem(ASYNC_VARIBLES.USER_TOKEN);
+    const response = await axios.post(
+      `${baseUrl}/${getAllChatHistoryByUserIdUrl}`,
+      { userId },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    const data = response.data?.recordList;
+    if (!Array.isArray(data)) return [];
+    const latest = {};
+    data.forEach(chat => {
+      if (!chat?.chatId || !chat?.content?.trim()) return;
+      const friendId = chat.chatId
+        .split('_')
+        .find(part => String(part) !== String(userId));
+      if (!friendId) return;
+      const timestamp = new Date(chat.created_at).getTime();
+      if (!latest[friendId] || timestamp > latest[friendId].timestamp) {
+        latest[friendId] = {
+          friendId: Number(friendId),
+          message: chat.content,
+          time: new Date(chat.created_at).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          }),
+          timestamp,
+        };
+      }
+    });
+    return Object.values(latest);
   } catch (error) {
     return [];
   }

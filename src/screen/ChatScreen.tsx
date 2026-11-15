@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, FlatList, Pressable } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AppSafeView from '../components/AppSafeView';
 import AppText from '../components/AppText';
 import { COLORS } from '../constants/AppColors';
@@ -29,6 +29,7 @@ import {
   baseUrl,
   delay,
   getAcceptedProposalByIdUrl,
+  getLatestMessagesByFriend,
   getGalleryImageListUrl,
   getPackageByUserIdUrl,
   getSelectedUserUrl,
@@ -120,59 +121,49 @@ const ChatScreen = () => {
     } catch (error) {
     }
   };
-  useEffect(() => {
-    const getLastMessage = async () => {
-      try {
-        const item = await AsyncStorage.getItem('lastMessage');
-        if (!item) {
-          setLastMessage([]);
-          return;
-        }
-        let data = [];
-        try {
-          data = JSON.parse(item);
-          if (!Array.isArray(data)) {
-            data = [data];
-          }
-        } catch (e) {
-          data = [];
-        }
-        setLastMessage(data);
-      } catch (error) {
-        setLastMessage([]);
-      }
-    };
-    getLastMessage();
-  }, []);
+  // Previews: show the cached copy first, then refresh from the server so the
+  // list is filled even if no conversation has been opened on this device.
+  const loadLastMessages = useCallback(async () => {
+    let cached: any[] = [];
+    try {
+      const item = await AsyncStorage.getItem(ASYNC_VARIBLES.LAST_MESSAGE);
+      const parsed = item ? JSON.parse(item) : [];
+      cached = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      cached = [];
+    }
+    setLastMessage(cached);
 
-  // Refresh when screen gains focus (e.g., after navigating back from conversations)
-  useEffect(() => {
-    const unsubscribe = (navigation as any).addListener('focus', () => {
-      // re-load last message preview from storage
-      (async () => {
-        try {
-          const item = await AsyncStorage.getItem(ASYNC_VARIBLES.LAST_MESSAGE);
-          if (!item) {
-            setLastMessage([]);
-            return;
-          }
-          let data = [];
-          try {
-            data = JSON.parse(item);
-            if (!Array.isArray(data)) {
-              data = [data];
-            }
-          } catch (e) {
-            data = [];
-          }
-          setLastMessage(data);
-        } catch (error) {
-          setLastMessage([]);
-        }
-      })();
+    if (!user?.id) return;
+    const fromServer = await getLatestMessagesByFriend(user.id);
+    if (fromServer.length === 0) return;
+
+    const merged = [...cached];
+    fromServer.forEach((serverMsg: any) => {
+      const idx = merged.findIndex(
+        (m: any) => String(m.friendId) === String(serverMsg.friendId),
+      );
+      if (idx === -1) {
+        merged.push(serverMsg);
+      } else if ((merged[idx].timestamp ?? 0) < serverMsg.timestamp) {
+        merged[idx] = serverMsg;
+      }
     });
+    setLastMessage(merged);
+    try {
+      await AsyncStorage.setItem(
+        ASYNC_VARIBLES.LAST_MESSAGE,
+        JSON.stringify(merged),
+      );
+    } catch (e) {}
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadLastMessages();
+    const unsubscribe = (navigation as any).addListener('focus', loadLastMessages);
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, loadLastMessages]);
+
   const truncateMessage = (message: string, maxLength: number = 35) => {
     if (!message) return '';
     return message.length > maxLength
@@ -188,7 +179,7 @@ const ChatScreen = () => {
     const unreadCount = unreadChatsForFriend.length;
     const latestUnreadChat = unreadChatsForFriend[0];
     const latestMessage = lastMessage?.find(
-      (message: any) => message.friendId === item.friendId,
+      (message: any) => String(message.friendId) === String(item.friendId),
     );
     // Determine the time to display
     const displayTime = latestUnreadChat?.created_at
